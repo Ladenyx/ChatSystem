@@ -1,0 +1,51 @@
+title: "[Decision] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to propose or settle a technical decision for the project.
+        When the team agrees, write the outcome in the first comment and update README.md.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - User Client
+        - Admin Console
+        - Server / networking
+        - Database
+        - Security / encryption
+        - LLM integration
+        - Build / release
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What needs to be decided, and why now?
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+      description: List each option with its main pros and cons.
+      placeholder: |
+        1. Option A: pros / cons
+        2. Option B: pros / cons
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed choice
+      description: Which option do you recommend, and why?
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: Decide by
+      description: Date by which the team should decide (optional).
