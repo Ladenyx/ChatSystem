@@ -19,6 +19,12 @@
 *.tar.gz
 *.rar
 
+# Maven build output
+target/
+
+# Local JDK copy used for development only
+/src/user/src/main/java/user/ui/oracleJdk-27/
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
