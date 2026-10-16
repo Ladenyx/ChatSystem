@@ -1,0 +1,473 @@
+/* =====================================================================
+ * theme.css  —  Chat System Design System
+ * Overrides AtlantaFX PrimerLight variables and defines shared classes.
+ * All screens import this file AFTER the AtlantaFX stylesheet.
+ * ===================================================================== */
+
+/* ── Root variables (AtlantaFX accent override) ────────────────────── */
+.root {
+    -fx-font-family: "Poppins", "Be Vietnam Pro", "Segoe UI", sans-serif;
+    -color-accent-fg:        #7678ed;
+    -color-accent-emphasis:  #7678ed;
+    -color-accent-subtle:    #ebebfc;
+    -color-bg-default:       #f9fafc;
+    -color-fg-default:       #202022;
+}
+
+/* ── Navigation rail (left dark sidebar) ───────────────────────────── */
+.rail {
+    -fx-background-color: #202022;
+    -fx-min-width:        70px;
+    -fx-pref-width:       70px;
+    -fx-max-width:        70px;
+    -fx-padding:          16 0 16 0;
+    -fx-alignment:        top-center;
+    -fx-spacing:          4;
+}
+
+.rail-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill:        rgba(255,255,255,0.6);
+    -fx-font-family:      "Poppins", "Segoe UI", sans-serif;
+    -fx-font-size:        10px;
+    -fx-content-display:  top;
+    -fx-graphic-text-gap: 4;
+    -fx-padding:          10 4 10 4;
+    -fx-pref-width:       70px;
+    -fx-alignment:        center;
+    -fx-background-radius:8;
+    -fx-cursor:           hand;
+}
+
+.rail-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-text-fill:        rgba(255,255,255,0.9);
+}
+
+.rail-btn:selected {
+    -fx-background-color: rgba(118,120,237,0.25);
+    -fx-text-fill:        #7678ed;
+}
+
+.rail-separator {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-pref-height:      1;
+    -fx-pref-width:       44;
+    -fx-min-height:       1;
+}
+
+/* ── Avatar (rounded square) ────────────────────────────────────────── */
+.avatar {
+    -fx-background-radius: 10;
+    -fx-min-width:         40px;
+    -fx-min-height:        40px;
+    -fx-max-width:         40px;
+    -fx-max-height:        40px;
+    -fx-alignment:         center;
+    -fx-font-size:         14px;
+    -fx-font-weight:       600;
+}
+
+.avatar-user {
+    -fx-background-color: #7678ed;
+    -fx-text-fill:        white;
+}
+
+.avatar-group {
+    -fx-background-color: #202022;
+    -fx-text-fill:        white;
+}
+
+.avatar-sm {
+    -fx-min-width:  32px;
+    -fx-min-height: 32px;
+    -fx-max-width:  32px;
+    -fx-max-height: 32px;
+    -fx-font-size:  11px;
+    -fx-background-radius: 8;
+}
+
+/* ── Online / offline status dot ────────────────────────────────────── */
+.status-dot {
+    -fx-min-width:    10px;
+    -fx-min-height:   10px;
+    -fx-max-width:    10px;
+    -fx-max-height:   10px;
+    -fx-background-radius: 99;
+}
+
+.status-dot-online  { -fx-background-color: #2ecc71; }
+.status-dot-offline { -fx-background-color: #8a8a95; }
+
+/* ── Unread badge ────────────────────────────────────────────────────── */
+.badge-unread {
+    -fx-background-color:  #ff7a55;
+    -fx-background-radius: 99;
+    -fx-text-fill:         white;
+    -fx-font-size:         10px;
+    -fx-font-weight:       700;
+    -fx-padding:           1 5 1 5;
+    -fx-min-width:         18px;
+    -fx-min-height:        18px;
+    -fx-alignment:         center;
+}
+
+/* ── Message bubbles ─────────────────────────────────────────────────── */
+.bubble-received {
+    -fx-background-color:  #ebebfc;
+    -fx-background-radius: 4 12 12 12;
+    -fx-padding:           8 12 8 12;
+    -fx-text-fill:         #202022;
+    -fx-font-size:         12.5px;
+    -fx-wrap-text:         true;
+    -fx-max-width:         340px;
+}
+
+.bubble-sent {
+    -fx-background-color:  #7678ed;
+    -fx-background-radius: 12 4 12 12;
+    -fx-padding:           8 12 8 12;
+    -fx-text-fill:         white;
+    -fx-font-size:         12.5px;
+    -fx-wrap-text:         true;
+    -fx-max-width:         340px;
+}
+
+.bubble-time {
+    -fx-font-size:  10px;
+    -fx-text-fill:  #8a8a95;
+    -fx-padding:    2 0 0 0;
+}
+
+/* ── Conversation list item ──────────────────────────────────────────── */
+.conv-item {
+    -fx-padding:           10 12 10 12;
+    -fx-background-radius: 12;
+    -fx-cursor:            hand;
+}
+
+.conv-item:hover    { -fx-background-color: #ebebfc; }
+.conv-item:selected { -fx-background-color: #dcdcf9; }
+
+.conv-name {
+    -fx-font-size:   13px;
+    -fx-font-weight: 600;
+    -fx-text-fill:   #202022;
+}
+
+.conv-preview {
+    -fx-font-size:  12px;
+    -fx-text-fill:  #8a8a95;
+}
+
+/* ── Card panels ─────────────────────────────────────────────────────── */
+.card {
+    -fx-background-color:  white;
+    -fx-background-radius: 20;
+    -fx-effect:            dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0, 0, 2);
+    -fx-padding:           20;
+}
+
+.card-accent {
+    -fx-background-color:  #ebebfc;
+    -fx-background-radius: 16;
+    -fx-padding:           16;
+}
+
+/* ── Section titles ──────────────────────────────────────────────────── */
+.section-title {
+    -fx-font-size:   22px;
+    -fx-font-weight: 700;
+    -fx-text-fill:   #202022;
+}
+
+.subsection-title {
+    -fx-font-size:   15px;
+    -fx-font-weight: 600;
+    -fx-text-fill:   #202022;
+}
+
+/* ── Text helpers ────────────────────────────────────────────────────── */
+.text-muted      { -fx-text-fill: #8a8a95; -fx-font-size: 11px; }
+.text-accent     { -fx-text-fill: #7678ed; }
+.text-warn       { -fx-text-fill: #ff7a55; }
+.text-danger     { -fx-text-fill: #e74c3c; }
+.text-bold       { -fx-font-weight: 700; }
+.text-semibold   { -fx-font-weight: 600; }
+.text-small      { -fx-font-size: 11px; }
+.text-name       { -fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #202022; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.btn-accent {
+    -fx-background-color:  #7678ed;
+    -fx-text-fill:         white;
+    -fx-font-weight:       600;
+    -fx-background-radius: 8;
+    -fx-cursor:            hand;
+    -fx-padding:           8 18 8 18;
+}
+
+.btn-accent:hover { -fx-background-color: #5c5eda; }
+
+.btn-warn {
+    -fx-background-color:  #ff7a55;
+    -fx-text-fill:         white;
+    -fx-font-weight:       600;
+    -fx-background-radius: 8;
+    -fx-cursor:            hand;
+    -fx-padding:           8 18 8 18;
+}
+
+.btn-warn:hover { -fx-background-color: #e05e39; }
+
+.btn-ghost {
+    -fx-background-color:  transparent;
+    -fx-border-color:      #dcdcdc;
+    -fx-border-radius:     8;
+    -fx-background-radius: 8;
+    -fx-cursor:            hand;
+    -fx-padding:           8 18 8 18;
+}
+
+.btn-ghost:hover { -fx-background-color: #f0f0f0; }
+
+.btn-icon {
+    -fx-background-color:  transparent;
+    -fx-padding:           6;
+    -fx-background-radius: 8;
+    -fx-cursor:            hand;
+}
+
+.btn-icon:hover { -fx-background-color: #ebebfc; }
+
+/* ── Search / filter bar ─────────────────────────────────────────────── */
+.search-field {
+    -fx-background-color:  #ebebfc;
+    -fx-background-radius: 12;
+    -fx-border-color:      transparent;
+    -fx-padding:           8 12 8 12;
+    -fx-prompt-text-fill:  #8a8a95;
+}
+
+.search-field:focused {
+    -fx-background-color:  white;
+    -fx-border-color:      #7678ed;
+    -fx-border-radius:     12;
+    -fx-border-width:      1.5;
+}
+
+/* ── Status badge (ACTIVE / LOCKED) ─────────────────────────────────── */
+.badge-active {
+    -fx-background-color:  #e6f9ee;
+    -fx-text-fill:         #27ae60;
+    -fx-background-radius: 6;
+    -fx-padding:           2 8 2 8;
+    -fx-font-size:         11px;
+    -fx-font-weight:       600;
+}
+
+.badge-locked {
+    -fx-background-color:  #fdecea;
+    -fx-text-fill:         #e74c3c;
+    -fx-background-radius: 6;
+    -fx-padding:           2 8 2 8;
+    -fx-font-size:         11px;
+    -fx-font-weight:       600;
+}
+
+.badge-online {
+    -fx-background-color:  #e6f9ee;
+    -fx-text-fill:         #27ae60;
+    -fx-background-radius: 6;
+    -fx-padding:           2 8 2 8;
+    -fx-font-size:         11px;
+    -fx-font-weight:       600;
+}
+
+.badge-offline {
+    -fx-background-color:  #f0f0f0;
+    -fx-text-fill:         #8a8a95;
+    -fx-background-radius: 6;
+    -fx-padding:           2 8 2 8;
+    -fx-font-size:         11px;
+    -fx-font-weight:       600;
+}
+
+/* ── Admin tag (group admin badge) ───────────────────────────────────── */
+.tag-admin {
+    -fx-background-color:  #fff3e0;
+    -fx-text-fill:         #f39c12;
+    -fx-background-radius: 4;
+    -fx-padding:           1 6 1 6;
+    -fx-font-size:         10px;
+    -fx-font-weight:       700;
+}
+
+/* ── Encrypted badge ─────────────────────────────────────────────────── */
+.badge-encrypted {
+    -fx-background-color:  #e8f4fd;
+    -fx-text-fill:         #2980b9;
+    -fx-background-radius: 6;
+    -fx-padding:           2 8 2 8;
+    -fx-font-size:         11px;
+    -fx-font-weight:       600;
+}
+
+/* ── ListView / TableView tweaks ─────────────────────────────────────── */
+.list-view-clean {
+    -fx-background-color:  transparent;
+    -fx-border-color:      transparent;
+    -fx-padding:           4 0 4 0;
+}
+
+.list-view-clean .list-cell {
+    -fx-background-color:  transparent;
+    -fx-padding:           4 0 4 0;
+}
+
+.list-view-clean .list-cell:selected {
+    -fx-background-color:  #ebebfc;
+    -fx-background-radius: 12;
+}
+
+.table-view-clean {
+    -fx-background-color:  white;
+    -fx-background-radius: 12;
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────── */
+.divider-h {
+    -fx-background-color: #eeeeee;
+    -fx-pref-height:      1;
+    -fx-min-height:       1;
+}
+
+/* ── Main frame outer background ─────────────────────────────────────── */
+.main-bg {
+    -fx-background-color: #202022;
+    -fx-padding:          12;
+}
+
+/* ── Inner content area ──────────────────────────────────────────────── */
+.content-area {
+    -fx-background-color:  #f9fafc;
+    -fx-background-radius: 16;
+}
+
+/* ── Chat input bar ──────────────────────────────────────────────────── */
+.chat-input {
+    -fx-background-color:  white;
+    -fx-background-radius: 12;
+    -fx-border-color:      #ebebfc;
+    -fx-border-radius:     12;
+    -fx-padding:           8 12 8 12;
+    -fx-font-size:         13px;
+    -fx-prompt-text-fill:  #8a8a95;
+}
+
+.chat-input:focused {
+    -fx-border-color: #7678ed;
+}
+
+/* ── Send button ─────────────────────────────────────────────────────── */
+.btn-send {
+    -fx-background-color:  #7678ed;
+    -fx-background-radius: 10;
+    -fx-text-fill:         white;
+    -fx-font-size:         18px;
+    -fx-cursor:            hand;
+    -fx-padding:           8 12 8 12;
+    -fx-min-width:         40px;
+    -fx-min-height:        40px;
+}
+
+.btn-send:hover { -fx-background-color: #5c5eda; }
+
+/* ── Scrollbar slim ──────────────────────────────────────────────────── */
+.scroll-pane-clean {
+    -fx-background-color:  transparent;
+    -fx-border-color:      transparent;
+    -fx-padding:           0;
+}
+
+.scroll-pane-clean > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane-clean .scroll-bar:vertical {
+    -fx-pref-width:       6px;
+    -fx-background-color: transparent;
+}
+
+.scroll-pane-clean .scroll-bar:vertical .thumb {
+    -fx-background-color:  rgba(0,0,0,0.15);
+    -fx-background-radius: 3;
+}
+
+/* ── Login / Register outer window ───────────────────────────────────── */
+.login-root {
+    -fx-background-color: #f9fafc;
+}
+
+.login-card {
+    -fx-background-color:  white;
+    -fx-background-radius: 20;
+    -fx-padding:           40;
+    -fx-effect:            dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);
+    -fx-pref-width:        360px;
+}
+
+.login-title {
+    -fx-font-size:   26px;
+    -fx-font-weight: 700;
+    -fx-text-fill:   #202022;
+}
+
+.login-subtitle {
+    -fx-font-size:  13px;
+    -fx-text-fill:  #8a8a95;
+}
+
+.login-link {
+    -fx-text-fill:         #7678ed;
+    -fx-underline:         false;
+    -fx-cursor:            hand;
+    -fx-font-size:         12px;
+    -fx-background-color:  transparent;
+    -fx-border-color:      transparent;
+    -fx-padding:           0;
+}
+
+.login-link:hover { -fx-underline: true; }
+
+/* ── Admin console overview ──────────────────────────────────────────── */
+.admin-content {
+    -fx-background-color: #f9fafc;
+}
+
+.admin-heading {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #202022;
+}
+
+.admin-summary-card, .admin-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 18;
+    -fx-border-color: #e8e9ef;
+    -fx-border-radius: 14;
+}
+
+.admin-summary-card {
+    -fx-min-height: 112px;
+}
+
+.admin-panel {
+    -fx-padding: 18;
+}
+
+.admin-panel .table-view {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
