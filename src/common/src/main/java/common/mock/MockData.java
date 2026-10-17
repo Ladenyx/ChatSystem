@@ -160,6 +160,11 @@ public class MockData {
         LOGIN_RECORDS.add(new LoginRecord(204, 7, "an.vo",        "Võ Thị Ánh",             LocalDateTime.of(2026, 10, 16, 8, 30)));
     }
 
+    // ── FRIEND & BLOCK RELATIONSHIPS ──────────────────────────────────────────
+    public static final List<Integer> FRIEND_IDS = new ArrayList<>(List.of(2, 3, 4, 5, 6, 7, 10, 11, 15, 17));
+    public static final List<Integer> BLOCKED_IDS = new ArrayList<>(List.of(8, 14));
+    public static final List<Integer> OUTGOING_REQUEST_IDS = new ArrayList<>(List.of(12));
+
     // ── HELPERS ───────────────────────────────────────────────────────────────
 
     /** Returns a user by id, or null if not found. */
@@ -167,10 +172,20 @@ public class MockData {
         return USERS.stream().filter(u -> u.getId() == id).findFirst().orElse(null);
     }
 
-    /** Returns the friends of the current user (hardcoded as users 2-7, 10, 11, 15, 17). */
+    /** Returns whether a user is currently a friend of the current user. */
+    public static boolean isFriend(int userId) {
+        return FRIEND_IDS.contains(userId);
+    }
+
+    /** Returns whether a user is blocked by or has blocked the current user. */
+    public static boolean isBlocked(int userId) {
+        return BLOCKED_IDS.contains(userId);
+    }
+
+    /** Returns the friends of the current user. */
     public static List<User> getCurrentUserFriends() {
         return USERS.stream()
-                .filter(u -> List.of(2, 3, 4, 5, 6, 7, 10, 11, 15, 17).contains(u.getId()))
+                .filter(u -> FRIEND_IDS.contains(u.getId()))
                 .toList();
     }
 
@@ -178,4 +193,283 @@ public class MockData {
     public static List<User> getOnlineFriends() {
         return getCurrentUserFriends().stream().filter(User::isOnline).toList();
     }
+
+    /** Removes friend relationship (Unfriend). */
+    public static void unfriend(int userId) {
+        FRIEND_IDS.remove(Integer.valueOf(userId));
+    }
+
+    /** Blocks a user (removes from friends, adds to blocked list). */
+    public static void blockUser(int userId) {
+        FRIEND_IDS.remove(Integer.valueOf(userId));
+        if (!BLOCKED_IDS.contains(userId)) {
+            BLOCKED_IDS.add(userId);
+        }
+    }
+
+    /** Accepts a friend request: adds sender to friends, marks request accepted. */
+    public static void acceptFriendRequest(FriendRequest request) {
+        if (request != null) {
+            request.setStatus(FriendRequest.Status.ACCEPTED);
+            if (!FRIEND_IDS.contains(request.getSender().getId())) {
+                FRIEND_IDS.add(request.getSender().getId());
+            }
+            FRIEND_REQUESTS.remove(request);
+        }
+    }
+
+    /** Declines a friend request: marks request declined and removes from pending. */
+    public static void declineFriendRequest(FriendRequest request) {
+        if (request != null) {
+            request.setStatus(FriendRequest.Status.DECLINED);
+            FRIEND_REQUESTS.remove(request);
+        }
+    }
+
+    /** Sends a friend request to target user. */
+    public static void sendFriendRequest(int targetUserId) {
+        if (!OUTGOING_REQUEST_IDS.contains(targetUserId)) {
+            OUTGOING_REQUEST_IDS.add(targetUserId);
+        }
+    }
+
+    /** Checks if an outgoing friend request is pending for target user. */
+    public static boolean hasOutgoingRequest(int targetUserId) {
+        return OUTGOING_REQUEST_IDS.contains(targetUserId);
+    }
+
+    // ── ADMIN HELPERS & DATA STRUCTURES ────────────────────────────────────────
+
+    public static final java.util.Map<Integer, List<Integer>> USER_FRIENDS_MAP = new java.util.HashMap<>();
+
+    static {
+        USER_FRIENDS_MAP.put(1,  new ArrayList<>(List.of(2, 3, 4, 5, 6, 7, 10, 11, 15, 17)));
+        USER_FRIENDS_MAP.put(2,  new ArrayList<>(List.of(1, 3, 4, 6, 8, 9, 12)));
+        USER_FRIENDS_MAP.put(3,  new ArrayList<>(List.of(1, 2, 5, 7, 10, 13)));
+        USER_FRIENDS_MAP.put(4,  new ArrayList<>(List.of(1, 2, 5, 9, 11, 14)));
+        USER_FRIENDS_MAP.put(5,  new ArrayList<>(List.of(1, 3, 4, 6, 7, 15)));
+        USER_FRIENDS_MAP.put(6,  new ArrayList<>(List.of(1, 2, 5, 8, 12, 16)));
+        USER_FRIENDS_MAP.put(7,  new ArrayList<>(List.of(1, 3, 5, 10, 17, 18)));
+        USER_FRIENDS_MAP.put(8,  new ArrayList<>(List.of(2, 6, 12, 14)));
+        USER_FRIENDS_MAP.put(9,  new ArrayList<>(List.of(2, 4, 11, 13)));
+        USER_FRIENDS_MAP.put(10, new ArrayList<>(List.of(1, 3, 7, 15, 17)));
+        USER_FRIENDS_MAP.put(11, new ArrayList<>(List.of(1, 4, 9, 13, 16)));
+        USER_FRIENDS_MAP.put(12, new ArrayList<>(List.of(2, 6, 8, 18)));
+        USER_FRIENDS_MAP.put(13, new ArrayList<>(List.of(3, 9, 11, 15)));
+        USER_FRIENDS_MAP.put(14, new ArrayList<>(List.of(4, 8, 16)));
+        USER_FRIENDS_MAP.put(15, new ArrayList<>(List.of(1, 5, 10, 13, 17)));
+        USER_FRIENDS_MAP.put(16, new ArrayList<>(List.of(6, 11, 14, 18)));
+        USER_FRIENDS_MAP.put(17, new ArrayList<>(List.of(1, 7, 10, 15)));
+        USER_FRIENDS_MAP.put(18, new ArrayList<>(List.of(7, 12, 16)));
+    }
+
+    /** Returns direct friends of any specified user. */
+    public static List<User> getUserFriends(int userId) {
+        List<Integer> fids = USER_FRIENDS_MAP.getOrDefault(userId, List.of());
+        return USERS.stream()
+                .filter(u -> fids.contains(u.getId()))
+                .toList();
+    }
+
+    /** Returns [directFriendsCount, friendsOfFriendsCount] for a user. */
+    public static int[] getFriendCounts(int userId) {
+        List<Integer> direct = USER_FRIENDS_MAP.getOrDefault(userId, List.of());
+        int directCount = direct.size();
+
+        java.util.Set<Integer> fofSet = new java.util.HashSet<>();
+        for (int fid : direct) {
+            List<Integer> secondary = USER_FRIENDS_MAP.getOrDefault(fid, List.of());
+            for (int sfid : secondary) {
+                if (sfid != userId && !direct.contains(sfid)) {
+                    fofSet.add(sfid);
+                }
+            }
+        }
+        return new int[]{directCount, fofSet.size()};
+    }
+
+    /** Returns the login records for a specific user. */
+    public static List<LoginRecord> getUserLoginHistory(int userId) {
+        return LOGIN_RECORDS.stream()
+                .filter(r -> r.getUserId() == userId)
+                .sorted((a, b) -> b.getLoginAt().compareTo(a.getLoginAt()))
+                .toList();
+    }
+
+    /** Adds a new user account (Admin A-02). */
+    public static void addUser(User user) {
+        if (user.getId() == 0) {
+            int maxId = USERS.stream().mapToInt(User::getId).max().orElse(0);
+            user.setId(maxId + 1);
+        }
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+        }
+        USERS.add(user);
+        USER_FRIENDS_MAP.put(user.getId(), new ArrayList<>());
+        LOGIN_RECORDS.add(new LoginRecord(
+                (int) (System.currentTimeMillis() % 100000),
+                user.getId(),
+                user.getUsername(),
+                user.getFullName(),
+                LocalDateTime.now()
+        ));
+    }
+
+    /** Updates an existing user profile (Admin A-02). */
+    public static void updateUser(User updated) {
+        for (int i = 0; i < USERS.size(); i++) {
+            if (USERS.get(i).getId() == updated.getId()) {
+                USERS.set(i, updated);
+                break;
+            }
+        }
+    }
+
+    /** Deletes a user by ID (Admin A-02). */
+    public static void deleteUser(int userId) {
+        USERS.removeIf(u -> u.getId() == userId);
+        USER_FRIENDS_MAP.remove(userId);
+        for (List<Integer> list : USER_FRIENDS_MAP.values()) {
+            list.remove(Integer.valueOf(userId));
+        }
+    }
+
+    /** Toggles lock/unlock status of a user (Admin A-03). */
+    public static void toggleUserStatus(int userId) {
+        User u = getUserById(userId);
+        if (u != null) {
+            if (u.getStatus() == User.Status.ACTIVE) {
+                u.setStatus(User.Status.LOCKED);
+            } else {
+                u.setStatus(User.Status.ACTIVE);
+            }
+        }
+    }
+
+    /** Resets password for user and returns the new plain temporary password (Admin A-04). */
+    public static String resetUserPassword(int userId) {
+        User u = getUserById(userId);
+        if (u != null) {
+            int randSuffix = 100 + (int) (Math.random() * 900);
+            return "Pass@" + randSuffix;
+        }
+        return "Chat#2026";
+    }
+
+    /** Locks the reported user account and resolves the spam report (Admin A-11). */
+    public static void lockReportedUser(int reportId) {
+        for (SpamReport report : SPAM_REPORTS) {
+            if (report.getId() == reportId) {
+                if (report.getReported() != null) {
+                    report.getReported().setStatus(User.Status.LOCKED);
+                }
+                report.setStatus(SpamReport.Status.RESOLVED);
+                break;
+            }
+        }
+    }
+
+    /** Resolves a spam report. */
+    public static void resolveSpamReport(int reportId) {
+        for (SpamReport report : SPAM_REPORTS) {
+            if (report.getId() == reportId) {
+                report.setStatus(SpamReport.Status.RESOLVED);
+                break;
+            }
+        }
+    }
+
+    /** Dismisses a spam report. */
+    public static void dismissSpamReport(int reportId) {
+        for (SpamReport report : SPAM_REPORTS) {
+            if (report.getId() == reportId) {
+                report.setStatus(SpamReport.Status.DISMISSED);
+                break;
+            }
+        }
+    }
+
+    /** Activity record representation for Admin screen A-15. */
+    public static class UserActivity {
+        private final User user;
+        private final int appOpens;
+        private final int peopleChattedWith;
+        private final int groupsChattedIn;
+        private final LocalDateTime lastActive;
+
+        public UserActivity(User user, int appOpens, int peopleChattedWith, int groupsChattedIn, LocalDateTime lastActive) {
+            this.user = user;
+            this.appOpens = appOpens;
+            this.peopleChattedWith = peopleChattedWith;
+            this.groupsChattedIn = groupsChattedIn;
+            this.lastActive = lastActive;
+        }
+
+        public User getUser() { return user; }
+        public int getAppOpens() { return appOpens; }
+        public int getPeopleChattedWith() { return peopleChattedWith; }
+        public int getGroupsChattedIn() { return groupsChattedIn; }
+        public LocalDateTime getLastActive() { return lastActive; }
+    }
+
+    /** Returns active user statistics in the given date range (Admin A-15). */
+    public static List<UserActivity> getActiveUserData(LocalDate from, LocalDate to) {
+        List<UserActivity> list = new ArrayList<>();
+        // Mock activity data seeded deterministically for all non-admin users
+        int[] opens =  { 58, 45, 42, 31, 27, 21, 19, 3,  14, 25, 22, 11, 8,  2, 16, 12, 18, 5 };
+        int[] people = {  9,  7,  6,  4,  5,  3,  4, 0,   2,  4,  3,  2, 1,  0,  3,  2,  3, 1 };
+        int[] groups = {  3,  2,  2,  2,  2,  1,  1, 0,   1,  2,  1,  1, 0,  0,  1,  1,  1, 0 };
+
+        List<User> regularUsers = USERS.stream().filter(u -> u.getId() != 0).toList();
+        for (int i = 0; i < regularUsers.size(); i++) {
+            User u = regularUsers.get(i);
+            int idx = i % opens.length;
+            LocalDateTime activeTime = LocalDateTime.of(2026, 10, 16, 8, 30).minusHours(i * 3 + 1);
+            list.add(new UserActivity(u, opens[idx], people[idx], groups[idx], activeTime));
+        }
+        return list;
+    }
+
+    /** Returns monthly registration counts for selected year (Admin A-13). */
+    public static java.util.Map<Integer, Long> getMonthlyRegistrations(int year) {
+        java.util.Map<Integer, Long> map = new java.util.LinkedHashMap<>();
+        for (int m = 1; m <= 12; m++) {
+            map.put(m, 0L);
+        }
+        // Count actual registrations in MockData
+        for (User u : USERS) {
+            if (u.getId() != 0 && u.getCreatedAt() != null && u.getCreatedAt().getYear() == year) {
+                int month = u.getCreatedAt().getMonthValue();
+                map.put(month, map.get(month) + 1);
+            }
+        }
+        // If year is 2025 or 2026, supplement with realistic curve so chart looks rich
+        if (year == 2025) {
+            int[] baseline = { 3, 4, 6, 5, 8, 7, 9, 11, 18, 12, 14, 15 };
+            for (int m = 1; m <= 12; m++) {
+                map.put(m, Math.max(map.get(m), (long) baseline[m - 1]));
+            }
+        } else if (year == 2026) {
+            int[] baseline = { 12, 15, 14, 18, 20, 22, 25, 24, 28, 30, 26, 32 };
+            for (int m = 1; m <= 12; m++) {
+                map.put(m, Math.max(map.get(m), (long) baseline[m - 1]));
+            }
+        }
+        return map;
+    }
+
+    /** Returns monthly active users for selected year (Admin A-16). */
+    public static java.util.Map<Integer, Long> getMonthlyActiveUsers(int year) {
+        java.util.Map<Integer, Long> map = new java.util.LinkedHashMap<>();
+        int[] baseline2026 = { 14, 15, 16, 15, 17, 18, 17, 19, 21, 24, 22, 25 };
+        int[] baseline2025 = { 8, 9, 10, 9, 11, 12, 13, 14, 16, 15, 17, 18 };
+        int[] baseline = (year == 2025) ? baseline2025 : baseline2026;
+        for (int m = 1; m <= 12; m++) {
+            map.put(m, (long) baseline[m - 1]);
+        }
+        return map;
+    }
 }
+
+

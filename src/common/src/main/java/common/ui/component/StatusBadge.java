@@ -19,6 +19,14 @@ public class StatusBadge extends Label {
         return new StatusBadge(online ? "Online" : "Offline");
     }
 
+    public static StatusBadge accountStatus(User user) {
+        return new StatusBadge(user != null && user.getStatus() != null ? user.getStatus().name() : "Active");
+    }
+
+    public static StatusBadge onlineStatus(User user) {
+        return online(user != null && user.isOnline());
+    }
+
     private void applyStatusStyle(String status) {
         String normalized = status == null ? "" : status.toLowerCase();
         if (normalized.equals("active") || normalized.equals("online") || normalized.equals("resolved")) {
