@@ -8,7 +8,7 @@
 - **Use Case Name**: [Tên Use Case, động từ + danh từ, ví dụ: Đăng nhập vào hệ thống]
 - **Author / Create by**: [Tên người viết]
 - **Date Create**: [Ngày tạo]
-- **Last Updated by** / Date: [Người cập nhật cuối cùng & ngày]
+- **Last Updated by / Date**: [Người cập nhật cuối cùng & ngày]
 - **Primary Actor**: [Tác nhân chính khởi tạo, ví dụ: Khách hàng, người dùng]
 - **Secondary Actor(s)**: [Tác nhận phụ/hỗ trợ, ví dụ: Hệ thống thanh toán, SMS Gateway]
 - **Priority**: [Must Have / Should Have / Could Have]
