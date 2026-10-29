@@ -1,12 +1,12 @@
 # Tổng quan yêu cầu — Hệ thống Chat
 
-Tài liệu tóm tắt yêu cầu ban đầu từ đề bài đồ án cuối kỳ môn **Lập trình ứng dụng Java** (BM. Công nghệ phần mềm – Khoa CNTT, Trường ĐH KHTN TP.HCM). Hệ thống gồm **2 phân hệ** chính dành cho **Người quản trị** và **Người sử dụng**.
+Tài liệu tóm tắt yêu cầu ban đầu từ đề bài đồ án cuối kỳ môn **Lập trình ứng dụng Java** (BM. Công nghệ phần mềm – Khoa CNTT, Trường ĐH KHTN TP.HCM). Hệ thống gồm **2 ứng dụng Desktop giao diện đồ họa (GUI)** dành cho **Người quản trị (Admin App)** và **Người sử dụng (User Client)**.
 
 ---
 
-## 1. Phân hệ Người quản trị (Admin)
+## 1. Phân hệ Người quản trị (Admin App — Desktop GUI)
 
-Tập trung vào quản trị tài khoản, giám sát hoạt động và thống kê hệ thống:
+Ứng dụng giao diện đồ họa trực quan tập trung vào quản trị tài khoản, giám sát hoạt động và biểu diễn thống kê/biểu đồ hệ thống:
 
 | Nhóm chức năng | Yêu cầu chi tiết |
 | :--- | :--- |
@@ -38,7 +38,7 @@ Cung cấp trải nghiệm nhắn tin cá nhân, nhóm và kết nối bạn bè
   - Nhắn tin thời gian thực khi người nhận online; lưu tin nhắn chờ khi người nhận offline.
   - Xem lịch sử chat; xóa một/vài dòng hoặc xóa toàn bộ lịch sử chat.
   - Tìm kiếm chuỗi trong lịch sử chat với 1 người hoặc với tất cả mọi người, cho phép di chuyển đến đúng đoạn hội thoại tìm thấy.
-  - Gọi **LLM** để chỉnh sửa hoặc gợi ý nội dung tin nhắn.
+  - Tích hợp **LLM** với **2 nút thao tác riêng**: **1 nút chỉnh sửa** nội dung đang soạn nháp và **1 nút gợi ý (recommend)** câu trả lời theo ngữ cảnh hội thoại.
 - **Nhóm chat**:
   - Tạo nhóm (thêm tối thiểu 1 thành viên theo tên đăng nhập), đổi tên nhóm, chat nhóm.
   - Quản trị thành viên: thêm thành viên, gán quyền admin nhóm, xóa thành viên (chỉ admin mới có quyền xóa).

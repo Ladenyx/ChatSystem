@@ -11,7 +11,7 @@ body:
       label: Area
       options:
         - User Client
-        - Admin Console
+        - Admin App (Desktop GUI)
         - Server / networking
         - Database
         - Security / encryption

@@ -60,7 +60,7 @@ Interface and database. The archive contains `src/`, `script/`, `git/` and the r
 | Deliverable | Status | Owner |
 |-------------|:------:|-------|
 | `src/`: screens of the User Client (UI only) | ⬜ | TBD |
-| `src/`: screens of the Admin Console (UI only) | ⬜ | TBD |
+| `src/`: screens of the Admin App (Desktop GUI, UI only) | ⬜ | TBD |
 | `script/`: database creation script | ⬜ | TBD |
 | `git/`: commit screenshots of every member | ⬜ | TBD |
 | Report: team information | ⬜ | TBD |
@@ -146,9 +146,9 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 | **Security, moderation and AI** | | | | |
 | U-25 | Encrypted group chat | ⬜ | ⬜ | TBD |
 | U-26 | Report a user for spam | ⬜ | ⬜ | TBD |
-| U-27 | LLM assistant: refine a draft or suggest a reply | ⬜ | ⬜ | TBD |
+| U-27 | LLM assistant: refine a draft and suggest a reply | ⬜ | ⬜ | TBD |
 
-### Admin Console
+### Admin App (Desktop GUI)
 
 | ID | Feature | UI | Logic | Owner |
 |----|---------|:--:|:-----:|-------|
