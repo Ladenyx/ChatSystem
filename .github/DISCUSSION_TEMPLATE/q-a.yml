@@ -1,0 +1,24 @@
+title: "[Q&A] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask a question about the code, setup or design.
+        For bugs and tasks, open an Issue instead.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you have tried
+      description: Include error messages, stack traces or relevant code in code blocks.
+  - type: input
+    id: feature
+    attributes:
+      label: Related feature ID
+      description: Feature ID from ROADMAP.md (optional).
+      placeholder: U-12
