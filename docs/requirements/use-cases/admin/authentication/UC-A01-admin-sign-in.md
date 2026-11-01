@@ -6,7 +6,7 @@
 - **Use Case Name**: Đăng nhập vào Admin App
 - **Author / Create by**: ladenyx
 - **Date Create**: 2026-10-29
-- **Last Updated by / Date**: ladenyx / 2026-10-30
+- **Last Updated by / Date**: ladenyx / 2026-11-01
 - **Primary Actor**: Admin hệ thống
 - **Secondary Actor(s)**: Không có tác nhân ngoài hệ thống.
 - **Priority**: Must Have
@@ -21,7 +21,7 @@
 ## Điều kiện tiên quyết (Conditions)
 
 - **Pre-conditions**: Tài khoản Admin hệ thống đã được tạo.
-- **Post-conditions**: Phiên Admin hợp lệ được thiết lập; số phiên hoạt động của tài khoản không vượt quá 1; A-SCR-02 được mở.
+- **Post-conditions**: Phiên Admin hợp lệ được thiết lập; phiên cũ đang hoạt động (nếu có) đã bị thu hồi; số phiên hoạt động của tài khoản không vượt quá 1; A-SCR-02 được mở.
 
 ## Luồng sự kiện (Flow of Events)
 
@@ -32,18 +32,17 @@
 | 1 | Admin mở app cho người quản trị | Hiển thị A-SCR-01 với ô Tên đăng nhập, mật khẩu và nút đăng nhập |
 | 2 | Admin nhập thông tin và chọn đăng nhập | Kiểm tra dữ liệu và gửi yêu cầu xác thực đến Server |
 | 3 | Chờ kết quả xác thực | Server kiểm tra thông tin đăng nhập, quyền Admin hệ thống và điều kiện được đăng nhập |
-| 4 | Chờ thiết lập phiên | Server áp dụng chính sách một phiên/tài khoản và cấp phiên có quyền quản trị khi hợp lệ |
+| 4 | Chờ thiết lập phiên | Server áp dụng chính sách một phiên/tài khoản (thu hồi trực tiếp phiên cũ nếu đang tồn tại) và cấp phiên có quyền quản trị khi hợp lệ |
 | 5 | Sử dụng ứng dụng | Admin App nhận phiên hợp lệ và mở A-SCR-02 |
 
 ### Alternative Flows
 
 - **Alt 2a — Thiếu dữ liệu bắt buộc**: Tại bước 2, nếu Admin để trống `Tên đăng nhập` hoặc `Mật khẩu`, Admin App không gửi yêu cầu lên Server, đánh dấu và hiển thị thông báo tại trường còn thiếu. Admin bổ sung thông tin và thực hiện lại bước 2.
 - **Alt 3a — Sai thông tin xác thực nhưng chưa vượt ngưỡng khóa (`≤ N` lần liên tiếp)**: Tại bước 3, nếu tên đăng nhập hoặc mật khẩu không chính xác và số lần nhập sai liên tiếp chưa vượt quá `N` lần quy định, Server ghi nhận tăng bộ đếm đăng nhập sai liên tiếp (nếu tài khoản tồn tại) và từ chối xác thực. Admin App xóa trống ô mật khẩu, hiển thị thông báo lỗi xác thực (kèm số lần thử còn lại nếu áp dụng) và quay về bước 2 để Admin nhập lại. *(Bộ đếm lỗi liên tiếp được đặt lại về `0` khi đăng nhập thành công).*
-- **Alt 4a — Tài khoản đang có phiên hoạt động (yêu cầu phiên cũ phê duyệt)**: Tại bước 4, nếu tài khoản đã có phiên quản trị đang hoạt động ở thiết bị/cửa sổ khác, hệ thống bảo đảm tối đa 1 phiên/tài khoản bằng cơ chế xin xác nhận từ **phiên cũ**:
-  - **Trên phiên mới (`A-SCR-01`)**: Hiển thị trạng thái chờ phiên đang hoạt động phê duyệt.
-  - **Trên phiên cũ (đang hoạt động)**: Hiển thị hộp thoại xác nhận: *“Phát hiện yêu cầu đăng nhập mới vào tài khoản này từ nơi khác. Bạn có đồng ý đăng xuất phiên hiện tại và cho phép phiên mới tiếp tục không?”*
-  - **Nhánh 4a.1 — Phiên cũ chọn Chấp nhận (`Accept` / `Yes`) hoặc hết thời gian chờ phản hồi (`Heartbeat Timeout`)**: Server thu hồi ngay lập tức phiên cũ (đăng xuất phiên cũ về `A-SCR-01`), đồng thời cấp phiên quản trị hợp lệ cho phiên mới và chuyển sang bước 5.
-  - **Nhánh 4a.2 — Phiên cũ chọn Từ chối (`Reject` / `No`)**: Server giữ nguyên phiên cũ và từ chối yêu cầu đăng nhập mới; Admin App ở phiên mới hiển thị thông báo đăng nhập bị từ chối và quay về bước 2.
+- **Alt 4a — Tài khoản đang có phiên hoạt động (thu hồi trực tiếp phiên cũ)**: Tại bước 4, nếu tài khoản đã có phiên quản trị đang hoạt động ở thiết bị/cửa sổ khác, hệ thống bảo đảm tối đa 1 phiên/tài khoản bằng cách thu hồi trực tiếp phiên cũ mà không cần chờ xác nhận:
+  - **Trên Server**: Thu hồi ngay lập tức phiên cũ (vô hiệu hóa cả yêu cầu nghiệp vụ lẫn kết nối thời gian thực đang mở; tự động kết nối lại từ phiên cũ không giành lại được phiên) và cấp phiên quản trị hợp lệ cho phiên mới.
+  - **Trên phiên cũ (đang hoạt động)**: Nhận sự kiện phiên bị thu hồi (hoặc bị từ chối ở yêu cầu tiếp theo), tự động đăng xuất về `A-SCR-01` và hiển thị thông báo: *“Phiên đăng nhập đã bị thu hồi do tài khoản vừa đăng nhập ở thiết bị/cửa sổ khác.”*
+  - **Trên phiên mới**: Nhận phiên quản trị hợp lệ và chuyển sang bước 5 để mở `A-SCR-02`.
 
 ### Exception Flows
 
@@ -63,7 +62,7 @@
 - **Business Rule (BR)**:
     - BR-01: Chỉ tài khoản Admin hệ thống được vào Admin App; quyền Admin nhóm không thay thế quyền này. Không đăng ký Admin công khai trên A-SCR-01
     - BR-02: Tài khoản Admin chỉ được tạo qua script SQL lên database
-    - BR-03: Tối đa một phiên hoạt động/tài khoản.
+    - BR-03: Tối đa một phiên hoạt động/tài khoản; đăng nhập mới hợp lệ sẽ thu hồi trực tiếp phiên cũ đang hoạt động, reconnect từ phiên cũ không giành lại phiên.
     - BR-04: Mọi yêu cầu quản trị sau đăng nhập đều phải được Server kiểm tra phiên và quyền, không chỉ dựa vào việc đã mở màn hình.
 - **Non-Functional Requirements (NFR)**:
     - NFR-01: Mật không được che trên GUI; không ghi mật khẩu hoặc dữ liệu nhạy cảm vào thông báo lỗi hay tài liệu cấu hình.
