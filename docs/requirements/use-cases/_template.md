@@ -14,13 +14,13 @@
 - **Priority**: [Must Have / Should Have / Could Have]
 - **Status**: [Draft / Review / Approved]
 
-## Mô tả tổng quan (Summary / Desciption)
+## Mô tả tổng quan (Summary / Description)
 
 - **Brief Description**: [Mô tả ngắn gọn mục đích của Use Case này giải quyết việc gì cho người dùng]
 - **Goal**: [Kết quả mà actor mong muốn đạt được sau khi hoàn tất Use Case]
 - **Trigger**: [Hành động hoặc điều kiện gì bắt đầu kích hoạt Use Case này? Ví dụ: Người dùng nhấn nút "Đăng nhập"]
 
-## Điều kiện tiên quyết (Conditions)
+## Điều kiện (Conditions)
 
 - **Pre-conditions**: [Những điều kiện bắt buộc phải đúng/tồn tại trước khi thực hiện Use Case. Ví dụ: Người dùng đã có tài khoản và trang web đang hoạt động]
 - **Post-conditions**: [Trạng thái của hệ thống hoặc dữ liệu sau khi Use Case kết thúc thành công. Ví dụ: Phiên làm việc (session) được tạo và chuyển hướng về trang chủ]
