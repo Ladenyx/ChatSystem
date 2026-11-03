@@ -215,16 +215,17 @@ Tại bước 4:
 5. User chọn một phương án; hệ thống điền vào ô soạn nháp, không tự gửi. User kiểm tra/chỉnh sửa rồi có thể tiếp tục bước 5.
 6. Nếu User hủy hoặc đóng popover mà chưa chọn phương án, hệ thống giữ nguyên nháp trước đó.
 
-#### Alt 4b — Gợi ý trả lời bằng AI (`U-27`)
+#### Alt 4b — Gợi ý tin nhắn bằng AI (`U-27`)
 
 Tại bước 4 hoặc sau bước 3:
 
-1. User nhấn **Gợi ý (Recommend)**, độc lập với nút Chỉnh sửa.
-2. Hệ thống mở `U-DLG-03` ở chế độ **Recommend Reply**, cho User chọn các tin nhắn ngữ cảnh trong hội thoại hiện tại.
-3. User xem trước/chỉnh sửa phần ngữ cảnh được chọn và xác nhận gửi bản rõ tới server ứng dụng cùng nhà cung cấp AI.
-4. Hệ thống chỉ gửi phần được xác nhận và hiển thị các câu trả lời gợi ý.
-5. User chọn một câu; hệ thống điền vào ô soạn nháp để User tự kiểm tra và nhấn **Gửi** khi muốn.
-6. Nếu User hủy hoặc chưa chọn ngữ cảnh, hệ thống không gửi yêu cầu AI và giữ nháp hiện tại.
+1. User nhấn **Gợi ý (Recommend)**, độc lập với nút Chỉnh sửa. User có thể mở chức năng này khi hội thoại chưa có tin nhắn và ô nháp đang trống để chủ động mở lời.
+2. Hệ thống mở `U-DLG-03` ở chế độ **Recommend**, cho User nhập prompt mô tả ý định, chọn các tin nhắn ngữ cảnh trong hội thoại hiện tại hoặc kết hợp cả hai.
+3. Trước khi gửi yêu cầu AI, hệ thống kiểm tra có prompt có nội dung, không chỉ gồm khoảng trắng, hoặc ít nhất một tin ngữ cảnh hợp lệ. Nếu chưa đáp ứng, hệ thống thông báo để User bổ sung, không gửi yêu cầu AI và giữ nguyên nháp hiện tại.
+4. User xem trước/chỉnh sửa prompt và/hoặc phần ngữ cảnh được chọn, được thông báo rõ bản rõ sẽ đi tới server ứng dụng cùng nhà cung cấp AI, kể cả trong nhóm E2EE, rồi xác nhận gửi.
+5. Chỉ sau khi User xác nhận, hệ thống gửi phần được duyệt và hiển thị các phương án tin nhắn gợi ý.
+6. User chọn một phương án; hệ thống điền vào ô soạn nháp để User tự kiểm tra và nhấn **Gửi** khi muốn, không tự gửi tin nhắn.
+7. Nếu User hủy trước khi xác nhận, hệ thống không gửi yêu cầu AI. Nếu User hủy hoặc đóng popover khi chưa chọn phương án, hệ thống giữ nguyên nháp hiện tại.
 
 ### Exception Flows
 
@@ -313,10 +314,11 @@ Tại bước 4 hoặc sau bước 3:
 
 #### BR-10 — Hai chế độ AI
 
-- Có hai nút độc lập.
+- Có hai nút độc lập: **Chỉnh sửa (Refine)** và **Gợi ý (Recommend)**.
 - **Refine** cần nháp có chữ;
-- **Recommend** dùng ngữ cảnh do User chọn.
-- Chỉ gửi nháp/ngữ cảnh đã xem trước và xác nhận;
+- **Recommend** cho nhập prompt mô tả ý định, chọn các tin nhắn ngữ cảnh trong hội thoại hiện tại hoặc kết hợp cả hai; hỗ trợ chủ động mở lời khi hội thoại chưa có tin nhắn và ô nháp đang trống.
+- Chỉ gửi yêu cầu **Recommend** khi có prompt có nội dung, không chỉ gồm khoảng trắng, hoặc ít nhất một tin ngữ cảnh hợp lệ.
+- Chỉ gửi bản nháp, prompt và/hoặc ngữ cảnh đã được User xem trước và xác nhận;
 - nêu rõ việc tiết lộ bản rõ tới server ứng dụng và nhà cung cấp AI, kể cả trong nhóm E2EE.
 
 #### BR-11 — Kiểm soát kết quả AI
