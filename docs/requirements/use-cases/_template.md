@@ -1,5 +1,3 @@
-> File format: 
-
 # ĐẶC TẢ USE-CASE
 
 ## Thông tin chung (Metadata)
