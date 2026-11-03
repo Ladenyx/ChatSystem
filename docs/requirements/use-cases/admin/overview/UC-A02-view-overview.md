@@ -12,7 +12,7 @@
 - **Priority**: Must have
 - **Status**: Draft
 
-## Mô tả tổng quan (Summary / Desciption)
+## Mô tả tổng quan (Summary / Description)
 
 - **Brief Description**: Hiển thị tình hình hệ thống bằng bốn thể KPI, biểu đồ xu hướng năm hiện tại và các danh sách hoạt động gần đây.
 - **Goal**: Admin nắm tổng quan và mở nhanh màn hình quản trị liên quan từ các thẻ KPI.
@@ -47,8 +47,7 @@
 - Ex 4d - Tại bước 4, màn hình đích không tải được: thông báo lỗi điều hướng/tải dữ liệu; không hiển thị kết quả của màn hình khác dưới nhãn đích đã chọn
 
 ## Business Rules & Non-Functional Requirements
-d.
-    - NFR-03
+
 - **Business Rules (BR)**:
     - BR-01: Dashboard gồm đúng 4 loại KPI và các khối tóm tắt; không phát sinh nghiệp vụ xử lý spam chỉ từ thẻ KPI.
     - BR-02: Thời gian hiển thị và năm hiện theo tính theo Asia/Ho_Chi_Minh.
