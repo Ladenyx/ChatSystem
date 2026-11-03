@@ -30,7 +30,11 @@
 | `LOCKED` | Tài khoản bị Admin khóa | Không cấp phiên/quyền chuyển tiếp; thu hồi các phiên đang hoạt động |
 | `DELETED` | Tài khoản đã xóa mềm, còn trong thời hạn khôi phục | Không cấp phiên/quyền chuyển tiếp; thu hồi phiên và ngừng nhận tin mới |
 
-- Admin có thể khóa/mở khóa hoặc xóa/khôi phục tài khoản theo nghiệp vụ quản trị; mở khóa hoặc khôi phục không tự khôi phục phiên cũ. Sau thời hạn xóa mềm, tài khoản bị purge theo chính sách của DEC-07.
+- Chuyển trạng thái theo nghiệp vụ quản trị:
+  - `ACTIVE` → `LOCKED` khi Admin khóa; `LOCKED` → `ACTIVE` khi Admin mở khóa.
+  - `ACTIVE` hoặc `LOCKED` → `DELETED` khi xóa mềm. Khi khôi phục trong thời hạn cho phép, tài khoản trở về trạng thái trước khi xóa: đã khóa thì trở về `LOCKED`, còn lại trở về `ACTIVE`.
+  - Sau thời hạn xóa mềm, tài khoản `DELETED` bị purge; không còn tài khoản để đăng nhập hoặc khôi phục.
+- Mở khóa hoặc khôi phục không tự khôi phục phiên cũ. Trở về `ACTIVE` không tự xác minh email hoặc bỏ hạn chế thử sai còn hiệu lực.
 - Không dùng `PENDING` làm trạng thái tài khoản. Dữ liệu đăng ký công khai chưa hoàn tất xác minh là yêu cầu tạm theo [DEC-06](password-reset-and-email.md#xác-minh-email), chưa phải tài khoản đăng nhập. Việc email đã xác minh hay chưa là điều kiện kiểm tra riêng, kể cả với tài khoản do Admin tạo.
 - Hạn chế đăng nhập do thử sai được quản lý độc lập với trạng thái tài khoản; hết hạn chờ không tự thay đổi trạng thái hay xác minh email.
 
