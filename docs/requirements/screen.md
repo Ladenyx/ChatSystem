@@ -13,13 +13,14 @@ flowchart LR
     Login["U-SCR-01: Đăng nhập"] --> SignUp["U-SCR-02: Đăng ký"]
     SignUp --> VerifyEmail["U-SCR-03: Xác minh Email"]
     VerifyEmail --> Login
+    Login -- "Chờ xác minh email" --> VerifyEmail
     Login --> ForgotPwd["U-SCR-04: Quên mật khẩu"]
     ForgotPwd --> Login
     Login -- "Mật khẩu tạm" --> ForcePwd["U-SCR-05: Đặt mật khẩu mới"]
     ForcePwd --> Login
-    Login -- "Thiếu khóa / Lần đầu" --> E2EEKey["U-SCR-06: Thiết lập / Khôi phục khóa E2EE"]
-    Login -- "Đã có khóa" --> MainShell["Khung chính User Client"]
-    E2EEKey --> MainShell
+    Login -- "Đủ điều kiện cấp phiên" --> MainShell["Khung chính User Client"]
+    MainShell -- "Thiết lập / Khôi phục ngay hoặc để sau" --> E2EEKey["U-SCR-06: Thiết lập / Khôi phục khóa E2EE"]
+    E2EEKey -- "Hoàn tất / Bỏ qua / Hủy" --> MainShell
     MainShell --> ChatView["U-SCR-07: Hội thoại & Khung Chat"]
     MainShell --> ContactsView["U-SCR-08: Bạn bè & Kết nối"]
     ChatView --> InfoDrawer["U-SCR-09: Panel Thông tin Đoạn chat"]
@@ -54,12 +55,12 @@ flowchart LR
 
 | Mã | Tên màn hình | Feature ID | Thành phần & Chức năng chính |
 | :--- | :--- | :--- | :--- |
-| `U-SCR-01` | **Đăng nhập (`Sign In View`)** | `U-02` | - Nhập `username`, `password`, nút **Sign in**<br>- Điều hướng sang **Đăng ký** (`U-SCR-02`) và **Quên mật khẩu** (`U-SCR-04`)<br>- Hiển thị thông báo lỗi xác thực, tài khoản bị khóa, hoặc phiên cũ bị thu hồi khi đăng nhập ở thiết bị khác (1 phiên/tài khoản) |
+| `U-SCR-01` | **Đăng nhập (`Sign In View`)** | `U-02` | - Chỉ tài khoản `USER` được đăng nhập; người quản trị muốn chat dùng tài khoản `USER` riêng theo DEC-07<br>- Nhập `username`, `password`, nút **Sign in**<br>- Điều hướng sang **Đăng ký** (`U-SCR-02`) và **Quên mật khẩu** (`U-SCR-04`); chuyển tiếp xác minh/đặt mật khẩu khi cần<br>- Hiển thị lỗi xác thực, trạng thái tài khoản hoặc lý do phiên hiện tại hết hạn/bị thu hồi<br>- Hỗ trợ nhiều phiên User Client; đăng nhập thiết bị khác không tự thu hồi phiên chat hoặc phiên quản trị đang có<br>- Chi tiết trạng thái giao diện tại [đặc tả U-SCR-01](screens/user/authentication/U-SCR-01-user-sign-in.md) |
 | `U-SCR-02` | **Đăng ký (`Sign Up View`)** | `U-01` | - Nhập các trường bắt buộc (*`username`*, *`password`*, *`confirm password`*, *`họ tên`*, *`email`*) và tùy chọn (`địa chỉ`, `ngày sinh`, `giới tính`)<br>- Hiển thị lỗi kiểm tra hợp lệ tại từng trường; liên kết quay lại **Đăng nhập** |
-| `U-SCR-03` | **Xác minh Email (`Email Verification View`)** | `U-01`, `U-03` | - Nhập mã xác minh gửi qua email sau khi đăng ký mới hoặc khi đổi sang địa chỉ email mới<br>- Hỗ trợ gửi lại mã (có đếm ngược giãn cách) và quay về màn hình Đăng nhập |
+| `U-SCR-03` | **Xác minh Email (`Email Verification View`)** | `U-01`, `U-03` | - Nhập mã xác minh gửi qua email sau khi đăng ký mới hoặc khi đổi sang địa chỉ email mới<br>- Mã hết hạn sau **10 phút kể từ khi Server phát hành** theo DEC-06; hết hạn thì chủ động yêu cầu mã mới, không tự xóa tài khoản<br>- Hỗ trợ gửi lại mã (có đếm ngược giãn cách) và quay về màn hình Đăng nhập |
 | `U-SCR-04` | **Quên mật khẩu (`Forgot Password View`)** | `U-05` | - Nhập `username` / `email` để yêu cầu gửi mật khẩu tạm ngẫu nhiên qua email (hiệu lực **15 phút**)<br>- Hiển thị bộ đếm giãn cách gửi lại (**60 giây**, tối đa 5 yêu cầu/giờ/tài khoản) |
-| `U-SCR-05` | **Đặt mật khẩu bắt buộc (`Force Change Password View`)** | `U-05`, `A-02`, `A-04` | - Hiển thị khi người dùng đăng nhập bằng **mật khẩu tạm** (sau khôi phục mật khẩu, Admin reset, hoặc tài khoản do Admin mới tạo); chưa cho phép vào khung chat chính<br>- Sau khi đặt mật khẩu mới thành công, thu hồi phiên tạm và chuyển về `U-SCR-01` để đăng nhập lại |
-| `U-SCR-06` | **Thiết lập / Khôi phục khóa E2EE (`E2EE Key Setup & Recovery View`)** | `U-25` | - **Thiết lập lần đầu**: sinh khóa thiết bị và hiển thị **Mã khôi phục (Recovery Code)** để người dùng lưu trữ<br>- **Đăng nhập trên máy mới**: nhập Mã khôi phục để giải mã bản sao lưu khóa, kèm thanh tiến độ đồng bộ lịch sử chat |
+| `U-SCR-05` | **Đặt mật khẩu bắt buộc (`Force Change Password View`)** | `U-05`, `A-02`, `A-04` | - Hiển thị khi người dùng đăng nhập bằng **mật khẩu tạm** (sau khôi phục mật khẩu, Admin reset, hoặc tài khoản do Admin mới tạo); chưa cho phép vào khung chat chính<br>- Quyền đặt mật khẩu dùng chung hạn 15 phút của mật khẩu tạm; mở màn hình không kéo dài hạn dùng<br>- Sau khi lưu thành công, vô hiệu hóa mật khẩu tạm và thu hồi phiên theo DEC-06, chuyển về `U-SCR-01` để đăng nhập lại |
+| `U-SCR-06` | **Thiết lập / Khôi phục khóa E2EE (`E2EE Key Setup & Recovery View`)** | `U-25` | - Mở từ khung chính **sau khi đăng nhập thành công**; có thể khôi phục ngay hoặc để sau. Hủy/bỏ qua không kết thúc phiên<br>- **Thiết lập lần đầu**: chuẩn bị khóa thiết bị và Mã khôi phục theo DEC-05<br>- **Khôi phục lịch sử**: nhập Mã khôi phục để giải mã backup và đồng bộ lịch sử được phép đọc<br>- **Bỏ qua khôi phục**: bảo toàn backup cũ; chỉ cho gửi/nhận tin E2EE mới khi thiết bị đã được cấp đủ khóa theo luồng E2EE riêng, không thay bằng bản rõ |
 
 ### 1.2. Khung làm việc chính (`Main Workspace Shell`)
 
@@ -75,7 +76,7 @@ Sử dụng thanh điều hướng dọc (Icon Rail) bên trái cùng gồm: chu
 
 | Mã | Tên hộp thoại / Popover | Feature ID | Chức năng & Ràng buộc giao diện |
 | :--- | :--- | :--- | :--- |
-| `U-DLG-01` | **Hồ sơ & Bảo mật Tài khoản (`Profile & Security Dialog`)** | `U-03`, `U-04`, `U-25` | - **Tab Hồ sơ (`U-03`)**: hiển thị `username` (chỉ đọc), cập nhật `họ tên`, `địa chỉ`, `ngày sinh`, `giới tính`; đổi `email` yêu cầu mật khẩu hiện tại và xác minh email mới (`U-SCR-03`)<br>- **Tab Đổi mật khẩu (`U-04`)**: nhập mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới<br>- **Tab Khóa E2EE (`U-25`)**: kiểm tra trạng thái sao lưu khóa và tạo lại mã khôi phục |
+| `U-DLG-01` | **Hồ sơ & Bảo mật Tài khoản (`Profile & Security Dialog`)** | `U-03`, `U-04`, `U-25` | - **Tab Hồ sơ (`U-03`)**: hiển thị `username` (chỉ đọc), cập nhật `họ tên`, `địa chỉ`, `ngày sinh`, `giới tính`; đổi `email` yêu cầu mật khẩu hiện tại và xác minh email mới (`U-SCR-03`)<br>- **Tab Đổi mật khẩu (`U-04`)**: nhập mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới<br>- **Tab Khóa E2EE (`U-25`)**: kiểm tra trạng thái sao lưu khóa, mở `U-SCR-06` để khôi phục sau và tạo lại mã khôi phục theo luồng quản lý khóa |
 | `U-DLG-02` | **Tạo nhóm chat mới (`Create Group Dialog`)** | `U-19`, `U-25` | - Nhập tên nhóm, tìm và chọn **tối thiểu 1 thành viên** từ danh sách bạn bè (không có quan hệ chặn hai chiều)<br>- Nhóm tạo mới mặc định bật E2EE; người tạo là Admin đầu tiên |
 | `U-DLG-03` | **Popover Trợ lý AI (`LLM Refine & Recommend Popover`)** | `U-27` | Mở tương ứng từ **2 nút riêng biệt** trên thanh soạn tin:<br>1. **Chế độ Chỉnh sửa (`Refine Draft`)**: nhận nội dung đang gõ ở ô soạn thảo (kích hoạt khi ô nháp có chữ), chọn kiểu diễn đạt mong muốn và sinh các phương án viết lại<br>2. **Chế độ Gợi ý (`Recommend Reply`)**: cho phép chọn các tin nhắn ngữ cảnh trong hội thoại để sinh danh sách câu trả lời gợi ý<br><br>**Quy tắc chung**: có bước **xem trước & xác nhận** gửi bản rõ tới Server và nhà cung cấp AI (kể cả trong nhóm E2EE); kết quả chọn chỉ điền vào **ô soạn nháp** để người dùng tự kiểm tra trước khi gửi (lỗi/hết hạn mức vẫn giữ nguyên nháp cũ) |
 | `U-DLG-04` | **Báo cáo Spam (`Report Spam Dialog`)** | `U-26` | - Chọn một hoặc nhiều tin nhắn vi phạm kèm lý do báo cáo<br>- Có bước **xem trước & xác nhận** gửi bản rõ tin nhắn cho Admin hệ thống (kể cả từ nhóm E2EE) |
