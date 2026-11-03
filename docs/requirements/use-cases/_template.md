@@ -14,7 +14,7 @@
 - **Priority**: [Must Have / Should Have / Could Have]
 - **Status**: [Draft / Review / Approved]
 
-## Mô tả tổng quan (Summary / Desciption)
+## Mô tả tổng quan (Summary / Description)
 
 - **Brief Description**: [Mô tả ngắn gọn mục đích của Use Case này giải quyết việc gì cho người dùng]
 - **Goal**: [Kết quả mà actor mong muốn đạt được sau khi hoàn tất Use Case]
