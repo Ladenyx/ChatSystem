@@ -43,7 +43,7 @@ Luồng chính áp dụng khi tài khoản hoạt động, không bị khóa, em
 
 ### Điều kiện tài khoản tại bước 3
 
-Áp dụng [DEC-07](../../../../decisions/account-lifecycle.md#điều-kiện-tài-khoản-khi-đăng-nhập) theo thứ tự ưu tiên từ trên xuống. Các nhánh cấp phiên/chuyển tiếp chỉ được thực hiện sau khi thông tin xác thực hợp lệ.
+Áp dụng trạng thái và điều kiện đăng nhập theo [DEC-07](../../../../decisions/account-lifecycle.md#trạng-thái-tài-khoản), xét bảng dưới theo thứ tự ưu tiên từ trên xuống. Các nhánh cấp phiên/chuyển tiếp chỉ được thực hiện sau khi thông tin xác thực hợp lệ.
 
 | Điều kiện tài khoản | Kết quả | Luồng |
 | --- | --- | --- |

@@ -20,9 +20,23 @@
 - Phiên User Client chỉ có phạm vi sử dụng chức năng người dùng. Nghiệp vụ quản trị yêu cầu phiên quản trị và quyền Admin hệ thống; Server kiểm tra quyền tài khoản và phạm vi phiên ở từng yêu cầu. Quyền Admin nhóm được xác định riêng theo từng nhóm.
 - Khuyến nghị người quản trị sử dụng tài khoản riêng cho hoạt động thường ngày theo hướng dẫn của [Google Workspace](https://knowledge.workspace.google.com/admin/users/security-best-practices-for-administrator-accounts) và [Microsoft 365](https://learn.microsoft.com/en-gb/microsoft-365/admin/security-and-compliance/m365b-account-security-admins?view=o365-worldwide). Đây là khuyến nghị vận hành, không phải điều kiện chặn vai trò Admin khỏi User Client.
 
+## Trạng thái tài khoản
+
+Đề xuất dùng ba trạng thái cho tài khoản đã được tạo:
+
+| Trạng thái | Ý nghĩa | Điều kiện đăng nhập |
+| --- | --- | --- |
+| `ACTIVE` | Tài khoản không bị khóa quản trị hoặc xóa mềm | Chỉ cấp phiên khi thông tin xác thực, email và các điều kiện khác đều hợp lệ |
+| `LOCKED` | Tài khoản bị Admin khóa | Không cấp phiên/quyền chuyển tiếp; thu hồi các phiên đang hoạt động |
+| `DELETED` | Tài khoản đã xóa mềm, còn trong thời hạn khôi phục | Không cấp phiên/quyền chuyển tiếp; thu hồi phiên và ngừng nhận tin mới |
+
+- Admin có thể khóa/mở khóa hoặc xóa/khôi phục tài khoản theo nghiệp vụ quản trị; mở khóa hoặc khôi phục không tự khôi phục phiên cũ. Sau thời hạn xóa mềm, tài khoản bị purge theo chính sách của DEC-07.
+- Không dùng `PENDING` làm trạng thái tài khoản. Dữ liệu đăng ký công khai chưa hoàn tất xác minh là yêu cầu tạm theo [DEC-06](password-reset-and-email.md#xác-minh-email), chưa phải tài khoản đăng nhập. Việc email đã xác minh hay chưa là điều kiện kiểm tra riêng, kể cả với tài khoản do Admin tạo.
+- Hạn chế đăng nhập do thử sai được quản lý độc lập với trạng thái tài khoản; hết hạn chờ không tự thay đổi trạng thái hay xác minh email.
+
 ## Điều kiện tài khoản khi đăng nhập
 
-Các trạng thái nghiệp vụ dưới đây tổng hợp điều kiện đã có trong screen map. `ACTIVE` và `LOCKED` giữ cách gọi của UC-A01; chờ xác minh/xóa mềm chưa ấn định tên enum hoặc cấu trúc lưu trữ. Quyền truy cập Admin App được kiểm tra riêng.
+Áp dụng các trạng thái trên cùng điều kiện xác thực, xác minh email và hạn chế thử sai. Quyền truy cập Admin App được kiểm tra riêng.
 
 | Điều kiện | Phiên sử dụng ứng dụng | Quyền chuyển tiếp xác minh/đặt mật khẩu |
 | --- | --- | --- |

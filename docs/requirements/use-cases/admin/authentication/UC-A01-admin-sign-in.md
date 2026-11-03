@@ -50,12 +50,7 @@
 - **Ex 3b — Tài khoản không có quyền Admin hệ thống**: Tại bước 3, nếu thông tin xác thực đúng nhưng tài khoản không mang vai trò Admin hệ thống (ví dụ: tài khoản `USER` thông thường hoặc chỉ là Admin nhóm chat), Server từ chối cấp phiên quản trị. Admin App hiển thị thông báo không có quyền truy cập ứng dụng quản trị. → **Kết thúc Use Case.**
 - **Ex 3c — Trạng thái tài khoản không hợp lệ để đăng nhập**: Tại bước 3, nếu tài khoản đang ở trạng thái không được phép đăng nhập theo chính sách Server, hệ thống từ chối xác thực, không tạo phiên và không mở `A-SCR-02`; Admin App hiển thị lý do tương ứng. → **Kết thúc Use Case.**
 
-  | Status | Ý nghĩa | Đăng nhập được? |
-  | :--- | :--- | :---: |
-  | `ACTIVE` | Hoạt động bình thường | Có |
-  | `LOCKED` | Bị khóa quản trị; cần được mở khóa theo nghiệp vụ quản trị | Không |
-
-  Khóa do thử sai được kiểm tra độc lập với trạng thái tài khoản theo [DEC-07](../../../../decisions/account-lifecycle.md#điều-kiện-tài-khoản-khi-đăng-nhập). Tài khoản `ACTIVE` đang trong hạn khóa tạm vẫn bị từ chối; hết hạn khóa tạm không thay đổi `LOCKED` hoặc phục hồi tài khoản đã xóa.
+  Trạng thái tài khoản và điều kiện đăng nhập áp dụng theo [DEC-07](../../../../decisions/account-lifecycle.md#trạng-thái-tài-khoản). Khóa do thử sai được kiểm tra độc lập: tài khoản `ACTIVE` trong hạn khóa tạm vẫn bị từ chối; hết hạn khóa tạm không thay đổi `LOCKED` hoặc phục hồi tài khoản đã xóa.
 
 - **Ex 4a — Mất kết nối hoặc Server không phản hồi**: Tại bước 2–4, nếu kết nối mạng gặp sự cố hoặc không nhận được phản hồi xác nhận từ Server, Admin App dừng trạng thái chờ, không mở `A-SCR-02`, hiển thị thông báo lỗi kết nối để Admin thử lại sau. → **Kết thúc Use Case.**
 
