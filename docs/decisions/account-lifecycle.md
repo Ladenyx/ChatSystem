@@ -14,27 +14,27 @@
 - Xóa admin nhóm cuối cần chọn người kế nhiệm trước; nhóm chỉ còn người bị xóa được đóng, giữ lịch sử. Không cam kết xóa bản sao trên thiết bị khác.
 - Spam report cho chọn tin và lý do, xem trước/xác nhận gửi bản rõ cho admin kể cả nhóm E2EE. Admin quyết định khóa thủ công; không mặc định server đã xác thực bản rõ do người báo cáo cung cấp.
 
-## Phân tách tài khoản quản trị và tài khoản chat
+## Vai trò và phạm vi phiên
 
-- User Client chỉ chấp nhận tài khoản có vai trò `USER`; Admin App chỉ chấp nhận tài khoản Admin hệ thống. Server kiểm tra vai trò trước khi cấp phiên hoặc quyền chuyển tiếp, không dựa vào lựa chọn trên giao diện.
-- Người quản trị muốn tham gia chat sử dụng tài khoản `USER` riêng với thông tin đăng nhập riêng. Tài khoản Admin hệ thống không dùng để chat; tài khoản `USER` không được gọi nghiệp vụ quản trị hệ thống. Quyền Admin nhóm được xác định theo từng nhóm, không cấp quyền Admin hệ thống.
-- Lý do lựa chọn: tách tài khoản có quyền khóa/xóa tài khoản và reset mật khẩu khỏi hoạt động chat thường ngày. Đổi lại, người quản trị cần quản lý hai tài khoản nếu muốn chat. Việc tách tài khoản không thay thế kiểm tra quyền và phiên trên Server.
-- Đây là chính sách thiết kế của dự án, không phải ràng buộc nêu trực tiếp trong đề bài. Tham khảo khuyến nghị dùng tài khoản riêng cho công việc hằng ngày của [Google Workspace](https://knowledge.workspace.google.com/admin/users/security-best-practices-for-administrator-accounts) và [Microsoft 365](https://learn.microsoft.com/en-gb/microsoft-365/admin/security-and-compliance/m365b-account-security-admins?view=o365-worldwide); các khuyến nghị này không khẳng định mọi sản phẩm đều chặn Admin đăng nhập ứng dụng người dùng.
+- User Client cho phép tài khoản thuộc mọi vai trò đăng nhập khi đáp ứng điều kiện xác thực và trạng thái tài khoản. Admin App chỉ chấp nhận tài khoản có quyền Admin hệ thống.
+- Phiên User Client chỉ có phạm vi sử dụng chức năng người dùng. Nghiệp vụ quản trị yêu cầu phiên quản trị và quyền Admin hệ thống; Server kiểm tra quyền tài khoản và phạm vi phiên ở từng yêu cầu. Quyền Admin nhóm được xác định riêng theo từng nhóm.
+- Khuyến nghị người quản trị sử dụng tài khoản riêng cho hoạt động thường ngày theo hướng dẫn của [Google Workspace](https://knowledge.workspace.google.com/admin/users/security-best-practices-for-administrator-accounts) và [Microsoft 365](https://learn.microsoft.com/en-gb/microsoft-365/admin/security-and-compliance/m365b-account-security-admins?view=o365-worldwide). Đây là khuyến nghị vận hành, không phải điều kiện chặn vai trò Admin khỏi User Client.
 
 ## Điều kiện tài khoản khi đăng nhập
 
-Các trạng thái nghiệp vụ dưới đây tổng hợp điều kiện đã có trong screen map. `ACTIVE` và `LOCKED` giữ cách gọi của UC-A01; chờ xác minh/xóa mềm chưa ấn định tên enum hoặc cấu trúc lưu trữ. Vai trò tài khoản được kiểm tra riêng theo use case của từng ứng dụng.
+Các trạng thái nghiệp vụ dưới đây tổng hợp điều kiện đã có trong screen map. `ACTIVE` và `LOCKED` giữ cách gọi của UC-A01; chờ xác minh/xóa mềm chưa ấn định tên enum hoặc cấu trúc lưu trữ. Quyền truy cập Admin App được kiểm tra riêng.
 
 | Điều kiện | Phiên sử dụng ứng dụng | Quyền chuyển tiếp xác minh/đặt mật khẩu |
 | --- | --- | --- |
 | Không tồn tại, đã xóa mềm hoặc đã xóa vĩnh viễn | Từ chối | Không cấp |
 | Bị khóa quản trị (`LOCKED`) | Từ chối | Không cấp, kể cả mật khẩu tạm còn hạn |
 | Đang trong thời gian khóa do thử sai | Từ chối đến khi hết hạn khóa tạm | Không cấp trong thời gian khóa tạm |
-| Chờ xác minh email, không bị khóa/xóa | Chưa cấp phiên User Client | Sau xác thực hợp lệ, chuyển sang xác minh email; chưa cấp quyền đặt mật khẩu từ nhánh login này |
+| Tài khoản do Admin tạo, chờ xác minh email, không bị khóa/xóa | Chưa cấp phiên User Client | Sau xác thực hợp lệ, chuyển sang xác minh email; chưa cấp quyền đặt mật khẩu từ nhánh login này |
 | Hoạt động (`ACTIVE`), dùng mật khẩu tạm hợp lệ | Chưa cấp phiên sử dụng ứng dụng | Chỉ cấp quyền đặt mật khẩu mới theo DEC-06 |
 | Hoạt động (`ACTIVE`), dùng mật khẩu thông thường hợp lệ | Cấp phiên nếu đáp ứng quyền truy cập ứng dụng | Không cần bước chuyển tiếp |
 
 - Kiểm tra các điều kiện từ trên xuống, trước khi cấp bất kỳ phiên hoặc quyền chuyển tiếp nào. Mật khẩu thông thường hoặc mật khẩu tạm đúng không bỏ qua được khóa/xóa tài khoản. Trước khi xác thực danh tính, thông báo không tiết lộ tài khoản có tồn tại hay không.
+- Đăng ký công khai chưa hoàn tất xác minh chỉ là yêu cầu đăng ký tạm, không phải tài khoản đăng nhập. Việc hủy hoặc hết hạn yêu cầu theo [DEC-06](password-reset-and-email.md#xác-minh-email) không xóa tài khoản đã tạo, bao gồm tài khoản do Admin tạo.
 - Khóa quản trị, hạn khóa do thử sai và trạng thái xác minh email là các điều kiện độc lập, có thể cùng tồn tại. Hết hạn khóa tạm chỉ bỏ hạn chế thử sai; không tự mở khóa quản trị, phục hồi tài khoản đã xóa hoặc xác minh email. Mọi lần cấp quyền phải kiểm tra lại toàn bộ điều kiện hiện tại.
 - Trong User Client, đợt thử đầu sai 5 lần liên tiếp thì khóa đăng nhập 3 phút; đợt tiếp theo giảm số lượt được thử. Lịch giảm lượt, thời gian khóa các đợt sau và điều kiện đặt lại bộ đếm theo cấu hình Server; đóng/mở app không đặt lại giới hạn. Không dùng bộ đếm/thời gian phía client làm nguồn quyết định. Khóa do thử sai không tự thu hồi các phiên đang hoạt động.
 - Đăng xuất hoặc thu hồi một phiên User Client chỉ kết thúc phiên được chỉ định. Các thao tác thu hồi toàn bộ phiên như khóa quản trị/xóa tài khoản hoặc đổi mật khẩu theo DEC-06 vẫn có hiệu lực trên các thiết bị.

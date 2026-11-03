@@ -2,7 +2,7 @@
 
 - **Màn hình**: Đăng nhập vào User Client.
 - **Use case**: [UC-U02 — Đăng nhập vào User Client](../../../use-cases/user/authentication/UC-U02-user-sign-in.md).
-- **Người viết / cập nhật**: baonguyen1776 / 2026-11-03.
+- **Người viết / cập nhật**: baonguyen1776 / 2026-11-04.
 - **Trạng thái**: Draft.
 - **Mockup**: [Framer — Bao → U-SCR-01](https://framer.com/projects/Early-Persimmon--1Tzz5NWFPHgQOJcXaGB4-jirMF?node=MUWi3e89o).
 
@@ -22,11 +22,11 @@
 | Đang xác thực | Nút đổi thành **Loading...** và bị vô hiệu hóa; chặn cả bấm nút lẫn Enter gửi lặp. Tạm vô hiệu hóa sửa trường, nút mắt và điều hướng đăng ký/quên mật khẩu trong lúc chờ | Chờ kết quả; cửa sổ vẫn phản hồi, không đóng băng ứng dụng |
 | Sai thông tin | **“Tên đăng nhập hoặc mật khẩu không đúng.”** tại vùng lỗi chung; giữ tên đăng nhập, xóa mật khẩu | Focus vùng lỗi chung để công cụ hỗ trợ đọc được; người dùng tự chọn ô cần sửa, không tô lỗi/focus riêng mật khẩu và không tự chuyển đăng ký |
 | Bị khóa tạm do thử sai | Thông báo phải chờ, kèm thời gian còn lại từ mốc khóa do Server cung cấp; vô hiệu hóa gửi lại | Cho thử lại khi được phép; hết đếm ngược không được tự coi tài khoản đã thoát mọi điều kiện khóa |
-| Không được phép đăng nhập | Với thông tin xác thực đúng nhưng sai vai trò: **“Tài khoản không có quyền sử dụng User Client.”** Các trạng thái khóa/xóa chỉ hiển thị lý do được Server cho phép công bố | Không mở khung chính hoặc tự chuyển sang bước xác minh/đặt mật khẩu |
+| Không được phép đăng nhập | Các trạng thái khóa/xóa chỉ hiển thị lý do được Server cho phép công bố | Không mở khung chính hoặc tự chuyển sang bước xác minh/đặt mật khẩu |
 | Mất kết nối/timeout | **“Chưa thể xác nhận đăng nhập. Kiểm tra kết nối rồi thử lại.”**; giữ tên đăng nhập, xóa mật khẩu | Trả nút về **Đăng nhập**, cho chủ động thử lại; không tự gửi lại yêu cầu |
 | Phiên hiện tại hết hạn/bị thu hồi | Quay về login với hai ô trống và lý do phù hợp do Server cung cấp | Đăng nhập lại chủ động; không tự điền mật khẩu hoặc giành lại phiên |
 | Trở về sau thao tác thành công | Thông báo đăng ký/xác minh/đổi mật khẩu thành công theo đúng ngữ cảnh; cả hai ô trống | Người dùng tự đăng nhập; không đồng thời hiển thị banner thành công và lỗi trái ngược |
-| Email chưa xác minh | **“Email của tài khoản chưa được xác minh.”**, lựa chọn **Xác minh email** / **Quay lại đăng nhập** | Chỉ cho tiếp tục theo kết quả xác thực và kiểm tra trạng thái từ Server; chọn xác minh mở `U-SCR-03` |
+| Tài khoản do Admin tạo chưa xác minh email | **“Email của tài khoản chưa được xác minh.”**, lựa chọn **Xác minh email** / **Quay lại đăng nhập** | Chỉ cho tiếp tục theo kết quả xác thực và kiểm tra trạng thái từ Server; chọn xác minh mở `U-SCR-03` |
 | Mật khẩu tạm không hợp lệ | Khi Server xác định được ngữ cảnh: **“Mật khẩu tạm không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu lại.”**; nếu không, dùng lỗi xác thực chung | Cho chủ động chọn Quên mật khẩu; không mở màn đặt mật khẩu bằng quyền không hợp lệ |
 | Quyền chuyển tiếp hết hạn | Khi được đưa về từ luồng liên quan: **“Yêu cầu đã hết hạn. Vui lòng bắt đầu lại.”**, cả hai ô trống | Người dùng chủ động bắt đầu yêu cầu mới |
 
