@@ -2,7 +2,7 @@
 
 **DEC-07 — Đề xuất:** chưa có kết luận chung toàn mục.
 
-- Username cố định, 3–30 ký tự ASCII chữ/số/`_`; username/email duy nhất không phân biệt hoa thường sau trim, kể cả đăng ký đồng thời.
+- Username cố định, 3–30 ký tự ASCII chữ/số/`_`; username/email của tài khoản phải duy nhất không phân biệt hoa thường sau trim, kể cả khi hoàn tất đăng ký đồng thời. Các yêu cầu đăng ký tạm có cùng email có thể dùng lại email và username của yêu cầu tạm đó theo [DEC-06](password-reset-and-email.md#xác-minh-email); Server kiểm tra lại tính duy nhất trước khi tạo tài khoản.
 - Mật khẩu 8–128 ký tự, giữ nguyên hoa thường/khoảng trắng, không chỉ gồm khoảng trắng. Họ tên bắt buộc, trim 1–100; email bắt buộc, trim tối đa 254 và đúng định dạng UC01.
 - Địa chỉ tùy chọn, trim tối đa 255; ngày sinh hợp lệ không ở tương lai; giới tính tùy chọn Nam/Nữ/Khác, không tự gán mặc định.
 - Đăng ký phải xác minh email, sau đó về đăng nhập. Đổi email cần mật khẩu hiện tại và xác minh email mới. Admin tạo user gửi mật khẩu tạm; user xác nhận email/đặt mật khẩu riêng trước khi chat.
