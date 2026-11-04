@@ -3,7 +3,6 @@
 ## Thông tin chung (Metadata)
 
 - **Use Case ID**: UC-U-AI-02
-  - **Ánh xạ theo [screen.md](../../../screen.md)**: Mã màn hình: [U-SCR-07](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell), [U-DLG-03](../../../screen.md#13-các-hộp-thoại--popover-của-user-client); Feature ID: [U-27](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell). Xem [bảng mapping](../../../use-case-map.md#24-user--trợ-lý-ai).
 - **Use Case Name**: Nhận gợi ý tin nhắn bằng AI
 - **Author / Create by**: Kiet
 - **Date Create**: 04/11/2026

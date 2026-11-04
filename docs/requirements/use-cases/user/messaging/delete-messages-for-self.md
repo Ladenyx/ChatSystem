@@ -3,7 +3,6 @@
 ## Thông tin chung (Metadata)
 
 - **Use Case ID**: UC-U-MSG-04
-  - **Ánh xạ theo [screen.md](../../../screen.md)**: Mã màn hình: [U-SCR-07](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell); Feature ID: [U-16](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell). Xem [bảng mapping](../../../use-case-map.md#21-user--nhắn-tin).
 - **Use Case Name**: Xóa tin phía mình
 - **Author / Create by**: Kiet
 - **Date Create**: 04/11/2026

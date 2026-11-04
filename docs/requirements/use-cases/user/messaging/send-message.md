@@ -3,7 +3,6 @@
 ## Thông tin chung (Metadata)
 
 - **Use Case ID**: UC-U-MSG-02
-  - **Ánh xạ theo [screen.md](../../../screen.md)**: Mã màn hình: [U-SCR-07](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell); Feature ID: [U-12](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell), [U-13](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell), [U-24](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell); [U-25](../../../screen.md#12-khung-làm-việc-chính-main-workspace-shell) (nhóm). Xem [bảng mapping](../../../use-case-map.md#21-user--nhắn-tin).
 - **Use Case Name**: Gửi tin nhắn
 - **Author / Create by**: Kiet
 - **Date Create**: 04/11/2026
