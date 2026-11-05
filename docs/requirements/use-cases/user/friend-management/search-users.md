@@ -56,8 +56,13 @@
 - **Business Rules (BR)**:
   - BR-01: Tìm theo username hoặc họ tên
   > **NOTE:** Cần chốt đặt độ dài tối thiểu, phương pháp so khớp dấu/hoa/thường, kích thước trang
-  - BR-02: Ẩn người User chặn và người chặn User dù nhập chính xác username
+  - BR-02: Ẩn người User chặn và người chặn User dù nhập chính xác username.
+
+    > **NOTE:** Đề xuất ẩn kết quả tìm kiếm theo cả hai chiều chặn
+
   - BR-03: Gửi lời mời, mở hội thoại/gửi tin và tạo nhóm là các mục tiêu được dẫn chiếu, không là nhánh cập nhật quan hệ trong UC tìm.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Kiểm tra quyền hiển thị tại server, làm mới kết quả khi quan hệ chặn thay đổi.
-  - NFR-02: Không áp ngưỡng tìm nội dung tin của DEC-09 cho tìm người dùng khi chưa có quyết định riêng.
+  - NFR-02: Thời gian tìm người dùng cần được xác định và đo riêng; không tự áp ngưỡng tìm nội dung tin nhắn.
+
+    > **NOTE:** Đề xuất cần chốt ngưỡng độ trễ và điều kiện đo cho tìm người dùng trước khi đưa vào nghiệm thu.

@@ -40,7 +40,7 @@ Luồng cơ bản: xem danh sách với phạm vi Tất cả.
 | --- | --- | --- |
 | 1 | Xem danh sách hội thoại của mình. | Xác thực User, xác định tập hội thoại được phép liệt kê và trạng thái dữ liệu hiện có; chưa tải hay đánh dấu đọc toàn bộ tin chỉ vì danh sách được yêu cầu. |
 | 2 | Chọn phạm vi Tất cả. | Lấy các hội thoại cá nhân và nhóm E2EE trong tập được phép; nhận diện theo định danh hội thoại và loại bỏ bản ghi trùng. |
-| 3 | Tra cứu các hội thoại được cung cấp. | Cung cấp thông tin nhận diện để phân biệt chat riêng/nhóm, tình trạng chưa đọc và trạng thái hiện diện được phép biết. Chat riêng dùng hiện diện của đối phương. Nhóm có chỉ báo loại/E2EE và hiển thị **Online khi ít nhất một thành viên trong nhóm online**; chỉ hiển thị Offline khi đã xác nhận không có thành viên online theo BR-05. |
+| 3 | Tra cứu các hội thoại được cung cấp. | Cung cấp thông tin nhận diện để phân biệt chat riêng/nhóm, tình trạng chưa đọc và trạng thái hiện diện được phép biết. Chat riêng dùng hiện diện của đối phương. Nhóm có chỉ báo loại/E2EE và hiển thị Online khi ít nhất một thành viên trong nhóm online (không tính bản thân User); chỉ hiển thị Offline khi đã xác nhận không có thành viên online. |
 | 4 | Nhận được danh sách cần tra cứu và kết thúc xem. | Hoàn tất mục tiêu với danh sách đúng phạm vi đã xác nhận; không bắt buộc chọn hội thoại, đọc lịch sử hoặc gửi tin. |
 
 ### Alternative Flows
@@ -58,7 +58,10 @@ Luồng cơ bản: xem danh sách với phạm vi Tất cả.
 - **Ex 1a — Phiên không hợp lệ**: Dừng truy vấn/đồng bộ cần xác thực; không trả danh sách dựa trên quyền của phiên cũ hoặc dùng kết quả đó cho người đăng nhập sau.
 - **Ex 1b — Lỗi tải hoặc mất kết nối**: Giữ bộ lọc và phần dữ liệu đã xác nhận nếu vẫn được phép xem; thông báo chưa hoàn tất và cho đối chiếu/thử lại. Không kết luận không có hội thoại từ lỗi tải hoặc đổi toàn bộ trạng thái hiện diện thành Offline.
 - **Ex 2a — Quyền hoặc nguồn truy vấn không hợp lệ**: Không cho User đọc danh sách của tài khoản khác bằng dữ liệu client truyền. Từ chối truy vấn không hợp lệ thay vì âm thầm chuyển sang một tài khoản/phạm vi khác.
-- **Ex 3a — Hội thoại không còn được phép liệt kê**: Loại khỏi kết quả hoặc giới hạn thông tin theo quyền mới, không mở rộng quyền từ bản danh sách cũ. Nhóm đã rời/bị xóa/đóng tuân theo phạm vi giữ lịch sử còn Proposed tại DEC-05, không tự coi mọi metadata/lịch sử luôn được truy cập.
+- **Ex 3a — Hội thoại không còn được phép liệt kê**: Loại khỏi kết quả hoặc giới hạn thông tin theo quyền mới, không mở rộng quyền từ bản danh sách cũ.
+
+  > **NOTE:** Đề xuất giữ quyền xem lịch sử từng được đọc ở chế độ chỉ đọc sau khi rời/bị xóa khỏi nhóm
+
 - **Ex 3b — Trạng thái hiện diện không xác định hoặc đã cũ**: Phân biệt chưa biết/chưa cập nhật với Offline; không suy ra đã nhận/đã xem tin hoặc quyền gửi từ trạng thái hiện diện. Với nhóm, chỉ cần một thành viên được xác nhận online là đủ hiển thị Online dù còn thiếu trạng thái của người khác. Nếu chưa xác nhận được người nào online nhưng vẫn còn trạng thái thành viên chưa biết/đã cũ, chưa kết luận nhóm Offline.
 
 ## Business Rules & Non-Functional Requirements
@@ -68,10 +71,18 @@ Luồng cơ bản: xem danh sách với phạm vi Tất cả.
   - BR-02 — Mỗi lần tra cứu áp dụng một phạm vi Tất cả, Chưa đọc hoặc Nhóm. Tất cả gồm cả hai loại hội thoại trong phạm vi quyền; Chưa đọc xét tin User nhận mà chưa đọc; Nhóm chỉ xét loại nhóm. Không tự đổi điều kiện khi không có kết quả.
   - BR-03 — Chưa đọc được xác định riêng theo User, không dùng số người chưa đọc chung của nhóm. Tin do User gửi, trạng thái online, nhận thông báo, tải metadata hay mở danh sách không làm phát sinh xác nhận đã xem. Tin nhóm chưa giải mã không được tự coi là đã đọc; trạng thái còn thiếu phải được ghi là chưa đủ dữ liệu. Việc cập nhật sau đọc thuộc UC-U-MSG-01 và được phản ánh lại vào danh sách.
   - BR-04 — Mỗi hội thoại có một mục theo định danh, không hợp nhất các hội thoại khác nhau chỉ vì trùng tên. Thông tin nhận diện và hiện diện không thay thế kiểm tra quyền tại lúc mở lịch sử hoặc gửi tin; không tải bản rõ nhóm hoặc yêu cầu khóa bí mật chỉ để lọc metadata danh sách.
-  - BR-05 — Chat riêng dùng Online/Offline của đối phương khi có dữ liệu hiện diện hợp lệ. Nhóm hiển thị Online khi có ít nhất một thành viên trong nhóm online, không yêu cầu tất cả thành viên online; không tính người đã rời hoặc bị xóa khỏi nhóm. Nhóm chỉ hiển thị Offline khi đã xác nhận không có thành viên online; thiếu dữ liệu không đồng nghĩa Offline.
-  - BR-06 — Thứ tự danh sách, cách xếp lại khi có hoạt động mới, phân trang/kích thước lô và hành vi ghi nhớ bộ lọc chưa được nguồn quy định.
+  - BR-05
+    - Nhóm hiển thị Online khi có ít nhất một thành viên trong nhóm online (không tính chính bản thân User), không yêu cầu tất cả thành viên online
+    - Nhóm chỉ hiển thị Offline khi đã xác nhận không có thành viên online; thiếu dữ liệu không đồng nghĩa Offline.
+
+  - BR-06 — Thứ tự danh sách, cách xếp lại khi có hoạt động mới, phân trang/kích thước lô và hành vi ghi nhớ bộ lọc.
+
+    > **NOTE:** Đề xuất cần chốt các quy tắc sắp xếp, phân trang và ghi nhớ bộ lọc
+
   - BR-07 — Đọc lịch sử, gửi tin, tìm nội dung và tạo nhóm là các mục tiêu được dẫn chiếu, không lồng vào mục tiêu xem/lọc danh sách. Có thể kết thúc ngay sau khi nhận danh sách.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01 — Phản hồi bất đồng bộ gắn đúng User/phiên/phạm vi; phản hồi cũ không ghi đè bộ lọc mới hoặc đưa dữ liệu người khác vào danh sách. Giữ bản nháp hội thoại đang mở khi tra cứu/đổi phạm vi.
   - NFR-02 — Kiểm tra quyền liệt kê tại server; chỉ cung cấp metadata/hiện diện được phép. Không gửi khóa E2EE hoặc bản rõ tin nhóm cho server để phục vụ bộ lọc danh sách thông thường.
-  - NFR-03 — Phân biệt tải/chưa hoàn tất/lỗi với danh sách thật sự rỗng, và trạng thái hiện diện chưa biết với Offline. Chưa có ngưỡng độ trễ riêng của danh sách hội thoại được chốt; không áp ngưỡng tìm tin hoặc tải lịch sử của DEC-09 như cam kết đã đo cho UC này.
+  - NFR-03 — Phân biệt tải/chưa hoàn tất/lỗi với danh sách thật sự rỗng, và trạng thái hiện diện chưa biết với Offline. Không tự áp ngưỡng tìm tin hoặc tải lịch sử cho danh sách hội thoại.
+
+    > **NOTE:** Đề xuất cần chốt ngưỡng độ trễ riêng của danh sách hội thoại và điều kiện đo.

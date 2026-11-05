@@ -56,7 +56,7 @@
   - BR-01: Chỉ bạn bè hiện tại xuất hiện trong danh sách bạn bè; trạng thái hiện diện không thay thế kiểm tra quan hệ/quyền.
   - BR-02: Các mục tiêu gửi tin, tạo nhóm, hủy kết bạn và chặn có UC riêng. Điều hướng từ một người bạn chưa hoàn thành những mục tiêu đó.
   - BR-03: Quy tắc khớp tên/hoa thường/dấu, phân trang và độ trễ 
-> **NOTE:** CẦN CHỐT
+> **NOTE:** CẦN CHỐT quy tắc khớp tên/hoa thường/dấu, phân trang và độ trễ 
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Phản hồi cũ không ghi đè điều kiện lọc mới; trạng thái quan hệ/hiện diện được cập nhật nhất quán.
   - NFR-02: Không mở quyền đọc danh bạ người khác từ dữ liệu client truyền.

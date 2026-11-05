@@ -54,7 +54,10 @@
 - **Business Rules (BR)**:
   - BR-01: Hủy kết bạn và chặn là hai mục tiêu độc lập; không tự thêm quan hệ chặn.
   - BR-02: Hủy kết bạn không tự thay đổi tư cách thành viên/quyền nhóm, không thu hồi hoặc xóa tin.
-  - BR-03: Chat riêng không bắt buộc là bạn bè
+  - BR-03: Chat riêng không bắt buộc là bạn bè.
+
+    > **NOTE:** Đề xuất tiếp tục cho chat riêng giữa hai tài khoản chưa kết bạn nếu các điều kiện chặn, phiên và quyền khác hợp lệ
+
   - BR-04: Kết bạn lại phải qua lời mời và quyết định hợp lệ, không được suy từ lịch sử tình bạn cũ.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Gỡ quan hệ hai phía nhất quán, retry an toàn và cập nhật danh sách đúng phạm vi.

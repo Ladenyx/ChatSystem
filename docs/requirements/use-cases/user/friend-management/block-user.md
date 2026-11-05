@@ -58,6 +58,9 @@
   - BR-02:Người chủ động chặn thấy hai button;người bị chặn bị vô hiệu hóa thanh nhập tin nhắn.
   - BR-03: Chặn không thu hồi nội dung cũ hoặc tự rời nhóm. Quan hệ chặn giữa thành viên không tự cấm gửi/đọc trong nhóm chung.
   - BR-04: Hệ quả tìm người dùng ẩn cả hai chiều.
+
+    > **NOTE:** Đề xuất ẩn kết quả tìm kiếm theo cả hai chiều chặn
+
   - BR-05: Chỉ tạo chiều chặn của actor; không cho actor gỡ chiều do người khác tạo.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Ghi chặn/hủy tình bạn/lời mời nhất quán; các yêu cầu đồng thời không để vừa chặn thành công vừa còn quan hệ bị cấm.

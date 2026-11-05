@@ -58,6 +58,9 @@
   - BR-01: Tập tài khoản đã chặn chỉ là nguồn chọn đích trong mục tiêu này; không dùng kết quả tìm người để vượt chính sách ẩn.
   - BR-02: Chặn hai chiều cần từng bên chủ động gỡ phần của mình; một lần bỏ chặn không thay quyết định bên còn lại.
   - BR-03: Nếu vẫn còn một chiều chặn thì cả 2 vẫn bị ẩn trong danh sách tìm kiếm.
+
+    > **NOTE:** Đề xuất ẩn kết quả tìm kiếm theo cả hai chiều chặn
+
   - BR-04: Muốn kết bạn lại cần gửi/xử lý lời mời mới khi đủ điều kiện; không tự phát sinh từ bỏ chặn.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Server xác thực actor và chiều quan hệ; retry không gỡ nhầm tài khoản/chiều khác.
