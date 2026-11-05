@@ -61,7 +61,9 @@
   - BR-06: Xóa lịch sử phía mình không thu hồi tin nhắn với mọi người.
   - BR-07: Trạng thái xóa được đồng bộ tới phiên/thiết bị mới của User.
   - BR-08: Tìm kiếm của User không trả lại phần lịch sử đã xóa.
-  - BR-09: Mốc bao gồm tin đến đồng thời lúc xác nhận chưa được nguồn mô tả chính xác.
+  - BR-09: Xác định phạm vi lịch sử khi có tin mới đồng thời với thao tác xóa.
+
+    > **NOTE:** Đề xuất cần chốt mốc bao gồm tin mới đến giữa lúc chọn, xác nhận và xử lý yêu cầu xóa.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Việc cập nhật lịch sử/chỉ mục/cache phải nhất quán và không làm mất lịch sử của người khác.
   - NFR-02: Phản hồi gắn đúng hội thoại/yêu cầu, không bị áp dụng sang hội thoại đang mở khác.

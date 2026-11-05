@@ -64,10 +64,17 @@
   - BR-02: Mỗi lần gửi lại giữ ID tin. Cùng yêu cầu không được tạo thêm tin hoặc lượt hoạt động; phải kiểm tra quyền hiện tại.
   - BR-03: Chat riêng còn chặn ở bất kỳ chiều nào thì không gửi mới. Bỏ chặn một phía chưa đủ, không tự retry tin bị từ chối.
   - BR-04: Có thể chat riêng với người chưa kết bạn. User phải có quyền thực tế, không suy quyền từ kết quả tìm người cũ.
+
+    > **NOTE:** Đề xuất cho phép chat riêng giữa hai tài khoản chưa kết bạn khi các điều kiện chặn, phiên và quyền khác hợp lệ
+
   - BR-05: AI chỉ cung cấp nháp theo UC-U-AI-01/02. Việc mở AI, áp dụng phương án hoặc đổi hội thoại không tự kích hoạt gửi.
   - BR-06 — Giới hạn độ dài tin nhắn: Mỗi tin nhắn được phép có tối đa **2.000 ký tự**, áp dụng cho chat cá nhân và nhóm. Kiểm tra độ dài trên nội dung văn bản trước khi mã hóa, không tính theo số byte hoặc độ dài bản mã. Nếu vượt giới hạn, từ chối gửi theo Ex 1a; không tự cắt hoặc chia nhỏ nội dung. 
   > Nguồn tham khảo: [PipeOne — Character limits per message](https://pipeone.me/help-center-english/character-limits-per-message)
+
+    > **NOTE:** Đề xuất cần chốt cách đếm ký tự Unicode và việc chuẩn hóa trước khi đếm; giới hạn tối đa 2.000 ký tự đã được xác nhận.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Không mất/trùng tin server đã lưu, kể cả timeout/reconnect; giữ nháp/yêu cầu theo hội thoại nguồn.
   - NFR-02: Server không giữ khóa bí mật tự giải mã luồng nhóm. Không đưa nội dung/khóa nhạy cảm vào lỗi vận hành.
-  - NFR-03: Mục tiêu p95 gửi tới GUI nhận giải mã/render ≤1 giây là đề xuất DEC-09, cần đo trong môi trường được ghi nhận.
+  - NFR-03: Thời gian từ gửi đến khi thiết bị nhận giải mã và hiển thị cần được đo trong môi trường nghiệm thu.
+
+    > **NOTE:** Đề xuất p95 từ lúc gửi tới khi giao diện người nhận giải mã và hiển thị ≤1 giây; cần chốt điều kiện đo, chưa coi là kết quả đã đạt.

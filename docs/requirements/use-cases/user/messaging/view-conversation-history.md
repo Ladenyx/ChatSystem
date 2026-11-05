@@ -57,8 +57,13 @@
   - BR-01: Trang lịch sử có kích thước 50 tin theo nguồn; trang cuối có thể ít hơn. Quyền xóa riêng/thu hồi phải được áp dụng khi đọc và tìm.
   - BR-02: Chỉ ghi nhận đã xem khi nội dung thực sự được đọc trong hội thoại đang xem, với E2EE đã giải mã. Online, nhận thông báo, tải nền hoặc nhận bản mã chưa đủ.
   - BR-03: Xác nhận đọc gắn đúng tin/người đọc; không tính người gửi là người nhận đã xem. Trong nhóm, một người đọc không đại diện toàn nhóm.
-  - BR-04: Chặn cá nhân giữ lịch sử cũ và không tự hạn chế nhóm chung. Truy cập sau khi rời/bị xóa nhóm theo đề xuất DEC-05, chưa tự phê duyệt giữ lịch sử.
+  - BR-04: Chặn cá nhân giữ lịch sử cũ và không tự hạn chế nhóm chung.
+
+    > **NOTE:** Đề xuất giữ lịch sử từng được đọc ở chế độ chỉ đọc sau khi rời/bị xóa khỏi nhóm
+
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Không mất/trùng tin đã được server xác nhận sau reconnect; phản hồi cũ không ghi đè hội thoại hiện tại.
   - NFR-02: Không truyền bản rõ nhóm cho server để đọc/tìm thông thường. Không suy ra khóa từ phiên đăng nhập.
-  - NFR-03: Mục tiêu tải trang 50 tin ≤2 giây và đồng bộ 10.000 tin ≤30 giây là đề xuất DEC-09, chưa là kết quả đã đo.
+  - NFR-03: Thời gian tải trang lịch sử và đồng bộ cần được đo theo môi trường nghiệm thu.
+
+    > **NOTE:** Đề xuất tải trang 50 tin trong ≤2 giây và đồng bộ 10.000 tin trong ≤30 giây sau khi có khóa hợp lệ; cần chốt điều kiện đo, chưa coi là kết quả đã đạt.

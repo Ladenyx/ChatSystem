@@ -56,7 +56,9 @@
   - BR-01: Có thể xóa phía mình với tin nhận hoặc tin gửi; không suy quyền thu hồi từ quyền xóa riêng.
   - BR-02: Trạng thái xóa riêng đồng bộ khi đổi máy/đăng nhập lại và loại tin khỏi kết quả tìm của User; người khác giữ nội dung.
   - BR-03: Xóa riêng không xóa toàn bộ hội thoại, không hủy kết bạn, rời nhóm hay thay đổi các bản chụp bằng chứng đã tiếp nhận.
-  - BR-04: Giới hạn số tin và chính sách thành công một phần khi lựa chọn thay đổi chưa có kết luận riêng trong nguồn; cần confirm CF-23 nếu triển khai xử lý từng phần, không tự báo toàn bộ đã xóa.
+  - BR-04: Không báo toàn bộ tin đã xóa khi một phần chưa được xác nhận.
+
+    > **NOTE:** Đề xuất cần chốt giới hạn số tin được chọn và xử lý toàn bộ hay thành công một phần khi lựa chọn thay đổi.
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Kết quả phải phản ánh trạng thái server/đồng bộ, không để cache hoặc chỉ mục trả lại nội dung đã xóa riêng.
   - NFR-02: Xử lý yêu cầu lặp an toàn và không mở rộng tập tin do phản hồi/đổi hội thoại.

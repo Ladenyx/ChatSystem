@@ -61,7 +61,12 @@
   - BR-01: Cùng một kiểm tra quyền áp dụng khi lập kết quả và khi mở tin; chọn kết quả không bảo đảm quyền vẫn còn.
   - BR-02: Xóa phía mình và thu hồi phải được phản ánh trong chỉ mục/kết quả; không làm nội dung đã mất quyền xuất hiện lại từ cache.
   - BR-03: Tìm thường không chuyển bản rõ nhóm cho server. Lịch sử/chỉ mục nhóm phải phản ánh dữ liệu được phép giải mã.
-  - BR-04: Chuẩn hóa chuỗi, so khớp hoa/thường/dấu, ngưỡng ký tự và kích thước kết quả
+  - BR-04: Quy tắc chuẩn hóa, so khớp và giới hạn kết quả tìm tin.
+
+    > **NOTE:** Đề xuất cần chốt cách chuẩn hóa chuỗi, so khớp hoa/thường/dấu, ngưỡng ký tự và kích thước kết quả.
+
 - **Non-Functional Requirements (NFR)**:
   - NFR-01: Phản hồi bất đồng bộ gắn với điều kiện/phạm vi tìm; không ghi đè kết quả mới bằng phản hồi cũ.
-  - NFR-02: Mục tiêu ≤2 giây khi dữ liệu/chỉ mục sẵn sàng là đề xuất DEC-09; không áp dụng như số đo đã đạt.
+  - NFR-02: Thời gian tìm cần được đo khi dữ liệu và chỉ mục đã sẵn sàng.
+
+    > **NOTE:** Đề xuất mục tiêu tìm tin ≤2 giây khi dữ liệu/chỉ mục sẵn sàng; cần chốt điều kiện đo và chưa coi là kết quả đã đạt.
