@@ -11,8 +11,8 @@
 - Người dùng có thể mở **Thiết lập mã khóa** từ menu **…** ở khung hội thoại. Vị trí menu cần được thống nhất trong thiết kế `U-SCR-07`.
 - **Thiết lập lần đầu**: người dùng nhập mã 6 số và nhập lại mã để xác nhận, sau đó chọn **Thiết lập**. Mã do người dùng chọn dùng cho tài khoản, không phải mã riêng của từng nhóm.
 - **Khôi phục trên thiết bị**: người dùng nhập mã đã thiết lập vào 6 ô; mỗi ô nhận một chữ số `0`–`9`, kể cả `0` ở đầu. Chưa nhập đủ 6 số thì nút **Xác nhận** bị vô hiệu hóa.
-- **Đổi mã**: sau khi đã mở khóa, người dùng chọn **Xóa mã** rồi thiết lập mã mới. Việc đổi mã được thực hiện theo [UC-U25-KEYS](../../../use-cases/user/security/UC-U25-key-setup-recovery.md) để giữ khả năng đọc lịch sử cũ khi còn đủ khóa.
-- **Quên mã**: nếu không còn mã và không còn thiết bị đã mở khóa, người dùng có thể chọn **Quên mã?** để thiết lập lại. Trước khi tiếp tục, hiển thị cảnh báo bản sao lưu khóa cũ sẽ được thay thế và tin nhắn cũ có thể không đọc lại được; người dùng phải xác nhận hoặc chọn **Hủy**.
+- **Đổi mã**: trên thiết bị còn trạng thái mở khóa hợp lệ và có các khóa cần thiết, người dùng chọn **Xóa mã** rồi thiết lập mã mới, không cần nhập lại mã cũ tại bước đổi. Việc đổi mã được thực hiện theo [UC-U25-KEYS](../../../use-cases/user/security/UC-U25-key-setup-recovery.md) để giữ khả năng đọc lịch sử cũ khi còn đủ khóa.
+- Phiên bản hiện tại không có thao tác **Quên mã** hoặc thiết lập lại mã. Nếu không còn mã và không còn thiết bị đã mở khóa, người dùng không thể dùng mã để khôi phục bản sao lưu và có thể không đọc lại được lịch sử mã hóa. Nếu tìm lại thiết bị còn mở khóa hợp lệ, người dùng có thể đổi mã trên thiết bị đó theo luồng trên.
 - Mã được che khi nhập. Nút hoặc phím Enter không gửi lặp khi hệ thống đang xử lý; Tab/Shift+Tab di chuyển giữa các điều khiển.
 - Sau khi đăng xuất, khi đăng nhập lại người dùng cần nhập mã để mở khóa; thiết bị mới cũng cần nhập mã để khôi phục. Nếu chỉ đóng và mở lại ứng dụng mà phiên đăng nhập và trạng thái mở khóa vẫn hợp lệ trên thiết bị, không yêu cầu nhập lại. Đăng nhập trên thiết bị mới không tự khóa thiết bị khác.
 
@@ -38,7 +38,6 @@ Khi tìm kiếm trong nhóm hoặc trên toàn bộ hội thoại, không tìm h
 | --- | --- |
 | Mã chưa đủ 6 số | Chưa cho xác nhận. |
 | Hai mã thiết lập chưa khớp | Hiển thị **“Mã chưa khớp”**; chưa hoàn tất thiết lập. |
-| Xác nhận thiết lập lại khi quên mã | Hiển thị **“Bản sao lưu khóa cũ sẽ được thay thế. Tin nhắn cũ có thể không đọc lại được.”** Cho chọn **Thiết lập lại** hoặc **Hủy**. |
 | Đang xử lý | Hiển thị **“Đang xử lý...”**; chặn gửi lặp. |
 | Mã sai | Hiển thị **“Mã không đúng”** khi xác định được mã sai; cho thử lại nếu chưa bị khóa tạm. |
 | Sai 5 lần | Tạm khóa thao tác nhập mã trên mọi thiết bị của tài khoản **5 phút**, hiển thị thời gian chờ từ Server; hết thời gian cho phép bắt đầu đợt thử mới. Thiết bị đã mở khóa không tự bị khóa lại; không khóa đăng nhập tài khoản. |
@@ -48,4 +47,4 @@ Khi tìm kiếm trong nhóm hoặc trên toàn bộ hội thoại, không tìm h
 | Để sau hoặc hủy | Đóng màn hình, giữ phiên đăng nhập và bản sao lưu hiện có. Nếu vẫn thiếu khóa, lớp phủ tại cuộc trò chuyện liên quan vẫn hiển thị. |
 
 - Server quản lý trạng thái chờ chung theo tài khoản; Client cần kết nối để kiểm tra trước mỗi lần thử. Cách ghi nhận và đồng bộ lần thử mà không gửi mã dạng rõ cần nhóm kỹ thuật xác định. Giới hạn trong ứng dụng không ngăn việc dò mã ngoài ứng dụng nếu bản sao lưu mã hóa bị lộ.
-- Đây là bản nháp đặc tả; chưa có mockup hoặc kiểm thử JavaFX.
+- [Wireframe Figma](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=128-3550) là bản tĩnh, phát triển trên bản sao màn hội thoại của `U-SCR-07`; vị trí menu và lớp phủ cần thống nhất với người phụ trách màn hội thoại. Chưa kiểm thử JavaFX.
