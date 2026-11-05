@@ -27,7 +27,7 @@
 
 ## Xác minh email
 
-- Mã xác minh gồm **6 chữ số** `0`–`9`, gắn với đúng yêu cầu, dùng một lần và hết hạn sau **10 phút kể từ khi Server phát hành**. Với đăng ký, mã chỉ có hiệu lực khi yêu cầu tạm còn hiệu lực.
+- Mã xác minh gồm **6 chữ số** `0`–`9`, gắn với đúng yêu cầu, dùng một lần và hết hạn sau **10 phút kể từ khi Server phát hành**. Email gửi mã thông báo thời hạn này; màn hình xác minh không hiển thị hạn mã. Với đăng ký, mã chỉ có hiệu lực khi yêu cầu tạm còn hiệu lực, nên thời gian sử dụng thực tế có thể ngắn hơn.
 - Người dùng có thể yêu cầu gửi lại đến cùng email sau tối thiểu **60 giây kể từ lần phát hành trước**. Trong đăng ký, khi đổi sang email khác, áp dụng thời gian chờ **30 giây** theo quy tắc trên. Khi Server phát hành mã mới, mã cũ của yêu cầu đó hết hiệu lực; gửi lại không kéo dài thời hạn yêu cầu đăng ký tạm.
 - Sau **5 lần nhập sai** được Server ghi nhận, mã hiện tại hết hiệu lực. Người dùng có thể yêu cầu mã mới khi Server cho phép; không tự khóa tài khoản vì nhập sai mã xác minh. Mã sai định dạng bị Client từ chối trước khi gửi không tính vào bộ đếm Server.
 - Server quản lý hạn mã, số lần thử và thời gian gửi lại; đóng/mở ứng dụng không đặt lại các giới hạn. Server giới hạn việc gửi mã theo cấu hình để ngăn lạm dụng, áp dụng cả khi tạo nhiều yêu cầu đăng ký mới cho cùng email hoặc từ cùng nguồn gửi; số lần và thời gian giới hạn chưa được chốt. Đăng ký lại vẫn được phép, nhưng gửi mã có thể phải chờ nếu chạm giới hạn này.

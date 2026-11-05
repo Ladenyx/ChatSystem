@@ -41,7 +41,7 @@ Trong đăng ký, bước tiếp theo là nhập thông tin cá nhân; chưa t�
 
 ### Alternative Flows
 
-- **Alt 2a — Mã chưa đủ hoặc sai định dạng**: Client không gửi yêu cầu và cho người dùng sửa. Dữ liệu không gửi lên Server không tính là một lần nhập sai.
+- **Alt 2a — Mã chưa đủ hoặc sai định dạng**: Client không gửi yêu cầu và cho người dùng sửa. Khi đã nhập nhưng chưa đủ 6 chữ số, Client hướng dẫn nhập đủ và vô hiệu hóa **Xác minh**; dữ liệu không gửi lên Server không tính là một lần nhập sai.
 - **Alt 2b — Gửi lại mã**: Người dùng yêu cầu mã mới đến cùng email. Khi Server cho phép theo BR-02, Server phát hành mã mới, vô hiệu mã cũ và gửi mã mới đến email. Người dùng tiếp tục từ bước 2.
 - **Alt 2c — Sửa email khi đăng ký**: Người dùng chọn đổi email. Client giữ thông tin đã nhập trong phiên đăng ký; Server kiểm tra email mới theo [UC-U01](UC-U01-user-sign-up.md). Khi Server chấp nhận địa chỉ mới và cho phép gửi theo BR-02, mã cũ hết hiệu lực và mã mới được gửi đến email mới. Người dùng tiếp tục từ bước 2.
 - **Alt 2d — Rời luồng xác minh**: Client trở về luồng gọi. Việc hủy đăng ký tạm theo [UC-U01](UC-U01-user-sign-up.md); với luồng đổi email trong hồ sơ, email cũ chưa bị thay đổi.
@@ -49,7 +49,7 @@ Trong đăng ký, bước tiếp theo là nhập thông tin cá nhân; chưa t�
 ### Exception Flows
 
 - **Ex 2a — Chưa được phép gửi mã**: Nếu còn thời gian chờ hoặc yêu cầu bị giới hạn gửi, Server chưa cấp mã mới; Client thông báo để người dùng thử lại khi được phép.
-- **Ex 3a — Mã không đúng**: Server ghi nhận lần nhập sai và từ chối xác minh. Người dùng có thể thử lại nếu mã còn hiệu lực.
+- **Ex 3a — Mã không đúng**: Server ghi nhận lần nhập sai và từ chối xác minh; Client hiển thị **“Mã xác thực không đúng”**. Người dùng có thể sửa và thử lại nếu mã còn hiệu lực.
 - **Ex 3b — Mã hết hiệu lực**: Nếu nhập sai 5 lần, mã hết hạn hoặc bị thay thế, Server từ chối mã. Người dùng có thể yêu cầu mã mới khi được phép; nhập sai mã không tự khóa tài khoản.
 - **Ex 3c — Yêu cầu hoặc quyền thực hiện hết hiệu lực**: Server từ chối xác minh; người dùng tiếp tục xử lý theo luồng gọi. Với đăng ký, người dùng bắt đầu lại từ đầu.
 - **Ex 3d — Không gửi được email hoặc mất phản hồi**: Client thông báo chưa thể hoàn tất và không tự gửi lặp. Nếu kết quả đổi email hoặc cấp/gửi mã chưa rõ, Client không khẳng định email nào đang được dùng hay mã cũ còn hiệu lực.
@@ -57,7 +57,7 @@ Trong đăng ký, bước tiếp theo là nhập thông tin cá nhân; chưa t�
 ## Business Rules & Non-Functional Requirements
 
 - **Business Rules (BR)**:
-  - **BR-01**: Mã xác minh gồm 6 chữ số, dùng một lần và gắn với đúng yêu cầu. Quy tắc hiệu lực và số lần thử theo [DEC-06](../../../../decisions/password-reset-and-email.md#xác-minh-email).
+  - **BR-01**: Mã xác minh gồm 6 chữ số, dùng một lần và gắn với đúng yêu cầu. Email thông báo hạn mã; màn hình xác minh không hiển thị thời gian hết hạn mã. Quy tắc hiệu lực và số lần thử theo [DEC-06](../../../../decisions/password-reset-and-email.md#xác-minh-email).
   - **BR-02**: Thời gian chờ gửi lại, đổi email và giới hạn gửi mã theo [DEC-06](../../../../decisions/password-reset-and-email.md#xác-minh-email). Server quyết định khi nào yêu cầu được phép gửi.
   - **BR-03**: Xác minh thành công chỉ ghi nhận kết quả cho yêu cầu tương ứng; các bước tạo tài khoản, cập nhật hồ sơ hoặc kích hoạt do luồng gọi quyết định.
 - **Non-Functional Requirements (NFR)**:

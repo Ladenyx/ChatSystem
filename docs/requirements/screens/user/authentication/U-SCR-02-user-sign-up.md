@@ -17,7 +17,7 @@
 | 4 — Thông tin cá nhân | **Họ tên**, **Địa chỉ**, **Ngày sinh**, **Giới tính**, **Hoàn tất đăng ký** | Đã nhập đầy đủ và dữ liệu hợp lệ; Server xác nhận tạo tài khoản thành công |
 
 - Các thông tin cá nhân trong bảng được nhập trước khi hoàn tất tạo tài khoản. Việc cập nhật hồ sơ sau đăng nhập thuộc chức năng khác; bản này không quy định cấm sửa hồ sơ.
-- Mật khẩu được che mặc định; điều khiển hiện/ẩn chỉ thay đổi cách hiển thị. Không hiển thị lại mật khẩu trong thông báo lỗi.
+- Mật khẩu được che mặc định bằng ký tự `*`; điều khiển hiện/ẩn chỉ thay đổi cách hiển thị. Wireframe dùng icon mắt gạch chéo khi mật khẩu đang được che; thư viện icon cho ứng dụng chưa được chốt. Không hiển thị lại mật khẩu trong thông báo lỗi.
 - Người dùng có thể quay lại bước nhập liệu trước khi xác minh. Khi đang xác minh, chọn **Đổi email** để sửa email mà vẫn tiếp tục đăng ký; hủy hoặc rời luồng sau khi tạo yêu cầu tạm được xử lý theo UC-U01. Không tự khôi phục form đang bỏ dở khi mở lại ứng dụng.
 - Khi sửa email trong lúc xác minh, cho phép nhập ngay và hiển thị thời gian còn lại nếu chưa đủ 30 giây kể từ lần Server phát hành mã gần nhất. Nếu giữ nguyên địa chỉ, gửi lại mã theo thời gian chờ 60 giây.
 
@@ -55,3 +55,5 @@ Các điều kiện và lỗi hiển thị ngay bên dưới trường tương �
 | Hoàn tất thành công | Chỉ báo thành công khi Server xác nhận tạo tài khoản; về `U-SCR-01` với form đăng nhập trống. |
 
 Mỗi yêu cầu tạm có hạn 30 phút; mã xác minh có hạn 10 phút và không còn hợp lệ nếu yêu cầu tương ứng hết hạn. Thứ tự tạo tài khoản sau bước thông tin cá nhân là yêu cầu mới cần đồng bộ với tài liệu chung.
+
+[Wireframe Figma](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=102-3550) là bản tĩnh; chưa kiểm thử JavaFX.

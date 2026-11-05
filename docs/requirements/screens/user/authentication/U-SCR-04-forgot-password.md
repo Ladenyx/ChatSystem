@@ -33,4 +33,4 @@
 
 - Client chỉ mở `U-SCR-05` khi người dùng chọn **Tiếp tục**; việc mở màn hình không tự xác thực mật khẩu tạm hoặc cấp quyền đặt mật khẩu. Người dùng vẫn có thể quay về `U-SCR-01` và đăng nhập bằng tên đăng nhập cùng mật khẩu tạm.
 - Quy tắc thời gian và giới hạn gửi theo [DEC-06](../../../../decisions/password-reset-and-email.md). Bộ đếm trên Client không thay thế kiểm tra của Server.
-- Đây là bản nháp yêu cầu giao diện; chưa có mockup hoặc kiểm thử JavaFX.
+- [Wireframe Figma](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=122-3550) là bản tĩnh; chưa kiểm thử JavaFX.
