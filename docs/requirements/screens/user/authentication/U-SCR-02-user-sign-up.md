@@ -14,9 +14,9 @@
 | 2 — Mật khẩu | Ô **Mật khẩu**, **Nhập lại mật khẩu**, điều khiển hiện/ẩn, **Quay lại**, **Tiếp tục** | Mật khẩu đáp ứng các điều kiện và hai ô khớp nhau |
 | 3 — Email | Ô **Email**, **Quay lại**, **Gửi mã xác minh** | Email hợp lệ; Server chấp nhận yêu cầu đăng ký tạm để chuyển sang `U-SCR-03` |
 | Xác minh email | Nhập mã trên `U-SCR-03` | Khi Server xác nhận email hợp lệ, chuyển sang bước thông tin cá nhân; chưa tạo tài khoản |
-| 4 — Thông tin cá nhân | **Họ tên**, **Địa chỉ**, **Ngày sinh**, **Giới tính**, **Hoàn tất đăng ký** | Đã nhập đầy đủ và dữ liệu hợp lệ; Server xác nhận tạo tài khoản thành công |
+| 4 — Thông tin cá nhân | **Họ tên**, **Địa chỉ**, **Ngày sinh**, **Giới tính**, **Hoàn tất đăng ký** | Đã nhập các trường bắt buộc và dữ liệu hợp lệ; Server xác nhận tạo tài khoản thành công |
 
-- Các thông tin cá nhân trong bảng được nhập trước khi hoàn tất tạo tài khoản. Việc cập nhật hồ sơ sau đăng nhập thuộc chức năng khác; bản này không quy định cấm sửa hồ sơ.
+- Họ tên, ngày sinh và giới tính bắt buộc trước khi hoàn tất tạo tài khoản; địa chỉ tùy chọn. Việc cập nhật hồ sơ sau đăng nhập thuộc chức năng khác; bản này không quy định cấm sửa hồ sơ.
 - Mật khẩu được che mặc định bằng ký tự `*`; điều khiển hiện/ẩn chỉ thay đổi cách hiển thị. Wireframe dùng icon mắt gạch chéo khi mật khẩu đang được che; thư viện icon cho ứng dụng chưa được chốt. Không hiển thị lại mật khẩu trong thông báo lỗi.
 - Người dùng có thể quay lại bước nhập liệu trước khi xác minh. Khi đang xác minh, chọn **Đổi email** để sửa email mà vẫn tiếp tục đăng ký; hủy hoặc rời luồng sau khi tạo yêu cầu tạm được xử lý theo UC-U01. Không tự khôi phục form đang bỏ dở khi mở lại ứng dụng.
 - Khi sửa email trong lúc xác minh, cho phép nhập ngay và hiển thị thời gian còn lại nếu chưa đủ 30 giây kể từ lần Server phát hành mã gần nhất. Nếu giữ nguyên địa chỉ, gửi lại mã theo thời gian chờ 60 giây.
@@ -34,9 +34,9 @@ Các điều kiện và lỗi hiển thị ngay bên dưới trường tương �
 | Email | Bắt buộc; đúng định dạng, tối đa 254 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lỗi: **“Vui lòng nhập email.”**, **“Vui lòng nhập email hợp lệ.”**, **“Email không được vượt quá 254 ký tự.”** |
 | Email đã đăng ký | Khi gửi yêu cầu hoặc đổi email đang đăng ký, Server kiểm tra email. Nếu email đã thuộc tài khoản được tạo, hiển thị **“Email đã được đăng ký”** và cho nhập email khác. Nếu chỉ có yêu cầu tạm, áp dụng luồng đăng ký lại trong UC-U01. |
 | Họ tên | Bắt buộc, 1–100 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lỗi: **“Vui lòng nhập họ tên.”**, **“Họ tên không được vượt quá 100 ký tự.”** |
-| Địa chỉ | Bắt buộc, tối đa 255 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lỗi: **“Vui lòng nhập địa chỉ.”**, **“Địa chỉ không được vượt quá 255 ký tự.”** |
-| Ngày sinh | Bắt buộc, là ngày hợp lệ và không ở tương lai. Lỗi: **“Vui lòng nhập ngày sinh.”**, **“Ngày sinh không hợp lệ.”**, **“Ngày sinh không được ở tương lai.”** |
-| Giới tính | Bắt buộc chọn **Nam**, **Nữ** hoặc **Khác**; không tự chọn mặc định. Nếu chưa chọn, hiển thị **“Vui lòng chọn giới tính.”** |
+| Địa chỉ | Tùy chọn; nếu nhập, tối đa 255 ký tự sau khi bỏ khoảng trắng đầu/cuối. Lỗi: **“Địa chỉ không được vượt quá 255 ký tự.”** |
+| Ngày sinh | Bắt buộc; có thể chọn ngày, tháng, năm bằng lịch. Ngày phải hợp lệ và không ở tương lai. Lỗi: **“Vui lòng nhập ngày sinh.”**, **“Ngày sinh không hợp lệ.”**, **“Ngày sinh không được ở tương lai.”** |
+| Giới tính | Bắt buộc chọn một trong hai lựa chọn **Nam** hoặc **Nữ**; không tự chọn mặc định. Nếu chưa chọn, hiển thị **“Vui lòng chọn giới tính.”** |
 
 - Kiểm tra định dạng tại Client giúp người dùng sửa ngay. Kết quả username đã dùng cần Server; khi mất kết nối phải thông báo chưa kiểm tra được, không báo tên đã dùng hoặc còn trống. Server kiểm tra lại trước khi tạo tài khoản.
 - Chỉ sử dụng kết quả kiểm tra tương ứng với giá trị username hiện tại; kết quả trả về chậm của giá trị cũ không được ghi đè kết quả mới.

@@ -18,7 +18,7 @@
 ## Mô tả tổng quan (Summary / Description)
 
 - **Brief Description**: Người dùng nhập lần lượt tên đăng nhập, mật khẩu, email; xác minh email; sau đó cung cấp thông tin cá nhân để hoàn tất đăng ký.
-- **Goal**: Tạo tài khoản User Client với email đã được xác minh và thông tin cá nhân được nhập đầy đủ.
+- **Goal**: Tạo tài khoản User Client với email đã được xác minh và thông tin cá nhân hợp lệ.
 - **Trigger**: Người dùng chọn tạo tài khoản tại màn hình đăng nhập `U-SCR-01`.
 
 ## Điều kiện (Conditions)
@@ -39,7 +39,7 @@
 | 2 | Nhập mật khẩu, xác nhận mật khẩu và yêu cầu tiếp tục | Client kiểm tra quy tắc mật khẩu và hai giá trị khớp nhau; nếu hợp lệ, chuyển sang bước email. |
 | 3 | Nhập email và yêu cầu xác minh | Client kiểm tra định dạng; Server kiểm tra dữ liệu và email có thuộc tài khoản đã tạo hay không. Nếu hợp lệ, Server tạo yêu cầu đăng ký tạm và yêu cầu gửi mã đến email; Client chuyển sang `U-SCR-03`. |
 | 4 | Nhập mã xác minh email | Server kiểm tra mã và hiệu lực của yêu cầu theo [luồng xác minh email](UC-U-VERIFY-EMAIL.md). Nếu hợp lệ, ghi nhận email đã được xác minh cho yêu cầu đó và chuyển sang bước thông tin cá nhân; chưa tạo tài khoản đăng nhập. |
-| 5 | Nhập họ tên, địa chỉ, ngày sinh, giới tính và yêu cầu hoàn tất | Client kiểm tra dữ liệu; Server kiểm tra lại thông tin, quyền hoàn tất yêu cầu còn hiệu lực và tính duy nhất của username/email. |
+| 5 | Nhập họ tên, ngày sinh, giới tính, có thể bổ sung địa chỉ và yêu cầu hoàn tất | Client kiểm tra dữ liệu; Server kiểm tra lại thông tin, quyền hoàn tất yêu cầu còn hiệu lực và tính duy nhất của username/email. |
 | 6 | Chờ kết quả | Nếu hợp lệ, Server tạo tài khoản `USER` bằng thông tin của yêu cầu đã xác minh. Client thông báo kết quả và đưa người dùng về `U-SCR-01` để tự đăng nhập. → Kết thúc Use Case. |
 
 ### Alternative Flows
@@ -66,7 +66,7 @@
 - **Business Rules (BR)**:
   - **BR-01**: Username dài 6–30 ký tự; chỉ gồm chữ cái Latin, chữ số, dấu gạch dưới `_` và gạch ngang `-`. Server kiểm tra tính duy nhất khi hoàn tất tạo tài khoản.
   - **BR-02**: Mật khẩu dài 8–128 ký tự, có ít nhất một chữ hoa, một chữ thường, một chữ số và một ký tự đặc biệt; xác nhận mật khẩu phải khớp. Ký tự đặc biệt là ký hiệu ASCII in được không phải chữ hoặc số, không tính khoảng trắng; ví dụ `!`, `@`, `#`, `$`, `%`, `^`, `&`, `*`. Ví dụ `@Nggasd123` đáp ứng các điều kiện này.
-  - **BR-03**: Email, họ tên, địa chỉ, ngày sinh và giới tính phải được nhập trong quá trình đăng ký; ngày sinh không được ở tương lai. Thông tin cá nhân được cung cấp trước khi hoàn tất tạo tài khoản; quy tắc dữ liệu theo [DEC-07](../../../../decisions/account-lifecycle.md).
+  - **BR-03**: Email, họ tên, ngày sinh và giới tính bắt buộc khi đăng ký; địa chỉ tùy chọn. Ngày sinh không được ở tương lai. Thông tin cá nhân được cung cấp trước khi hoàn tất tạo tài khoản; quy tắc dữ liệu theo [DEC-07](../../../../decisions/account-lifecycle.md).
   - **BR-04**: Đăng ký công khai chỉ tạo tài khoản `USER`; không cấp phiên sử dụng ứng dụng từ use case đăng ký.
   - **BR-05**: Mỗi email chỉ thuộc một tài khoản đã tạo. Server kiểm tra email khi gửi yêu cầu đăng ký hoặc đổi email đang đăng ký và kiểm tra lại khi hoàn tất; yêu cầu tạm chưa tạo tài khoản không được coi là tài khoản đã đăng ký. Email phải được xác minh trước khi tạo tài khoản. Quyền hoàn tất chỉ phục vụ yêu cầu đăng ký tương ứng, không cấp quyền chat.
   - **BR-06**: Mỗi yêu cầu tạm có hạn tối đa 30 phút từ khi Server tạo; mã xác minh có hạn 10 phút và chỉ hợp lệ khi yêu cầu tương ứng còn hiệu lực. Gửi lại mã không gia hạn yêu cầu. Hủy, hết hạn và đăng ký lại được xử lý nhất quán, không hủy hoặc ghi đè tài khoản đã tạo.

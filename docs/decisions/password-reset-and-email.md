@@ -18,7 +18,7 @@
 
 ## Đăng ký công khai
 
-- Người dùng nhập username, mật khẩu, email; xác minh email; sau đó nhập thông tin cá nhân và yêu cầu hoàn tất. Server chỉ tạo tài khoản sau khi kiểm tra đầy đủ thông tin và kết quả xác minh còn hiệu lực; xác minh email không tự tạo tài khoản hoặc phiên chat.
+- Người dùng nhập username, mật khẩu, email; xác minh email; sau đó nhập thông tin cá nhân và yêu cầu hoàn tất. Server chỉ tạo tài khoản sau khi kiểm tra thông tin bắt buộc, dữ liệu được cung cấp và kết quả xác minh còn hiệu lực; xác minh email không tự tạo tài khoản hoặc phiên chat.
 - Trước khi tạo tài khoản, Server quản lý yêu cầu đăng ký tạm với hạn tối đa **30 phút kể từ khi tạo**. Mã xác minh có hạn **10 phút** và chỉ được dùng khi yêu cầu tương ứng còn hiệu lực; gửi lại mã không gia hạn yêu cầu. Sau xác minh, quyền hoàn tất chỉ phục vụ yêu cầu đó và không vượt quá hạn 30 phút.
 - Khi đang xác minh đăng ký, người dùng có thể sửa email mà không rời luồng hoặc gia hạn yêu cầu tạm; chi tiết tại [UC-U01](../requirements/use-cases/user/authentication/UC-U01-user-sign-up.md) và [luồng xác minh email](../requirements/use-cases/user/authentication/UC-U-VERIFY-EMAIL.md).
 - Khi người dùng hủy hoặc rời luồng, Client yêu cầu Server hủy yêu cầu tạm. Khi Server xác nhận hủy, mã của yêu cầu đó hết hiệu lực. Nếu Server không nhận được yêu cầu, dữ liệu tạm hết hạn theo mốc 30 phút; Client không khẳng định đã hủy khi chưa nhận xác nhận. Sau khi hủy hoặc hết hạn, bắt đầu đăng ký lại từ đầu.
