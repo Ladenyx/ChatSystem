@@ -21,7 +21,7 @@
 ## Điều kiện tiên quyết (Conditions)
 
 - **Pre-conditions**:
-  - User có phiên hợp lệ; hội thoại cá nhân hoặc nhóm còn cho phép soạn theo quyền hiện tại. Chat riêng có chặn ở bất kỳ chiều nào không đáp ứng điều kiện này theo DEC-03.
+  - User có phiên hợp lệ; hội thoại cá nhân hoặc nhóm còn cho phép soạn theo quyền hiện tại. Chat riêng có chặn ở bất kỳ chiều nào không đáp ứng điều kiện này.
   - Bản nháp có văn bản không rỗng sau khi loại khoảng trắng đầu/cuối; thiết bị có quyền đọc nội dung được dùng.
   - Luồng cơ bản có kết nối và dịch vụ AI được cấu hình, được phép sử dụng, còn hạn mức.
 - **Post-conditions**:
@@ -67,8 +67,13 @@
 - **BR-02 — Đồng ý chia sẻ**: Mỗi lần tạo/thử lại phải được xác nhận sau khi User xem trước nội dung và biết phạm vi chia sẻ tới server ứng dụng, nhà cung cấp AI. Với nội dung nhóm E2EE, giải thích đây là chia sẻ bản rõ ra ngoài luồng E2EE. Không gửi khóa bí mật hoặc cho server/AI khả năng giải mã lịch sử nhóm; HTTPS không thay thế việc xác nhận bản rõ.
 - **BR-03 — Quyền áp dụng**: Kết quả chỉ là gợi ý, User có cơ hội kiểm tra/sửa. Áp dụng chỉ thay nháp đúng hội thoại và phiên bản đã xác nhận; không tự gửi hay tạo sự kiện chat cho đối phương.
 - **BR-04 — Bất đồng bộ**: Gắn phản hồi với định danh yêu cầu, hội thoại và phiên; kết quả cũ không thay thế yêu cầu mới. Ngừng chờ không cam kết nhà cung cấp chưa xử lý hoặc chưa tính phí.
-- **BR-05 — Phần cần xác nhận**: Model, đầu vào/đầu ra, quota, thời gian chờ và nhãn AI theo DEC-08; các giá trị 5/3/15 giây không là BR đã duyệt. Không tự thêm watermark vào tin.
-- **BR-06 — Dịch vụ**: Theo DEC-08, tích hợp Muse API qua server; khóa API ở server. Không dùng cookie/token web hoặc token cá nhân làm API chung.
+- **BR-05 — Cấu hình và nhãn AI**: Không tự thêm watermark vào tin.
+
+  > **NOTE:** Đề xuất cần chốt model, định dạng đầu vào/đầu ra, số phương án, quota, thời gian chờ và việc hiển thị nhãn AI. Các giá trị 3 phương án và 15 giây chưa được duyệt; giới hạn 5 tin ngữ cảnh thuộc chức năng gợi ý, không tự áp cho chỉnh sửa nháp.
+
+- **BR-06 — Dịch vụ**: Tích hợp Muse API qua server; khóa API ở server. Không dùng cookie/token web hoặc token cá nhân làm API chung.
+
+  > **NOTE:** Đề xuất cần xác minh model, quyền sử dụng dịch vụ, quota và chính sách xử lý dữ liệu trước khi nghiệm thu tích hợp.
 
 ### Non-Functional Requirements (NFR)
 

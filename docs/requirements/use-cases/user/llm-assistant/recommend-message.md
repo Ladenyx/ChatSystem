@@ -14,17 +14,17 @@
 
 ## Mô tả tổng quan (Summary / Description)
 
-- **Brief Description**: User chọn ngữ cảnh được phép đọc, xem trước và xác nhận phần bản rõ được chia sẻ để AI gợi ý nội dung. Bổ sung prompt/ý định hoặc chỉ dùng prompt. User tự quyết định có đưa phương án vào nháp hay không.
+- **Brief Description**: User chọn ngữ cảnh được phép đọc, xem trước và xác nhận phần bản rõ được chia sẻ để AI gợi ý nội dung. User tự quyết định có đưa phương án vào nháp hay không.
 - **Goal**: Nhận gợi ý tin nhắn phù hợp để tiếp tục tự soạn và/hoặc quyết định gửi.
 - **Trigger**: User muốn được gợi ý nội dung liên hệ trong hội thoại hiện tại.
-- Gợi ý theo ngữ cảnh và các bảo đảm dữ liệu đã có trong [DEC-08](../../../../decisions/llm-assistant.md). **Prompt bổ sung ngữ cảnh, nhánh chỉ có prompt/chủ động mở lời và các con số 5 tin, 3 gợi ý, 15 giây còn Proposed**, chưa là tiêu chí nghiệm thu bắt buộc; xem [cần xác nhận](../../../pending-confirmations.md). UI thuộc [đặc tả trợ lý AI](../../../screens/user/u-dlg-03-llm-refine-and-recommend-popover.md).
+> **NOTE:** Đề xuất cho bổ sung prompt hoặc chỉ dùng prompt để chủ động mở lời; cần xác nhận phạm vi trước khi áp dụng.
 
 ## Điều kiện tiên quyết (Conditions)
 
 - **Pre-conditions**:
   - Phiên hợp lệ, hội thoại nguồn và quyền soạn còn khả dụng; có kết nối và dịch vụ AI sẵn sàng trong luồng cơ bản.
   - Luồng cơ bản có ít nhất một tin văn bản được phép đọc trong chính hội thoại, đã giải mã được nếu từ nhóm E2EE. Không bắt buộc có bản nháp hoặc người nhận đang online.
-> **Note:** Nếu hội thoại rỗng thì có dùng được chế độ gợi ý không? Ví dụ trường hợp muốn bắt chuyện với một người nào đó nhưng chưa có ý tưởng mở lời (Giảng viên, HR, bạn mới, ...)
+    > **NOTE:** Đề xuất cho gợi ý mở lời chỉ từ prompt khi hội thoại chưa có tin; cần xác nhận phạm vi.
 - **Post-conditions**:
   - User nhận được phương án tương ứng với nội dung đã xác nhận, gắn đúng hội thoại/yêu cầu.
   - Nếu server ứng dụng đã tiếp nhận bản rõ của yêu cầu, việc tin nguồn bị thu hồi/xóa phía mình sau đó không làm mất hiệu lực ngữ cảnh đã tiếp nhận; yêu cầu tiếp tục dùng bản chụp nội dung trước khi tin bị thu hồi/xóa.
@@ -47,13 +47,16 @@
 ### Alternative Flows
 
 - **Alt 1a — Chỉ có prompt**: Tại bước 1–2, khi không có tin hoặc User không muốn chọn tin, User cung cấp prompt có nội dung mô tả ý định. Chỉ gửi prompt đã xem trước/xác nhận, không tự lấy hồ sơ người nhận/lịch sử khác.
-> **NOTE:** Cần Confirm
+  > **NOTE:** Đề xuất cho gợi ý chỉ từ prompt, kể cả khi hội thoại chưa có tin hoặc User không chọn tin; cần xác nhận.
 - **Alt 2a — Ngữ cảnh đổi trước chia sẻ**: 
   - Tại bước 2–3, khi mới chọn/xem trước mà chưa chia sẻ bản rõ tới server ứng dụng, tin bị thu hồi/xóa phía mình không còn được chọn làm ngữ cảnh, không gửi lại bản sao cũ của tin đã bị loại. 
   - Nếu vẫn còn ngữ cảnh hợp lệ, tiếp tục bước 3. 
   - Nếu chỉ còn prompt, chỉ tiếp tục theo Alt 1a khi nhánh được chốt; nếu không, yêu cầu chọn lại ngữ cảnh. Không gửi khi không có đầu vào hợp lệ.
 - **Alt 2b — Sửa đầu vào**: Quay lại bước 2 và lấy xác nhận cho nội dung mới; lựa chọn cũ không cho phép gửi bản đã thay đổi.
 - **Alt 2c — Bổ sung prompt cùng ngữ cảnh**: User muốn nêu thêm ý định cùng các tin đã chọn. Đưa cả prompt và ngữ cảnh vào bản xem trước rồi xác nhận lại ở bước 3; không tự thu thập hồ sơ hoặc nội dung khác.
+
+  > **NOTE:** Đề xuất cho bổ sung prompt cùng các tin được chọn; cần xác nhận phạm vi.
+
 - **Alt 3a — Hủy trước chia sẻ**: User không đồng ý, kết thúc mà không gửi dữ liệu và giữ nháp.
 - **Alt 3b — Tin nguồn bị thu hồi/xóa sau chia sẻ**: Sau khi server ứng dụng đã tiếp nhận bản rõ ở bước 3, một hoặc nhiều tin nguồn bị thu hồi/xóa phía mình. Yêu cầu đang xử lý vẫn dùng bản chụp ngữ cảnh đã tiếp nhận trước sự kiện đó, kể cả khi server chưa chuyển nội dung tới nhà cung cấp AI; không loại ngữ cảnh hoặc hủy yêu cầu chỉ vì tin nguồn bị thu hồi/xóa sau chia sẻ.
 - **Alt 4a — Tạo lại**: User muốn phương án khác, quay lại bước 2–3; đây là yêu cầu AI mới, phải kiểm tra lại tin còn được phép chọn, xác nhận lại và có thể tiêu thụ hạn mức. Không tái sử dụng tin đã thu hồi/xóa phía mình từ bản chụp của yêu cầu trước làm ngữ cảnh cho yêu cầu mới.
@@ -82,9 +85,13 @@
   - Việc chỉ chọn tin hoặc xác nhận nhưng chưa chia sẻ chưa tạo mốc này. Bản chụp chỉ có hiệu lực cho yêu cầu đã tiếp nhận; tạo lại/thử lại là yêu cầu mới, phải kiểm tra lại ngữ cảnh. Không khôi phục tin nguồn hoặc bỏ qua kiểm tra quyền áp dụng kết quả.
 - **BR-03**: Mỗi lần tạo/thử lại cần đồng ý chia sẻ mới. Không gửi khóa E2EE hoặc cho server/AI tự giải mã lịch sử; kết quả chỉ về nháp sau xác nhận áp dụng.
 - **BR-04**: Gắn yêu cầu/kết quả với hội thoại, phiên và đầu vào; không tự dùng kết quả cũ cho đầu vào mới. Không tự gửi tin cho đối phương hoặc đánh dấu nội dung AI đã được xác minh.
-- **BR-05**: Prompt bổ sung ngữ cảnh/prompt-only, 5 tin ngữ cảnh, 3 gợi ý, timeout 15 giây, quota/model và nhãn AI theo DEC-08 còn mở; ngân sách 2 USD/tháng không tự suy ra quota. Không tự thêm watermark.
-> **NOTE:** Cần confirm BR-05
-- **BR-06**: Muse API tích hợp qua server theo DEC-08; khóa API không lưu ở client. Không dùng token/cookie cá nhân thay API chung.
+- **BR-05 — Cấu hình và nhãn AI**: Ngân sách mục tiêu 2 USD/tháng không tự suy ra quota. Không tự thêm watermark.
+
+  > **NOTE:** Đề xuất tối đa 5 tin ngữ cảnh, 3 gợi ý và thời gian chờ 15 giây; cần chốt các giới hạn này cùng model, quota, định dạng dữ liệu và nhãn AI, chưa coi là tiêu chí đã duyệt.
+
+- **BR-06**: Muse API tích hợp qua server; khóa API không lưu ở client. Không dùng token/cookie cá nhân thay API chung.
+
+  > **NOTE:** Đề xuất cần xác minh model, quyền sử dụng dịch vụ, quota và chính sách xử lý dữ liệu trước khi nghiệm thu tích hợp.
 
 ### Non-Functional Requirements (NFR)
 
