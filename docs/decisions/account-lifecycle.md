@@ -17,7 +17,8 @@
     - TH1: không giao thì Evidence = Selected + 30, 
     - TH2: giao một phần thì Evidence = Selected + 30 − |Selected ∩ Context|, 
     - TH3: Selected nằm trong Context thì Evidence = 30. 
-    - Nếu local có ít hơn 30 tin, dùng toàn bộ tin hiện có, vẫn cho gửi khi Selected hợp lệ và thông báo rõ số lượng. 
+    - Nếu local có ít hơn 30 tin, dùng toàn bộ tin hiện có, vẫn cho gửi khi Selected hợp lệ và thông báo rõ số lượng.
+    > **CHÚ Ý:** chỉ gửi toàn bộ tin context nếu số tin <= 30 ngay tại thời điểm xử lý, tránh việc sau khi xác nhận số tin <= 30 nhưng sau đó số tin bỗng tăng lên mà hệ thống lại đi gửi toàn bộ tin thì không đúng.
     - Gói được xem trước/xác nhận đầy đủ; thử lại cùng yêu cầu giữ nguyên gói, không tự lấy tin mới.
 
 **Còn mở:** băm mật khẩu (Argon2id mới là ứng viên), thời hạn phiên, bảo vệ admin hệ thống cuối, mã xác minh email và retention/purge dữ liệu.
