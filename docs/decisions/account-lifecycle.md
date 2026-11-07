@@ -57,4 +57,13 @@
 - Trong User Client, đợt thử đầu sai 5 lần liên tiếp thì khóa đăng nhập 3 phút; đợt tiếp theo giảm số lượt được thử. Lịch giảm lượt, thời gian khóa các đợt sau và điều kiện đặt lại bộ đếm theo cấu hình Server; đóng/mở app không đặt lại giới hạn. Không dùng bộ đếm/thời gian phía client làm nguồn quyết định. Khóa do thử sai không tự thu hồi các phiên đang hoạt động.
 - Đăng xuất hoặc thu hồi một phiên User Client chỉ kết thúc phiên được chỉ định. Các thao tác thu hồi toàn bộ phiên như khóa quản trị/xóa tài khoản hoặc đổi mật khẩu theo DEC-06 vẫn có hiệu lực trên các thiết bị.
 
+- Spam report cho chọn tin và lý do; client bổ sung tối đa 30 tin mới nhất trong cùng hội thoại từ local, gộp với tin được chọn theo ID rồi xem trước/xác nhận gửi toàn bộ bản rõ cho admin kể cả nhóm E2EE. Admin quyết định khóa thủ công; không mặc định server đã xác thực bản rõ do người báo cáo cung cấp.
+- ***Selected*** là tập tin được report, ***Context*** là tối đa 30 tin mới nhất đủ quyền đọc trong lịch sử local tại lúc chuẩn bị bản xem trước. Gói ***Evidence*** = Selected ∪ Context, mỗi ID một bản; tin giao giữa Context và Selected thì giữ cả hai nhãn. Context có thể gồm tin của người báo cáo hoặc thành viên khác, không chỉ tin của tài khoản đích. Client trích xuất Context và gửi gói; server không lấy lịch sử của mình để bổ sung ngữ cảnh.
+- Khi local có đủ 30 tin hợp lệ, Evidence có ít nhất 30 tin: 
+    - TH1: không giao thì Evidence = Selected + 30, 
+    - TH2: giao một phần thì Evidence = Selected + 30 − |Selected ∩ Context|, 
+    - TH3: Selected nằm trong Context thì Evidence = 30. 
+    - Nếu local có ít hơn 30 tin, dùng toàn bộ tin hiện có, vẫn cho gửi khi Selected hợp lệ và thông báo rõ số lượng. 
+    - Gói được xem trước/xác nhận đầy đủ; thử lại cùng yêu cầu giữ nguyên gói, không tự lấy tin mới.
+
 **Còn mở:** băm mật khẩu (Argon2id mới là ứng viên), thời hạn phiên, bảo vệ admin hệ thống cuối, cơ chế mã xác minh email và retention/purge dữ liệu.
