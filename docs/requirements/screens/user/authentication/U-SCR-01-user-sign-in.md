@@ -1,7 +1,7 @@
 # ĐẶC TẢ GIAO DIỆN — U-SCR-01
 
 - **Màn hình**: Đăng nhập vào User Client.
-- **Use case**: [UC-U02 — Đăng nhập vào User Client](../../../use-cases/user/authentication/UC-U02-user-sign-in.md).
+- **Use case**: [UC-USR-AUTH-02 — Đăng nhập vào User Client](../../../use-cases/user/authentication/UC-USR-AUTH-02-sign-in.md).
 - **Người viết / cập nhật**: baonguyen1776 / 2026-11-04.
 - **Trạng thái**: Draft.
 - **Mockup**: [Framer — Bao → U-SCR-01](https://framer.com/projects/Early-Persimmon--1Tzz5NWFPHgQOJcXaGB4-jirMF?node=MUWi3e89o).
