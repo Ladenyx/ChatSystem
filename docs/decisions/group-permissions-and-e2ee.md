@@ -4,12 +4,12 @@
 
 - Người tạo là admin đầu tiên; admin ngang quyền, được đổi tên, thêm/xóa thành viên, cấp/thu hồi admin; bảo vệ admin cuối cùng.
 - Thành viên thường chỉ được thêm bạn bè theo điều kiện DEC-03, không đổi tên nhóm. Admin chỉ thu hồi tin của mình theo giới hạn DEC-02.
-- Mọi nhóm dùng E2EE; server lưu/chuyển bản mã, không tự giải mã luồng chat nhóm.
+- Mọi nhóm dùng E2EE; server lưu/chuyển bản mã, không tự giải mã luồng chat nhóm. Bảo đảm mật mã này bổ sung cho chính sách quyền riêng tư tại [DEC-07](account-lifecycle.md) (vốn đã cấm Admin hệ thống xem nội dung hội thoại cá nhân/nhóm kể cả khi không mã hóa E2EE, ngoại trừ tin nhắn bằng chứng trong báo cáo spam).
 - Người mới được đọc lịch sử trước khi tham gia, trừ tin đã thu hồi; cần thiết bị có quyền chia sẻ khả năng giải mã. Người được mời có thể offline; quyền đọc chỉ hoàn tất khi chia sẻ xong.
 - Người bị xóa giữ lịch sử từng được đọc, không nhận/giải mã tin mới; không thể xóa bản đã nằm trên thiết bị của họ.
 - User Client hỗ trợ nhiều phiên/thiết bị đồng thời; đăng nhập máy mới không kết thúc phiên chat hoặc phiên quản trị đang có. Giới hạn một phiên chỉ áp dụng cho phiên quản trị theo DEC-07. Xác thực tài khoản không đồng nghĩa thiết bị đã có khóa E2EE.
 - Đổi máy cần chuyển/khôi phục khóa bằng mã khôi phục người dùng giữ và backup khóa đã mã hóa. Reset mật khẩu không mở khóa lịch sử; mất thiết bị giữ khóa lẫn mã thì không tự mở được backup.
-- Gửi nội dung cho LLM hoặc báo cáo spam là tiết lộ bản rõ, có xem trước/xác nhận riêng.
+- Gửi nội dung cho LLM hoặc đính kèm tin nhắn khi báo cáo spam là tiết lộ bản rõ do người dùng chủ động thực hiện (cấp quyền cho Admin xem các tin bằng chứng đối với cả chat 1-1 không E2EE lẫn nhóm E2EE), có xem trước/xác nhận riêng.
 
 ## Thiết lập/khôi phục khóa sau đăng nhập
 

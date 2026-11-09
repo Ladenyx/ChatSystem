@@ -12,7 +12,7 @@
 - Xóa mềm **30 ngày**, ngừng đăng nhập/nhận tin mới; admin hệ thống được khôi phục trước hạn. Khôi phục không tự trả thành viên hoặc quyền nhóm.
 - Sau hạn, purge hồ sơ/thông tin đăng nhập/quan hệ/backup khóa server; giữ chat dưới nhãn người đã xóa, loại định danh khỏi log/báo cáo và giữ thống kê. Username/email được dùng lại sau purge; tài khoản mới có ID mới, không kế thừa dữ liệu/quyền.
 - Xóa admin nhóm cuối cần chọn người kế nhiệm trước; nhóm chỉ còn người bị xóa được đóng, giữ lịch sử. Không cam kết xóa bản sao trên thiết bị khác.
-- Spam report cho chọn tin và lý do, xem trước/xác nhận gửi bản rõ cho admin kể cả nhóm E2EE. Admin quyết định khóa thủ công; không mặc định server đã xác thực bản rõ do người báo cáo cung cấp.
+- Theo chính sách quyền riêng tư, Admin hệ thống mặc định không có quyền xem nội dung tin nhắn cá nhân (1-1) hay nhóm chat, kể cả khi hội thoại không mã hóa E2EE; ngoại lệ duy nhất là xem các tin nhắn bằng chứng trong báo cáo spam. Spam report cho chọn tin và lý do, xem trước/xác nhận gửi bản rõ làm bằng chứng cho admin (áp dụng cho cả chat 1-1 lẫn nhóm E2EE). Admin quyết định khóa thủ công; không mặc định server đã xác thực bản rõ do người báo cáo cung cấp.
 
 ## Vai trò và phạm vi phiên
 
