@@ -32,7 +32,7 @@
 ### Alternative Flows
 
 - **A1 — Đã gửi lời mời**: Tại bước 2, đã có lời mời cùng chiều đang chờ. Hệ thống trả trạng thái hiện tại; kết thúc.
-- **A2 — Đã nhận lời mời từ đối phương**: Tại bước 2, hệ thống giữ lời mời nhận vào để người dùng [chấp nhận hoặc từ chối](process-friend-request.md); kết thúc yêu cầu gửi.
+- **A2 — Đã nhận lời mời từ đối phương**: Tại bước 2, hệ thống giữ lời mời nhận vào để người dùng [chấp nhận hoặc từ chối](UC-USR-FRD-04-process-friend-request.md); kết thúc yêu cầu gửi.
 - **A3 — Đã là bạn bè**: Tại bước 2, hệ thống thông báo quan hệ hiện tại; kết thúc.
 
 ### Exception Flows

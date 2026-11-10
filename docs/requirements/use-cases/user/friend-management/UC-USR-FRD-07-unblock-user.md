@@ -46,7 +46,7 @@
   - **BR-01**: Mỗi người chỉ được gỡ chiều chặn do mình tạo.
   - **BR-02**: Bỏ chặn không khôi phục tình bạn hoặc lời mời cũ; muốn kết bạn lại phải gửi lời mời mới.
   - **BR-03**: Chat riêng và lời mời mới chỉ hoạt động lại khi không còn bên nào chặn và tài khoản đủ điều kiện tương tác.
-  - **BR-04**: Nếu đối phương vẫn chặn, người dùng vẫn không tìm thấy đối phương theo [quy tắc tìm người dùng](search-users.md).
+  - **BR-04**: Nếu đối phương vẫn chặn, người dùng vẫn không tìm thấy đối phương theo [quy tắc tìm người dùng](UC-USR-FRD-02-search-users.md).
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Server kiểm tra chủ sở hữu chiều chặn; xử lý lặp không ảnh hưởng chiều chặn của đối phương.
   - **NFR-02**: Chỉ cập nhật quyền gửi sau khi có xác nhận; giữ bản nháp và không tự gửi lại tin đã bị từ chối.
