@@ -12,8 +12,10 @@ Hai trọng tâm cốt lõi của Version 1:
 
 Mục tiêu là tạo "xương sống" để mọi thành viên có thể kéo code về và làm giao diện độc lập trên nhánh riêng mà không xung đột.
 
-- [ ] **1.1. Khởi tạo cấu trúc Maven & thư mục chuẩn**
-  - Thiết lập Maven Wrapper (`mvnw`) với cấu trúc multi-module (`common`, `server`, `user`, `admin`) theo [tech-stack.md](../decisions/tech-stack.md) (`Eclipse Temurin JDK 25`, `JavaFX 25`, `AtlantaFX 2.0.1`, `Ikonli`), đảm bảo giữ đúng cấu trúc thư mục nộp bài (`src/`, `script/`, `git/`).
+- [x] **1.1. Khởi tạo cấu trúc Maven & thư mục chuẩn**
+  - Đã thiết lập Maven Wrapper (`mvnw`, `mvnw.cmd`, Maven 3.9.11) với cấu trúc multi-module (`common`, `server`, `user`, `admin`) trong `src/` theo [tech-stack.md](../../decisions/tech-stack.md) (`Eclipse Temurin JDK 25`, `JavaFX 25`, `AtlantaFX 2.0.1`, `Ikonli 12.4.0`), giữ các thư mục nộp bài (`src/`, `script/`, `git/`) cùng `report/`, `release/`, `docs/images/`.
+  - POM cha quản lý phiên bản thư viện/plugin, kiểm tra JDK/Maven; mỗi module có thư mục nguồn, tài nguyên và kiểm thử chuẩn Maven. Xem lệnh build/test và phạm vi khung tại [README.md](../../../README.md).
+  - Đã kiểm tra `./mvnw clean verify` cho toàn bộ reactor và `./mvnw -pl src/user -am verify` với Temurin JDK 25 trên Linux; `validate` với JDK 17 bị từ chối đúng yêu cầu. Chưa có test case hoặc lớp khởi chạy ứng dụng ở bước này.
 - [ ] **1.2. Xây dựng bộ khung điều hướng (Navigation / Scene Manager) & Theme**
   - Khởi tạo class khởi chạy cho **User Client** và **Admin App**, nạp theme `Primer Light` / `Primer Dark` của AtlantaFX.
   - Tạo `ViewNavigator` cho phép chuyển đổi giữa các màn hình FXML và bật các hộp thoại Modal/Drawer/Popover để phục vụ demo luồng màn hình và chụp ảnh báo cáo.
@@ -31,7 +33,7 @@ Thực hiện song song với Giai đoạn 1–3 để sớm chốt cấu trúc 
   - **Nhóm Quan hệ Bạn bè & Chặn (`U-06`–`U-11`, `A-06`, `A-14`):** `friend_requests`, `friendships`, `blocks`.
   - **Nhóm Hội thoại, Nhóm chat & Tin nhắn (`U-12`–`U-24`, `A-08`, `A-09`, `A-15`):** `conversations` (1-1 và nhóm), `conversation_members` (vai trò `ADMIN`/`MEMBER`, thời điểm tham gia/rời), `messages` (hỗ trợ bản rõ 1-1, bản mã E2EE, trạng thái thu hồi 48h), `message_deletions` (xóa phía mình theo từng user).
   - **Nhóm Khóa E2EE (`U-25`):** `e2ee_devices` (khóa công khai `X25519`/`Ed25519`), `e2ee_key_backups` (bản sao lưu khóa mã hóa bằng mã khôi phục), `e2ee_group_key_envelopes` (khóa phiên nhóm bọc cho từng thành viên/thiết bị).
-  - **Nhóm Báo cáo Spam (`U-26`, `A-10`, `A-11`):** `spam_reports`, `spam_report_evidences` (lưu gói bằng chứng Selected + tối đa 30 tin Context theo [account-lifecycle.md](../decisions/account-lifecycle.md#L59-L67)).
+  - **Nhóm Báo cáo Spam (`U-26`, `A-10`, `A-11`):** `spam_reports`, `spam_report_evidences` (lưu gói bằng chứng Selected + tối đa 30 tin Context theo [account-lifecycle.md](../../decisions/account-lifecycle.md)).
 - [ ] **2.2. Viết và kiểm thử `script/`**
   - Viết file SQL khởi tạo trong `script/` (ví dụ `script/schema.sql` và `script/seed.sql` hoặc gộp theo quy ước nhóm) kèm các `INDEX` quan trọng (như `(conversation_id, created_at DESC)`, `pg_trgm` + `unaccent` cho tìm kiếm tên/tin nhắn).
   - **Kiểm tra bắt buộc:** Chạy script từ đầu trên một database PostgreSQL 18 trống để chắc chắn không có lỗi cú pháp hay thứ tự khóa ngoại.
@@ -40,7 +42,7 @@ Thực hiện song song với Giai đoạn 1–3 để sớm chốt cấu trúc 
 
 ## Giai đoạn 3: Xây dựng Giao diện `User Client` (3–4 ngày)
 
-Bám sát đặc tả tại [screen.md](../requirements/screen.md#L52-L84), chia thành 3 cụm màn hình để triển khai FXML + Controller UI:
+Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thành 3 cụm màn hình để triển khai FXML + Controller UI:
 
 - [ ] **3.1. Cụm 1 — Xác thực & Khởi tạo khóa (`U-SCR-01` → `U-SCR-06`)**
   - `U-SCR-01`: Đăng nhập (`Sign In View`).
@@ -65,7 +67,7 @@ Bám sát đặc tả tại [screen.md](../requirements/screen.md#L52-L84), chia
 
 ## Giai đoạn 4: Xây dựng Giao diện `Admin App` (Desktop GUI) (3–4 ngày)
 
-Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](../requirements/screen.md#L87-L118):
+Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](../../requirements/screen.md):
 
 - [ ] **4.1. Cụm 1 — Khung Sidebar, Tổng quan & Quản trị Master–Detail (`A-SCR-01` → `A-SCR-06`, `A-DLG-01`..`02`)**
   - `A-SCR-01`: Đăng nhập Quản trị (`Admin Sign In View`) và khung chính có Sidebar phân nhóm.
@@ -85,9 +87,9 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
 
 ## Giai đoạn 5: Nghiệm thu nội bộ, Viết Báo cáo & Đóng gói nộp Version 1 (1–2 ngày cuối)
 
-Theo bảng **Version 1 deliverables** và **Pre-submission checks** tại [ROADMAP.md](../../ROADMAP.md#L55-L71):
+Theo bảng **Version 1 deliverables** và **Pre-submission checks** tại [ROADMAP.md](../../../ROADMAP.md#version-1-deliverables):
 
-- [ ] **5.1. Cập nhật trạng thái [ROADMAP.md](../../ROADMAP.md)**
+- [ ] **5.1. Cập nhật trạng thái [ROADMAP.md](../../../ROADMAP.md)**
   - Đánh dấu `✅` vào cột **UI** cho các tính năng `U-01`–`U-27`, `A-01`–`A-16` và `X-01`.
   - Điền GitHub handle của từng thành viên vào cột **Owner**.
 - [ ] **5.2. Thu thập ảnh chụp Commit (`git/`)**

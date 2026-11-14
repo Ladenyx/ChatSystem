@@ -27,3 +27,27 @@ AGENTS.md
 .agents/
 .vscode/
 .specify/
+
+# Maven build output and local cache
+target/
+.m2/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.local.properties
+*.local.yml
+*.local.yaml
+/release/config/
+
+# IDE metadata
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# Operating system files
+.DS_Store
+Thumbs.db

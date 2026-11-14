@@ -22,4 +22,6 @@
 - **Cấu hình máy tối thiểu:** CPU 2 vCPU, RAM 4 GB, cài sẵn JDK 25, độ phân giải màn hình tối thiểu `1366x768`.
 - **Gói nộp (`release/`):** giữ các file JAR chạy được (`user.jar`, `admin.jar`, kèm `server.jar`) và file cấu hình kết nối ngoài.
 
-**Còn mở:** xác minh quyền truy cập/tên model thực tế của Muse API và khởi tạo bộ khung Maven multi-module (`pom.xml`, `mvnw`) để cố định các lệnh build/test/launch.
+**Khung build đã khởi tạo (Version 1, mục 1.1):** Maven Wrapper 3.9.11 (`mvnw`, `mvnw.cmd`), bốn module trong `src/`, POM cha quản lý JavaFX 25, AtlantaFX 2.0.1, Ikonli 12.4.0 và JUnit 5.13.4; lệnh build/test tại [README.md](../../README.md#build-và-kiểm-tra). Mục 1.2 sẽ bổ sung lớp khởi chạy JavaFX và lệnh launch; Spring Boot và fat-JAR sẽ được triển khai ở giai đoạn tiếp theo.
+
+**Còn mở:** xác minh quyền truy cập/tên model thực tế của Muse API.

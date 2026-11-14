@@ -2,7 +2,7 @@
 
 Progress tracker for the Java Real-Time Chat System. The project overview and setup instructions are in [README.md](README.md).
 
-**Last updated:** TBD
+**Last updated:** 2026-11-14
 
 ## Contents
 
@@ -46,7 +46,7 @@ Progress tracker for the Java Real-Time Chat System. The project overview and se
 
 | Milestone | Weight | Scope | Status |
 |-----------|:------:|-------|:------:|
-| **Version 1** | 20% | UI screens of both applications, database creation script, report | ⬜ |
+| **Version 1** | 20% | UI screens of both applications, database creation script, report | 🚧 |
 | **Version 2** | 80% | Complete working system, release package, final report, self-assessment | ⬜ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
@@ -108,8 +108,10 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 | X-01 | Database design and creation script | ⬜ | TBD |
 | X-02 | Chat server: connections, message routing, presence | ⬜ | TBD |
 | X-03 | Configuration file loading (database, server, email, LLM) | ⬜ | TBD |
-| X-04 | Build and packaging of the runnable JARs | ⬜ | TBD |
+| X-04 | Build and packaging of the runnable JARs | 🚧 | TBD |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ | TBD |
+
+X-04: Maven multi-module scaffold and Wrapper are ready (Version 1 plan, task 1.1). See [README.md](README.md#build-và-kiểm-tra) for build/test commands. Application launchers and runnable fat-JAR packaging remain pending; UI feature statuses are unchanged.
 
 ### User Client
 
