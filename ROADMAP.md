@@ -2,7 +2,7 @@
 
 Progress tracker for the Java Real-Time Chat System. The project overview and setup instructions are in [README.md](README.md).
 
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-15
 
 ## Contents
 
@@ -59,8 +59,8 @@ Interface and database. The archive contains `src/`, `script/`, `git/` and the r
 
 | Deliverable | Status | Owner |
 |-------------|:------:|-------|
-| `src/`: screens of the User Client (UI only) | ⬜ | TBD |
-| `src/`: screens of the Admin App (Desktop GUI, UI only) | ⬜ | TBD |
+| `src/`: screens of the User Client (UI only) | 🚧 | TBD |
+| `src/`: screens of the Admin App (Desktop GUI, UI only) | 🚧 | TBD |
 | `script/`: database creation script | ⬜ | TBD |
 | `git/`: commit screenshots of every member | ⬜ | TBD |
 | Report: team information | ⬜ | TBD |
@@ -111,7 +111,7 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 | X-04 | Build and packaging of the runnable JARs | 🚧 | TBD |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ | TBD |
 
-X-04: Maven multi-module scaffold and Wrapper are ready (Version 1 plan, task 1.1). See [README.md](README.md#build-và-kiểm-tra) for build/test commands. Application launchers and runnable fat-JAR packaging remain pending; UI feature statuses are unchanged.
+X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
 
 ### User Client
 

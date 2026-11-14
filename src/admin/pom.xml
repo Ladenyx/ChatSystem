@@ -17,6 +17,10 @@
     <dependencies>
         <dependency>
             <groupId>com.chatsystem</groupId>
+            <artifactId>chatsystem-desktop-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.chatsystem</groupId>
             <artifactId>chatsystem-common</artifactId>
         </dependency>
         <dependency>
@@ -43,5 +47,17 @@
 
     <build>
         <finalName>admin</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.chatsystem.admin.AdminApplication</mainClass>
+                    <options>
+                        <option>--enable-native-access=javafx.graphics</option>
+                    </options>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

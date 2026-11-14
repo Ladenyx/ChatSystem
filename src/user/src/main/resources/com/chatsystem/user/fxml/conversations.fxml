@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.chatsystem.user.controller.ConversationsController"
+            focusTraversable="true" minWidth="0">
+    <left>
+        <VBox styleClass="conversation-list">
+            <Label text="Đoạn chat" styleClass="section-title"/>
+            <Button id="createGroup" text="Tạo nhóm mới" onAction="#createGroup" maxWidth="Infinity"/>
+            <VBox alignment="CENTER" spacing="12" styleClass="empty-state" VBox.vgrow="ALWAYS">
+                <Label text="Chưa có cuộc trò chuyện" wrapText="true" styleClass="section-title"/>
+                <Label text="Các cuộc trò chuyện sẽ xuất hiện tại đây." wrapText="true" styleClass="secondary-text"/>
+            </VBox>
+        </VBox>
+    </left>
+    <center>
+        <BorderPane styleClass="surface" minWidth="0">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar">
+                    <Label text="Hội thoại" styleClass="section-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button id="conversationInfo" text="Thông tin" onAction="#openInfo"/>
+                </HBox>
+            </top>
+            <center>
+                <VBox alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0">
+                    <Label text="Bắt đầu cuộc trò chuyện" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
+                    <Label text="Mở Bạn bè &amp; Kết nối hoặc tạo nhóm mới để bắt đầu." styleClass="secondary-text"
+                           wrapText="true" textAlignment="CENTER"/>
+                    <Button text="Mở Bạn bè" onAction="#openContacts" styleClass="accent"/>
+                </VBox>
+            </center>
+        </BorderPane>
+    </center>
+</BorderPane>

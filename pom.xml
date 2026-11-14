@@ -15,6 +15,7 @@
     <modules>
         <module>src/common</module>
         <module>src/server</module>
+        <module>src/desktop-ui</module>
         <module>src/user</module>
         <module>src/admin</module>
     </modules>
@@ -34,6 +35,11 @@
             <dependency>
                 <groupId>com.chatsystem</groupId>
                 <artifactId>chatsystem-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.chatsystem</groupId>
+                <artifactId>chatsystem-desktop-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Keep transitive JavaFX dependencies on the same version. -->
@@ -123,6 +129,11 @@
                     <artifactId>maven-install-plugin</artifactId>
                     <version>3.1.4</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-maven-plugin</artifactId>
+                    <version>0.0.8</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -153,4 +164,25 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>ui-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>--enable-native-access=ALL-UNNAMED</argLine>
+                            <systemPropertyVariables>
+                                <chatsystem.uiTests>true</chatsystem.uiTests>
+                                <chatsystem.reducedMotion>true</chatsystem.reducedMotion>
+                                <prism.order>sw</prism.order>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

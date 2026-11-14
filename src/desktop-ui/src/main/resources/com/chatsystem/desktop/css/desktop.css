@@ -1,0 +1,153 @@
+/* Figma CS semantic tokens. Primer supplies control skins, focus rings and states. */
+.root, .cs-root {
+    -fx-font-family: "Inter";
+    -fx-font-size: 14px;
+    -cs-canvas: #f5f5f5;
+    -cs-surface: #ffffff;
+    -cs-hover: #f0f0f0;
+    -cs-text: #1f1f1f;
+    -cs-muted: #616161;
+    -cs-border: #d1d1d1;
+    -cs-brand: #0f6cbd;
+    -cs-brand-subtle: #ebf3fc;
+    -cs-brand-text: #115ea3;
+    -cs-accent-fill: #0f6cbd;
+    -color-accent-emphasis: -cs-accent-fill;
+    -color-accent-fg: -cs-brand-text;
+    -fx-background-color: -cs-canvas;
+}
+
+.root:dark, .cs-root:dark {
+    -cs-canvas: #141414;
+    -cs-surface: #1f1f1f;
+    -cs-hover: #333333;
+    -cs-text: #ffffff;
+    -cs-muted: #d1d1d1;
+    -cs-border: #525252;
+    -cs-brand: #479ef5;
+    -cs-brand-subtle: #0a2e4a;
+    -cs-brand-text: #96c6fa;
+}
+
+.label { -fx-text-fill: -cs-text; }
+.secondary-text, .caption { -fx-text-fill: -cs-muted; }
+.caption, .eyebrow { -fx-font-size: 12px; }
+.eyebrow { -fx-text-fill: -cs-brand-text; -fx-font-weight: 600; }
+.page-title { -fx-font-size: 28px; -fx-font-weight: 600; }
+.section-title { -fx-font-size: 16px; -fx-font-weight: 600; }
+.brand { -fx-font-size: 20px; -fx-font-weight: 700; }
+.surface, .empty-state { -fx-background-color: -cs-surface; }
+.empty-state { -fx-padding: 32px; }
+.page-content { -fx-padding: 32px; -fx-spacing: 24px; }
+.toolbar {
+    -fx-background-color: -cs-surface;
+    -fx-padding: 12px 24px;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 0 1px 0;
+    -fx-min-height: 64px;
+}
+.offline-badge {
+    -fx-background-color: -cs-canvas;
+    -fx-text-fill: -cs-muted;
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 12px;
+}
+.rail {
+    -fx-background-color: -cs-canvas;
+    -fx-padding: 8px;
+    -fx-spacing: 16px;
+    -fx-min-width: 72px;
+    -fx-pref-width: 72px;
+    -fx-max-width: 72px;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 1px 0 0;
+}
+.app-mark {
+    -fx-background-color: -cs-hover;
+    -fx-background-radius: 4px;
+    -fx-alignment: center;
+    -fx-min-width: 56px;
+    -fx-min-height: 48px;
+    -fx-font-weight: 600;
+}
+.rail .toggle-button, .rail .button {
+    -fx-content-display: top;
+    -fx-alignment: center;
+    -fx-wrap-text: true;
+    -fx-font-size: 12px;
+    -fx-min-width: 56px;
+    -fx-pref-width: 56px;
+    -fx-max-width: 56px;
+    -fx-min-height: 68px;
+    -fx-padding: 8px 4px;
+    -fx-graphic-text-gap: 4px;
+}
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cs-text;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-min-height: 40px;
+}
+.nav-item:hover { -fx-background-color: -cs-hover; }
+.nav-item:selected {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-text-fill: -cs-brand-text;
+    -fx-font-weight: 600;
+}
+.nav-item:focused { -fx-border-color: -cs-brand; -fx-border-width: 2px; }
+.nav-item .ikonli-font-icon { -fx-icon-color: -cs-text; }
+.nav-item:selected .ikonli-font-icon { -fx-icon-color: -cs-brand-text; }
+.sidebar {
+    -fx-background-color: -cs-surface;
+    -fx-padding: 16px;
+    -fx-spacing: 8px;
+    -fx-min-width: 224px;
+    -fx-pref-width: 224px;
+    -fx-max-width: 224px;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 1px 0 0;
+}
+.sidebar .nav-item {
+    -fx-alignment: center-left;
+    -fx-max-width: infinity;
+    -fx-padding: 8px 12px;
+    -fx-graphic-text-gap: 12px;
+}
+.nav-group {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-muted;
+    -fx-padding: 16px 0 4px 0;
+}
+.conversation-list {
+    -fx-background-color: -cs-surface;
+    -fx-padding: 24px;
+    -fx-spacing: 24px;
+    -fx-min-width: 280px;
+    -fx-pref-width: 384px;
+    -fx-max-width: 384px;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 1px 0 0;
+}
+.conversation-list .empty-state { -fx-padding: 16px 0; }
+.drawer {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 0 0 1px;
+    -fx-min-width: 320px;
+    -fx-pref-width: 320px;
+    -fx-max-width: 320px;
+}
+.drawer-header { -fx-padding: 24px 16px; }
+.drawer .empty-state { -fx-padding: 24px; }
+.drawer .page-title { -fx-font-size: 20px; }
+.display-options { -fx-padding: 20px; -fx-background-color: -cs-surface; }
+.dialog-pane { -fx-background-color: -cs-surface; }
+.root.popup, .popover { -fx-background-color: transparent; }
+.popover > .border { -fx-fill: -cs-surface; -fx-stroke: -cs-border; }
+.button, .toggle-button { -fx-cursor: hand; }
+.button:disabled, .toggle-button:disabled { -fx-cursor: default; }
