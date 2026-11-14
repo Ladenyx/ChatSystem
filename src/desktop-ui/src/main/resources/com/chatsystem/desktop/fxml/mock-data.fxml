@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.chatsystem.desktop.controller.MockDataPreviewController"
+      id="mockDataPreview" styleClass="mock-preview" minWidth="0">
+    <Label text="Dữ liệu mẫu" styleClass="page-title"/>
+    <Label fx:id="summary" styleClass="secondary-text" wrapText="true" maxWidth="Infinity"/>
+    <TabPane fx:id="mockTabs" id="mockTabs" VBox.vgrow="ALWAYS" minWidth="0" minHeight="0"/>
+</VBox>

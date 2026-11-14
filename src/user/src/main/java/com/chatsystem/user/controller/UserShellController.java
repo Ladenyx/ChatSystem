@@ -1,6 +1,7 @@
 package com.chatsystem.user.controller;
 
 import com.chatsystem.desktop.controller.DisplayOptionsController;
+import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
 import com.chatsystem.user.UserViews;
@@ -71,6 +72,11 @@ public final class UserShellController {
     @FXML
     private void openDisplayOptions() {
         navigator.showPopover(DisplayOptionsController.VIEW, displayButton);
+    }
+
+    @FXML
+    private void openMockData() {
+        navigator.navigate(MockDataPreviewController.VIEW);
     }
 
     @FXML

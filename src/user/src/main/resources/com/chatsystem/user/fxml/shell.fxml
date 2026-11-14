@@ -43,6 +43,10 @@
                     <Label text="ChatSystem" styleClass="brand"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="offline-badge"/>
+                    <Button id="openMockData" onAction="#openMockData" accessibleText="Xem dữ liệu mẫu">
+                        <graphic><FontIcon iconLiteral="fth-database" iconSize="20"/></graphic>
+                        <tooltip><Tooltip text="Xem dữ liệu mẫu"/></tooltip>
+                    </Button>
                     <Button fx:id="displayButton" id="displayOptions" text="Hiển thị" onAction="#openDisplayOptions"/>
                 </HBox>
             </top>

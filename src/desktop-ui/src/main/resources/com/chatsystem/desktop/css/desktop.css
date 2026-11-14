@@ -151,3 +151,7 @@
 .popover > .border { -fx-fill: -cs-surface; -fx-stroke: -cs-border; }
 .button, .toggle-button { -fx-cursor: hand; }
 .button:disabled, .toggle-button:disabled { -fx-cursor: default; }
+
+.mock-preview { -fx-padding: 24px; -fx-spacing: 12px; }
+.mock-preview .tab-content-area { -fx-padding: 16px 0 0 0; }
+.mock-message { -fx-padding: 8px; }

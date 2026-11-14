@@ -8,7 +8,7 @@
 | --- | --- |
 | `common` | DTO/giao thức; không phụ thuộc JavaFX |
 | `server` | Nghiệp vụ/tích hợp backend; không phụ thuộc UI |
-| `desktop-ui` | `View`, `ViewController`, `ViewNavigator`, `ThemeManager`, CSS và font dùng chung |
+| `desktop-ui` | `View`, `ViewController`, `ViewNavigator`, `ThemeManager`, CSS, font và dữ liệu UI mẫu dùng chung |
 | `user` | Rail, route và FXML của User Client |
 | `admin` | Sidebar phân nhóm, route và FXML của Admin App |
 
@@ -100,7 +100,7 @@ Trên Linux đã có Xvfb:
 xvfb-run -a -s "-screen 0 1440x1000x24" ./mvnw -Pui-tests verify
 ```
 
-Thêm `-Dchatsystem.capture=true` để ghi ảnh render vào `src/user/target/screenshots/` và `src/admin/target/screenshots/`. Profile dùng software renderer và giảm chuyển động để chụp ảnh ổn định, chạy ở nội dung cửa sổ 1280 × 720 và 1024 × 640. Ảnh đã duyệt phục vụ review nằm tại [docs/images/navigation-theme](../images/navigation-theme/README.md). Chưa nghiệm thu Windows/macOS, biểu mẫu nghiệp vụ, dữ liệu mẫu hoặc fat-JAR.
+Thêm `-Dchatsystem.capture=true` để ghi ảnh render vào `src/user/target/screenshots/` và `src/admin/target/screenshots/`. Profile dùng software renderer và giảm chuyển động để chụp ảnh ổn định, chạy ở nội dung cửa sổ 1280 × 720 và 1024 × 640. Ảnh khung điều hướng đã duyệt nằm tại [docs/images/navigation-theme](../images/navigation-theme/README.md). Mục 1.3 bổ sung [bộ dữ liệu và trang xem mẫu](ui-mock-data.md), kèm kiểm thử riêng. Chưa nghiệm thu Windows/macOS, biểu mẫu nghiệp vụ hoặc fat-JAR.
 
 ## Khởi chạy
 
