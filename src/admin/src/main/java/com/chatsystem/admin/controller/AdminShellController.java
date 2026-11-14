@@ -2,6 +2,7 @@ package com.chatsystem.admin.controller;
 
 import com.chatsystem.admin.AdminViews;
 import com.chatsystem.desktop.controller.DisplayOptionsController;
+import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
@@ -83,6 +84,11 @@ public final class AdminShellController {
     @FXML
     private void openDisplayOptions() {
         navigator.showPopover(DisplayOptionsController.VIEW, displayButton);
+    }
+
+    @FXML
+    private void openMockData() {
+        navigator.navigate(MockDataPreviewController.VIEW);
     }
 
     @FXML

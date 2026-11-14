@@ -35,6 +35,10 @@
                     <Label fx:id="pageTitle" styleClass="section-title" wrapText="true"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="offline-badge"/>
+                    <Button id="openMockData" onAction="#openMockData" accessibleText="Xem dữ liệu mẫu">
+                        <graphic><FontIcon iconLiteral="fth-database" iconSize="20"/></graphic>
+                        <tooltip><Tooltip text="Xem dữ liệu mẫu"/></tooltip>
+                    </Button>
                     <Button fx:id="displayButton" id="displayOptions" text="Hiển thị" onAction="#openDisplayOptions"/>
                     <Button id="openUserDialog" onAction="#openUserDialog" accessibleText="Thêm người dùng">
                         <graphic><FontIcon iconLiteral="fth-user-plus" iconSize="20"/></graphic>
