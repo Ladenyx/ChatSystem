@@ -1,20 +1,25 @@
 # Tech stack — ChatSystem
 
-| Thành phần | Công nghệ / hướng lựa chọn |
+| Thành phần | Công nghệ / quyết định đã chốt |
 | --- | --- |
 | Java | Eclipse Temurin JDK 25 |
-| Desktop UI | JavaFX 25, FXML/CSS cho cả **User Client** và **Admin App** (đều là ứng dụng Desktop GUI trực quan, không dùng CLI/Console cho phân hệ quản trị); bổ sung AtlantaFX, phiên bản theme còn chờ xác nhận |
+| Desktop UI | JavaFX 25, FXML/CSS cho cả **User Client** và **Admin App** (đều là ứng dụng Desktop GUI trực quan, không dùng CLI/Console cho phân hệ quản trị); AtlantaFX 2.0.1 (theme Primer Light / Primer Dark) + Ikonli (bộ icon đồng bộ) |
 | Backend | Spring Boot 4.1.x |
-| Database | PostgreSQL 18; JDBC/JdbcTemplate |
-| Build | Maven 3.9 qua Maven Wrapper |
+| Database | PostgreSQL 18; JDBC/JdbcTemplate (kết hợp In-Memory state `ConcurrentHashMap` / `Caffeine` trên Server cho trạng thái Online/Offline và phiên WebSocket; `pg_trgm` + `unaccent` cho tìm kiếm văn bản) |
+| Build & Đóng gói | Maven 3.9 qua Maven Wrapper (`mvnw`), kiến trúc multi-module (`common`, `server`, `user`, `admin`) đóng gói 3 fat-JAR độc lập (`user.jar`, `admin.jar`, `server.jar`) đọc file cấu hình ngoài trong `release/` |
 | Giao tiếp | HTTPS REST + WSS, dữ liệu JSON |
-| Mã hóa nhóm | E2EE; chưa chọn giao thức/thư viện mật mã |
-| Email | SMTP cho xác minh email và khôi phục mật khẩu; chưa chọn nhà cung cấp |
-| AI | Muse API cho cả **chỉnh sửa câu nháp và gợi ý trả lời** (2 nút riêng trên thanh soạn tin); model/quyền truy cập cần xác minh, ngân sách mục tiêu 2 USD/tháng |
-| Triển khai | Server trên Internet; hosting/tên miền chưa chọn, ngân sách dự kiến 5–10 USD/tháng |
+| Bảo mật & Mật khẩu | Băm mật khẩu bằng **Argon2id** qua `Spring Security Crypto` + `Bouncy Castle` theo chuẩn OWASP (`m=19456 KiB` / 19 MiB, `t=2`, `p=1`) |
+| Mã hóa nhóm (E2EE) | **Hybrid E2EE** trên JDK JCA + Bouncy Castle (`AES-256-GCM` cho tin nhắn/lịch sử + `X25519`/`Ed25519` bọc khóa thành viên và xoay khóa; `PBKDF2`/`Argon2` cho bản sao lưu khóa khôi phục) |
+| Email | **Gmail SMTP** (App Password, cổng `587` STARTTLS / `465` SMTPS) qua `Spring Mail` (`JavaMailSender`) cho xác minh email và khôi phục mật khẩu, cấu hình qua file ngoài |
+| AI | Muse API cho cả **chỉnh sửa câu nháp và gợi ý trả lời** (2 nút riêng trên thanh soạn tin); ngân sách mục tiêu 2 USD/tháng |
+| Kiểm thử (Testing) | JUnit 5 (Jupiter) + AssertJ + Mockito + Spring Boot Test (kiểm thử tích hợp trên PostgreSQL / Testcontainers) |
+| Triển khai | VPS Linux (Hetzner / DigitalOcean, 4–6 USD/tháng, mở cổng SMTP `587`/`465`), chạy Docker Compose (Spring Boot Server + PostgreSQL 18 + Reverse Proxy tự cấp TLS cho HTTPS/WSS) |
 
-**Kiến trúc:** User Client / Admin App (Desktop GUI) → Server → PostgreSQL, SMTP, LLM API. Thông tin đăng nhập database và API key dịch vụ chỉ ở server.
+**Kiến trúc:** User Client / Admin App (Desktop GUI) → Server → PostgreSQL, Gmail SMTP, LLM API. Thông tin đăng nhập database, SMTP và API key dịch vụ chỉ ở server (hoặc file cấu hình theo yêu cầu gói nộp `release/`).
 
-**Nền tảng:** ưu tiên nghiệm thu Windows Intel x64; Arch Linux x64 và macOS Apple Silicon arm64 phục vụ phát triển. Phát hành đủ ba OS là phạm vi bổ sung. Gói nộp giữ JAR user/admin, cấu hình và thành phần server cần thiết.
+**Nền tảng & Cấu hình máy tối thiểu:**
+- **Hệ điều hành:** ưu tiên nghiệm thu Windows Intel x64; Arch Linux x64 và macOS Apple Silicon arm64 phục vụ phát triển. Phát hành đủ ba OS là phạm vi bổ sung.
+- **Cấu hình máy tối thiểu:** CPU 2 vCPU, RAM 4 GB, cài sẵn JDK 25, độ phân giải màn hình tối thiểu `1366x768`.
+- **Gói nộp (`release/`):** giữ các file JAR chạy được (`user.jar`, `admin.jar`, kèm `server.jar`) và file cấu hình kết nối ngoài.
 
-**Còn cần chốt:** cặp JavaFX/AtlantaFX, phiên bản dependency cụ thể, framework test, cấu hình máy tối thiểu, hosting/SMTP, giao thức E2EE và thuật toán/tham số băm mật khẩu. Chưa cấu hình lệnh build/test/launch.
+**Còn mở:** xác minh quyền truy cập/tên model thực tế của Muse API và khởi tạo bộ khung Maven multi-module (`pom.xml`, `mvnw`) để cố định các lệnh build/test/launch.
