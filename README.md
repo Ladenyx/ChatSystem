@@ -21,6 +21,7 @@ ChatSystem/
 ├── src/
 │   ├── common/                    # DTO và mô hình giao thức dùng chung
 │   ├── server/                    # Nghiệp vụ, persistence và tích hợp dịch vụ
+│   ├── desktop-ui/                # Điều hướng, overlay, theme dùng chung cho desktop
 │   ├── user/                      # User Client — JavaFX desktop GUI
 │   └── admin/                     # Admin App — JavaFX desktop GUI
 ├── script/                        # Script PostgreSQL
@@ -50,7 +51,7 @@ Mỗi module trong `src/` giữ cấu trúc Maven chuẩn:
 
 Với `user` và `admin`, tài nguyên nằm trong `src/main/resources/com/chatsystem/<module>/`, gồm `fxml/`, `css/`, `images/`. Các file `.gitkeep` giữ thư mục trống trong Git. Đường dẫn tài nguyên tuyệt đối khi dùng `getResource` sẽ có dạng `/com/chatsystem/user/fxml/<view>.fxml`.
 
-`server`, `user`, `admin` phụ thuộc vào `common`; `common` không phụ thuộc JavaFX hay framework server. Hai ứng dụng desktop không phụ thuộc trực tiếp vào module `server`. Đây là các **Maven module**; chưa sử dụng Java Platform Module System (`module-info.java`).
+`server`, `user`, `admin` phụ thuộc vào `common`; `common` không phụ thuộc JavaFX hay framework server. `user` và `admin` dùng thêm thư viện `desktop-ui` cho điều hướng, overlay và theme; `server` không phụ thuộc thư viện này. Đây là các **Maven module**; chưa sử dụng Java Platform Module System (`module-info.java`).
 
 ## Build và kiểm tra
 
@@ -82,9 +83,36 @@ Chạy kiểm thử JUnit 5:
 ./mvnw test
 ```
 
-Hiện tại là khung dự án của mục **1.1**, chưa có test case; lệnh `test` thực thi pha kiểm thử nhưng chưa kiểm tra hành vi ứng dụng. Khi thêm kiểm thử, đặt class tên `<ClassName>Test` trong `src/test/java` của module tương ứng.
+Build mặc định không cần màn hình và bỏ qua các lớp kiểm thử GUI. Kiểm thử JavaFX cần desktop session hoặc Xvfb trên Linux và phải bật profile riêng:
 
-Kết quả build nằm trong `target/` của từng module; `user`, `admin`, `server` tạo lần lượt `user.jar`, `admin.jar`, `server.jar`. Các JAR hiện tại là thư viện khung, **chưa chạy độc lập**. Lớp khởi chạy JavaFX, theme và lệnh launch sẽ được bổ sung ở mục **1.2**; Spring Boot, nghiệp vụ server và đóng gói fat-JAR thuộc công việc tiếp theo. Chưa có lệnh khởi chạy ứng dụng ở bước này.
+```sh
+./mvnw -Pui-tests verify
+```
+
+Profile này kiểm tra điều hướng/quay lại, giữ trạng thái trang, reset phiên, lỗi FXML, theme, modal/drawer/popover và khởi chạy hai ứng dụng. Không bật profile thì các kiểm thử cần JavaFX được đánh dấu **skipped**. Đặt class tên `<ClassName>Test` trong `src/test/java` của module tương ứng. Xem [hướng dẫn kiểm thử UI](docs/architecture/desktop-ui.md#kiểm-thử).
+
+## Chạy User Client và Admin App
+
+Cài các module dùng chung vào Maven local repository trước lần chạy đầu và sau khi sửa chúng:
+
+```sh
+./mvnw install
+```
+
+Mở hai terminal riêng từ thư mục gốc:
+
+```sh
+./mvnw -pl src/user javafx:run
+./mvnw -pl src/admin javafx:run
+```
+
+Windows PowerShell dùng `.\mvnw.cmd install`, `.\mvnw.cmd -pl src/user javafx:run` và `.\mvnw.cmd -pl src/admin javafx:run`. Các lệnh này cần JDK 25 và môi trường đồ họa. Chạy `javafx:run` trên module ứng dụng, không thêm `-am` vào lệnh launch.
+
+Hai ứng dụng mở thẳng **bản xem giao diện ngoại tuyến**. Dùng rail/sidebar để chuyển trang, nút Quay lại hoặc **Alt + ←**, nút đổi sáng/tối và **Hiển thị** để mở popover. User Client có **Hồ sơ**, **Tạo nhóm mới** (modal), **Thông tin** (drawer); dùng nút **Đóng** hoặc **Esc** để đóng. **Thoát** đóng ứng dụng; chưa có phiên đăng nhập ở bước 1.2.
+
+Các trang và hộp thoại hiện là khung rỗng để gắn FXML nghiệp vụ ở giai đoạn 3–4. Bộ dữ liệu mẫu thuộc mục 1.3. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và ảnh chạy thực tế trong `docs/images/navigation-theme/`.
+
+Kết quả build nằm trong `target/` của từng module; `user`, `admin`, `server` tạo lần lượt `user.jar`, `admin.jar`, `server.jar`. Hiện chạy desktop qua Maven/IDE; đóng gói fat-JAR chạy bằng `java -jar` và Spring Boot server thuộc công việc tiếp theo.
 
 ## Cấu hình và đóng gói
 

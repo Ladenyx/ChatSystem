@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.chatsystem.desktop.controller.DisplayOptionsController"
+      spacing="16" prefWidth="300" styleClass="display-options">
+    <Label text="Giao diện" styleClass="section-title"/>
+    <HBox spacing="8">
+        <ToggleButton fx:id="lightButton" id="lightTheme" text="Sáng" onAction="#useLight" prefWidth="120"/>
+        <ToggleButton fx:id="darkButton" id="darkTheme" text="Tối" onAction="#useDark" prefWidth="120"/>
+    </HBox>
+    <CheckBox fx:id="reducedMotion" text="Giảm chuyển động"/>
+</VBox>

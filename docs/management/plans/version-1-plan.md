@@ -16,9 +16,12 @@ Mục tiêu là tạo "xương sống" để mọi thành viên có thể kéo c
   - Đã thiết lập Maven Wrapper (`mvnw`, `mvnw.cmd`, Maven 3.9.11) với cấu trúc multi-module (`common`, `server`, `user`, `admin`) trong `src/` theo [tech-stack.md](../../decisions/tech-stack.md) (`Eclipse Temurin JDK 25`, `JavaFX 25`, `AtlantaFX 2.0.1`, `Ikonli 12.4.0`), giữ các thư mục nộp bài (`src/`, `script/`, `git/`) cùng `report/`, `release/`, `docs/images/`.
   - POM cha quản lý phiên bản thư viện/plugin, kiểm tra JDK/Maven; mỗi module có thư mục nguồn, tài nguyên và kiểm thử chuẩn Maven. Xem lệnh build/test và phạm vi khung tại [README.md](../../../README.md).
   - Đã kiểm tra `./mvnw clean verify` cho toàn bộ reactor và `./mvnw -pl src/user -am verify` với Temurin JDK 25 trên Linux; `validate` với JDK 17 bị từ chối đúng yêu cầu. Chưa có test case hoặc lớp khởi chạy ứng dụng ở bước này.
-- [ ] **1.2. Xây dựng bộ khung điều hướng (Navigation / Scene Manager) & Theme**
+- [x] **1.2. Xây dựng bộ khung điều hướng (Navigation / Scene Manager) & Theme**
   - Khởi tạo class khởi chạy cho **User Client** và **Admin App**, nạp theme `Primer Light` / `Primer Dark` của AtlantaFX.
   - Tạo `ViewNavigator` cho phép chuyển đổi giữa các màn hình FXML và bật các hộp thoại Modal/Drawer/Popover để phục vụ demo luồng màn hình và chụp ảnh báo cáo.
+  - Đã có `UserApplication` / `AdminApplication`, rail/sidebar tham chiếu Figma, đổi Primer Light/Dark trực tiếp, cache trang, lịch sử quay lại, reset phiên và quản lý focus/đóng overlay. Thêm thư viện `desktop-ui` để chia sẻ UI mà giữ `common`/`server` độc lập với JavaFX.
+  - Đã kiểm tra 10 test GUI trên Linux với Temurin JDK 25 + Xvfb, bao gồm kích thước nội dung 1280 × 720 và 1024 × 640, cùng lệnh launch Maven cho cả hai ứng dụng. Xem [kiến trúc và cách gắn FXML](../../architecture/desktop-ui.md), [ảnh chạy thực tế](../../images/navigation-theme/README.md) và [lệnh launch](../../../README.md#chạy-user-client-và-admin-app).
+  - Các route nghiệp vụ hiện dùng nội dung khung; bộ dữ liệu mẫu và các màn hình/biểu mẫu đầy đủ vẫn thuộc mục 1.3 và giai đoạn 3–4.
 - [ ] **1.3. Tạo bộ dữ liệu giả lập (UI Mock / Dummy Models)**
   - Tạo sẵn các class dữ liệu hiển thị (Record/ViewModel) chứa danh sách người dùng mẫu, tin nhắn mẫu, nhóm mẫu, báo cáo spam mẫu và số liệu 12 tháng để các bảng (`TableView`), danh sách (`ListView`) và biểu đồ (`BarChart`) hiển thị đầy đặn khi chạy UI.
 

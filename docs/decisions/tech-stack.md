@@ -6,7 +6,7 @@
 | Desktop UI | JavaFX 25, FXML/CSS cho cả **User Client** và **Admin App** (đều là ứng dụng Desktop GUI trực quan, không dùng CLI/Console cho phân hệ quản trị); AtlantaFX 2.0.1 (theme Primer Light / Primer Dark) + Ikonli (bộ icon đồng bộ) |
 | Backend | Spring Boot 4.1.x |
 | Database | PostgreSQL 18; JDBC/JdbcTemplate (kết hợp In-Memory state `ConcurrentHashMap` / `Caffeine` trên Server cho trạng thái Online/Offline và phiên WebSocket; `pg_trgm` + `unaccent` cho tìm kiếm văn bản) |
-| Build & Đóng gói | Maven 3.9 qua Maven Wrapper (`mvnw`), kiến trúc multi-module (`common`, `server`, `user`, `admin`) đóng gói 3 fat-JAR độc lập (`user.jar`, `admin.jar`, `server.jar`) đọc file cấu hình ngoài trong `release/` |
+| Build & Đóng gói | Maven 3.9 qua Maven Wrapper (`mvnw`); bốn module nghiệp vụ (`common`, `server`, `user`, `admin`) và thư viện JavaFX dùng chung `desktop-ui`; mục tiêu đóng gói 3 fat-JAR độc lập (`user.jar`, `admin.jar`, `server.jar`) đọc file cấu hình ngoài trong `release/` |
 | Giao tiếp | HTTPS REST + WSS, dữ liệu JSON |
 | Bảo mật & Mật khẩu | Băm mật khẩu bằng **Argon2id** qua `Spring Security Crypto` + `Bouncy Castle` theo chuẩn OWASP (`m=19456 KiB` / 19 MiB, `t=2`, `p=1`) |
 | Mã hóa nhóm (E2EE) | **Hybrid E2EE** trên JDK JCA + Bouncy Castle (`AES-256-GCM` cho tin nhắn/lịch sử + `X25519`/`Ed25519` bọc khóa thành viên và xoay khóa; `PBKDF2`/`Argon2` cho bản sao lưu khóa khôi phục) |
@@ -22,4 +22,4 @@
 - **Cấu hình máy tối thiểu:** CPU 2 vCPU, RAM 4 GB, cài sẵn JDK 25, độ phân giải màn hình tối thiểu `1366x768`.
 - **Gói nộp (`release/`):** giữ các file JAR chạy được (`user.jar`, `admin.jar`, kèm `server.jar`) và file cấu hình kết nối ngoài.
 
-**Khung build đã khởi tạo (Version 1, mục 1.1):** Maven Wrapper 3.9.11 (`mvnw`, `mvnw.cmd`), bốn module trong `src/`, POM cha quản lý JavaFX 25, AtlantaFX 2.0.1, Ikonli 12.4.0 và JUnit 5.13.4; lệnh build/test tại [README.md](../../README.md#build-và-kiểm-tra). Mục 1.2 sẽ bổ sung lớp khởi chạy JavaFX và lệnh launch; Spring Boot và fat-JAR sẽ được triển khai ở giai đoạn tiếp theo.
+**Khung build/UI đã khởi tạo (Version 1, mục 1.1–1.2):** Maven Wrapper 3.9.11 (`mvnw`, `mvnw.cmd`), các module trong `src/`, POM cha quản lý JavaFX 25, AtlantaFX 2.0.1, Ikonli 12.4.0 và JUnit 5.13.4. `UserApplication` / `AdminApplication` chạy bằng `javafx:run`, dùng thư viện `desktop-ui` cho điều hướng FXML, overlay và Primer Light/Dark. Xem [lệnh build/test/launch](../../README.md#chạy-user-client-và-admin-app) và [kiến trúc desktop](../architecture/desktop-ui.md). Spring Boot và fat-JAR sẽ được triển khai ở giai đoạn tiếp theo.
