@@ -77,7 +77,9 @@ Các route modal hiện dùng nội dung khung. Profile, tạo nhóm, thông tin
 
 CSS chung ở `src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css`. Dùng các màu ngữ nghĩa `-cs-canvas`, `-cs-surface`, `-cs-text`, `-cs-muted`, `-cs-border`, `-cs-brand`, … thay vì gán màu rải rác vào từng FXML. Màu xanh nút chính giữ độ tương phản với chữ trắng trong cả hai theme.
 
-Đã đối chiếu [các node Figma](figma_links.md): Foundations (`19:71`), User rail (`35:2`), Admin sidebar (`192:1076`). Áp dụng Inter, body 14 px, spacing theo lưới 4 px, radius 4 px, màu brand sáng `#0F6CBD`, rail 72 px và sidebar 224 px. Icon đang dùng **Ikonli Feather** theo tech stack; các màn hình nghiệp vụ và icon vector riêng trong Figma sẽ được đối chiếu khi triển khai từng màn hình. Wireframe màu xám không thay thế theme Primer đã chốt.
+File Figma hiện gồm wireframe và các tài liệu/thành phần tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Đây chưa phải bộ giao diện trực quan cuối cùng đã chốt.
+
+Khung 1.2 tham khảo [các node đang có](figma_links.md): Foundations (`19:71`), User rail (`35:2`), Admin sidebar (`192:1076`). Các lựa chọn hiện tại gồm Inter, body 14 px, spacing theo lưới 4 px, radius 4 px, màu brand sáng `#0F6CBD`, rail 72 px và sidebar 224 px; không coi đây là xác nhận thiết kế cuối cùng của nhóm. Icon dùng **Ikonli Feather** và theme dùng Primer theo tech stack. Khi triển khai màn hình nghiệp vụ, bám wireframe Admin đã hoàn thành và cập nhật phần User theo tiến độ hoàn thiện wireframe.
 
 Nút Hiển thị cung cấp chọn sáng/tối và giảm chuyển động. Tùy chọn giảm chuyển động bỏ hiệu ứng drawer/popover; có thể đặt mặc định bằng JVM property `-Dchatsystem.reducedMotion=true`. Tùy chọn hiện giữ trong lần chạy, chưa lưu vào cấu hình tài khoản.
 

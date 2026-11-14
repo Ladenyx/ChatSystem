@@ -22,6 +22,7 @@ Mục tiêu là tạo "xương sống" để mọi thành viên có thể kéo c
   - Đã có `UserApplication` / `AdminApplication`, rail/sidebar tham chiếu Figma, đổi Primer Light/Dark trực tiếp, cache trang, lịch sử quay lại, reset phiên và quản lý focus/đóng overlay. Thêm thư viện `desktop-ui` để chia sẻ UI mà giữ `common`/`server` độc lập với JavaFX.
   - Đã kiểm tra 10 test GUI trên Linux với Temurin JDK 25 + Xvfb, bao gồm kích thước nội dung 1280 × 720 và 1024 × 640, cùng lệnh launch Maven cho cả hai ứng dụng. Xem [kiến trúc và cách gắn FXML](../../architecture/desktop-ui.md), [ảnh chạy thực tế](../../images/navigation-theme/README.md) và [lệnh launch](../../../README.md#chạy-user-client-và-admin-app).
   - Các route nghiệp vụ hiện dùng nội dung khung; bộ dữ liệu mẫu và các màn hình/biểu mẫu đầy đủ vẫn thuộc mục 1.3 và giai đoạn 3–4.
+  - Trạng thái Figma theo cập nhật của nhóm: wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành; file còn có các thành phần/tài liệu tham khảo, chưa phải bộ giao diện cuối cùng đã chốt. Khung 1.2 tham khảo phần đang có và không đồng nghĩa hoàn tất triển khai các wireframe.
 - [ ] **1.3. Tạo bộ dữ liệu giả lập (UI Mock / Dummy Models)**
   - Tạo sẵn các class dữ liệu hiển thị (Record/ViewModel) chứa danh sách người dùng mẫu, tin nhắn mẫu, nhóm mẫu, báo cáo spam mẫu và số liệu 12 tháng để các bảng (`TableView`), danh sách (`ListView`) và biểu đồ (`BarChart`) hiển thị đầy đặn khi chạy UI.
 

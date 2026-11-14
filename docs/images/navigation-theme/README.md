@@ -1,6 +1,6 @@
 # Ảnh chạy thực tế — Khung điều hướng & Theme
 
-Ảnh được render từ ứng dụng JavaFX khi chạy kiểm thử trên Linux, Temurin JDK 25, JavaFX 25, AtlantaFX 2.0.1 và màn hình ảo Xvfb. Đây là **khung UI của mục 1.2**, chưa phải các màn hình nghiệp vụ hoàn thiện từ Figma.
+Ảnh được render từ ứng dụng JavaFX khi chạy kiểm thử trên Linux, Temurin JDK 25, JavaFX 25, AtlantaFX 2.0.1 và màn hình ảo Xvfb. Đây là **khung UI của mục 1.2**. Figma hiện chủ yếu là wireframe và tài liệu tham khảo: wireframe Admin đã hoàn thành, User chưa hoàn thành; các ảnh này không đại diện cho bản triển khai đầy đủ hoặc thiết kế cuối cùng đã được nhóm chốt.
 
 | Ảnh | Nội dung |
 | --- | --- |

@@ -112,6 +112,8 @@ Hai ứng dụng mở thẳng **bản xem giao diện ngoại tuyến**. Dùng r
 
 Các trang và hộp thoại hiện là khung rỗng để gắn FXML nghiệp vụ ở giai đoạn 3–4. Bộ dữ liệu mẫu thuộc mục 1.3. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và ảnh chạy thực tế trong `docs/images/navigation-theme/`.
 
+Figma hiện gồm wireframe và tài liệu tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Các lựa chọn trực quan của khung 1.2 chưa được coi là thiết kế cuối cùng đã chốt của nhóm.
+
 Kết quả build nằm trong `target/` của từng module; `user`, `admin`, `server` tạo lần lượt `user.jar`, `admin.jar`, `server.jar`. Hiện chạy desktop qua Maven/IDE; đóng gói fat-JAR chạy bằng `java -jar` và Spring Boot server thuộc công việc tiếp theo.
 
 ## Cấu hình và đóng gói
