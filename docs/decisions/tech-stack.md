@@ -11,7 +11,7 @@
 | Bảo mật & Mật khẩu | Băm mật khẩu bằng **Argon2id** qua `Spring Security Crypto` + `Bouncy Castle` theo chuẩn OWASP (`m=19456 KiB` / 19 MiB, `t=2`, `p=1`) |
 | Mã hóa nhóm (E2EE) | **Hybrid E2EE** trên JDK JCA + Bouncy Castle (`AES-256-GCM` cho tin nhắn/lịch sử + `X25519`/`Ed25519` bọc khóa thành viên và xoay khóa; `PBKDF2`/`Argon2` cho bản sao lưu khóa khôi phục) |
 | Email | **Gmail SMTP** (App Password, cổng `587` STARTTLS / `465` SMTPS) qua `Spring Mail` (`JavaMailSender`) cho xác minh email và khôi phục mật khẩu, cấu hình qua file ngoài |
-| AI | Muse API cho cả **chỉnh sửa câu nháp và gợi ý trả lời** (2 nút riêng trên thanh soạn tin); ngân sách mục tiêu 2 USD/tháng |
+| AI | **Meta Model API (Muse API)** (`POST https://api.meta.ai/v1/chat/completions`, model mặc định `muse-spark-1.3-contributor`, `response_format: json_schema`, `reasoning_effort: "minimal"`/`"low"`) cho cả **chỉnh sửa câu nháp và gợi ý trả lời** (2 nút riêng trên thanh soạn tin); ngân sách mục tiêu 2 USD/tháng, cấu hình qua file server |
 | Kiểm thử (Testing) | JUnit 5 (Jupiter) + AssertJ + Mockito + Spring Boot Test (kiểm thử tích hợp trên PostgreSQL / Testcontainers) |
 | Triển khai | VPS Linux (Hetzner / DigitalOcean, 4–6 USD/tháng, mở cổng SMTP `587`/`465`), chạy Docker Compose (Spring Boot Server + PostgreSQL 18 + Reverse Proxy tự cấp TLS cho HTTPS/WSS) |
 
@@ -23,5 +23,3 @@
 - **Gói nộp (`release/`):** giữ các file JAR chạy được (`user.jar`, `admin.jar`, kèm `server.jar`) và file cấu hình kết nối ngoài.
 
 **Khung build đã khởi tạo (Version 1, mục 1.1):** Maven Wrapper 3.9.11 (`mvnw`, `mvnw.cmd`), bốn module trong `src/`, POM cha quản lý JavaFX 25, AtlantaFX 2.0.1, Ikonli 12.4.0 và JUnit 5.13.4; lệnh build/test tại [README.md](../../README.md#build-và-kiểm-tra). Mục 1.2 sẽ bổ sung lớp khởi chạy JavaFX và lệnh launch; Spring Boot và fat-JAR sẽ được triển khai ở giai đoạn tiếp theo.
-
-**Còn mở:** xác minh quyền truy cập/tên model thực tế của Muse API.
