@@ -13,7 +13,7 @@ Hai trọng tâm cốt lõi của Version 1:
 Mục tiêu là tạo "xương sống" để mọi thành viên có thể kéo code về và làm giao diện độc lập trên nhánh riêng mà không xung đột.
 
 - [x] **1.1. Khởi tạo cấu trúc Maven & thư mục chuẩn**
-  - Đã thiết lập Maven Wrapper (`mvnw`, `mvnw.cmd`, Maven 3.9.11) với cấu trúc multi-module (`common`, `server`, `user`, `admin`) trong `src/` theo [tech-stack.md](../../decisions/tech-stack.md) (`Eclipse Temurin JDK 25`, `JavaFX 25`, `AtlantaFX 2.0.1`, `Ikonli 12.4.0`), giữ các thư mục nộp bài (`src/`, `script/`, `git/`) cùng `report/`, `release/`, `docs/images/`.
+  - Đã thiết lập Maven Wrapper (`mvnw`, `mvnw.cmd`, Maven 3.9.11) với cấu trúc multi-module gồm bốn module nghiệp vụ (`common`, `server`, `user`, `admin`) và thư viện JavaFX dùng chung `desktop-ui` trong `src/` theo [tech-stack.md](../../decisions/tech-stack.md) (`Eclipse Temurin JDK 25`, `JavaFX 25`, `AtlantaFX 2.0.1`, `Ikonli 12.4.0`), giữ các thư mục nộp bài (`src/`, `script/`, `git/`) cùng `report/`, `release/`, `docs/images/`.
   - POM cha quản lý phiên bản thư viện/plugin, kiểm tra JDK/Maven; mỗi module có thư mục nguồn, tài nguyên và kiểm thử chuẩn Maven. Xem lệnh build/test và phạm vi khung tại [README.md](../../../README.md).
   - Đã kiểm tra `./mvnw clean verify` cho toàn bộ reactor và `./mvnw -pl src/user -am verify` với Temurin JDK 25 trên Linux; `validate` với JDK 17 bị từ chối đúng yêu cầu. Chưa có test case hoặc lớp khởi chạy ứng dụng ở bước này.
 - [x] **1.2. Xây dựng bộ khung điều hướng (Navigation / Scene Manager) & Theme**
@@ -40,9 +40,10 @@ Thực hiện song song với Giai đoạn 1–3 để sớm chốt cấu trúc 
   - **Nhóm Hội thoại, Nhóm chat & Tin nhắn (`U-12`–`U-24`, `A-08`, `A-09`, `A-15`):** `conversations` (1-1 và nhóm), `conversation_members` (vai trò `ADMIN`/`MEMBER`, thời điểm tham gia/rời), `messages` (hỗ trợ bản rõ 1-1, bản mã E2EE, trạng thái thu hồi 48h), `message_deletions` (xóa phía mình theo từng user).
   - **Nhóm Khóa E2EE (`U-25`):** `e2ee_devices` (khóa công khai `X25519`/`Ed25519`), `e2ee_key_backups` (bản sao lưu khóa mã hóa bằng mã khôi phục), `e2ee_group_key_envelopes` (khóa phiên nhóm bọc cho từng thành viên/thiết bị).
   - **Nhóm Báo cáo Spam (`U-26`, `A-10`, `A-11`):** `spam_reports`, `spam_report_evidences` (lưu gói bằng chứng Selected + tối đa 30 tin Context theo [account-lifecycle.md](../../decisions/account-lifecycle.md)).
-- [ ] **2.2. Viết và kiểm thử `script/`**
+- [ ] **2.2. Viết và kiểm thử `script/` (kèm `compose.yaml`)**
   - Viết file SQL khởi tạo trong `script/` (ví dụ `script/schema.sql` và `script/seed.sql` hoặc gộp theo quy ước nhóm) kèm các `INDEX` quan trọng (như `(conversation_id, created_at DESC)`, `pg_trgm` + `unaccent` cho tìm kiếm tên/tin nhắn).
-  - **Kiểm tra bắt buộc:** Chạy script từ đầu trên một database PostgreSQL 18 trống để chắc chắn không có lỗi cú pháp hay thứ tự khóa ngoại.
+  - Bổ sung `compose.yaml` (Docker Compose cho **PostgreSQL 18** gắn `./script` vào `/docker-entrypoint-initdb.d:ro`) để cả 3 môi trường phát triển của nhóm (Arch Linux, macOS, Windows) kiểm thử khởi tạo DB trống đồng nhất 100%.
+  - **Kiểm tra bắt buộc:** Chạy script từ đầu trên một database PostgreSQL 18 trống (qua `docker compose` và đảm bảo file `.sql` trong `script/` vẫn chạy độc lập được trên PostgreSQL cài trực tiếp trên Windows) để chắc chắn không có lỗi cú pháp hay thứ tự khóa ngoại.
 
 ---
 
@@ -65,7 +66,7 @@ Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thà
   - `U-SCR-08`: 5 phân mục (sub-tab): *Tất cả bạn bè*, *Đang Online*, *Lời mời kết bạn*, *Tìm người dùng*, *Đã chặn*.
   - `U-DLG-01`: Hồ sơ & Bảo mật Tài khoản (Hồ sơ, Đổi mật khẩu, Quản lý khóa E2EE).
   - `U-DLG-02`: Tạo nhóm chat mới.
-  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend`, kèm bước xem trước/xác nhận gửi bản rõ).
+  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend` theo [llm-assistant.md](../../decisions/llm-assistant.md)): chọn tối đa **5 tin nhắn** ngữ cảnh cho `Recommend`, hiển thị **3 phương án** trả về cho mỗi yêu cầu, và có bước xem trước/xác nhận nêu rõ bản rõ gửi tới Server & Meta Model API (kèm lưu ý dữ liệu có thể được dùng huấn luyện mô hình tương lai khi dùng `muse-spark-1.3-contributor`).
   - `U-DLG-04`: Báo cáo Spam (chọn tin vi phạm, lý do và xem trước gói bằng chứng).
   - `U-DLG-05`: Chọn Admin kế nhiệm.
 
@@ -105,7 +106,8 @@ Theo bảng **Version 1 deliverables** và **Pre-submission checks** tại [ROAD
   - Thông tin nhóm, danh sách công việc của từng thành viên và bảng tỷ lệ đóng góp (tổng cộng đúng **100%**).
   - Thiết kế cơ sở dữ liệu (sơ đồ ERD + giải thích các bảng/ràng buộc chính).
   - Danh sách toàn bộ màn hình đã thiết kế kèm **ảnh chụp màn hình thực tế chạy từ ứng dụng JavaFX**.
-- [ ] **5.4. Kiểm tra cấu trúc gói nộp cuối cùng**
-  - Đảm bảo file nén chứa đúng `src/`, `script/`, `git/` và file Báo cáo theo đúng quy định của đề bài.
+- [ ] **5.4. Kiểm thử chéo trên Windows & kiểm tra cấu trúc gói nộp cuối cùng**
+  - Chạy kiểm thử giao diện trực tiếp trên máy **Windows** (`.\mvnw.cmd -pl src/user javafx:run` và `.\mvnw.cmd -pl src/admin javafx:run` ở độ phân giải tối thiểu `1366x768`) để xác nhận không lỗi font tiếng Việt, không lệch/tràn bố cục so với máy Arch Linux và macOS trước khi chụp ảnh đưa vào báo cáo.
+  - Đảm bảo file nén chứa đúng `src/`, `script/`, `git/` và file Báo cáo theo đúng quy định của đề bài (kèm POM cha, `mvnw`, `mvnw.cmd`, `.mvn/` để build được từ đầu).
   - Kiểm tra không commit hoặc đóng gói kèm mật khẩu, API key hay thông tin nhạy cảm thật.
 
