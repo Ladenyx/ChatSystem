@@ -66,4 +66,8 @@
     > **CHÚ Ý:** chỉ gửi toàn bộ tin context nếu số tin <= 30 ngay tại thời điểm xử lý, tránh việc sau khi xác nhận số tin <= 30 nhưng sau đó số tin bỗng tăng lên mà hệ thống lại đi gửi toàn bộ tin thì không đúng.
     - Gói được xem trước/xác nhận đầy đủ; thử lại cùng yêu cầu giữ nguyên gói, không tự lấy tin mới.
 
-**Còn mở:** băm mật khẩu (Argon2id mới là ứng viên), thời hạn phiên, bảo vệ admin hệ thống cuối, cơ chế mã xác minh email và retention/purge dữ liệu.
+## Kiểm duyệt và thời hạn lưu báo cáo đã chốt
+
+[DEC-10](spam-moderation-and-retention.md) chốt ngày 15/11/2026: Admin chủ động đánh dấu đã xử lý kèm ghi chú; User chỉ gửi báo cáo. Selected tối đa 20 tin, Context tối đa 30 tin, toàn gói báo cáo đã xác nhận trước nén (lý do, ID/metadata và Evidence sau loại trùng) tối đa 1 MiB. Nội dung/lý do/ghi chú được giữ tối đa 180 ngày từ tiếp nhận, sau đó chỉ giữ metadata hồ sơ đã ẩn danh. Purge tài khoản sau 30 ngày vẫn loại định danh liên quan trước mốc này; không được retry để khôi phục hoặc gia hạn dữ liệu đã xóa.
+
+**Còn mở:** thời hạn phiên, bảo vệ admin hệ thống cuối, cơ chế mã xác minh email và chi tiết retention/purge các nhóm dữ liệu khác. Chính sách báo cáo spam đã được chốt ở DEC-10; chi tiết thực thi còn thuộc thiết kế SQL/backend.

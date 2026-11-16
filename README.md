@@ -29,7 +29,7 @@ ChatSystem/
 ├── report/                        # Báo cáo, ERD và tài liệu nộp bài
 ├── release/                       # JAR chạy được và cấu hình ngoài (Version 2)
 └── docs/
-    ├── images/                    # Ảnh dùng trong tài liệu
+    ├── architecture/              # Kiến trúc và hướng dẫn tích hợp UI
     ├── requirements/
     ├── decisions/
     └── management/
@@ -110,9 +110,9 @@ Windows PowerShell dùng `.\mvnw.cmd install`, `.\mvnw.cmd -pl src/user javafx:r
 
 Hai ứng dụng mở thẳng **bản xem giao diện ngoại tuyến**. Dùng rail/sidebar để chuyển trang, nút Quay lại hoặc **Alt + ←**, nút đổi sáng/tối và **Hiển thị** để mở popover. User Client có **Hồ sơ**, **Tạo nhóm mới** (modal), **Thông tin** (drawer); dùng nút **Đóng** hoặc **Esc** để đóng. **Thoát** đóng ứng dụng; chưa có phiên đăng nhập ở bước 1.2.
 
-Nút **hình cơ sở dữ liệu** trên toolbar (tooltip **Xem dữ liệu mẫu**) mở trang xem bộ mẫu của mục 1.3: 20 tài khoản, 9 hội thoại/126 tin nhắn, 4 nhóm, 6 báo cáo spam và biểu đồ đủ 12 tháng cho năm 2025/2026. Dữ liệu hư cấu cố định, dùng chung trong `desktop-ui`, có thêm nhật ký đăng nhập và chỉ số hoạt động. Xem [API, cách gắn TableView/ListView/BarChart và kiểm thử](docs/architecture/ui-mock-data.md), [ảnh trang dữ liệu mẫu](docs/images/ui-mock-data/README.md).
+Nút **hình cơ sở dữ liệu** trên toolbar (tooltip **Xem dữ liệu mẫu**) mở trang xem bộ mẫu của mục 1.3: 20 tài khoản, 9 hội thoại/126 tin nhắn, 4 nhóm, 6 báo cáo spam và biểu đồ đủ 12 tháng cho năm 2025/2026. Dữ liệu hư cấu cố định, dùng chung trong `desktop-ui`, có thêm nhật ký đăng nhập và chỉ số hoạt động. Xem [API, cách gắn TableView/ListView/BarChart và kiểm thử](docs/architecture/ui-mock-data.md), [ảnh trang dữ liệu mẫu trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md).
 
-Các trang và hộp thoại nghiệp vụ hiện là khung rỗng để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và ảnh khung điều hướng trong `docs/images/navigation-theme/`.
+Các trang và hộp thoại nghiệp vụ hiện là khung rỗng để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và [ảnh khung điều hướng trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md).
 
 Figma hiện gồm wireframe và tài liệu tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Các lựa chọn trực quan của khung 1.2 chưa được coi là thiết kế cuối cùng đã chốt của nhóm.
 

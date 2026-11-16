@@ -70,7 +70,7 @@
 - **Business Rules (BR)**:
   - **BR-01**: Đối tượng bị khóa bắt buộc là **tài khoản User bị báo cáo** gắn theo định danh bất biến trong báo cáo spam, tuyệt đối không tác động nhầm lên người gửi báo cáo; tư cách Admin nhóm chat của người bị báo cáo không miễn trừ thao tác khóa.
   - **BR-02**: Bắt buộc phải có bước **Admin** xác nhận tường minh trước khi thực thi khóa tài khoản.
-  - **BR-03**: Hiệu lực khóa và cơ chế thu hồi toàn bộ phiên tuân thủ đồng nhất quy tắc nghiệp vụ của `UC-ADM-USER-07` và [DEC-07](../../../../decisions/account-lifecycle.md). Việc khóa tài khoản không xóa bản ghi báo cáo spam hay bằng chứng đính kèm.
+  - **BR-03**: Hiệu lực khóa và cơ chế thu hồi toàn bộ phiên tuân thủ đồng nhất quy tắc nghiệp vụ của `UC-ADM-USER-07` và [DEC-07](../../../../decisions/account-lifecycle.md). Việc khóa tài khoản không xóa bản ghi báo cáo spam hay bằng chứng đính kèm. Việc khóa không tự đánh dấu báo cáo `REVIEWED`; Admin thực hiện thao tác riêng theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#đánh-dấu-đã-xử-lý). Việc giữ dữ liệu vẫn tuân thời hạn lưu và purge đã chốt.
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Máy chủ phải xác minh lại phiên, quyền Admin hệ thống và định danh tài khoản đích trực tiếp từ dữ liệu gốc của báo cáo, không tin cậy đơn thuần tham số gửi từ phía ứng dụng khách.
   - **NFR-02**: Hệ thống ngăn chặn xử lý trùng lặp khi cùng một yêu cầu khóa bị gửi lặp trong lúc đang chờ phản hồi.

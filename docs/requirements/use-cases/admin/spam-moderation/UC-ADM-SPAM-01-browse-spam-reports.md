@@ -26,7 +26,7 @@
 ### Basic Flow
 
 1. **Admin** mở chức năng tra cứu báo cáo spam.
-2. **Hệ thống** kiểm tra hiệu lực phiên, quyền Admin hệ thống và trả về danh sách các báo cáo spam hiện có theo thứ tự mặc định.
+2. **Hệ thống** kiểm tra hiệu lực phiên, quyền Admin hệ thống và trả về danh sách các hồ sơ báo cáo gốc còn lưu, chưa quá hạn 180 ngày từ tiếp nhận, theo thứ tự mặc định.
 3. **Admin** nhập điều kiện lọc (khoảng thời gian gửi báo cáo và/hoặc `username` của người bị báo cáo) và chọn tiêu chí sắp xếp (theo thời gian hoặc theo `username`).
 4. **Hệ thống** kiểm tra tính hợp lệ của khoảng thời gian, truy vấn và trả về danh sách báo cáo thỏa mãn tổ hợp lọc và sắp xếp đã chọn.
 5. **Admin** chọn một báo cáo cụ thể trong danh sách kết quả để kiểm tra chi tiết.
@@ -65,7 +65,7 @@
 3. Kết thúc Use Case.
 
 **Exception flow 4: Báo cáo được chọn không còn khả dụng**
-1. Từ bước #6 của Basic Flow, báo cáo vừa chọn không còn tồn tại tại thời điểm mở chi tiết.
+1. Từ bước #6 của Basic Flow, báo cáo vừa chọn không còn tồn tại hoặc đã hết hạn lưu tại thời điểm mở chi tiết.
 2. **Hệ thống** thông báo báo cáo không còn khả dụng, làm mới lại danh sách và không mở báo cáo khác thay thế.
 3. Quay lại bước #4 trong Basic Flow.
 
@@ -75,6 +75,7 @@
   - **BR-01**: Tiêu chí lọc và sắp xếp theo `username` áp dụng trên `username` của **tài khoản bị báo cáo**, không phải người gửi báo cáo.
   - **BR-02**: Khoảng thời gian lọc được tính theo múi giờ `Asia/Ho_Chi_Minh` (ngày kết thúc tính đến trước `00:00` của ngày kế tiếp theo [Thống kê và thời gian](../../../../decisions/statistics-and-time.md)).
   - **BR-03**: Nghiệp vụ tra cứu danh sách chỉ đọc dữ liệu; không tự động khóa tài khoản bị báo cáo và không tự đánh dấu báo cáo đã xử lý.
+  - **BR-04**: Danh sách này chỉ gồm hồ sơ gốc còn trong thời hạn lưu theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#lưu-nội-dung-180-ngày-và-metadata-ẩn-danh), kể cả khi tác vụ dọn vật lý chưa chạy. Archive ẩn danh chỉ là nguồn metadata/thống kê riêng, không JOIN theo `username`, không dùng mã hồ sơ cũ để tra cứu và không trộn vào danh sách kiểm duyệt như hồ sơ gốc.
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Mọi yêu cầu tra cứu báo cáo spam đều phải được kiểm tra quyền Admin hệ thống trên máy chủ trước khi trả dữ liệu.
   - **NFR-02**: Khi **Admin** thay đổi bộ lọc liên tiếp, kết quả trả về muộn của truy vấn cũ không được ghi đè kết quả của truy vấn mới nhất.
