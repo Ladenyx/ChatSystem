@@ -18,6 +18,8 @@ ChatSystem/
 ├── pom.xml                         # POM cha và danh sách module
 ├── mvnw / mvnw.cmd                 # Maven Wrapper cho Unix / Windows
 ├── .mvn/wrapper/                   # Phiên bản Maven và checksum
+├── compose.yaml                   # PostgreSQL 18 cho môi trường phát triển
+├── .env.example                   # Mẫu cấu hình cục bộ, sao chép thành .env
 ├── src/
 │   ├── common/                    # DTO và mô hình giao thức dùng chung
 │   ├── server/                    # Nghiệp vụ, persistence và tích hợp dịch vụ
@@ -52,6 +54,22 @@ Mỗi module trong `src/` giữ cấu trúc Maven chuẩn:
 Với `user` và `admin`, tài nguyên nằm trong `src/main/resources/com/chatsystem/<module>/`, gồm `fxml/`, `css/`, `images/`. Các file `.gitkeep` giữ thư mục trống trong Git. Đường dẫn tài nguyên tuyệt đối khi dùng `getResource` sẽ có dạng `/com/chatsystem/user/fxml/<view>.fxml`.
 
 `server`, `user`, `admin` phụ thuộc vào `common`; `common` không phụ thuộc JavaFX hay framework server. `user` và `admin` dùng thêm thư viện `desktop-ui` cho điều hướng, overlay và theme; `server` không phụ thuộc thư viện này. Đây là các **Maven module**; chưa sử dụng Java Platform Module System (`module-info.java`).
+
+## PostgreSQL cho nhóm phát triển
+
+Cài Docker Engine kèm Docker Compose trên Linux, hoặc Docker Desktop trên Windows/macOS; khởi động Docker trước khi chạy.
+
+Sao chép `.env.example` thành `.env` (`cp .env.example .env` trên Linux/macOS, `Copy-Item .env.example .env` trong PowerShell), rồi thay `POSTGRES_PASSWORD` bằng mật khẩu cục bộ của bạn. File `.env` đã được Git bỏ qua.
+
+```sh
+docker compose config --quiet
+docker compose up -d --wait db
+docker compose ps
+```
+
+Kết nối từ máy phát triển: host `127.0.0.1`, port `55432`, database/user `chatsystem`; mật khẩu lấy từ `.env`. Có thể đổi tên, user và port qua các biến `POSTGRES_*` trong file đó. Dữ liệu được giữ trong named volume khi chạy `docker compose down`.
+
+Compose nạp các script SQL trong `script/` khi khởi tạo volume trống. Xem [cách dùng PostgreSQL và script](script/README.md) để mở `psql`, xem log và xử lý khi script thay đổi. JavaFX tiếp tục chạy trực tiếp trên máy phát triển.
 
 ## Build và kiểm tra
 
