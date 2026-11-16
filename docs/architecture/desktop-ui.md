@@ -100,7 +100,7 @@ Trên Linux đã có Xvfb:
 xvfb-run -a -s "-screen 0 1440x1000x24" ./mvnw -Pui-tests verify
 ```
 
-Thêm `-Dchatsystem.capture=true` để ghi ảnh render vào `src/user/target/screenshots/` và `src/admin/target/screenshots/`. Profile dùng software renderer và giảm chuyển động để chụp ảnh ổn định, chạy ở nội dung cửa sổ 1280 × 720 và 1024 × 640. Ảnh khung điều hướng đã duyệt nằm tại [docs/images/navigation-theme](../images/navigation-theme/README.md). Mục 1.3 bổ sung [bộ dữ liệu và trang xem mẫu](ui-mock-data.md), kèm kiểm thử riêng. Chưa nghiệm thu Windows/macOS, biểu mẫu nghiệp vụ hoặc fat-JAR.
+Thêm `-Dchatsystem.capture=true` để ghi ảnh render vào `src/user/target/screenshots/` và `src/admin/target/screenshots/`. Profile dùng software renderer và giảm chuyển động để chụp ảnh ổn định, chạy ở nội dung cửa sổ 1280 × 720 và 1024 × 640. Ảnh khung điều hướng đã duyệt được lưu trong [lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md). Mục 1.3 bổ sung [bộ dữ liệu và trang xem mẫu](ui-mock-data.md), kèm kiểm thử riêng. Chưa nghiệm thu Windows/macOS, biểu mẫu nghiệp vụ hoặc fat-JAR.
 
 ## Khởi chạy
 

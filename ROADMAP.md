@@ -112,7 +112,7 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 
 X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
 
-Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, message/evidence lists, and twelve-month charts in both applications. See [mock data APIs and verification](docs/architecture/ui-mock-data.md) and [screenshots](docs/images/ui-mock-data/README.md). This supplies data for stages 3–4; individual business screens retain their current status.
+Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, message/evidence lists, and twelve-month charts in both applications. See [mock data APIs and verification](docs/architecture/ui-mock-data.md) and [screenshots in Git history](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md). This supplies data for stages 3–4; individual business screens retain their current status.
 
 ### User Client
 
