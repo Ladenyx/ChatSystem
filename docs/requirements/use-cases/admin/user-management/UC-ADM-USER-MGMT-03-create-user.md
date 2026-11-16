@@ -67,7 +67,7 @@
 
 - **Business Rules (BR)**:
   - **BR-01**: Nghiệp vụ này chỉ tạo tài khoản mang vai trò `USER`; không cấp quyền Admin hệ thống qua chức năng quản lý người dùng.
-  - **BR-02**: Quy tắc trường theo [DEC-07](../../../../decisions/account-lifecycle.md): `username` cố định 3–30 ký tự ASCII chữ/số/`_`; `họ tên` bắt buộc (1–100 ký tự sau trim); `email` bắt buộc (tối đa 254 ký tự, đúng định dạng); `địa chỉ` tùy chọn (tối đa 255 ký tự); `ngày sinh` hợp lệ không ở tương lai; `giới tính` tùy chọn (`Nam` / `Nữ` / `Khác`). `username` và `email` là duy nhất không phân biệt hoa thường sau khi cắt khoảng trắng đầu/cuối.
+  - **BR-02**: Quy tắc trường theo [DEC-07](../../../../decisions/account-lifecycle.md): `username` cố định 6–30 ký tự ASCII chữ/số/`_`/`-`; `họ tên` bắt buộc (1–100 ký tự sau trim); `email` bắt buộc (tối đa 254 ký tự, đúng định dạng); `địa chỉ` tùy chọn (tối đa 255 ký tự); `ngày sinh` hợp lệ không ở tương lai; `giới tính` tùy chọn (`Nam` / `Nữ` / `Khác`). `username` và `email` là duy nhất không phân biệt hoa thường sau khi cắt khoảng trắng đầu/cuối.
   - **BR-03**: Admin không đặt và không được xem mật khẩu của người dùng. Mật khẩu tạm có hiệu lực 15 phút kể từ khi máy chủ phát hành theo [DEC-06](../../../../decisions/password-reset-and-email.md); người dùng bắt buộc xác minh email và tự đặt mật khẩu riêng trước khi được cấp phiên sử dụng chat.
   - **BR-04**: `username` và `email` của tài khoản đang ở trạng thái xóa mềm (`DELETED`) chưa được phép tái sử dụng cho đến khi hoàn tất purge.
 - **Non-Functional Requirements (NFR)**:
