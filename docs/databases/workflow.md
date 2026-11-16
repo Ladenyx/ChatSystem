@@ -28,7 +28,7 @@ script/
 
 `00-core-users.sql` là định nghĩa `users` duy nhất; PK `id` có kiểu UUID. Bảng hiện chứa hồ sơ cơ bản để làm hợp đồng FK, chưa phải toàn bộ nhóm Tài khoản/Xác thực hay cơ chế đăng nhập. Thay đổi hợp đồng mỏ neo cần phối hợp; không tạo `users` stub ở mỗi luồng.
 
-Các file 10/20/30 và test nghiệp vụ tương ứng hiện để sẵn vị trí cho team triển khai. Chỉ smoke test mỏ neo/hạ tầng đã có. Mỗi người phát triển trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp.
+Mỗi người phát triển DDL và test nghiệp vụ trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp. Với luồng `messaging-e2ee-spam`, xem [mô hình và phạm vi kiểm thử](../../script/README.md#mô-hình-dữ-liệu-hội-thoại-e2ee-và-spam).
 
 ## Vòng kiểm thử độc lập
 
