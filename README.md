@@ -18,6 +18,8 @@ ChatSystem/
 ├── pom.xml                         # POM cha và danh sách module
 ├── mvnw / mvnw.cmd                 # Maven Wrapper cho Unix / Windows
 ├── .mvn/wrapper/                   # Phiên bản Maven và checksum
+├── compose.yaml                   # PostgreSQL 18 cho môi trường phát triển
+├── .env.example                   # Mẫu cấu hình cục bộ, sao chép thành .env
 ├── src/
 │   ├── common/                    # DTO và mô hình giao thức dùng chung
 │   ├── server/                    # Nghiệp vụ, persistence và tích hợp dịch vụ
@@ -29,7 +31,7 @@ ChatSystem/
 ├── report/                        # Báo cáo, ERD và tài liệu nộp bài
 ├── release/                       # JAR chạy được và cấu hình ngoài (Version 2)
 └── docs/
-    ├── images/                    # Ảnh dùng trong tài liệu
+    ├── architecture/              # Kiến trúc và hướng dẫn tích hợp UI
     ├── requirements/
     ├── decisions/
     └── management/
@@ -52,6 +54,22 @@ Mỗi module trong `src/` giữ cấu trúc Maven chuẩn:
 Với `user` và `admin`, tài nguyên nằm trong `src/main/resources/com/chatsystem/<module>/`, gồm `fxml/`, `css/`, `images/`. Các file `.gitkeep` giữ thư mục trống trong Git. Đường dẫn tài nguyên tuyệt đối khi dùng `getResource` sẽ có dạng `/com/chatsystem/user/fxml/<view>.fxml`.
 
 `server`, `user`, `admin` phụ thuộc vào `common`; `common` không phụ thuộc JavaFX hay framework server. `user` và `admin` dùng thêm thư viện `desktop-ui` cho điều hướng, overlay và theme; `server` không phụ thuộc thư viện này. Đây là các **Maven module**; chưa sử dụng Java Platform Module System (`module-info.java`).
+
+## PostgreSQL cho nhóm phát triển
+
+Cài Docker Engine kèm Docker Compose trên Linux, hoặc Docker Desktop trên Windows/macOS; khởi động Docker trước khi chạy.
+
+Sao chép `.env.example` thành `.env` (`cp .env.example .env` trên Linux/macOS, `Copy-Item .env.example .env` trong PowerShell), rồi thay `POSTGRES_PASSWORD` bằng mật khẩu cục bộ của bạn. File `.env` đã được Git bỏ qua.
+
+```sh
+docker compose config --quiet
+docker compose up -d --wait db
+docker compose ps
+```
+
+Kết nối từ máy phát triển: host `127.0.0.1`, port `55432`, database/user `chatsystem`; mật khẩu lấy từ `.env`. Có thể đổi tên, user và port qua các biến `POSTGRES_*` trong file đó. Dữ liệu được giữ trong named volume khi chạy `docker compose down`.
+
+Compose nạp các script SQL trong `script/` khi khởi tạo volume trống. Xem [cách dùng PostgreSQL và script](script/README.md) để mở `psql`, xem log và xử lý khi script thay đổi. JavaFX tiếp tục chạy trực tiếp trên máy phát triển.
 
 ## Build và kiểm tra
 
@@ -110,9 +128,9 @@ Windows PowerShell dùng `.\mvnw.cmd install`, `.\mvnw.cmd -pl src/user javafx:r
 
 Hai ứng dụng mở thẳng **bản xem giao diện ngoại tuyến**. Dùng rail/sidebar để chuyển trang, nút Quay lại hoặc **Alt + ←**, nút đổi sáng/tối và **Hiển thị** để mở popover. User Client có **Hồ sơ**, **Tạo nhóm mới** (modal), **Thông tin** (drawer); dùng nút **Đóng** hoặc **Esc** để đóng. **Thoát** đóng ứng dụng; chưa có phiên đăng nhập ở bước 1.2.
 
-Nút **hình cơ sở dữ liệu** trên toolbar (tooltip **Xem dữ liệu mẫu**) mở trang xem bộ mẫu của mục 1.3: 20 tài khoản, 9 hội thoại/126 tin nhắn, 4 nhóm, 6 báo cáo spam và biểu đồ đủ 12 tháng cho năm 2025/2026. Dữ liệu hư cấu cố định, dùng chung trong `desktop-ui`, có thêm nhật ký đăng nhập và chỉ số hoạt động. Xem [API, cách gắn TableView/ListView/BarChart và kiểm thử](docs/architecture/ui-mock-data.md), [ảnh trang dữ liệu mẫu](docs/images/ui-mock-data/README.md).
+Nút **hình cơ sở dữ liệu** trên toolbar (tooltip **Xem dữ liệu mẫu**) mở trang xem bộ mẫu của mục 1.3: 20 tài khoản, 9 hội thoại/126 tin nhắn, 4 nhóm, 6 báo cáo spam và biểu đồ đủ 12 tháng cho năm 2025/2026. Dữ liệu hư cấu cố định, dùng chung trong `desktop-ui`, có thêm nhật ký đăng nhập và chỉ số hoạt động. Xem [API, cách gắn TableView/ListView/BarChart và kiểm thử](docs/architecture/ui-mock-data.md), [ảnh trang dữ liệu mẫu trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md).
 
-Các trang và hộp thoại nghiệp vụ hiện là khung rỗng để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và ảnh khung điều hướng trong `docs/images/navigation-theme/`.
+Các trang và hộp thoại nghiệp vụ hiện là khung rỗng để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và [ảnh khung điều hướng trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md).
 
 Figma hiện gồm wireframe và tài liệu tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Các lựa chọn trực quan của khung 1.2 chưa được coi là thiết kế cuối cùng đã chốt của nhóm.
 

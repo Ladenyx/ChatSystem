@@ -57,7 +57,7 @@
 ## Business Rules & Non-Functional Requirements
 
 - **Business Rules (BR)**:
-  - **BR-01**: Nhật ký đăng nhập hệ thống phục vụ tra cứu tập trung toàn hệ thống theo thứ tự thời gian (phân biệt với lịch sử đăng nhập của riêng từng người dùng tại [UC-ADM-USER-10](../user-management/UC-ADM-USER-10-view-user-login-history.md)) và không cho phép Admin sửa hay xóa bản ghi nhật ký.
+  - **BR-01**: Nhật ký đăng nhập hệ thống phục vụ tra cứu tập trung toàn hệ thống theo thứ tự thời gian (phân biệt với lịch sử đăng nhập của riêng từng người dùng tại [UC-ADM-USER-MGMT-10](../user-management/UC-ADM-USER-MGMT-10-view-user-login-history.md)) và không cho phép Admin sửa hay xóa bản ghi nhật ký.
   - **BR-02**: Mỗi bản ghi nhật ký bắt buộc cung cấp đầy đủ `thời gian đăng nhập`, `username` và `họ tên` (trừ trường hợp định danh đã được ẩn danh sau purge theo [DEC-07](../../../../decisions/account-lifecycle.md)).
   - **BR-03**: Thời điểm đăng nhập được lưu chuẩn hóa theo giờ máy chủ (UTC) và hiển thị theo múi giờ `Asia/Ho_Chi_Minh`; sự kiện đăng nhập không đồng nhất với chỉ số "lượt mở ứng dụng" trong thống kê hoạt động ([Thống kê và thời gian](../../../../decisions/statistics-and-time.md)).
 - **Non-Functional Requirements (NFR)**:

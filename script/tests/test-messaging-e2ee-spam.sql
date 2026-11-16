@@ -1,0 +1,4 @@
+-- Thanh vien 1: checks and workstream-specific fixtures for Conversations, Messages, E2EE, Spam.
+-- Shared helpers and fixed-UUID users are loaded first; the caller rolls back.
+-- Add pg_temp.assert_true / pg_temp.expect_error cases here, with a unique prefix.
+-- Business checks are intentionally pending implementation of this workstream.

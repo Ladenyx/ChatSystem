@@ -104,15 +104,17 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 
 | ID | Task | Status |
 |----|------|:------:|
-| X-01 | Database design and creation script | ⬜ |
+| X-01 | Database design and creation script | 🚧 |
 | X-02 | Chat server: connections, message routing, presence | ⬜ |
 | X-03 | Configuration file loading (database, server, email, LLM) | ⬜ |
 | X-04 | Build and packaging of the runnable JARs | 🚧 |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ |
 
+X-01: PostgreSQL Compose and the [SQL collaboration scaffold](docs/databases/workflow.md) are ready. A canonical users anchor, one DDL/Test pair per team workstream, and isolated runners support parallel development; business DDL and acceptance tests remain pending.
+
 X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
 
-Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, message/evidence lists, and twelve-month charts in both applications. See [mock data APIs and verification](docs/architecture/ui-mock-data.md) and [screenshots](docs/images/ui-mock-data/README.md). This supplies data for stages 3–4; individual business screens retain their current status.
+Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, message/evidence lists, and twelve-month charts in both applications. See [mock data APIs and verification](docs/architecture/ui-mock-data.md) and [screenshots in Git history](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md). This supplies data for stages 3–4; individual business screens retain their current status.
 
 ### User Client
 

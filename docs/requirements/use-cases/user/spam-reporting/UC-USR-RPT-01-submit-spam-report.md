@@ -6,7 +6,7 @@
 - **Use Case Name**: Gửi báo cáo spam
 - **Author / Create by**: tkiet24
 - **Date Create**: 04/11/2026
-- **Last Updated by / Date**: tkiet24 / 09/11/2026
+- **Last Updated by / Date**: Theo quyết định chủ dự án / 15/11/2026
 - **Primary Actor**: Người dùng báo cáo
 - **Secondary Actor(s)**: Admin hệ thống tiếp nhận để kiểm duyệt.
 
@@ -53,9 +53,11 @@
   - **BR-01**: Một báo cáo có một chủ, một tài khoản đích và một hội thoại. Selected gồm ít nhất một tin của tài khoản đích, không dùng tin của chính người báo cáo hoặc tin hệ thống. Không bắt buộc kết bạn hoặc online.
   - **BR-02**: Context gồm tối đa 30 tin mới nhất đủ quyền đọc trong local tại lúc chuẩn bị bản xem trước, không phải 30 tin quanh tin được chọn. Có thể gồm tin của người báo cáo và thành viên khác; không tải bù từ server.
   - **BR-03**: Evidence = Selected ∪ Context theo ID; giữ đủ tin được chọn dù nằm ngoài Context. Tin giao chỉ có một bản với cả hai nhãn. Giữ thứ tự hội thoại và số lượng tin được chọn, ngữ cảnh, giao nhau, tổng ID duy nhất.
-  - **BR-04**: Lý do bắt buộc có nội dung. Giới hạn số tin được chọn áp dụng cho Selected; giới hạn dung lượng áp dụng cho toàn bộ Evidence sau loại trùng.
+  - **BR-04**: Lý do bắt buộc có nội dung. Selected từ 1 đến tối đa **20 tin**; toàn gói báo cáo đã xác nhận trước nén, gồm lý do, ID/metadata và Evidence sau loại trùng, không vượt **1 MiB (1.048.576 byte)** theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#biểu-diễn-dùng-để-tính-byte). Không tự cắt nội dung hoặc giảm Context để đạt giới hạn.
   - **BR-05**: Chỉ gửi đúng gói và lý do đã xác nhận; không sửa nội dung tin nguồn. Ngừng chờ sau khi gửi không đồng nghĩa hủy báo cáo.
-  - **BR-06**: Admin kiểm duyệt được xem bằng chứng đã tiếp nhận; bản rõ do người báo cáo cung cấp không mặc nhiên được xác thực mật mã. Tiếp nhận không tự khóa/chặn tài khoản, xóa tin hoặc rời nhóm.
+  - **BR-06**: Admin kiểm duyệt được xem bằng chứng đã tiếp nhận; bản rõ do người báo cáo cung cấp không mặc nhiên được xác thực mật mã. Tiếp nhận tạo hồ sơ `PENDING`, không tự khóa/chặn tài khoản, xóa tin hoặc rời nhóm. Chỉ Admin chủ động đánh dấu đã xử lý kèm ghi chú mới chuyển sang `REVIEWED`, theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md).
+  - **BR-07**: Bản rõ bằng chứng/lý do được giữ tối đa **180 ngày từ thời điểm server tiếp nhận**; sau hạn chỉ giữ metadata hồ sơ đã ẩn danh theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#lưu-nội-dung-180-ngày-và-metadata-ẩn-danh). Purge tài khoản theo DEC-07 vẫn được thực hiện trước hạn nếu đến mốc; retry không gia hạn hoặc tái tạo dữ liệu đã loại.
+  - **BR-08**: Phạm vi hiện tại chỉ cho User gửi báo cáo; không có chức năng User theo dõi kết quả hoặc yêu cầu rút.
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Lưu hồ sơ và gói bằng chứng cùng thành công hoặc không thay đổi; cùng ID khác nội dung bị từ chối.
   - **NFR-02**: Kiểm tra chủ báo cáo và quyền truy cập; truyền bảo mật, không gửi khóa E2EE, ghi nội dung/lý do vào log hoặc thực thi nội dung bằng chứng.

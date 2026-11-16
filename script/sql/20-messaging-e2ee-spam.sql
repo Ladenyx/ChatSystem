@@ -1,0 +1,4 @@
+-- Thanh vien 1: Conversations, Messages, E2EE, Spam.
+-- Add this workstream's DDL here; reference public.users(id) from 00-core-users.sql.
+-- Transaction control belongs to schema.sql/the isolated test runner.
+-- Business DDL is intentionally pending; this PR publishes the scaffold first.

@@ -1,6 +1,6 @@
 # ĐẶC TẢ USE-CASE
 
-> Chức năng đề xuất, chưa được chốt trong yêu cầu hiện tại.
+> Ngoài phạm vi đã chốt ngày 15/11/2026: User hiện chỉ gửi báo cáo, chưa theo dõi kết quả hoặc yêu cầu rút. Tài liệu này được giữ làm đề xuất tương lai, không phải yêu cầu triển khai hiện tại; xem [DEC-10](../../../../decisions/spam-moderation-and-retention.md).
 
 ## Thông tin chung (Metadata)
 
