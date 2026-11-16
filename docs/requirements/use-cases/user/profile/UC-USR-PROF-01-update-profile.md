@@ -30,7 +30,7 @@
 
 1. **Người dùng** mở tab Hồ sơ tài khoản trong hộp thoại Hồ sơ & Bảo mật (`U-DLG-01`), xem thông tin hiện tại (tên đăng nhập hiển thị chỉ đọc).
 2. **Người dùng** chỉnh sửa một hoặc nhiều thông tin cá nhân gồm họ tên, ngày sinh, giới tính, địa chỉ và gửi yêu cầu lưu hồ sơ.
-3. **Hệ thống** kiểm tra tính hợp lệ của dữ liệu nhập (họ tên từ 1 đến 100 ký tự, ngày sinh hợp lệ không ở tương lai, giới tính Nam/Nữ, địa chỉ tối đa 255 ký tự).
+3. **Hệ thống** kiểm tra tính hợp lệ của dữ liệu nhập (họ tên từ 1 đến 100 ký tự, ngày sinh hợp lệ không ở tương lai, giới tính Nam/Nữ/Khác, địa chỉ tối đa 255 ký tự).
 4. **Hệ thống** kiểm tra hiệu lực phiên User Client, lưu thông tin hồ sơ mới vào cơ sở dữ liệu và thông báo cập nhật thành công cho **Người dùng**.
 
 ### Alternative Flows
@@ -84,7 +84,7 @@
 
 - **Business Rules (BR)**:
   - **BR-01**: Tên đăng nhập (`username`) là thông tin định danh cố định, chỉ hiển thị ở chế độ đọc và không được phép chỉnh sửa tại giao diện này theo [DEC-07](../../../../decisions/account-lifecycle.md).
-  - **BR-02**: Ràng buộc dữ liệu hồ sơ cá nhân: Họ tên bắt buộc (1–100 ký tự sau khi cắt khoảng trắng thừa); ngày sinh hợp lệ và không ở tương lai; giới tính bắt buộc (Nam hoặc Nữ); địa chỉ là tùy chọn (tối đa 255 ký tự sau khi cắt khoảng trắng thừa) theo [DEC-07](../../../../decisions/account-lifecycle.md).
+  - **BR-02**: Ràng buộc dữ liệu hồ sơ cá nhân: Họ tên bắt buộc (1–100 ký tự sau khi cắt khoảng trắng thừa); ngày sinh hợp lệ và không ở tương lai; giới tính bắt buộc (Nam/Nữ/Khác); địa chỉ là tùy chọn (tối đa 255 ký tự sau khi cắt khoảng trắng thừa) theo [DEC-07](../../../../decisions/account-lifecycle.md).
   - **BR-03**: Cập nhật thông tin cá nhân và đổi địa chỉ email là hai quy trình nghiệp vụ độc lập. Thao tác đổi email bắt buộc phải xác thực mật khẩu hiện tại và hoàn tất xác minh mã 6 chữ số gửi tới email mới theo [DEC-06](../../../../decisions/password-reset-and-email.md).
   - **BR-04**: Địa chỉ email của tài khoản phải là duy nhất trên toàn hệ thống (không phân biệt chữ hoa, chữ thường sau khi cắt khoảng trắng thừa). Email cũ chỉ bị thay thế sau khi máy chủ xác nhận email mới đã được xác minh thành công.
 - **Non-Functional Requirements (NFR)**:
