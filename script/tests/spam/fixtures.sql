@@ -1,2 +1,0 @@
--- spam: add fixtures for this domain here.
--- Common fixture users/conversations are loaded first; all changes are rolled back.

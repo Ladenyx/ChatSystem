@@ -1,4 +1,0 @@
--- spam: add this domain's tables, indexes, functions and triggers here.
--- Shared anchors public.users and public.conversations are loaded by bootstrap.
--- Keep transaction control and shared-table definitions out of this file.
--- Intentionally no business DDL yet: this PR publishes the shared scaffold first.

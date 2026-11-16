@@ -1,6 +1,18 @@
-# Khung SQL và vòng kiểm thử độc lập
+# Khung SQL và kiểm thử theo luồng thành viên
 
-Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Đây là hạ tầng để các thành viên xây SQL và kiểm thử từng miền song song. Các file miền hiện là placeholder; 12 ca smoke test kiểm chứng mỏ neo/hạ tầng, chưa đại diện cho kiểm thử nghiệp vụ hoàn chỉnh.
+Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Mỗi thành viên có **một cặp DDL + Test riêng**. Các file nghiệp vụ hiện là placeholder; smoke test chung kiểm tra mỏ neo/hạ tầng, chưa đại diện cho tính năng đã hoàn tất.
+
+## Phân chia file
+
+| Thành viên | Phạm vi | DDL trong `script/sql/` | Test trong `script/tests/` |
+| --- | --- | --- | --- |
+| 2 | Auth, Sessions, Friends, Blocks | `10-auth-and-friends.sql` | `test-auth-friends.sql` |
+| 1 | Conversations, Messages, E2EE, Spam | `20-messaging-e2ee-spam.sql` | `test-messaging-e2ee-spam.sql` |
+| 3 | Login logs, App open events, Analytics, Indexes | `30-logs-and-analytics.sql` | `test-logs-analytics.sql` |
+
+[`sql/00-core-users.sql`](sql/00-core-users.sql) là nơi duy nhất định nghĩa extension và bảng `users` chung. Các luồng dùng `public.users(id)`, không tạo stub/copy của bảng này. Thay đổi hợp đồng mỏ neo cần thống nhất giữa các thành viên.
+
+`schema.sql` chỉ điều phối `\ir` theo thứ tự 00 → 10 → 20 → 30, trong một transaction. Các file con đặt trong `sql/` để Docker không chạy lại chúng ở cấp đầu. `tests/run.sql` điều phối assert, fixture user và các file test. Các entry point này chỉ được thiết lập một lần; phát triển hàng ngày diễn ra trong cặp file của từng người.
 
 ## Dựng PostgreSQL một lần
 
@@ -12,63 +24,55 @@ docker compose up -d --wait db
 docker compose ps
 ```
 
-Database phát triển mặc định là `chatsystem`, user `chatsystem`, host `127.0.0.1`, port `55432`. Các giá trị cấu hình nằm trong `.env`; file này được Git bỏ qua.
+Database phát triển mặc định là `chatsystem`, user `chatsystem`, host `127.0.0.1`, port `55432`. Các giá trị nằm trong `.env`; file này được Git bỏ qua.
 
-`docker compose down` dừng container và giữ named volume. `schema.sql` chỉ tự chạy khi volume còn trống. Với volume đã có từ PR Compose, vòng test bên dưới vẫn nạp bộ khung mới vào DB tạm; không cần reset volume phát triển để bắt đầu làm SQL.
+`schema.sql` chỉ tự chạy khi volume còn trống. Với volume đã có từ PR Compose, vòng test bên dưới vẫn nạp bộ khung mới vào DB tạm, nên không cần reset volume phát triển để bắt đầu làm SQL.
 
-## Sửa SQL → chạy lại test
+## Sửa DDL → chạy lại test
 
-Giữ service `db` chạy và chọn miền của mình:
-
-```sh
-python3 script/test-db.py --domain messaging
-python3 script/test-db.py --domain e2ee
-python3 script/test-db.py --domain spam
-```
-
-PowerShell có thể dùng `py -3` thay `python3`. Chạy tích hợp các miền bằng:
+Giữ service `db` chạy và chọn luồng của mình:
 
 ```sh
-python3 script/test-db.py --domain all
+python3 script/test-db.py --flow auth-friends
+python3 script/test-db.py --flow messaging-e2ee-spam
+python3 script/test-db.py --flow logs-analytics
 ```
 
-Mỗi lượt tạo DB mới dạng `chatsystem_schema_test_<miền>_<mã ngẫu nhiên>`, nạp mỏ neo cùng đúng miền cần kiểm tra, chạy test rồi xóa **DB tạm do lượt đó tạo**. Các fixture được rollback trước khi dọn. Không chạy `docker compose down -v`, không xóa/tạo lại database phát triển `chatsystem`.
-
-Mỗi lượt cũng sao chép SQL từ checkout hiện tại vào một thư mục tạm riêng trong container. Vì vậy nhiều terminal/worktree dùng cùng service DB vẫn chạy trên đúng phiên bản file của mình, không ghi đè file test của nhau. Dùng `--project <tên>` nếu service DB được khởi chạy với một Compose project khác.
-
-Vòng warm-Docker này tận dụng server đang chạy; thời gian thực tế tùy máy. Bộ kiểm tra native bên dưới đã đo dưới 2 giây/lượt trên môi trường Linux hiện tại. Lần tải image/khởi động Docker đầu tiên không nằm trong vòng sửa/test nhanh.
-
-## Kiểm tra khi không dùng Docker
-
-Linux/macOS có PostgreSQL 18 trong `PATH` có thể dùng cụm tạm chỉ mở Unix socket, tách khỏi server và dữ liệu hiện có:
+PowerShell có thể dùng `py -3` thay `python3`. Chạy tích hợp trước khi merge bằng:
 
 ```sh
-python3 script/test-native.py --domain messaging
-python3 script/test-native.py --domain e2ee
-python3 script/test-native.py --domain spam
-python3 script/test-native.py --domain all
+python3 script/test-db.py --flow all
 ```
 
-Có thể thêm `--pg-bin /path/to/postgresql/18/bin`. Cụm native được dừng và xóa sau mỗi lượt; các lượt chạy đồng thời không dùng chung socket hay thư mục dữ liệu. Trên Windows, dùng Docker runner.
+Một lượt riêng chỉ nạp `00-core-users.sql` cùng DDL/Test được chọn và smoke test mỏ neo. DDL hoặc test của người khác đang sửa dở không được nạp trong lượt đó. Chế độ `all` dùng nguyên `schema.sql` và `tests/run.sql` để phát hiện lỗi tích hợp.
 
-## File mỗi thành viên cần sửa
+Mỗi lượt tạo DB dạng `chatsystem_schema_test_<luồng>_<mã ngẫu nhiên>`, chụp bản SQL từ checkout hiện tại rồi chạy kiểm tra. Fixture được rollback; cuối lượt chỉ xóa **DB tạm và bản SQL do lượt đó tạo**. Không chạy `docker compose down -v`, không xóa/tạo lại database phát triển `chatsystem`.
 
-| Miền | DDL | Fixture và kiểm tra riêng |
-| --- | --- | --- |
-| Hội thoại/Tin nhắn | `domains/messaging.sql` | `tests/messaging/fixtures.sql`, `tests/messaging/cases.sql` |
-| E2EE | `domains/e2ee.sql` | `tests/e2ee/fixtures.sql`, `tests/e2ee/cases.sql` |
-| Spam | `domains/spam.sql` | `tests/spam/fixtures.sql`, `tests/spam/cases.sql` |
+Các terminal/worktree có DB và bản SQL riêng, có thể dùng chung server Compose đang chạy. Dùng `--project <tên>` nếu server được khởi chạy với Compose project khác. Vòng warm-Docker tận dụng server sẵn có; thời gian thực tế tùy máy, không gồm lần tải image/khởi động Docker đầu tiên.
 
-Các đường dẫn trong bảng tính từ `script/`. File miền được include trong transaction chung; không đặt `BEGIN`/`COMMIT`, `DROP SCHEMA` hoặc định nghĩa lại bảng mỏ neo trong file miền.
+## Kiểm thử native nhanh
 
-[`anchors/users.sql`](anchors/users.sql) là định nghĩa `users` duy nhất. [`anchors/conversations.sql`](anchors/conversations.sql) là hợp đồng hội thoại chung để E2EE/Spam tham chiếu độc lập. Thay đổi mỏ neo cần thống nhất giữa các thành viên; miền nghiệp vụ tham chiếu `public.users(id)`/`public.conversations(id)` thay vì tạo stub riêng.
+Linux/macOS có PostgreSQL 18 trong `PATH` có thể chạy cụm tạm riêng, chỉ mở Unix socket:
 
-`common/bootstrap.sql` nạp môi trường, mỏ neo và miền được chọn. `tests/run.sql` nạp fixture/test tương ứng qua `\ir`, bật `ON_ERROR_STOP`, rollback và kiểm tra không còn dữ liệu thử. Dùng `pg_temp.assert_true(label, boolean)` hoặc `pg_temp.expect_error(label, SQL, SQLSTATE[, constraint])` trong file `cases.sql`. Đặt nhãn case có prefix miền (ví dụ `e2ee/current-backup`) để các bộ test không trùng nhãn khi chạy `all`.
+```sh
+python3 script/test-native.py --flow auth-friends
+python3 script/test-native.py --flow messaging-e2ee-spam
+python3 script/test-native.py --flow logs-analytics
+python3 script/test-native.py --flow all
+```
 
-Chạy toàn bộ script khởi tạo trực tiếp trên database mới, trống bằng:
+Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được dừng và xóa sau lượt; không kết nối server hiện có. Trên Windows dùng Docker runner. Bộ kiểm tra native đã đo dưới 2 giây/lượt trên Linux hiện tại; số đo Docker cần nghiệm thu khi có daemon chạy.
+
+## Viết case
+
+`tests/assertions.sql` cung cấp `pg_temp.assert_true(label, boolean)` và `pg_temp.expect_error(label, SQL, SQLSTATE[, constraint])`. `tests/fixtures.sql` có UUID user cố định: suffix 1=Alice, 2=Bob, 3=Carol, 4=Admin; đây là hồ sơ DB thử, không phải credential đăng nhập. `test-core-users.sql` giữ smoke test của mỏ neo.
+
+Mỗi người thêm fixture riêng và case vào file test của mình. Dùng nhãn có prefix như `messaging/...` để tránh trùng khi chạy `all`. Không tự `BEGIN`/`COMMIT`, reset schema hoặc định nghĩa lại `users` trong cặp file nghiệp vụ. Runner phụ trách transaction và kiểm tra dữ liệu được rollback sạch.
+
+Để khởi tạo thủ công trên database mới, trống:
 
 ```sh
 psql -X -v ON_ERROR_STOP=1 -d ten_database_moi -f script/schema.sql
 ```
 
-`\ir` giải đường dẫn theo file đang được include, không phụ thuộc thư mục làm việc. Xem [quy ước phối hợp SQL](../docs/databases/workflow.md) và [kế hoạch Version 1](../docs/management/plans/version-1-plan.md).
+`\ir` giải đường dẫn theo file đang include. Xem [quy trình phối hợp SQL](../docs/databases/workflow.md) và [kế hoạch Version 1](../docs/management/plans/version-1-plan.md).

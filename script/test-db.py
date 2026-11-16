@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one SQL domain in a new isolated database; leave the development volume alone."""
+"""Run one member-owned DDL/Test pair in an isolated temporary database."""
 import argparse
 import io
 import os
@@ -14,7 +14,11 @@ import time
 import uuid
 
 SCRIPT = Path(__file__).resolve().parent
-DOMAINS = ("all", "messaging", "e2ee", "spam")
+FLOWS = {
+    "auth-friends": ("10-auth-and-friends.sql", "test-auth-friends.sql"),
+    "messaging-e2ee-spam": ("20-messaging-e2ee-spam.sql", "test-messaging-e2ee-spam.sql"),
+    "logs-analytics": ("30-logs-and-analytics.sql", "test-logs-analytics.sql"),
+}
 
 
 def execute(command, *, env=None, input_data=None):
@@ -37,6 +41,31 @@ def show_checks(result):
         print(result.stderr.decode().strip())
 
 
+def prepare_source(destination, flow):
+    """Snapshot this checkout; generate selected entry points only in temp storage."""
+    for path in SCRIPT.rglob("*.sql"):
+        if path.is_symlink():
+            raise ValueError(f"SQL symlinks are not supported: {path}")
+        target = destination / path.relative_to(SCRIPT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+    if flow == "all":
+        return "schema.sql", "tests/run.sql"
+    ddl, test = FLOWS[flow]
+    (destination / "_bootstrap.sql").write_text(
+        "\\set ON_ERROR_STOP on\nBEGIN;\n\\ir sql/00-core-users.sql\n"
+        f"\\ir sql/{ddl}\nCOMMIT;\n", encoding="utf-8")
+    run = (destination / "tests/run.sql").read_text(encoding="utf-8")
+    directives = {"\\ir " + files[1] for files in FLOWS.values()}
+    for directive in directives:
+        if sum(line.strip() == directive for line in run.splitlines()) != 1:
+            raise ValueError(f"tests/run.sql must include exactly once: {directive}")
+    selected = [line for line in run.splitlines()
+                if line.strip() not in directives or line.strip() == "\\ir " + test]
+    (destination / "tests/_run_selected.sql").write_text("\n".join(selected) + "\n", encoding="utf-8")
+    return "_bootstrap.sql", "tests/_run_selected.sql"
+
+
 def native(args, database):
     if os.name == "nt":
         raise ValueError("Use the Docker runner on Windows; --native is for Linux/macOS")
@@ -52,6 +81,8 @@ def native(args, database):
     env = {key: value for key, value in os.environ.items() if not key.startswith("PG")}
     with tempfile.TemporaryDirectory(prefix="cs-pg18-", dir="/tmp") as tmp:
         root = Path(tmp)
+        source = root / "source"
+        bootstrap, checks = prepare_source(source, args.flow)
         data, sock, log = root / "data", root / "socket", root / "postgres.log"
         sock.mkdir()
         execute([bins["initdb"], "-D", str(data), "-U", "chatsystem_test_owner",
@@ -63,10 +94,9 @@ def native(args, database):
             connection = ["-h", str(sock), "-p", "5432", "-U", "chatsystem_test_owner"]
             execute([bins["createdb"], *connection, database], env=env)
             psql = [bins["psql"], *connection, "-d", database, "-X", "-q",
-                    "-v", "ON_ERROR_STOP=1", "-v", "domain=" + args.domain]
-            bootstrap = SCRIPT / "schema.sql" if args.domain == "all" else SCRIPT / "common" / "bootstrap.sql"
-            execute(psql + ["-f", str(bootstrap)], env=env)
-            show_checks(execute(psql + ["-f", str(SCRIPT / "tests" / "run.sql")], env=env))
+                    "-v", "ON_ERROR_STOP=1", "-v", "flow=" + args.flow]
+            execute(psql + ["-f", str(source / bootstrap)], env=env)
+            show_checks(execute(psql + ["-f", str(source / checks)], env=env))
         except subprocess.CalledProcessError:
             if log.exists():
                 print(log.read_text(), file=sys.stderr)
@@ -83,43 +113,41 @@ def docker(args, database, token):
     prefix = compose + ["exec", "-T", "db"]
 
     def pg(tool, *parameters):
-        # Fixed shell program; all variable arguments are passed as positional data.
+        # Fixed shell program; variable arguments are passed only as positional data.
         return execute(prefix + ["sh", "-c",
             'pg_tool=$1; shift; exec "$pg_tool" --username="$POSTGRES_USER" "$@"',
             "sh", tool, *parameters])
 
-    # Copy this checkout's SQL, not the source mount of another running worktree.
-    # Each invocation uses its own directory, so parallel workers cannot overwrite it.
-    buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w") as archive:
-        for path in sorted(SCRIPT.rglob("*.sql")):
-            if path.is_symlink():
-                raise ValueError(f"SQL symlinks are not supported: {path}")
-            archive.add(path, arcname=str(path.relative_to(SCRIPT)), recursive=False)
-    directory = "/tmp/chatsystem-schema-" + token
-    copied = created = False
-    try:
-        execute(prefix + ["sh", "-c", 'mkdir -m 700 "$1" && tar -xf - -C "$1"',
-                          "sh", directory], input_data=buffer.getvalue())
-        copied = True
-        pg("createdb", "--template=template0", "--encoding=UTF8", database)
-        created = True
-        psql = ["-X", "-q", "--set=ON_ERROR_STOP=1", "--set=domain=" + args.domain, "--dbname=" + database]
-        bootstrap = "/schema.sql" if args.domain == "all" else "/common/bootstrap.sql"
-        pg("psql", *psql, "--file=" + directory + bootstrap)
-        show_checks(pg("psql", *psql, "--file=" + directory + "/tests/run.sql"))
-    finally:
+    with tempfile.TemporaryDirectory(prefix="cs-sqlsrc-") as tmp:
+        source = Path(tmp)
+        bootstrap, checks = prepare_source(source, args.flow)
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode="w") as archive:
+            for path in sorted(source.rglob("*.sql")):
+                archive.add(path, arcname=str(path.relative_to(source)), recursive=False)
+        directory = "/tmp/chatsystem-schema-" + token
+        copied = created = False
         try:
-            if created:
-                pg("dropdb", "--if-exists", "--force", database)
+            execute(prefix + ["sh", "-c", 'mkdir -m 700 "$1" && tar -xf - -C "$1"',
+                              "sh", directory], input_data=buffer.getvalue())
+            copied = True
+            pg("createdb", "--template=template0", "--encoding=UTF8", database)
+            created = True
+            psql = ["-X", "-q", "--set=ON_ERROR_STOP=1", "--set=flow=" + args.flow, "--dbname=" + database]
+            pg("psql", *psql, "--file=" + directory + "/" + bootstrap)
+            show_checks(pg("psql", *psql, "--file=" + directory + "/" + checks))
         finally:
-            if copied:
-                execute(prefix + ["sh", "-c", 'rm -rf -- "$1"', "sh", directory])
+            try:
+                if created:
+                    pg("dropdb", "--if-exists", "--force", database)
+            finally:
+                if copied:
+                    execute(prefix + ["sh", "-c", 'rm -rf -- "$1"', "sh", directory])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--domain", choices=DOMAINS, default="all")
+    parser.add_argument("--flow", "--domain", dest="flow", choices=("all", *FLOWS), default="all")
     parser.add_argument("--native", action="store_true", help="Use a private PostgreSQL 18 cluster on Linux/macOS")
     parser.add_argument("--pg-bin", type=Path, help="Native PostgreSQL 18 executable directory")
     parser.add_argument("--project", help="Docker Compose project name when using a non-default project")
@@ -129,9 +157,9 @@ def main():
     if args.project and args.native:
         parser.error("--project applies only to Docker")
     token = uuid.uuid4().hex[:12]
-    database = "chatsystem_schema_test_" + args.domain + "_" + token
+    database = "chatsystem_schema_test_" + args.flow.replace("-", "_") + "_" + token
     started = time.perf_counter()
-    print(f"Domain={args.domain}; isolated database={database}", flush=True)
+    print(f"Flow={args.flow}; isolated database={database}", flush=True)
     try:
         if args.native:
             native(args, database)

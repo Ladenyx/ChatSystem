@@ -1,2 +1,0 @@
--- spam: add meaningful pg_temp.assert_true / pg_temp.expect_error checks here.
--- Business checks are intentionally pending implementation of this domain.

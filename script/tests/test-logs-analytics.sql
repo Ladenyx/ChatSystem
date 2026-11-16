@@ -1,0 +1,4 @@
+-- Thanh vien 3: checks and workstream-specific fixtures for Login logs, App open events, Indexes.
+-- Shared helpers and fixed-UUID users are loaded first; the caller rolls back.
+-- Add pg_temp.assert_true / pg_temp.expect_error cases here, with a unique prefix.
+-- Business checks are intentionally pending implementation of this workstream.

@@ -1,32 +1,26 @@
 \set ON_ERROR_STOP on
 \pset tuples_only on
 \pset format unaligned
-\ir ../common/selection.sql
+\if :{?flow}
+\else
+\set flow all
+\endif
 DO $$
 BEGIN
-    IF current_database() !~ '^chatsystem_schema_test(_(all|messaging|e2ee|spam)_[0-9a-f]{12})?$' THEN
+    IF current_database() !~ '^chatsystem_schema_test(_(all|auth_friends|messaging_e2ee_spam|logs_analytics)_[0-9a-f]{12})?$' THEN
         RAISE EXCEPTION 'Use only a dedicated chatsystem_schema_test database';
     END IF;
 END $$;
 BEGIN;
 SET LOCAL search_path = public;
 SET LOCAL TIME ZONE 'UTC';
-\ir common/assertions.sql
-\ir common/fixtures.sql
-\ir common/cases.sql
-\if :run_messaging
-\ir messaging/fixtures.sql
-\ir messaging/cases.sql
-\endif
-\if :run_e2ee
-\ir e2ee/fixtures.sql
-\ir e2ee/cases.sql
-\endif
-\if :run_spam
-\ir spam/fixtures.sql
-\ir spam/cases.sql
-\endif
-SELECT format('%s scaffold checks passed (domain=%s); business-domain checks are pending', count(*), :'domain') FROM db_checks;
+\ir assertions.sql
+\ir fixtures.sql
+\ir test-core-users.sql
+\ir test-auth-friends.sql
+\ir test-messaging-e2ee-spam.sql
+\ir test-logs-analytics.sql
+SELECT format('%s scaffold checks passed (flow=%s); business checks are pending',count(*),:'flow') FROM db_checks;
 ROLLBACK;
 DO $$
 DECLARE

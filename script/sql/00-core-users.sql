@@ -1,3 +1,17 @@
+-- Canonical shared users anchor and PostgreSQL environment.
+SET LOCAL search_path = public;
+SET LOCAL TIME ZONE 'UTC';
+-- Common PostgreSQL 18 environment. Included within bootstrap transaction.
+DO $$
+BEGIN
+    IF current_setting('server_version_num')::integer NOT BETWEEN 180000 AND 189999 THEN
+        RAISE EXCEPTION 'This schema targets PostgreSQL 18';
+    END IF;
+END $$;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
 -- Canonical shared users anchor. All domains reference public.users(id).
 -- Coordinate changes to this file; do not create private copies in domain scripts.
 -- Shared identity/profile dependency. Authentication tables are a subsequent iteration.
@@ -23,4 +37,3 @@ CREATE TABLE users (
 CREATE UNIQUE INDEX users_username_uq ON users (lower(username));
 CREATE UNIQUE INDEX users_email_uq ON users (lower(email));
 CREATE INDEX users_name_trgm_idx ON users USING GIN (lower(full_name) gin_trgm_ops);
-
