@@ -81,7 +81,7 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
   - `A-SCR-02`: Dashboard Tổng quan (4 thẻ KPI + biểu đồ xu hướng nhanh + danh sách tóm tắt).
   - `A-SCR-03`: Quản lý Người dùng dạng `SplitPane` (bảng lọc/sắp xếp bên trái + User Inspector cố định bên phải kèm 2 tab *Lịch sử đăng nhập* `A-05` và *Danh sách bạn bè* `A-06`).
   - `A-SCR-04`: Quản lý Nhóm Chat (danh sách nhóm bên trái + danh sách Admin/Thành viên bên phải).
-  - `A-SCR-05`: Kiểm duyệt Báo cáo Spam (danh sách báo cáo bên trái + khung xem bằng chứng tin nhắn dạng bong bóng chat và nút Khóa tài khoản bên phải).
+  - `A-SCR-05`: Kiểm duyệt Báo cáo Spam (danh sách báo cáo bên trái + khung xem bằng chứng tin nhắn dạng bong bóng chat, nút Khóa tài khoản riêng và thao tác Đánh dấu đã xử lý kèm ghi chú theo DEC-10 bên phải).
   - `A-SCR-06`: Nhật ký Đăng nhập Hệ thống theo thời gian (`A-07`).
   - `A-DLG-01`: Modal Thêm / Cập nhật Người dùng.
   - `A-DLG-02`: Modal Xác nhận Thao tác Quản trị.

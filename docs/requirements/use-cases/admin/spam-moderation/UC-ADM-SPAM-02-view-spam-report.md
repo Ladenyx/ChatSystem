@@ -37,10 +37,10 @@
 2. **Hệ thống** cung cấp đúng số lượng tin nhắn thực tế có trong bản chụp báo cáo.
 3. Tiếp tục bước #4 trong Basic Flow.
 
-**Alternative flow 2: Một phần định danh đã ẩn danh sau purge hoặc bằng chứng không đọc được trọn vẹn**
-1. Từ bước #3 của Basic Flow, một tài khoản liên quan đã bị xóa vĩnh viễn (purge) theo chính sách vòng đời dữ liệu hoặc một phần dữ liệu đính kèm không còn khả dụng.
-2. **Hệ thống** nêu rõ phần thông tin đã ẩn danh hoặc không đọc được mà không tự suy diễn hay dựng nội dung thay thế.
-3. Tiếp tục bước #4 trong Basic Flow.
+**Alternative flow 2: Tài khoản liên quan bị purge trong lúc mở báo cáo**
+1. Từ bước #2 hoặc #3 của Basic Flow, bất kỳ tài khoản liên quan — người báo cáo, tài khoản đích, người gửi tin bằng chứng (kể cả chỉ là Context) hoặc Admin xử lý — bị xóa vĩnh viễn theo chính sách vòng đời dữ liệu.
+2. **Hệ thống** chuyển toàn bộ hồ sơ sang metadata archive ẩn danh và ghi tombstone theo quyết định bổ sung ngày 16/11/2026 tại [DEC-10](../../../../decisions/spam-moderation-and-retention.md#purge-tài-khoản-và-retry), kể cả chưa đủ 180 ngày; không trả phần bằng chứng còn lại, ánh xạ mã cũ sang archive hoặc giữ chi tiết cũ trên giao diện/cache.
+3. **Hệ thống** thông báo hồ sơ không còn khả dụng, hủy ngữ cảnh chi tiết và quay về danh sách tại [UC-ADM-SPAM-01](UC-ADM-SPAM-01-browse-spam-reports.md). Kết thúc Use Case.
 
 ### Exception Flows
 
@@ -65,6 +65,8 @@
   - **BR-01**: Admin hệ thống không có quyền truy cập toàn bộ lịch sử hội thoại riêng tư hay tự giải mã nhóm chat E2EE trên máy chủ. Toàn bộ nội dung tin nhắn xem được trong báo cáo chỉ đến từ bản rõ do người gửi báo cáo chủ động xác nhận cung cấp (tin vi phạm kèm tối đa 30 tin nhắn gần nhất) theo [DEC-05](../../../../decisions/group-permissions-and-e2ee.md) và [DEC-07](../../../../decisions/account-lifecycle.md).
   - **BR-02**: Hệ thống phải ghi chú rõ bằng chứng bản rõ là dữ liệu do người báo cáo gửi kèm để Admin tự thẩm định, không mặc định máy chủ đã xác thực mật mã nội dung E2EE gốc.
   - **BR-03**: Hệ thống phải phân biệt tách bạch vai trò giữa **người gửi báo cáo** và **tài khoản bị báo cáo** để tránh nhầm đối tượng khi chuyển sang bước xử lý khóa tài khoản.
+  - **BR-04**: Sau khi xem, Admin có thể khởi tạo thao tác riêng **Đánh dấu đã xử lý kèm ghi chú** theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#đánh-dấu-đã-xử-lý). Bản thân thao tác xem không chuyển `PENDING` thành `REVIEWED` và không sửa ghi chú.
+  - **BR-05**: Sau 180 ngày từ tiếp nhận, hồ sơ gốc không còn được mở bằng mã cũ; từ chối tải chi tiết và làm mới danh sách theo [DEC-10](../../../../decisions/spam-moderation-and-retention.md#lưu-nội-dung-180-ngày-và-metadata-ẩn-danh). Không trả lại bản rõ/lý do/ghi chú hoặc định danh đã loại và không ánh xạ mã cũ sang archive. Archive là nguồn metadata/thống kê ẩn danh riêng, không phải hồ sơ thay thế trong thao tác xem này.
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Khi **Admin** chuyển nhanh sang báo cáo khác, dữ liệu phản hồi trễ của báo cáo cũ không được hiển thị chồng lên báo cáo mới.
   - **NFR-02**: Mốc thời gian của báo cáo và tin nhắn bằng chứng được quy đổi nhất quán theo múi giờ `Asia/Ho_Chi_Minh`.
