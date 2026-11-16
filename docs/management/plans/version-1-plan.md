@@ -45,6 +45,8 @@ Thực hiện song song với Giai đoạn 1–3 để sớm chốt cấu trúc 
   - Bổ sung `compose.yaml` (Docker Compose cho **PostgreSQL 18** gắn `./script` vào `/docker-entrypoint-initdb.d:ro`) để cả 3 môi trường phát triển của nhóm (Arch Linux, macOS, Windows) kiểm thử khởi tạo DB trống đồng nhất 100%.
   - **Kiểm tra bắt buộc:** Chạy script từ đầu trên một database PostgreSQL 18 trống (qua `docker compose` và đảm bảo file `.sql` trong `script/` vẫn chạy độc lập được trên PostgreSQL cài trực tiếp trên Windows) để chắc chắn không có lỗi cú pháp hay thứ tự khóa ngoại.
 
+  - **Khung phối hợp đã có:** Compose PostgreSQL 18, hai mỏ neo dùng chung và file riêng cho Hội thoại/E2EE/Spam, điều phối bằng `\ir`; runner tạo DB tạm theo miền, rollback và dọn riêng mỗi lượt. Xem [quy trình SQL song song](../../databases/workflow.md). DDL và ca kiểm thử nghiệp vụ từng miền vẫn đang chờ triển khai; các mục 2.1–2.2 chưa được đánh dấu hoàn thành toàn bộ.
+
 ---
 
 ## Giai đoạn 3: Xây dựng Giao diện `User Client` (3–4 ngày)
