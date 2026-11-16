@@ -1,0 +1,4 @@
+-- Thanh vien 2: checks and workstream-specific fixtures for Auth, Sessions, Friends, Blocks.
+-- Shared helpers and fixed-UUID users are loaded first; the caller rolls back.
+-- Add pg_temp.assert_true / pg_temp.expect_error cases here, with a unique prefix.
+-- Business checks are intentionally pending implementation of this workstream.

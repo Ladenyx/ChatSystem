@@ -104,11 +104,13 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 
 | ID | Task | Status |
 |----|------|:------:|
-| X-01 | Database design and creation script | ⬜ |
+| X-01 | Database design and creation script | 🚧 |
 | X-02 | Chat server: connections, message routing, presence | ⬜ |
 | X-03 | Configuration file loading (database, server, email, LLM) | ⬜ |
 | X-04 | Build and packaging of the runnable JARs | 🚧 |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ |
+
+X-01: PostgreSQL Compose and the [SQL collaboration scaffold](docs/databases/workflow.md) are ready. A canonical users anchor, one DDL/Test pair per team workstream, and isolated runners support parallel development; business DDL and acceptance tests remain pending.
 
 X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
 
