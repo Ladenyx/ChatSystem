@@ -1,1264 +1,1264 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1724px" height="1086px" viewBox="-0.5 -0.5 1724 1086" content="&lt;mxfile&gt;&lt;diagram id=&quot;e2ee-erd&quot; name=&quot;ERD · KHÓA E2EE&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1954px" height="1046px" viewBox="-0.5 -0.5 1954 1046" content="&lt;mxfile&gt;&lt;diagram id=&quot;e2ee-erd&quot; name=&quot;ERD · KHÓA E2EE&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
     <defs>
         <clipPath id="mx-clip-e2ee_devices-hdr-0">
-            <rect x="2" y="154" width="80" height="30"/>
+            <rect x="212" y="164" width="80" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-hdr-1">
-            <rect x="86" y="154" width="212" height="30"/>
+            <rect x="296" y="164" width="212" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-hdr-2">
-            <rect x="302" y="154" width="146" height="30"/>
+            <rect x="512" y="164" width="146" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-hdr-3">
-            <rect x="452" y="154" width="66" height="30"/>
+            <rect x="662" y="164" width="66" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r1-c0">
-            <rect x="2" y="184" width="80" height="34"/>
+            <rect x="212" y="194" width="80" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r1-c1">
-            <rect x="86" y="184" width="212" height="34"/>
+            <rect x="296" y="194" width="212" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r1-c2">
-            <rect x="302" y="184" width="146" height="34"/>
+            <rect x="512" y="194" width="146" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r1-c3">
-            <rect x="452" y="184" width="66" height="34"/>
+            <rect x="662" y="194" width="66" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r2-c0">
-            <rect x="2" y="218" width="80" height="34"/>
+            <rect x="212" y="242" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r2-c1">
-            <rect x="86" y="218" width="212" height="34"/>
+            <rect x="296" y="242" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r2-c2">
-            <rect x="302" y="218" width="146" height="34"/>
+            <rect x="512" y="242" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r2-c3">
-            <rect x="452" y="218" width="66" height="34"/>
+            <rect x="662" y="242" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r3-c1">
-            <rect x="86" y="252" width="212" height="34"/>
+            <rect x="296" y="276" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r3-c2">
-            <rect x="302" y="252" width="146" height="34"/>
+            <rect x="512" y="276" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r3-c3">
-            <rect x="452" y="252" width="66" height="34"/>
+            <rect x="662" y="276" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r4-c1">
-            <rect x="86" y="286" width="212" height="34"/>
+            <rect x="296" y="310" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r4-c2">
-            <rect x="302" y="286" width="146" height="34"/>
+            <rect x="512" y="310" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r4-c3">
-            <rect x="452" y="286" width="66" height="34"/>
+            <rect x="662" y="310" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r5-c1">
-            <rect x="86" y="320" width="212" height="34"/>
+            <rect x="296" y="344" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r5-c2">
-            <rect x="302" y="320" width="146" height="34"/>
+            <rect x="512" y="344" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r5-c3">
-            <rect x="452" y="320" width="66" height="34"/>
+            <rect x="662" y="344" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r6-c1">
-            <rect x="86" y="354" width="212" height="34"/>
+            <rect x="296" y="378" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r6-c2">
-            <rect x="302" y="354" width="146" height="34"/>
+            <rect x="512" y="378" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r6-c3">
-            <rect x="452" y="354" width="66" height="34"/>
+            <rect x="662" y="378" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r7-c1">
-            <rect x="86" y="388" width="212" height="34"/>
+            <rect x="296" y="412" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r7-c2">
-            <rect x="302" y="388" width="146" height="34"/>
+            <rect x="512" y="412" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r7-c3">
-            <rect x="452" y="388" width="66" height="34"/>
+            <rect x="662" y="412" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r8-c0">
-            <rect x="2" y="422" width="80" height="34"/>
+            <rect x="212" y="446" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r8-c1">
-            <rect x="86" y="422" width="212" height="34"/>
+            <rect x="296" y="446" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r8-c2">
-            <rect x="302" y="422" width="146" height="34"/>
+            <rect x="512" y="446" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r8-c3">
-            <rect x="452" y="422" width="66" height="34"/>
+            <rect x="662" y="446" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r9-c1">
-            <rect x="86" y="456" width="212" height="34"/>
+            <rect x="296" y="480" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r9-c2">
-            <rect x="302" y="456" width="146" height="34"/>
+            <rect x="512" y="480" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r9-c3">
-            <rect x="452" y="456" width="66" height="34"/>
+            <rect x="662" y="480" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r10-c1">
-            <rect x="86" y="490" width="212" height="34"/>
+            <rect x="296" y="514" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r10-c2">
-            <rect x="302" y="490" width="146" height="34"/>
+            <rect x="512" y="514" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_devices-r10-c3">
-            <rect x="452" y="490" width="66" height="34"/>
+            <rect x="662" y="514" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-users-hdr-0">
-            <rect x="702" y="188" width="52" height="30"/>
+            <rect x="912" y="212" width="52" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-users-hdr-1">
-            <rect x="758" y="188" width="104" height="30"/>
+            <rect x="968" y="212" width="104" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-users-hdr-2">
-            <rect x="866" y="188" width="92" height="30"/>
+            <rect x="1076" y="212" width="92" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-users-hdr-3">
-            <rect x="962" y="188" width="56" height="30"/>
+            <rect x="1172" y="212" width="56" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-users-r1-c0">
-            <rect x="702" y="218" width="52" height="34"/>
+            <rect x="912" y="242" width="52" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-users-r1-c1">
-            <rect x="758" y="218" width="104" height="34"/>
+            <rect x="968" y="242" width="104" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-users-r1-c2">
-            <rect x="866" y="218" width="92" height="34"/>
+            <rect x="1076" y="242" width="92" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-users-r1-c3">
-            <rect x="962" y="218" width="56" height="34"/>
+            <rect x="1172" y="242" width="56" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-hdr-0">
-            <rect x="1202" y="154" width="80" height="30"/>
+            <rect x="1412" y="164" width="80" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-hdr-1">
-            <rect x="1286" y="154" width="212" height="30"/>
+            <rect x="1496" y="164" width="212" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-hdr-2">
-            <rect x="1502" y="154" width="146" height="30"/>
+            <rect x="1712" y="164" width="146" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-hdr-3">
-            <rect x="1652" y="154" width="66" height="30"/>
+            <rect x="1862" y="164" width="66" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r1-c0">
-            <rect x="1202" y="184" width="80" height="34"/>
+            <rect x="1412" y="194" width="80" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r1-c1">
-            <rect x="1286" y="184" width="212" height="34"/>
+            <rect x="1496" y="194" width="212" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r1-c2">
-            <rect x="1502" y="184" width="146" height="34"/>
+            <rect x="1712" y="194" width="146" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r1-c3">
-            <rect x="1652" y="184" width="66" height="34"/>
+            <rect x="1862" y="194" width="66" height="48"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r2-c0">
-            <rect x="1202" y="218" width="80" height="34"/>
+            <rect x="1412" y="242" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r2-c1">
-            <rect x="1286" y="218" width="212" height="34"/>
+            <rect x="1496" y="242" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r2-c2">
-            <rect x="1502" y="218" width="146" height="34"/>
+            <rect x="1712" y="242" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r2-c3">
-            <rect x="1652" y="218" width="66" height="34"/>
+            <rect x="1862" y="242" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r3-c0">
-            <rect x="1202" y="252" width="80" height="34"/>
+            <rect x="1412" y="276" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r3-c1">
-            <rect x="1286" y="252" width="212" height="34"/>
+            <rect x="1496" y="276" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r3-c2">
-            <rect x="1502" y="252" width="146" height="34"/>
+            <rect x="1712" y="276" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r3-c3">
-            <rect x="1652" y="252" width="66" height="34"/>
+            <rect x="1862" y="276" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r4-c1">
-            <rect x="1286" y="286" width="212" height="34"/>
+            <rect x="1496" y="310" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r4-c2">
-            <rect x="1502" y="286" width="146" height="34"/>
+            <rect x="1712" y="310" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r4-c3">
-            <rect x="1652" y="286" width="66" height="34"/>
+            <rect x="1862" y="310" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r5-c1">
-            <rect x="1286" y="320" width="212" height="34"/>
+            <rect x="1496" y="344" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r5-c2">
-            <rect x="1502" y="320" width="146" height="34"/>
+            <rect x="1712" y="344" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r5-c3">
-            <rect x="1652" y="320" width="66" height="34"/>
+            <rect x="1862" y="344" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r6-c1">
-            <rect x="1286" y="354" width="212" height="34"/>
+            <rect x="1496" y="378" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r6-c2">
-            <rect x="1502" y="354" width="146" height="34"/>
+            <rect x="1712" y="378" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r6-c3">
-            <rect x="1652" y="354" width="66" height="34"/>
+            <rect x="1862" y="378" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r7-c1">
-            <rect x="1286" y="388" width="212" height="34"/>
+            <rect x="1496" y="412" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r7-c2">
-            <rect x="1502" y="388" width="146" height="34"/>
+            <rect x="1712" y="412" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_key_backups-r7-c3">
-            <rect x="1652" y="388" width="66" height="34"/>
+            <rect x="1862" y="412" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-hdr-0">
-            <rect x="2" y="804" width="80" height="30"/>
+            <rect x="212" y="754" width="80" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-hdr-1">
-            <rect x="86" y="804" width="212" height="30"/>
+            <rect x="296" y="754" width="212" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-hdr-2">
-            <rect x="302" y="804" width="146" height="30"/>
+            <rect x="512" y="754" width="146" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-hdr-3">
-            <rect x="452" y="804" width="66" height="30"/>
+            <rect x="662" y="754" width="66" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r1-c0">
-            <rect x="2" y="834" width="80" height="34"/>
+            <rect x="212" y="784" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r1-c1">
-            <rect x="86" y="834" width="212" height="34"/>
+            <rect x="296" y="784" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r1-c2">
-            <rect x="302" y="834" width="146" height="34"/>
+            <rect x="512" y="784" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r1-c3">
-            <rect x="452" y="834" width="66" height="34"/>
+            <rect x="662" y="784" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r2-c0">
-            <rect x="2" y="868" width="80" height="34"/>
+            <rect x="212" y="818" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r2-c1">
-            <rect x="86" y="868" width="212" height="34"/>
+            <rect x="296" y="818" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r2-c2">
-            <rect x="302" y="868" width="146" height="34"/>
+            <rect x="512" y="818" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r2-c3">
-            <rect x="452" y="868" width="66" height="34"/>
+            <rect x="662" y="818" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r3-c0">
-            <rect x="2" y="902" width="80" height="34"/>
+            <rect x="212" y="852" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r3-c1">
-            <rect x="86" y="902" width="212" height="34"/>
+            <rect x="296" y="852" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r3-c2">
-            <rect x="302" y="902" width="146" height="34"/>
+            <rect x="512" y="852" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r3-c3">
-            <rect x="452" y="902" width="66" height="34"/>
+            <rect x="662" y="852" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r4-c1">
-            <rect x="86" y="936" width="212" height="34"/>
+            <rect x="296" y="886" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r4-c2">
-            <rect x="302" y="936" width="146" height="34"/>
+            <rect x="512" y="886" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r4-c3">
-            <rect x="452" y="936" width="66" height="34"/>
+            <rect x="662" y="886" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r5-c1">
-            <rect x="86" y="970" width="212" height="34"/>
+            <rect x="296" y="920" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r5-c2">
-            <rect x="302" y="970" width="146" height="34"/>
+            <rect x="512" y="920" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r5-c3">
-            <rect x="452" y="970" width="66" height="34"/>
+            <rect x="662" y="920" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r6-c1">
-            <rect x="86" y="1004" width="212" height="34"/>
+            <rect x="296" y="954" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r6-c2">
-            <rect x="302" y="1004" width="146" height="34"/>
+            <rect x="512" y="954" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_envelopes-r6-c3">
-            <rect x="452" y="1004" width="66" height="34"/>
+            <rect x="662" y="954" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-hdr-0">
-            <rect x="702" y="838" width="52" height="30"/>
+            <rect x="912" y="788" width="52" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-hdr-1">
-            <rect x="758" y="838" width="104" height="30"/>
+            <rect x="968" y="788" width="104" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-hdr-2">
-            <rect x="866" y="838" width="92" height="30"/>
+            <rect x="1076" y="788" width="92" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-hdr-3">
-            <rect x="962" y="838" width="56" height="30"/>
+            <rect x="1172" y="788" width="56" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-r1-c0">
-            <rect x="702" y="868" width="52" height="34"/>
+            <rect x="912" y="818" width="52" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-r1-c1">
-            <rect x="758" y="868" width="104" height="34"/>
+            <rect x="968" y="818" width="104" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-r1-c2">
-            <rect x="866" y="868" width="92" height="34"/>
+            <rect x="1076" y="818" width="92" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-conversations-r1-c3">
-            <rect x="962" y="868" width="56" height="34"/>
+            <rect x="1172" y="818" width="56" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-hdr-0">
-            <rect x="1202" y="804" width="80" height="30"/>
+            <rect x="1412" y="754" width="80" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-hdr-1">
-            <rect x="1286" y="804" width="212" height="30"/>
+            <rect x="1496" y="754" width="212" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-hdr-2">
-            <rect x="1502" y="804" width="146" height="30"/>
+            <rect x="1712" y="754" width="146" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-hdr-3">
-            <rect x="1652" y="804" width="66" height="30"/>
+            <rect x="1862" y="754" width="66" height="30"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r1-c0">
-            <rect x="1202" y="834" width="80" height="34"/>
+            <rect x="1412" y="784" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r1-c1">
-            <rect x="1286" y="834" width="212" height="34"/>
+            <rect x="1496" y="784" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r1-c2">
-            <rect x="1502" y="834" width="146" height="34"/>
+            <rect x="1712" y="784" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r1-c3">
-            <rect x="1652" y="834" width="66" height="34"/>
+            <rect x="1862" y="784" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r2-c0">
-            <rect x="1202" y="868" width="80" height="34"/>
+            <rect x="1412" y="818" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r2-c1">
-            <rect x="1286" y="868" width="212" height="34"/>
+            <rect x="1496" y="818" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r2-c2">
-            <rect x="1502" y="868" width="146" height="34"/>
+            <rect x="1712" y="818" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r2-c3">
-            <rect x="1652" y="868" width="66" height="34"/>
+            <rect x="1862" y="818" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r3-c0">
-            <rect x="1202" y="902" width="80" height="34"/>
+            <rect x="1412" y="852" width="80" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r3-c1">
-            <rect x="1286" y="902" width="212" height="34"/>
+            <rect x="1496" y="852" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r3-c2">
-            <rect x="1502" y="902" width="146" height="34"/>
+            <rect x="1712" y="852" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r3-c3">
-            <rect x="1652" y="902" width="66" height="34"/>
+            <rect x="1862" y="852" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r4-c1">
-            <rect x="1286" y="936" width="212" height="34"/>
+            <rect x="1496" y="886" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r4-c2">
-            <rect x="1502" y="936" width="146" height="34"/>
+            <rect x="1712" y="886" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r4-c3">
-            <rect x="1652" y="936" width="66" height="34"/>
+            <rect x="1862" y="886" width="66" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r5-c1">
-            <rect x="1286" y="970" width="212" height="34"/>
+            <rect x="1496" y="920" width="212" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r5-c2">
-            <rect x="1502" y="970" width="146" height="34"/>
+            <rect x="1712" y="920" width="146" height="34"/>
         </clipPath>
         <clipPath id="mx-clip-e2ee_group_key_epochs-r5-c3">
-            <rect x="1652" y="970" width="66" height="34"/>
+            <rect x="1862" y="920" width="66" height="34"/>
         </clipPath>
     </defs>
     <g>
-        <rect x="0" y="0" width="1720" height="44" fill="none" stroke="none" pointer-events="all"/>
+        <rect x="20" y="8" width="1910" height="44" fill="none" stroke="none" pointer-events="all"/>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" font-size="28px">
-            <text x="2" y="31">
+            <text x="22" y="39">
                 KHÓA E2EE
             </text>
         </g>
-        <path d="M 0 57 L 1720 57" fill="none" stroke="#dce4ef" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 689.65 224.65 L 689.65 245.35 M 679.3 224.65 L 679.3 245.35" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="551.05" cy="235" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 520 245.35 L 540.7 235 L 520 224.65 M 540.7 235 L 520 235" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 700 235 L 560.55 235" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
+        <path d="M 20 69 L 1930 69" fill="none" stroke="#dce4ef" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 899.65 248.65 L 899.65 269.35 M 889.3 248.65 L 889.3 269.35" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="761.05" cy="259" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 730 269.35 L 750.7 259 L 730 248.65 M 750.7 259 L 730 259" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 910 259 L 770.55 259" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
         <g fill="#64748B" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="604" y="225" width="62" height="20"/>
-            <text x="635" y="239.5">
+            <rect fill="#FFFFFF" stroke="none" x="814" y="249" width="62" height="20"/>
+            <text x="845" y="263.5">
                 sở hữu
             </text>
         </g>
-        <path d="M 1030.35 245.35 L 1030.35 224.65 M 1040.7 245.35 L 1040.7 224.65" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="1168.95" cy="235" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 1200 224.65 L 1179.3 235 L 1200 245.35 M 1179.3 235 L 1200 235" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 1020 235 L 1159.45 235" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
+        <path d="M 1240.35 269.35 L 1240.35 248.65 M 1250.7 269.35 L 1250.7 248.65" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="1378.95" cy="259" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 1410 248.65 L 1389.3 259 L 1410 269.35 M 1389.3 259 L 1410 259" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1230 259 L 1369.45 259" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
         <g fill="#64748B" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="1079" y="225" width="62" height="20"/>
-            <text x="1110" y="239.5">
+            <rect fill="#FFFFFF" stroke="none" x="1289" y="249" width="62" height="20"/>
+            <text x="1320" y="263.5">
                 sở hữu
             </text>
         </g>
-        <ellipse cx="551.05" cy="201" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 530.35 211.35 L 530.35 190.65 M 541.55 201 L 520 201" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="551.05" cy="439" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 520 449.35 L 540.7 439 L 520 428.65 M 540.7 439 L 520 439" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 560.55 201 L 572 201 L 572 439 L 560.55 439" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
+        <ellipse cx="761.05" cy="218" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 740.35 228.35 L 740.35 207.65 M 751.55 218 L 730 218" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="761.05" cy="463" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 730 473.35 L 750.7 463 L 730 452.65 M 750.7 463 L 730 463" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 770.55 218 L 782 218 L 782 463 L 770.55 463" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
         <g fill="#285EA8" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="529" y="330" width="86" height="20"/>
-            <text x="572" y="344.5">
+            <rect fill="#FFFFFF" stroke="none" x="739" y="355" width="86" height="20"/>
+            <text x="782" y="369.5">
                 phê duyệt
             </text>
         </g>
-        <path d="M 119.65 534.35 L 140.35 534.35 M 119.65 544.7 L 140.35 544.7" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="130" cy="728.95" rx="9" ry="9" fill="none" stroke="#16715A" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 140.35 760 L 130 739.3 L 119.65 760 M 130 739.3 L 130 760" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 130 524 L 130 719.45" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 199.65 195.17 L 199.65 215.87 M 189.3 195.17 L 189.3 215.87" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="178.95" cy="835" rx="9" ry="9" fill="none" stroke="#16715A" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 210 824.65 L 189.3 835 L 210 845.35 M 189.3 835 L 210 835" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 210 205.52 L 75 205.5 L 75 835 L 169.45 835" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="stroke"/>
         <g fill="#16715A" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="71" y="632" width="118" height="20"/>
-            <text x="130" y="646.5">
+            <rect fill="#FFFFFF" stroke="none" x="16" y="505" width="118" height="20"/>
+            <text x="75" y="519.5">
                 thiết bị nhận
             </text>
         </g>
-        <ellipse cx="390" cy="555.05" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 379.65 534.35 L 400.35 534.35 M 390 545.55 L 390 524" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="390" cy="728.95" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 400.35 760 L 390 739.3 L 379.65 760 M 390 739.3 L 390 760" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 390 564.55 L 390 719.45" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
+        <ellipse cx="178.95" cy="230.49" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 199.65 220.13 L 199.65 240.83 M 188.45 230.49 L 210 230.48" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="178.95" cy="869" rx="9" ry="9" fill="none" stroke="#285EA8" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 210 858.65 L 189.3 869 L 210 879.35 M 189.3 869 L 210 869" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 169.45 230.49 L 135 230.5 L 135 869 L 169.45 869" fill="none" stroke="#285EA8" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
         <g fill="#285EA8" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="311" y="632" width="158" height="20"/>
-            <text x="390" y="646.5">
+            <rect fill="#FFFFFF" stroke="none" x="56" y="595" width="158" height="20"/>
+            <text x="135" y="609.5">
                 thiết bị phát hành
             </text>
         </g>
-        <path d="M 1030.35 895.35 L 1030.35 874.65 M 1040.7 895.35 L 1040.7 874.65" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="1168.95" cy="885" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 1200 874.65 L 1179.3 885 L 1200 895.35 M 1179.3 885 L 1200 885" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 1020 885 L 1159.45 885" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
+        <path d="M 1240.35 845.35 L 1240.35 824.65 M 1250.7 845.35 L 1250.7 824.65" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="1378.95" cy="835" rx="9" ry="9" fill="none" stroke="#64748B" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 1410 824.65 L 1389.3 835 L 1410 845.35 M 1389.3 835 L 1410 835" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1230 835 L 1369.45 835" fill="none" stroke="#64748B" stroke-width="1.7" stroke-miterlimit="10" stroke-dasharray="10.2 6.8" pointer-events="stroke"/>
         <g fill="#64748B" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="1071" y="875" width="78" height="20"/>
-            <text x="1110" y="889.5">
+            <rect fill="#FFFFFF" stroke="none" x="1281" y="825" width="78" height="20"/>
+            <text x="1320" y="839.5">
                 có epoch
             </text>
         </g>
-        <path d="M 1189.65 840.65 L 1189.65 861.35 M 1179.3 840.65 L 1179.3 861.35" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <ellipse cx="551.05" cy="851" rx="9" ry="9" fill="none" stroke="#16715A" stroke-width="1.7" pointer-events="all"/>
-        <path d="M 520 861.35 L 540.7 851 L 520 840.65 M 540.7 851 L 520 851" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 1200 851 L 1110 851 L 1110 695 L 610 695 L 610 851 L 560.55 851" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 1399.65 790.65 L 1399.65 811.35 M 1389.3 790.65 L 1389.3 811.35" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="761.05" cy="801" rx="9" ry="9" fill="none" stroke="#16715A" stroke-width="1.7" pointer-events="all"/>
+        <path d="M 730 811.35 L 750.7 801 L 730 790.65 M 750.7 801 L 730 801" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1410 801 L 1320 801 L 1320 645 L 820 645 L 820 801 L 770.55 801" fill="none" stroke="#16715A" stroke-width="1.7" stroke-miterlimit="10" pointer-events="stroke"/>
         <g fill="#16715A" font-family="Helvetica" text-anchor="middle" font-size="14px">
-            <rect fill="#FFFFFF" stroke="none" x="809" y="685" width="102" height="20"/>
-            <text x="860" y="699.5">
+            <rect fill="#FFFFFF" stroke="none" x="1019" y="635" width="102" height="20"/>
+            <text x="1070" y="649.5">
                 có envelope
             </text>
         </g>
-        <path d="M 0 154 L 0 110 L 520 110 L 520 154" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="0" y="154" width="520" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="0" y="184" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="218" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="252" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="286" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="320" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="354" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="388" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="422" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="456" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="490" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <path d="M 0 154 L 0 524 L 520 524 L 520 154" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 0 154 L 520 154" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 0 184 L 520 184" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 84 154 L 84 524" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 300 154 L 300 524" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 450 154 L 450 524" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 164 L 210 120 L 730 120 L 730 164" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="210" y="164" width="520" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="210" y="194" width="520" height="48" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="242" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="276" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="310" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="344" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="378" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="412" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="446" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="480" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="514" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <path d="M 210 164 L 210 548 L 730 548 L 730 164" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 164 L 730 164" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 194 L 730 194" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 294 164 L 294 548" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 510 164 L 510 548" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 660 164 L 660 548" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="260" y="138">
+            <text x="470" y="148">
                 e2ee_devices
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="42" y="173">
+            <text x="252" y="183">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-hdr-1)" font-size="12px">
-            <text x="92" y="173">
+            <text x="302" y="183">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-hdr-2)" font-size="12px">
-            <text x="308" y="173">
+            <text x="518" y="183">
                 Kiểu dữ liệu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="173">
+            <text x="695" y="183">
                 Rỗng
             </text>
         </g>
-        <path d="M 0 218 L 520 218" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 242 L 730 242" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="204.85">
+            <text x="252" y="221.85">
                 PK, U1
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r1-c1)" font-size="14px">
-            <text x="92" y="205.9">
+            <text x="302" y="222.9">
                 id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r1-c2)" font-size="13px">
-            <text x="308" y="205.55">
+            <text x="518" y="222.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="205.2">
+            <text x="695" y="222.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r2-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="238.85">
+            <text x="252" y="262.85">
                 FK, U1
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r2-c1)" font-size="14px">
-            <text x="92" y="239.9">
+            <text x="302" y="263.9">
                 user_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r2-c2)" font-size="13px">
-            <text x="308" y="239.55">
+            <text x="518" y="263.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r2-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="239.2">
+            <text x="695" y="263.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r3-c1)" font-size="14px">
-            <text x="92" y="273.9">
+            <text x="302" y="297.9">
                 encryption_public_key
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r3-c2)" font-size="13px">
-            <text x="308" y="273.55">
+            <text x="518" y="297.55">
                 BYTEA
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r3-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="273.2">
+            <text x="695" y="297.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r4-c1)" font-size="14px">
-            <text x="92" y="307.9">
+            <text x="302" y="331.9">
                 signing_public_key
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r4-c2)" font-size="13px">
-            <text x="308" y="307.55">
+            <text x="518" y="331.55">
                 BYTEA
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r4-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="307.2">
+            <text x="695" y="331.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r5-c1)" font-size="14px">
-            <text x="92" y="341.9">
+            <text x="302" y="365.9">
                 created_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r5-c2)" font-size="13px">
-            <text x="308" y="341.55">
+            <text x="518" y="365.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r5-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="341.2">
+            <text x="695" y="365.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r6-c1)" font-size="14px">
-            <text x="92" y="375.9">
+            <text x="302" y="399.9">
                 trusted_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r6-c2)" font-size="13px">
-            <text x="308" y="375.55">
+            <text x="518" y="399.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r6-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="375.2">
+            <text x="695" y="399.2">
                 NULL
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r7-c1)" font-size="14px">
-            <text x="92" y="409.9">
+            <text x="302" y="433.9">
                 trust_method
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r7-c2)" font-size="13px">
-            <text x="308" y="409.55">
+            <text x="518" y="433.55">
                 TEXT
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r7-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="409.2">
+            <text x="695" y="433.2">
                 NULL
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r8-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="442.85">
+            <text x="252" y="466.85">
                 FK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r8-c1)" font-size="14px">
-            <text x="92" y="443.9">
+            <text x="302" y="467.9">
                 approved_by_device_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r8-c2)" font-size="13px">
-            <text x="308" y="443.55">
+            <text x="518" y="467.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r8-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="443.2">
+            <text x="695" y="467.2">
                 NULL
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r9-c1)" font-size="14px">
-            <text x="92" y="477.9">
+            <text x="302" y="501.9">
                 trust_proof
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r9-c2)" font-size="13px">
-            <text x="308" y="477.55">
+            <text x="518" y="501.55">
                 JSONB
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r9-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="477.2">
+            <text x="695" y="501.2">
                 NULL
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r10-c1)" font-size="14px">
-            <text x="92" y="511.9">
+            <text x="302" y="535.9">
                 revoked_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r10-c2)" font-size="13px">
-            <text x="308" y="511.55">
+            <text x="518" y="535.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_devices-r10-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="511.2">
+            <text x="695" y="535.2">
                 NULL
             </text>
         </g>
         <g fill="#53657D" font-family="Helvetica" font-style="italic" font-size="13px">
-            <text x="700" y="132">
+            <text x="910" y="156">
                 Tham chiếu · ngoài phạm vi
             </text>
         </g>
-        <path d="M 700 188 L 700 144 L 1020 144 L 1020 188" fill="#64748B" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="700" y="188" width="320" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="700" y="218" width="320" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <path d="M 700 188 L 700 252 L 1020 252 L 1020 188" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 700 188 L 1020 188" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 700 218 L 1020 218" fill="none" stroke="#64748B" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 756 188 L 756 252" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 864 188 L 864 252" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 960 188 L 960 252" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 212 L 910 168 L 1230 168 L 1230 212" fill="#64748B" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="910" y="212" width="320" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="910" y="242" width="320" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <path d="M 910 212 L 910 276 L 1230 276 L 1230 212" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 212 L 1230 212" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 242 L 1230 242" fill="none" stroke="#64748B" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 966 212 L 966 276" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1074 212 L 1074 276" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1170 212 L 1170 276" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="860" y="172">
+            <text x="1070" y="196">
                 users
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-users-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="728" y="207">
+            <text x="938" y="231">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-users-hdr-1)" font-size="12px">
-            <text x="764" y="207">
+            <text x="974" y="231">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-users-hdr-2)" font-size="12px">
-            <text x="872" y="207">
+            <text x="1082" y="231">
                 Kiểu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-users-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="990" y="207">
+            <text x="1200" y="231">
                 Rỗng
             </text>
         </g>
         <g fill="#475569" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-users-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="728" y="238.85">
+            <text x="938" y="262.85">
                 PK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-users-r1-c1)" font-size="14px">
-            <text x="764" y="239.9">
+            <text x="974" y="263.9">
                 id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-users-r1-c2)" font-size="13px">
-            <text x="872" y="239.55">
+            <text x="1082" y="263.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-users-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="990" y="239.2">
+            <text x="1200" y="263.2">
                 NN
             </text>
         </g>
         <g fill="#53657D" font-family="Helvetica" font-style="italic" font-size="13px">
-            <text x="1200" y="98">
+            <text x="1410" y="108">
                 Bản sao lưu khóa đã mã hóa
             </text>
         </g>
-        <path d="M 1200 154 L 1200 110 L 1720 110 L 1720 154" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="1200" y="154" width="520" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="184" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="218" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="252" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="286" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="320" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="354" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="388" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <path d="M 1200 154 L 1200 422 L 1720 422 L 1720 154" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1200 154 L 1720 154" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1200 184 L 1720 184" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1284 154 L 1284 422" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1500 154 L 1500 422" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1650 154 L 1650 422" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 164 L 1410 120 L 1930 120 L 1930 164" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="1410" y="164" width="520" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="194" width="520" height="48" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="242" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="276" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="310" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="344" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="378" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="412" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <path d="M 1410 164 L 1410 446 L 1930 446 L 1930 164" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 164 L 1930 164" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 194 L 1930 194" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1494 164 L 1494 446" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1710 164 L 1710 446" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1860 164 L 1860 446" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="1460" y="138">
+            <text x="1670" y="148">
                 e2ee_key_backups
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="1242" y="173">
+            <text x="1452" y="183">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-hdr-1)" font-size="12px">
-            <text x="1292" y="173">
+            <text x="1502" y="183">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-hdr-2)" font-size="12px">
-            <text x="1508" y="173">
+            <text x="1718" y="183">
                 Kiểu dữ liệu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="173">
+            <text x="1895" y="183">
                 Rỗng
             </text>
         </g>
-        <path d="M 1200 218 L 1720 218" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 242 L 1930 242" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="204.85">
+            <text x="1452" y="221.85">
                 PK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r1-c1)" font-size="14px">
-            <text x="1292" y="205.9">
+            <text x="1502" y="222.9">
                 id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r1-c2)" font-size="13px">
-            <text x="1508" y="205.55">
+            <text x="1718" y="222.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="205.2">
+            <text x="1895" y="222.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r2-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="238.85">
+            <text x="1452" y="262.85">
                 FK, U1, U2
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r2-c1)" font-size="14px">
-            <text x="1292" y="239.9">
+            <text x="1502" y="263.9">
                 user_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r2-c2)" font-size="13px">
-            <text x="1508" y="239.55">
+            <text x="1718" y="263.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r2-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="239.2">
+            <text x="1895" y="263.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r3-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="272.85">
+            <text x="1452" y="296.85">
                 U1
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r3-c1)" font-size="14px">
-            <text x="1292" y="273.9">
+            <text x="1502" y="297.9">
                 revision
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r3-c2)" font-size="13px">
-            <text x="1508" y="273.55">
+            <text x="1718" y="297.55">
                 BIGINT
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r3-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="273.2">
+            <text x="1895" y="297.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r4-c1)" font-size="14px">
-            <text x="1292" y="307.9">
+            <text x="1502" y="331.9">
                 encrypted_payload
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r4-c2)" font-size="13px">
-            <text x="1508" y="307.55">
+            <text x="1718" y="331.55">
                 BYTEA
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r4-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="307.2">
+            <text x="1895" y="331.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r5-c1)" font-size="14px">
-            <text x="1292" y="341.9">
+            <text x="1502" y="365.9">
                 crypto_metadata
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r5-c2)" font-size="13px">
-            <text x="1508" y="341.55">
+            <text x="1718" y="365.55">
                 JSONB
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r5-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="341.2">
+            <text x="1895" y="365.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r6-c1)" font-size="14px">
-            <text x="1292" y="375.9">
+            <text x="1502" y="399.9">
                 created_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r6-c2)" font-size="13px">
-            <text x="1508" y="375.55">
+            <text x="1718" y="399.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r6-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="375.2">
+            <text x="1895" y="399.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r7-c1)" font-size="14px">
-            <text x="1292" y="409.9">
+            <text x="1502" y="433.9">
                 replaced_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r7-c2)" font-size="13px">
-            <text x="1508" y="409.55">
+            <text x="1718" y="433.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_key_backups-r7-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="409.2">
+            <text x="1895" y="433.2">
                 NULL
             </text>
         </g>
-        <path d="M 1200 442 L 1706 442 L 1720 456 L 1720 500 L 1200 500 Z" fill="#EEF4FA" stroke="#285EA8" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 1706 442 L 1706 456 L 1720 456" fill="none" stroke="#285EA8" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1410 466 L 1916 466 L 1930 480 L 1930 524 L 1410 524 Z" fill="#EEF4FA" stroke="#285EA8" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1916 466 L 1916 480 L 1930 480" fill="none" stroke="#285EA8" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
         <g fill="#334155" font-family="Helvetica" pointer-events="none" font-size="13px">
-            <text x="1212" y="464">
+            <text x="1422" y="488">
                 U1 (user_id, revision)
             </text>
-            <text x="1212" y="484">
+            <text x="1422" y="508">
                 U2 (user_id) WHERE replaced_at IS NULL
             </text>
         </g>
         <g fill="#53657D" font-family="Helvetica" font-style="italic" font-size="13px">
-            <text x="0" y="1060">
+            <text x="210" y="698">
                 Khóa nhóm được bọc cho từng thiết bị
             </text>
         </g>
-        <path d="M 0 804 L 0 760 L 520 760 L 520 804" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="0" y="804" width="520" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="0" y="834" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="868" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="902" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="936" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="0" y="970" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="0" y="1004" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <path d="M 0 804 L 0 1038 L 520 1038 L 520 804" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 0 804 L 520 804" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 0 834 L 520 834" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 84 804 L 84 1038" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 300 804 L 300 1038" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 450 804 L 450 1038" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 754 L 210 710 L 730 710 L 730 754" fill="#285EA8" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="210" y="754" width="520" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="210" y="784" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="818" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="852" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="886" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="210" y="920" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="210" y="954" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <path d="M 210 754 L 210 988 L 730 988 L 730 754" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 754 L 730 754" fill="none" stroke="#285EA8" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 784 L 730 784" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 294 754 L 294 988" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 510 754 L 510 988" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 660 754 L 660 988" fill="none" stroke="#285EA8" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="260" y="788">
+            <text x="470" y="738">
                 e2ee_group_key_envelopes
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="42" y="823">
+            <text x="252" y="773">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-hdr-1)" font-size="12px">
-            <text x="92" y="823">
+            <text x="302" y="773">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-hdr-2)" font-size="12px">
-            <text x="308" y="823">
+            <text x="518" y="773">
                 Kiểu dữ liệu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="823">
+            <text x="695" y="773">
                 Rỗng
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="854.85">
+            <text x="252" y="804.85">
                 PK, FK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r1-c1)" font-size="14px">
-            <text x="92" y="855.9">
+            <text x="302" y="805.9">
                 epoch_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r1-c2)" font-size="13px">
-            <text x="308" y="855.55">
+            <text x="518" y="805.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="855.2">
+            <text x="695" y="805.2">
                 NN
             </text>
         </g>
-        <path d="M 0 902 L 520 902" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 210 852 L 730 852" fill="none" stroke="#285EA8" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r2-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="888.85">
+            <text x="252" y="838.85">
                 PK, FK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r2-c1)" font-size="14px">
-            <text x="92" y="889.9">
+            <text x="302" y="839.9">
                 recipient_device_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r2-c2)" font-size="13px">
-            <text x="308" y="889.55">
+            <text x="518" y="839.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r2-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="889.2">
+            <text x="695" y="839.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r3-c0)" text-anchor="middle" font-size="11px">
-            <text x="42" y="922.85">
+            <text x="252" y="872.85">
                 FK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r3-c1)" font-size="14px">
-            <text x="92" y="923.9">
+            <text x="302" y="873.9">
                 issued_by_device_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r3-c2)" font-size="13px">
-            <text x="308" y="923.55">
+            <text x="518" y="873.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r3-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="923.2">
+            <text x="695" y="873.2">
                 NULL
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r4-c1)" font-size="14px">
-            <text x="92" y="957.9">
+            <text x="302" y="907.9">
                 wrapped_key
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r4-c2)" font-size="13px">
-            <text x="308" y="957.55">
+            <text x="518" y="907.55">
                 BYTEA
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r4-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="957.2">
+            <text x="695" y="907.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r5-c1)" font-size="14px">
-            <text x="92" y="991.9">
+            <text x="302" y="941.9">
                 crypto_metadata
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r5-c2)" font-size="13px">
-            <text x="308" y="991.55">
+            <text x="518" y="941.55">
                 JSONB
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r5-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="991.2">
+            <text x="695" y="941.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r6-c1)" font-size="14px">
-            <text x="92" y="1025.9">
+            <text x="302" y="975.9">
                 created_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r6-c2)" font-size="13px">
-            <text x="308" y="1025.55">
+            <text x="518" y="975.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_envelopes-r6-c3)" text-anchor="middle" font-size="12px">
-            <text x="485" y="1025.2">
+            <text x="695" y="975.2">
                 NN
             </text>
         </g>
         <g fill="#53657D" font-family="Helvetica" font-style="italic" font-size="13px">
-            <text x="700" y="782">
+            <text x="910" y="732">
                 Tham chiếu · ngoài phạm vi
             </text>
         </g>
-        <path d="M 700 838 L 700 794 L 1020 794 L 1020 838" fill="#64748B" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="700" y="838" width="320" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="700" y="868" width="320" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <path d="M 700 838 L 700 902 L 1020 902 L 1020 838" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 700 838 L 1020 838" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 700 868 L 1020 868" fill="none" stroke="#64748B" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 756 838 L 756 902" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 864 838 L 864 902" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 960 838 L 960 902" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 788 L 910 744 L 1230 744 L 1230 788" fill="#64748B" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="910" y="788" width="320" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="910" y="818" width="320" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <path d="M 910 788 L 910 852 L 1230 852 L 1230 788" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 788 L 1230 788" fill="none" stroke="#64748B" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 910 818 L 1230 818" fill="none" stroke="#64748B" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 966 788 L 966 852" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1074 788 L 1074 852" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1170 788 L 1170 852" fill="none" stroke="#64748B" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="860" y="822">
+            <text x="1070" y="772">
                 conversations
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-conversations-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="728" y="857">
+            <text x="938" y="807">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-conversations-hdr-1)" font-size="12px">
-            <text x="764" y="857">
+            <text x="974" y="807">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-conversations-hdr-2)" font-size="12px">
-            <text x="872" y="857">
+            <text x="1082" y="807">
                 Kiểu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-conversations-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="990" y="857">
+            <text x="1200" y="807">
                 Rỗng
             </text>
         </g>
         <g fill="#475569" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-conversations-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="728" y="888.85">
+            <text x="938" y="838.85">
                 PK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-conversations-r1-c1)" font-size="14px">
-            <text x="764" y="889.9">
+            <text x="974" y="839.9">
                 id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-conversations-r1-c2)" font-size="13px">
-            <text x="872" y="889.55">
+            <text x="1082" y="839.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-conversations-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="990" y="889.2">
+            <text x="1200" y="839.2">
                 NN
             </text>
         </g>
         <g fill="#53657D" font-family="Helvetica" font-style="italic" font-size="13px">
-            <text x="1200" y="748">
+            <text x="1410" y="698">
                 Các phiên bản khóa của nhóm
             </text>
         </g>
-        <path d="M 1200 804 L 1200 760 L 1720 760 L 1720 804" fill="#16715A" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
-        <rect x="1200" y="804" width="520" height="30" fill="#E2EBF5" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="834" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="868" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="902" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="936" width="520" height="34" fill="#EFF3FA" stroke="none" pointer-events="none"/>
-        <rect x="1200" y="970" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
-        <path d="M 1200 804 L 1200 1004 L 1720 1004 L 1720 804" fill="none" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1200 804 L 1720 804" fill="none" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1200 834 L 1720 834" fill="none" stroke="#16715A" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1284 804 L 1284 1004" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1500 804 L 1500 1004" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
-        <path d="M 1650 804 L 1650 1004" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 754 L 1410 710 L 1930 710 L 1930 754" fill="#16715A" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="1410" y="754" width="520" height="30" fill="#DCE6F3" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="784" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="818" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="852" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="886" width="520" height="34" fill="#E9EFF8" stroke="none" pointer-events="none"/>
+        <rect x="1410" y="920" width="520" height="34" fill="#FFFFFF" stroke="none" pointer-events="none"/>
+        <path d="M 1410 754 L 1410 954 L 1930 954 L 1930 754" fill="none" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 754 L 1930 754" fill="none" stroke="#16715A" stroke-width="1.5" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 784 L 1930 784" fill="none" stroke="#16715A" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1494 754 L 1494 954" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1710 754 L 1710 954" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1860 754 L 1860 954" fill="none" stroke="#16715A" stroke-width="1" stroke-opacity="0.35" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#FFFFFF" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="18px">
-            <text x="1460" y="788">
+            <text x="1670" y="738">
                 e2ee_group_key_epochs
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-hdr-0)" text-anchor="middle" font-size="12px">
-            <text x="1242" y="823">
+            <text x="1452" y="773">
                 Khóa
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-hdr-1)" font-size="12px">
-            <text x="1292" y="823">
+            <text x="1502" y="773">
                 Thuộc tính
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-hdr-2)" font-size="12px">
-            <text x="1508" y="823">
+            <text x="1718" y="773">
                 Kiểu dữ liệu
             </text>
         </g>
         <g fill="#334155" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-hdr-3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="823">
+            <text x="1895" y="773">
                 Rỗng
             </text>
         </g>
-        <path d="M 1200 868 L 1720 868" fill="none" stroke="#16715A" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 1410 818 L 1930 818" fill="none" stroke="#16715A" stroke-width="1" stroke-miterlimit="10" pointer-events="none"/>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r1-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="854.85">
+            <text x="1452" y="804.85">
                 PK
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" font-weight="bold" text-decoration="underline" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r1-c1)" font-size="14px">
-            <text x="1292" y="855.9">
+            <text x="1502" y="805.9">
                 id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r1-c2)" font-size="13px">
-            <text x="1508" y="855.55">
+            <text x="1718" y="805.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r1-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="855.2">
+            <text x="1895" y="805.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r2-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="888.85">
+            <text x="1452" y="838.85">
                 FK, U1
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r2-c1)" font-size="14px">
-            <text x="1292" y="889.9">
+            <text x="1502" y="839.9">
                 conversation_id
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r2-c2)" font-size="13px">
-            <text x="1508" y="889.55">
+            <text x="1718" y="839.55">
                 UUID
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r2-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="889.2">
+            <text x="1895" y="839.2">
                 NN
             </text>
         </g>
         <g fill="#24619E" font-family="Helvetica" font-weight="bold" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r3-c0)" text-anchor="middle" font-size="11px">
-            <text x="1242" y="922.85">
+            <text x="1452" y="872.85">
                 U1
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r3-c1)" font-size="14px">
-            <text x="1292" y="923.9">
+            <text x="1502" y="873.9">
                 epoch_no
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r3-c2)" font-size="13px">
-            <text x="1508" y="923.55">
+            <text x="1718" y="873.55">
                 BIGINT
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r3-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="923.2">
+            <text x="1895" y="873.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r4-c1)" font-size="14px">
-            <text x="1292" y="957.9">
+            <text x="1502" y="907.9">
                 created_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r4-c2)" font-size="13px">
-            <text x="1508" y="957.55">
+            <text x="1718" y="907.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r4-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="957.2">
+            <text x="1895" y="907.2">
                 NN
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r5-c1)" font-size="14px">
-            <text x="1292" y="991.9">
+            <text x="1502" y="941.9">
                 retired_at
             </text>
         </g>
         <g fill="#172B4D" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r5-c2)" font-size="13px">
-            <text x="1508" y="991.55">
+            <text x="1718" y="941.55">
                 TIMESTAMPTZ
             </text>
         </g>
         <g fill="#63748C" font-family="Helvetica" pointer-events="none" clip-path="url(#mx-clip-e2ee_group_key_epochs-r5-c3)" text-anchor="middle" font-size="12px">
-            <text x="1685" y="991.2">
+            <text x="1895" y="941.2">
                 NULL
             </text>
         </g>
-        <path d="M 1200 1024 L 1706 1024 L 1720 1038 L 1720 1082 L 1200 1082 Z" fill="#ECFDF5" stroke="#16715A" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
-        <path d="M 1706 1024 L 1706 1038 L 1720 1038" fill="none" stroke="#16715A" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1410 974 L 1916 974 L 1930 988 L 1930 1032 L 1410 1032 Z" fill="#ECFDF5" stroke="#16715A" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 1916 974 L 1916 988 L 1930 988" fill="none" stroke="#16715A" stroke-width="1.2" stroke-miterlimit="10" pointer-events="all"/>
         <g fill="#134E4A" font-family="Helvetica" pointer-events="none" font-size="13px">
-            <text x="1212" y="1046">
+            <text x="1422" y="996">
                 U1 (conversation_id, epoch_no)
             </text>
-            <text x="1212" y="1066">
+            <text x="1422" y="1016">
                 Chỉ áp dụng cho conversations (type = &#x27;GROUP&#x27;)
             </text>
         </g>
