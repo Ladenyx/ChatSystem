@@ -557,3 +557,40 @@ SELECT pg_temp.assert_true('logs-analytics/reference/midnight starts next Vietna
     (SELECT app_opens=1 FROM analytics_activity WHERE user_id=pg_temp.id(0,201))
     AND (SELECT array_agg(unique_openers)=ARRAY[1,0,0,0,0,0,0,0,0,0,0,0]::bigint[]
          FROM analytics_monthly_openers));
+
+-- Step 5.2: schema contracts, not planner/timing assertions on tiny fixtures.
+SELECT pg_temp.assert_true('logs-analytics/indexes/system login order is covered',
+    EXISTS (SELECT FROM pg_indexes WHERE schemaname='public' AND tablename='login_logs'
+        AND indexdef LIKE '%USING btree (login_at DESC, id DESC)'));
+SELECT pg_temp.assert_true('logs-analytics/indexes/account login order is covered',
+    EXISTS (SELECT FROM pg_indexes WHERE schemaname='public' AND tablename='login_logs'
+        AND indexdef LIKE '%USING btree (user_id, login_at DESC, id DESC)'));
+SELECT pg_temp.assert_true('logs-analytics/indexes/date-first app-open aggregate is covered',
+    EXISTS (SELECT FROM pg_indexes WHERE schemaname='public' AND tablename='app_open_events'
+        AND indexdef LIKE '%USING btree (opened_at, account_key)'));
+SELECT pg_temp.assert_true('logs-analytics/indexes/account-first date-window count is covered',
+    EXISTS (SELECT FROM pg_indexes WHERE schemaname='public' AND tablename='app_open_events'
+        AND indexdef LIKE '%USING btree (account_key, opened_at)'));
+SELECT pg_temp.assert_true('logs-analytics/indexes/shared name trigram index is reused',
+    EXISTS (SELECT FROM pg_indexes WHERE schemaname='public' AND tablename='users'
+        AND indexdef LIKE '%USING gin (lower(full_name) gin_trgm_ops)'));
+SELECT pg_temp.assert_true('logs-analytics/indexes/no duplicate equivalent indexes on owned event tables',
+    NOT EXISTS (SELECT FROM pg_index a JOIN pg_index b
+        ON b.indrelid=a.indrelid AND b.indexrelid>a.indexrelid
+        AND b.indkey=a.indkey AND b.indclass=a.indclass AND b.indoption=a.indoption
+        AND b.indcollation=a.indcollation
+        AND pg_get_expr(b.indexprs,b.indrelid) IS NOT DISTINCT FROM pg_get_expr(a.indexprs,a.indrelid)
+        AND pg_get_expr(b.indpred,b.indrelid) IS NOT DISTINCT FROM pg_get_expr(a.indpred,a.indrelid)
+        WHERE a.indrelid IN ('public.login_logs'::regclass,'public.app_open_events'::regclass,
+            'public.app_open_accounts'::regclass)));
+UPDATE public.users SET full_name='Free! \%_' WHERE id=pg_temp.id(0,206);
+UPDATE analytics_params SET from_date='2030-11-01',through_date='2030-11-30',name_query='! \%_';
+SELECT pg_temp.assert_true('logs-analytics/indexes/GIN-compatible filter keeps escape backslash percent underscore literal',
+    (SELECT array_agg(user_id)=ARRAY[pg_temp.id(0,206)] FROM analytics_new_registrations)
+    AND (SELECT array_agg(user_id)=ARRAY[pg_temp.id(0,206)] FROM analytics_friend_network)
+    AND NOT EXISTS (SELECT FROM analytics_activity));
+UPDATE analytics_params SET name_query='  NGƯỜI DÙNG ĐÃ XÓA  ';
+SELECT pg_temp.assert_true('logs-analytics/indexes/purged-label branch remains searchable after name optimization',
+    (SELECT array_agg(account_key)=ARRAY[pg_temp.analytics_key(212)] FROM analytics_new_registrations)
+    AND (SELECT array_agg(account_key)=ARRAY[pg_temp.analytics_key(212)] FROM analytics_activity)
+    AND NOT EXISTS (SELECT FROM analytics_friend_network));
