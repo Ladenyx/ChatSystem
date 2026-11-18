@@ -17,7 +17,8 @@ SELECT pg_temp.expect_error('core/email uniqueness ignores case',
 SELECT pg_temp.expect_error('core/profile name required',
     $$INSERT INTO users (username,email,full_name) VALUES ('other05','other@example.test',NULL)$$,'23502');
 SELECT pg_temp.expect_error('core/username shape',
-    $$UPDATE users SET username='bad space' WHERE id=pg_temp.id(0,2)$$,'23514');
+    $$INSERT INTO users (username,email,full_name) VALUES ('bad space','shape@example.test','Khác')$$,
+    '23514','users_username_check');
 SELECT pg_temp.expect_error('core/role domain',
     $$UPDATE users SET role='OWNER' WHERE id=pg_temp.id(0,2)$$,'23514');
 SELECT pg_temp.expect_error('core/soft-delete metadata consistent',

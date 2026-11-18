@@ -1,6 +1,6 @@
 # Khung SQL và kiểm thử theo luồng thành viên
 
-Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Mỗi thành viên có **một cặp DDL + Test riêng**. Các file nghiệp vụ hiện là placeholder; smoke test chung kiểm tra mỏ neo/hạ tầng, chưa đại diện cho tính năng đã hoàn tất.
+Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Mỗi thành viên có một cặp DDL + Test. Auth đã có DDL và test ràng buộc; Bạn bè/Chặn và hai luồng còn lại vẫn là placeholder. Test SQL không nghiệm thu backend.
 
 ## Phân chia file
 

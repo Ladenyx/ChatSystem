@@ -26,9 +26,9 @@ script/
 
 `schema.sql` giữ đúng bảy dòng điều phối: bật `ON_ERROR_STOP`, `BEGIN`, include bốn file 00/10/20/30 và `COMMIT`. Các DDL con nằm trong thư mục con để Docker chỉ chạy một entry point ở cấp đầu, không chạy trùng DDL.
 
-`00-core-users.sql` là định nghĩa `users` duy nhất; PK `id` có kiểu UUID. Bảng hiện chứa hồ sơ cơ bản để làm hợp đồng FK, chưa phải toàn bộ nhóm Tài khoản/Xác thực hay cơ chế đăng nhập. Thay đổi hợp đồng mỏ neo cần phối hợp; không tạo `users` stub ở mỗi luồng.
+`00-core-users.sql` là định nghĩa `users` duy nhất; PK `id` có kiểu UUID. Bảng có 14 trường theo [ERD Tài khoản & Xác thực](erd/authentication.drawio.svg), giữ nguyên hợp đồng FK `users(id)`. Không tạo `users` stub ở mỗi luồng.
 
-Các file 10/20/30 và test nghiệp vụ tương ứng hiện để sẵn vị trí cho team triển khai. Chỉ smoke test mỏ neo/hạ tầng đã có. Mỗi người phát triển trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp.
+File `10` đã có bốn bảng xác thực còn lại và test ràng buộc; Bạn bè/Chặn cùng các file 20/30 và test nghiệp vụ tương ứng vẫn chờ triển khai trong checkout này. SQL chưa thay thế xử lý đăng nhập/xác minh ở backend. Mỗi người phát triển trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp.
 
 ## Vòng kiểm thử độc lập
 
