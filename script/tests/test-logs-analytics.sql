@@ -353,7 +353,166 @@ CREATE TEMP TABLE analytics_block_inputs (
 );
 INSERT INTO analytics_block_inputs VALUES (pg_temp.id(0,201),pg_temp.id(0,209)),(pg_temp.id(0,210),pg_temp.id(0,201));
 
-\ir ../queries/analytics-reference.sql
+-- Reference analytics queries are embedded so this test needs no extra SQL files.
+-- TEMP views validate the source contracts above; adapters for workstreams 10/20 remain pending.
+CREATE TEMP VIEW analytics_bounds AS
+SELECT p.*, p.from_date::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh' AS starts_at,
+       (p.through_date + 1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh' AS ends_at
+FROM pg_temp.analytics_params p;
+
+CREATE TEMP VIEW analytics_accounts AS
+SELECT r.account_key,k.user_id,r.created_at,
+       COALESCE(u.username,'Người dùng đã xóa') AS username,
+       COALESCE(u.full_name,'Người dùng đã xóa') AS full_name,
+       u.email,COALESCE(u.status,'PURGED') AS status,
+       COALESCE(k.user_id,r.account_key) AS sort_id
+FROM pg_temp.analytics_registration_facts r
+LEFT JOIN public.app_open_accounts k ON k.account_key=r.account_key
+LEFT JOIN public.users u ON u.id=k.user_id;
+
+-- Keep literal-substring semantics while making the live-name predicate match
+-- the existing users_name_trgm_idx on lower(users.full_name). Escape ! first.
+CREATE TEMP VIEW analytics_name_filter AS
+SELECT '%'||replace(replace(replace(lower(btrim(COALESCE(name_query,''))),
+    '!','!!'),'%','!%'),'_','!_')||'%' AS name_pattern
+FROM pg_temp.analytics_params;
+
+CREATE TEMP VIEW analytics_name_matches AS
+SELECT u.id FROM public.users u CROSS JOIN pg_temp.analytics_name_filter p
+WHERE lower(u.full_name) LIKE p.name_pattern ESCAPE '!';
+
+-- Separate live users from purged labels so COALESCE does not wrap the indexed
+-- full_name expression. The branches are disjoint, so UNION ALL preserves counts.
+CREATE TEMP VIEW analytics_filtered_accounts AS
+SELECT a.* FROM pg_temp.analytics_accounts a JOIN pg_temp.analytics_name_matches n ON n.id=a.user_id
+UNION ALL
+SELECT a.* FROM pg_temp.analytics_accounts a CROSS JOIN pg_temp.analytics_name_filter p
+WHERE a.user_id IS NULL AND lower('Người dùng đã xóa') LIKE p.name_pattern ESCAPE '!';
+
+CREATE FUNCTION pg_temp.analytics_count_matches(actual BIGINT, operator TEXT, threshold BIGINT)
+RETURNS BOOLEAN LANGUAGE sql IMMUTABLE AS $$
+    SELECT CASE WHEN operator IS NULL THEN TRUE
+        WHEN operator='=' THEN actual=threshold
+        WHEN operator='<' THEN actual<threshold
+        WHEN operator='>' THEN actual>threshold ELSE FALSE END
+$$;
+
+-- A-05 / A-07. Pass the live account UUID; NULL selects system-wide history.
+CREATE TEMP VIEW analytics_login_history AS
+SELECT l.id,l.user_id,l.login_at,l.login_at AT TIME ZONE 'Asia/Ho_Chi_Minh' AS local_login_at,
+       COALESCE(u.username,'Người dùng đã xóa') AS username,
+       COALESCE(u.full_name,'Người dùng đã xóa') AS full_name,l.session_scope
+FROM public.login_logs l LEFT JOIN public.users u ON u.id=l.user_id
+CROSS JOIN pg_temp.analytics_bounds p
+WHERE (p.login_user_id IS NULL OR l.user_id=p.login_user_id)
+    AND l.login_at>=p.starts_at AND l.login_at<p.ends_at
+ORDER BY l.login_at DESC,l.id DESC;
+
+-- A-12. The retained facts contain only completed accounts, never signup requests.
+CREATE TEMP VIEW analytics_new_registrations AS
+SELECT a.* FROM pg_temp.analytics_filtered_accounts a CROSS JOIN pg_temp.analytics_bounds p
+WHERE a.created_at>=p.starts_at AND a.created_at<p.ends_at
+ORDER BY CASE WHEN p.sort_by='name' AND p.sort_direction='ASC' THEN lower(a.full_name) END ASC,
+         CASE WHEN p.sort_by='name' AND p.sort_direction='DESC' THEN lower(a.full_name) END DESC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='ASC' THEN a.created_at END ASC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='DESC' THEN a.created_at END DESC,
+         a.sort_id ASC;
+
+CREATE TEMP VIEW analytics_months AS
+SELECT m.month_no,
+       make_date(p.chart_year,m.month_no,1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh' AS starts_at,
+       (make_date(p.chart_year,m.month_no,1)::timestamp + INTERVAL '1 month')
+           AT TIME ZONE 'Asia/Ho_Chi_Minh' AS ends_at
+FROM pg_temp.analytics_params p CROSS JOIN generate_series(1,12) AS m(month_no);
+
+-- A-13 / A-16. Charts ignore list/name/count filters and always contain 12 months.
+CREATE TEMP VIEW analytics_monthly_registrations AS
+SELECT m.month_no,count(r.account_key) AS registrations
+FROM pg_temp.analytics_months m LEFT JOIN pg_temp.analytics_registration_facts r
+    ON r.created_at>=m.starts_at AND r.created_at<m.ends_at
+GROUP BY m.month_no ORDER BY m.month_no;
+
+CREATE TEMP VIEW analytics_monthly_openers AS
+SELECT m.month_no,count(DISTINCT e.account_key) AS unique_openers
+FROM pg_temp.analytics_months m LEFT JOIN pg_temp.analytics_open_facts e
+    ON e.opened_at>=m.starts_at AND e.opened_at<m.ends_at
+GROUP BY m.month_no ORDER BY m.month_no;
+
+-- A-15. Aggregate each source before joining; only successful sends count.
+CREATE TEMP VIEW analytics_activity_counts AS
+WITH opens AS (
+    SELECT e.account_key,count(*) AS app_opens
+    FROM pg_temp.analytics_open_facts e CROSS JOIN pg_temp.analytics_bounds p
+    WHERE e.opened_at>=p.starts_at AND e.opened_at<p.ends_at GROUP BY e.account_key
+), sends AS (
+    SELECT s.sender_key AS account_key,count(DISTINCT s.recipient_key) AS direct_receivers,
+           count(DISTINCT s.group_id) AS groups_chatted
+    FROM pg_temp.analytics_message_inputs s CROSS JOIN pg_temp.analytics_bounds p
+    WHERE s.accepted_at>=p.starts_at AND s.accepted_at<p.ends_at GROUP BY s.sender_key
+), active_keys AS (
+    SELECT account_key FROM opens UNION SELECT account_key FROM sends
+)
+SELECT a.*,COALESCE(o.app_opens,0) AS app_opens,COALESCE(s.direct_receivers,0) AS direct_receivers,
+       COALESCE(s.groups_chatted,0) AS groups_chatted
+FROM active_keys k JOIN pg_temp.analytics_accounts a USING (account_key)
+LEFT JOIN opens o USING (account_key) LEFT JOIN sends s USING (account_key);
+
+CREATE TEMP VIEW analytics_activity AS
+SELECT a.* FROM pg_temp.analytics_activity_counts a
+JOIN pg_temp.analytics_filtered_accounts f ON f.account_key=a.account_key
+CROSS JOIN pg_temp.analytics_params p
+WHERE pg_temp.analytics_count_matches(CASE p.activity_metric
+        WHEN 'app_opens' THEN a.app_opens WHEN 'direct_receivers' THEN a.direct_receivers
+        WHEN 'groups_chatted' THEN a.groups_chatted END,p.count_operator,p.count_value)
+ORDER BY CASE WHEN p.sort_by='name' AND p.sort_direction='ASC' THEN lower(a.full_name) END ASC,
+         CASE WHEN p.sort_by='name' AND p.sort_direction='DESC' THEN lower(a.full_name) END DESC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='ASC' THEN a.created_at END ASC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='DESC' THEN a.created_at END DESC,
+         a.sort_id ASC;
+
+-- A-14. Current graph, independent of the activity/date filters.
+CREATE TEMP VIEW analytics_friend_counts AS
+WITH live_accounts AS (
+    SELECT * FROM pg_temp.analytics_accounts WHERE status IN ('ACTIVE','LOCKED')
+), undirected AS (
+    SELECT user_a AS root_id,user_b AS friend_id FROM pg_temp.analytics_friendship_inputs WHERE is_accepted
+    UNION
+    SELECT user_b,user_a FROM pg_temp.analytics_friendship_inputs WHERE is_accepted
+), edges AS (
+    SELECT e.* FROM undirected e
+    JOIN live_accounts a ON a.user_id=e.root_id JOIN live_accounts b ON b.user_id=e.friend_id
+    WHERE e.root_id<>e.friend_id AND NOT EXISTS (
+        SELECT FROM pg_temp.analytics_block_inputs x
+        WHERE (x.blocker_id=e.root_id AND x.blocked_id=e.friend_id)
+           OR (x.blocked_id=e.root_id AND x.blocker_id=e.friend_id))
+), reach AS (
+    SELECT root_id,friend_id FROM edges
+    UNION
+    SELECT a.root_id,b.friend_id FROM edges a JOIN edges b ON b.root_id=a.friend_id
+), direct_counts AS (
+    SELECT root_id,count(*) AS direct_friends FROM edges GROUP BY root_id
+), expanded_counts AS (
+    SELECT r.root_id,count(*) AS expanded_friends FROM reach r
+    WHERE r.root_id<>r.friend_id AND NOT EXISTS (
+        SELECT FROM pg_temp.analytics_block_inputs x
+        WHERE (x.blocker_id=r.root_id AND x.blocked_id=r.friend_id)
+           OR (x.blocked_id=r.root_id AND x.blocker_id=r.friend_id))
+    GROUP BY r.root_id
+)
+SELECT a.*,COALESCE(d.direct_friends,0) AS direct_friends,COALESCE(e.expanded_friends,0) AS expanded_friends
+FROM live_accounts a LEFT JOIN direct_counts d ON d.root_id=a.user_id
+LEFT JOIN expanded_counts e ON e.root_id=a.user_id;
+
+CREATE TEMP VIEW analytics_friend_network AS
+SELECT a.* FROM pg_temp.analytics_friend_counts a
+JOIN pg_temp.analytics_filtered_accounts f ON f.account_key=a.account_key
+CROSS JOIN pg_temp.analytics_params p
+WHERE pg_temp.analytics_count_matches(a.direct_friends,p.count_operator,p.count_value)
+ORDER BY CASE WHEN p.sort_by='name' AND p.sort_direction='ASC' THEN lower(a.full_name) END ASC,
+         CASE WHEN p.sort_by='name' AND p.sort_direction='DESC' THEN lower(a.full_name) END DESC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='ASC' THEN a.created_at END ASC,
+         CASE WHEN p.sort_by='created_at' AND p.sort_direction='DESC' THEN a.created_at END DESC,
+         a.sort_id ASC;
 
 SELECT pg_temp.assert_true('logs-analytics/reference/Vietnam inclusive dates become half-open UTC bounds',
     (SELECT starts_at=TIMESTAMPTZ '2030-10-31 17:00:00+00'
