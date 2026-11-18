@@ -51,6 +51,10 @@ CREATE TABLE public.app_open_events (
 
 CREATE INDEX app_open_events_opened_at_account_key_idx
     ON public.app_open_events (opened_at, account_key);
+-- Per-account counts in a date window; UNIQUE(account_key, launch_id) cannot
+-- constrain opened_at. Keep both column orders for the two distinct workloads.
+CREATE INDEX app_open_events_account_key_opened_at_idx
+    ON public.app_open_events (account_key, opened_at);
 
 -- Call only after authentication, in the same transaction as the session grant.
 -- No session-table dependency; the caller supplies the actual granted scope.
