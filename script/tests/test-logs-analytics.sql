@@ -81,7 +81,8 @@ VALUES (pg_temp.id(0,81),'reused81','reused81@example.test','Tên trước purge
 INSERT INTO public.login_logs (id,user_id,login_at,session_scope) VALUES
 (pg_temp.id(8,81),pg_temp.id(0,81),'2026-09-01 UTC','USER_CLIENT'),
 (pg_temp.id(8,82),pg_temp.id(0,81),'2026-09-02 UTC','USER_CLIENT');
-UPDATE public.users SET status='DELETED',deleted_at='2026-10-01 UTC' WHERE id=pg_temp.id(0,81);
+UPDATE public.users SET status='DELETED',status_before_delete='ACTIVE',deleted_at='2026-10-01 UTC'
+WHERE id=pg_temp.id(0,81);
 SELECT pg_temp.assert_true('logs-analytics/soft deletion preserves account history',
     (SELECT count(*)=2 AND bool_and(u.status='DELETED' AND u.username='reused81')
      FROM public.login_logs l JOIN public.users u ON u.id=l.user_id
@@ -128,7 +129,8 @@ SELECT pg_temp.assert_true('logs-analytics/Admin App leaves open counts unchange
     AND (SELECT count(*)=1 FROM public.app_open_accounts));
 
 -- Re-login creates another login log but returns the original app-open event.
-INSERT INTO public.login_logs (user_id,session_scope) VALUES (pg_temp.id(0,4),'USER_CLIENT');
+INSERT INTO public.login_logs (id,user_id,login_at,session_scope)
+VALUES (pg_temp.id(8,7),pg_temp.id(0,4),'2026-11-17 07:00:00+00','USER_CLIENT');
 CREATE TEMP TABLE app_open_retry AS
     SELECT public.record_app_open(pg_temp.id(0,4),pg_temp.id(9,1),'USER_CLIENT') AS id;
 SELECT pg_temp.assert_true('logs-analytics/re-login adds log without another app open',
@@ -210,7 +212,7 @@ SELECT pg_temp.assert_true('logs-analytics/month boundaries use Vietnam time and
      FROM public.app_open_events e JOIN app_open_purge_keys k USING (account_key)
      WHERE opened_at >= TIMESTAMP '2026-09-01' AT TIME ZONE 'Asia/Ho_Chi_Minh'
        AND opened_at < TIMESTAMP '2026-10-01' AT TIME ZONE 'Asia/Ho_Chi_Minh'));
-UPDATE public.users SET status='DELETED',deleted_at='2026-10-01 UTC'
+UPDATE public.users SET status='DELETED',status_before_delete='ACTIVE',deleted_at='2026-10-01 UTC'
 WHERE id IN (pg_temp.id(0,91),pg_temp.id(0,92));
 SELECT pg_temp.assert_true('logs-analytics/soft deletion preserves app-open identities and events',
     (SELECT count(*)=3 AND count(DISTINCT e.account_key)=2
@@ -243,8 +245,8 @@ SELECT pg_temp.assert_true('logs-analytics/reused username gets a new statistics
      FROM public.app_open_accounts a JOIN public.app_open_events e USING (account_key)
      LEFT JOIN app_open_purge_keys k USING (account_key) WHERE a.user_id=pg_temp.id(0,93)));
 
--- Step 5.1: executable reference queries, with explicit TEMP source contracts.
--- Missing registration-retention/chat/friend adapters are not production tables.
+-- Steps 5.1 and 5.3 share the same fixed input and expected results in both flows.
+SELECT :'flow' = 'all' AS analytics_integrated \gset
 CREATE TEMP TABLE analytics_params (
     singleton BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (singleton),
     from_date DATE NOT NULL, through_date DATE NOT NULL, chart_year INTEGER NOT NULL,
@@ -265,23 +267,24 @@ CREATE FUNCTION pg_temp.analytics_key(number INTEGER) RETURNS UUID LANGUAGE sql 
     SELECT pg_temp.id(8,number+1000)
 $$;
 
-INSERT INTO public.users (id,username,email,full_name,role,status,created_at,deleted_at) VALUES
-(pg_temp.id(0,201),'ref0201','ref201@example.test','An','USER','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,202),'ref0202','ref202@example.test','Binh','USER','LOCKED','2030-10-30 17:00:00+00',NULL),
-(pg_temp.id(0,203),'ref0203','ref203@example.test','Chi','USER','ACTIVE','2030-10-31 16:59:59.999999+00',NULL),
-(pg_temp.id(0,204),'ref0204','ref204@example.test','Dung','USER','ACTIVE','2030-11-30 16:59:59.999999+00',NULL),
-(pg_temp.id(0,205),'ref0205','ref205@example.test','Echo','USER','DELETED','2030-10-14 17:00:00+00','2030-11-15 17:00:00+00'),
-(pg_temp.id(0,206),'ref0206','ref206@example.test','Free %_','USER','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,207),'ref0207','ref207@example.test','An','ADMIN','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,208),'ref0208','ref208@example.test','Huy','USER','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,209),'ref0209','ref209@example.test','Ivy','USER','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,210),'ref0210','ref210@example.test','Jade','USER','ACTIVE','2030-10-31 17:00:00+00',NULL),
-(pg_temp.id(0,211),'ref0211','ref211@example.test','Gone','USER','DELETED','2030-10-31 17:00:00+00','2030-11-09 17:00:00+00'),
-(pg_temp.id(0,212),'ref0212','ref212@example.test','Lost','USER','ACTIVE','2030-11-19 17:00:00+00',NULL);
+INSERT INTO public.users (id,username,email,full_name,role,status,created_at,deleted_at,status_before_delete) VALUES
+(pg_temp.id(0,201),'ref0201','ref201@example.test','An','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,202),'ref0202','ref202@example.test','Binh','USER','LOCKED','2030-10-30 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,203),'ref0203','ref203@example.test','Chi','USER','ACTIVE','2030-10-31 16:59:59.999999+00',NULL,NULL),
+(pg_temp.id(0,204),'ref0204','ref204@example.test','Dung','USER','ACTIVE','2030-11-30 16:59:59.999999+00',NULL,NULL),
+(pg_temp.id(0,205),'ref0205','ref205@example.test','Echo','USER','DELETED','2030-10-14 17:00:00+00','2030-11-15 17:00:00+00','ACTIVE'),
+(pg_temp.id(0,206),'ref0206','ref206@example.test','Free %_','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,207),'ref0207','ref207@example.test','An','ADMIN','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,208),'ref0208','ref208@example.test','Huy','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,209),'ref0209','ref209@example.test','Ivy','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,210),'ref0210','ref210@example.test','Jade','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
+(pg_temp.id(0,211),'ref0211','ref211@example.test','Gone','USER','DELETED','2030-10-31 17:00:00+00','2030-11-09 17:00:00+00','ACTIVE'),
+(pg_temp.id(0,212),'ref0212','ref212@example.test','Lost','USER','ACTIVE','2030-11-19 17:00:00+00',NULL,NULL);
 INSERT INTO public.app_open_accounts (account_key,user_id)
 SELECT pg_temp.analytics_key(n),pg_temp.id(0,n) FROM generate_series(201,212) n;
 
--- Prototype of the retained registration input, to be agreed with member 2.
+-- Snapshot real users.created_at into the proposed retained input. The deployed
+-- schema has no registration history source that survives deleting public.users.
 CREATE TEMP TABLE analytics_registration_facts (
     account_key UUID PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL
@@ -330,13 +333,10 @@ INSERT INTO analytics_message_inputs VALUES
 (pg_temp.id(2,4208),pg_temp.analytics_key(208),pg_temp.analytics_key(201),NULL,'2030-11-01 02:00:00+00'),
 (pg_temp.id(2,4209),pg_temp.analytics_key(206),pg_temp.analytics_key(201),NULL,NULL),
 (pg_temp.id(2,4210),pg_temp.analytics_key(206),NULL,pg_temp.id(1,4201),NULL),
-(pg_temp.id(2,4211),pg_temp.analytics_key(201),pg_temp.analytics_key(209),NULL,'2030-10-31 16:59:59.999999+00'),
-(pg_temp.id(2,4212),pg_temp.analytics_key(201),pg_temp.analytics_key(209),NULL,'2030-11-30 17:00:00+00');
-CREATE TEMP TABLE analytics_message_display_state (
-    message_id UUID PRIMARY KEY REFERENCES analytics_message_inputs(message_id), recalled BOOLEAN, hidden BOOLEAN
-);
-INSERT INTO analytics_message_display_state VALUES (pg_temp.id(2,4208),FALSE,FALSE);
-
+(pg_temp.id(2,4211),pg_temp.analytics_key(202),pg_temp.analytics_key(203),NULL,'2030-10-31 16:59:59.999999+00'),
+(pg_temp.id(2,4212),pg_temp.analytics_key(201),pg_temp.analytics_key(209),NULL,'2030-11-30 17:00:00+00'),
+(pg_temp.id(2,4213),pg_temp.analytics_key(212),pg_temp.analytics_key(201),NULL,'2030-11-20 06:00:00+00'),
+(pg_temp.id(2,4214),pg_temp.analytics_key(212),NULL,pg_temp.id(1,4201),'2030-11-20 06:00:00+00');
 CREATE TEMP TABLE analytics_friendship_inputs (
     user_a UUID, user_b UUID, is_accepted BOOLEAN NOT NULL,
     PRIMARY KEY (user_a,user_b)
@@ -353,8 +353,104 @@ CREATE TEMP TABLE analytics_block_inputs (
 );
 INSERT INTO analytics_block_inputs VALUES (pg_temp.id(0,201),pg_temp.id(0,209)),(pg_temp.id(0,210),pg_temp.id(0,201));
 
--- Reference analytics queries are embedded so this test needs no extra SQL files.
--- TEMP views validate the source contracts above; adapters for workstreams 10/20 remain pending.
+\if :analytics_integrated
+-- D completed self-registration. The pending requests and F's Admin-issued
+-- initial setup are separate from the completed accounts counted via users.
+INSERT INTO public.pending_registrations (id,username,email,password_hash,created_at,expires_at)
+SELECT request_id,'signup' || right(request_id::text,3),
+       'signup' || right(request_id::text,3) || '@example.test','fixture-hash',
+       requested_at,requested_at + INTERVAL '30 minutes'
+FROM analytics_pending_signups;
+INSERT INTO public.pending_registrations
+    (id,username,email,password_hash,created_at,expires_at,email_verified_at,completed_at)
+SELECT pg_temp.id(1,204),username,email,'fixture-hash',created_at - INTERVAL '10 minutes',
+       created_at + INTERVAL '20 minutes',created_at,created_at
+FROM public.users WHERE id=pg_temp.id(0,204);
+INSERT INTO public.password_reset_tokens
+    (id,user_id,purpose,temporary_password_hash,issued_at,expires_at)
+SELECT pg_temp.id(1,206),id,'INITIAL_SETUP','fixture-hash',created_at,created_at + INTERVAL '15 minutes'
+FROM public.users WHERE id=pg_temp.id(0,206);
+
+INSERT INTO public.user_sessions (id,user_id,scope,token_hash,created_at)
+SELECT pg_temp.id(1,207),user_id,session_scope,'fixture-admin-session',login_at
+FROM public.login_logs WHERE id=pg_temp.id(8,3205);
+
+INSERT INTO public.friendships (user_low_id,user_high_id,created_at)
+SELECT DISTINCT LEAST(f.user_a,f.user_b),GREATEST(f.user_a,f.user_b),
+       GREATEST(a.created_at,b.created_at,'2030-11-02 00:00:00+07'::timestamptz)
+FROM analytics_friendship_inputs f
+JOIN public.users a ON a.id=f.user_a JOIN public.users b ON b.id=f.user_b
+WHERE f.is_accepted AND f.user_a<>f.user_b;
+INSERT INTO public.friend_requests (id,sender_id,recipient_id,created_at)
+SELECT pg_temp.id(1,4501),user_a,user_b,'2030-11-02 00:00:00+07'
+FROM analytics_friendship_inputs WHERE NOT is_accepted;
+INSERT INTO public.blocks (blocker_id,blocked_id,created_at)
+SELECT blocker_id,blocked_id,'2030-11-03 00:00:00+07' FROM analytics_block_inputs;
+
+CREATE TEMP TABLE analytics_direct_threads AS
+SELECT pg_temp.id(1,4300 + row_number() OVER (ORDER BY low_key,high_key)::integer) AS conversation_id,
+       low_key,high_key
+FROM (
+    SELECT DISTINCT LEAST(sender_key,recipient_key) AS low_key,GREATEST(sender_key,recipient_key) AS high_key
+    FROM analytics_message_inputs WHERE recipient_key IS NOT NULL AND accepted_at IS NOT NULL
+) AS pairs;
+INSERT INTO public.conversations (id,type,group_name,created_at)
+SELECT conversation_id,'DIRECT',NULL,'2030-10-31 16:59:59.999999+00'::timestamptz
+FROM analytics_direct_threads
+UNION ALL
+SELECT DISTINCT group_id,'GROUP','Nhóm ' || right(group_id::text,4),'2030-11-01 00:00:00+07'::timestamptz
+FROM analytics_message_inputs WHERE group_id IS NOT NULL;
+INSERT INTO public.conversation_members (conversation_id,user_id,joined_at)
+SELECT d.conversation_id,k.user_id,GREATEST(c.created_at,u.created_at)
+FROM analytics_direct_threads d JOIN public.conversations c ON c.id=d.conversation_id
+JOIN public.app_open_accounts k ON k.account_key IN (d.low_key,d.high_key)
+JOIN public.users u ON u.id=k.user_id
+UNION ALL
+SELECT c.id,pg_temp.id(0,n),'2030-11-01 00:00:00+07'::timestamptz
+FROM public.conversations c CROSS JOIN generate_series(201,203) n
+WHERE c.id IN (pg_temp.id(1,4201),pg_temp.id(1,4202));
+INSERT INTO public.conversation_members (conversation_id,user_id,joined_at)
+VALUES (pg_temp.id(1,4201),pg_temp.id(0,212),'2030-11-20 05:30:00+00');
+
+INSERT INTO public.messages
+    (id,conversation_id,sender_user_id,created_at,content_plain,content_cipher,crypto_metadata)
+SELECT m.message_id,COALESCE(m.group_id,d.conversation_id),k.user_id,m.accepted_at,
+       CASE WHEN m.group_id IS NULL THEN 'Fixture message' END,
+       CASE WHEN m.group_id IS NOT NULL THEN decode('01','hex') END,
+       CASE WHEN m.group_id IS NOT NULL THEN '{}'::jsonb END
+FROM analytics_message_inputs m JOIN public.app_open_accounts k ON k.account_key=m.sender_key
+LEFT JOIN analytics_direct_threads d ON d.low_key=LEAST(m.sender_key,m.recipient_key)
+    AND d.high_key=GREATEST(m.sender_key,m.recipient_key) AND m.recipient_key IS NOT NULL
+WHERE m.accepted_at IS NOT NULL;
+
+CREATE TEMP VIEW analytics_live_sends AS
+SELECT m.id AS message_id,sender.account_key AS sender_key,recipient.account_key AS recipient_key,
+       CASE WHEN c.type='GROUP' THEN c.id END AS group_id,m.created_at AS accepted_at
+FROM public.messages m JOIN public.conversations c ON c.id=m.conversation_id
+JOIN public.app_open_accounts sender ON sender.user_id=m.sender_user_id
+LEFT JOIN public.conversation_members cm ON c.type='DIRECT' AND cm.conversation_id=c.id
+    AND cm.user_id<>m.sender_user_id
+LEFT JOIN public.app_open_accounts recipient ON recipient.user_id=cm.user_id;
+CREATE TEMP VIEW analytics_friendships AS
+SELECT user_low_id AS user_a,user_high_id AS user_b FROM public.friendships;
+CREATE TEMP VIEW analytics_blocks AS SELECT blocker_id,blocked_id FROM public.blocks;
+\else
+CREATE TEMP VIEW analytics_live_sends AS SELECT * FROM analytics_message_inputs WHERE accepted_at IS NOT NULL;
+CREATE TEMP VIEW analytics_friendships AS SELECT user_a,user_b FROM analytics_friendship_inputs WHERE is_accepted;
+CREATE TEMP VIEW analytics_blocks AS SELECT blocker_id,blocked_id FROM analytics_block_inputs;
+\endif
+
+-- A purge detaches the live sender and can remove the recipient's membership.
+-- Keep only the fixture's accepted-send metadata when simulating historical facts.
+CREATE TEMP TABLE analytics_retained_sends AS TABLE analytics_live_sends WITH NO DATA;
+ALTER TABLE analytics_retained_sends ADD PRIMARY KEY (message_id);
+CREATE TEMP VIEW analytics_sends AS
+SELECT s.* FROM analytics_live_sends s
+WHERE NOT EXISTS (SELECT FROM analytics_retained_sends h WHERE h.message_id=s.message_id)
+UNION ALL
+SELECT * FROM analytics_retained_sends;
+
+-- Reference analytics queries read the same source contract in either flow.
 CREATE TEMP VIEW analytics_bounds AS
 SELECT p.*, p.from_date::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh' AS starts_at,
        (p.through_date + 1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh' AS ends_at
@@ -447,7 +543,7 @@ WITH opens AS (
 ), sends AS (
     SELECT s.sender_key AS account_key,count(DISTINCT s.recipient_key) AS direct_receivers,
            count(DISTINCT s.group_id) AS groups_chatted
-    FROM pg_temp.analytics_message_inputs s CROSS JOIN pg_temp.analytics_bounds p
+    FROM pg_temp.analytics_sends s CROSS JOIN pg_temp.analytics_bounds p
     WHERE s.accepted_at>=p.starts_at AND s.accepted_at<p.ends_at GROUP BY s.sender_key
 ), active_keys AS (
     SELECT account_key FROM opens UNION SELECT account_key FROM sends
@@ -475,14 +571,14 @@ CREATE TEMP VIEW analytics_friend_counts AS
 WITH live_accounts AS (
     SELECT * FROM pg_temp.analytics_accounts WHERE status IN ('ACTIVE','LOCKED')
 ), undirected AS (
-    SELECT user_a AS root_id,user_b AS friend_id FROM pg_temp.analytics_friendship_inputs WHERE is_accepted
+    SELECT user_a AS root_id,user_b AS friend_id FROM pg_temp.analytics_friendships
     UNION
-    SELECT user_b,user_a FROM pg_temp.analytics_friendship_inputs WHERE is_accepted
+    SELECT user_b,user_a FROM pg_temp.analytics_friendships
 ), edges AS (
     SELECT e.* FROM undirected e
     JOIN live_accounts a ON a.user_id=e.root_id JOIN live_accounts b ON b.user_id=e.friend_id
     WHERE e.root_id<>e.friend_id AND NOT EXISTS (
-        SELECT FROM pg_temp.analytics_block_inputs x
+        SELECT FROM pg_temp.analytics_blocks x
         WHERE (x.blocker_id=e.root_id AND x.blocked_id=e.friend_id)
            OR (x.blocked_id=e.root_id AND x.blocker_id=e.friend_id))
 ), reach AS (
@@ -494,7 +590,7 @@ WITH live_accounts AS (
 ), expanded_counts AS (
     SELECT r.root_id,count(*) AS expanded_friends FROM reach r
     WHERE r.root_id<>r.friend_id AND NOT EXISTS (
-        SELECT FROM pg_temp.analytics_block_inputs x
+        SELECT FROM pg_temp.analytics_blocks x
         WHERE (x.blocker_id=r.root_id AND x.blocked_id=r.friend_id)
            OR (x.blocked_id=r.root_id AND x.blocker_id=r.friend_id))
     GROUP BY r.root_id
@@ -526,10 +622,31 @@ SELECT pg_temp.assert_true('logs-analytics/reference/personal login query uses a
      FROM analytics_login_history));
 UPDATE analytics_params SET login_user_id=NULL;
 SELECT pg_temp.assert_true('logs-analytics/reference/registrations count completed accounts including admin-created and deleted',
-    (SELECT count(*)=9 AND count(*) FILTER (WHERE user_id=pg_temp.id(0,204))=1
-        AND count(*) FILTER (WHERE user_id=pg_temp.id(0,207))=1
+    (SELECT array_agg(user_id ORDER BY user_id)=ARRAY[
+            pg_temp.id(0,201),pg_temp.id(0,204),pg_temp.id(0,206),pg_temp.id(0,207),pg_temp.id(0,208),
+            pg_temp.id(0,209),pg_temp.id(0,210),pg_temp.id(0,211),pg_temp.id(0,212)]
         AND count(*) FILTER (WHERE status='DELETED')=1 FROM analytics_new_registrations)
     AND (SELECT count(*)=3 FROM analytics_pending_signups));
+\if :analytics_integrated
+SELECT pg_temp.assert_true('logs-analytics/integration/self and Admin creation count while temporary requests do not',
+    (SELECT EXISTS (
+        SELECT FROM public.pending_registrations p JOIN analytics_new_registrations a
+            ON a.username=p.username AND a.email=p.email AND a.created_at=p.completed_at
+        WHERE p.id=pg_temp.id(1,204) AND a.user_id=pg_temp.id(0,204)))
+    AND EXISTS (
+        SELECT FROM public.password_reset_tokens t JOIN analytics_new_registrations a ON a.user_id=t.user_id
+        WHERE t.id=pg_temp.id(1,206) AND t.purpose='INITIAL_SETUP' AND a.user_id=pg_temp.id(0,206))
+    AND (SELECT count(*)=3 AND bool_and(p.completed_at IS NULL) FROM public.pending_registrations p
+         JOIN analytics_pending_signups s ON s.request_id=p.id)
+    AND NOT EXISTS (
+        SELECT FROM public.pending_registrations p JOIN analytics_pending_signups s ON s.request_id=p.id
+        JOIN analytics_new_registrations a ON a.username=p.username OR a.email=p.email));
+SELECT pg_temp.assert_true('logs-analytics/integration/Admin session alone has one log and zero opens',
+    (SELECT count(*)=1 FROM public.user_sessions s JOIN analytics_login_history l
+         ON (s.user_id,s.scope,s.created_at)=(l.user_id,l.session_scope,l.login_at)
+     WHERE s.id=pg_temp.id(1,207) AND s.scope='ADMIN_APP')
+    AND NOT EXISTS (SELECT FROM analytics_open_facts WHERE account_key=pg_temp.analytics_key(207)));
+\endif
 SELECT pg_temp.assert_true('logs-analytics/reference/registration chart has twelve months including zeros',
     (SELECT array_agg(registrations)=ARRAY[0,0,0,0,0,0,0,0,0,3,9,0]::bigint[]
      FROM analytics_monthly_registrations));
@@ -541,7 +658,7 @@ SELECT pg_temp.assert_true('logs-analytics/reference/activity union and three in
         = jsonb_build_object(pg_temp.id(0,201),jsonb_build_array(2,2,2),
             pg_temp.id(0,202),jsonb_build_array(0,1,0),pg_temp.id(0,204),jsonb_build_array(1,0,0),
             pg_temp.id(0,205),jsonb_build_array(1,0,0),pg_temp.id(0,208),jsonb_build_array(0,1,0),
-            pg_temp.id(0,209),jsonb_build_array(1,0,0),pg_temp.id(0,212),jsonb_build_array(1,0,0))
+            pg_temp.id(0,209),jsonb_build_array(1,0,0),pg_temp.id(0,212),jsonb_build_array(1,1,1))
      FROM analytics_activity));
 SELECT pg_temp.assert_true('logs-analytics/reference/previous-month opener sending now has zero current opens',
     (SELECT app_opens=0 AND direct_receivers=1 FROM analytics_activity WHERE user_id=pg_temp.id(0,202))
@@ -552,15 +669,41 @@ SELECT pg_temp.assert_true('logs-analytics/reference/receive-only pending reject
         (pg_temp.id(0,203),pg_temp.id(0,206),pg_temp.id(0,207),pg_temp.id(0,210)))
     AND public.record_app_open(pg_temp.id(0,207),pg_temp.id(9,2209),'ADMIN_APP') IS NULL);
 CREATE TEMP TABLE analytics_before_display_changes AS TABLE analytics_activity_counts;
-UPDATE analytics_message_display_state SET recalled=TRUE,hidden=TRUE;
+\if :analytics_integrated
+INSERT INTO public.message_deletions (message_id,user_id,deleted_at)
+VALUES (pg_temp.id(2,4208),pg_temp.id(0,208),'2030-11-01 10:00:00+07');
+SELECT pg_temp.assert_true('logs-analytics/integration/personal deletion keeps the only send for H',
+    (SELECT app_opens=0 AND direct_receivers=1 AND groups_chatted=0
+     FROM analytics_activity_counts WHERE user_id=pg_temp.id(0,208)));
+UPDATE public.messages SET recalled_at='2030-11-01 11:00:00+07',content_plain=NULL
+WHERE id=pg_temp.id(2,4208);
+INSERT INTO public.messages (id,conversation_id,sender_user_id,created_at,content_plain)
+SELECT id,conversation_id,sender_user_id,'2030-11-03 00:00:00+07','Retried message'
+FROM public.messages WHERE id=pg_temp.id(2,4201)
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.messages (id,conversation_id,sender_user_id,created_at,content_cipher,crypto_metadata)
+SELECT id,conversation_id,sender_user_id,'2030-11-03 00:00:00+07',decode('02','hex'),crypto_metadata
+FROM public.messages WHERE id=pg_temp.id(2,4204)
+ON CONFLICT (id) DO NOTHING;
+SELECT pg_temp.assert_true('logs-analytics/integration/accepted message ID keeps its original send',
+    (SELECT count(*)=1 AND min(created_at)='2030-11-01 02:00:00+00'
+        AND min(content_plain)='Fixture message' FROM public.messages WHERE id=pg_temp.id(2,4201))
+    AND (SELECT created_at='2030-11-01 02:00:00+00' AND content_cipher=decode('01','hex')
+         FROM public.messages WHERE id=pg_temp.id(2,4204))
+    AND NOT EXISTS (SELECT FROM public.messages WHERE id IN (pg_temp.id(2,4209),pg_temp.id(2,4210)))
+    AND (SELECT recalled_at IS NOT NULL AND content_plain IS NULL
+         FROM public.messages WHERE id=pg_temp.id(2,4208)));
+\else
 INSERT INTO analytics_message_inputs
-SELECT * FROM analytics_message_inputs WHERE message_id=pg_temp.id(2,4201) ON CONFLICT (message_id) DO NOTHING;
-SELECT pg_temp.assert_true('logs-analytics/reference/send retry recall and personal deletion do not change metrics',
+SELECT * FROM analytics_message_inputs WHERE message_id IN (pg_temp.id(2,4201),pg_temp.id(2,4204))
+ON CONFLICT (message_id) DO NOTHING;
+\endif
+SELECT pg_temp.assert_true('logs-analytics/reference/historical activity counts remain unchanged',
     NOT EXISTS (
         (SELECT * FROM analytics_activity_counts EXCEPT ALL SELECT * FROM analytics_before_display_changes)
         UNION ALL
         (SELECT * FROM analytics_before_display_changes EXCEPT ALL SELECT * FROM analytics_activity_counts))
-    AND (SELECT count(*)=12 FROM analytics_message_inputs));
+    AND (SELECT count(*)=12 FROM analytics_sends WHERE message_id BETWEEN pg_temp.id(2,4201) AND pg_temp.id(2,4214)));
 SELECT pg_temp.assert_true('logs-analytics/reference/friend network matches hand-calculated graph',
     (SELECT jsonb_object_agg(user_id,jsonb_build_array(direct_friends,expanded_friends))
         = jsonb_build_object(pg_temp.id(0,201),jsonb_build_array(2,4),pg_temp.id(0,202),jsonb_build_array(5,7),
@@ -685,23 +828,58 @@ END $$;
 UPDATE analytics_params SET from_date='2030-11-01',through_date='2030-11-30',name_query=NULL;
 
 -- Retention-input prototype: purge detaches identity without deleting historical facts.
+INSERT INTO public.login_logs (id,user_id,login_at,session_scope)
+VALUES (pg_temp.id(8,3212),pg_temp.id(0,212),'2030-11-20 05:00:00+00','USER_CLIENT');
+\if :analytics_integrated
+INSERT INTO public.user_sessions (id,user_id,scope,token_hash,created_at)
+SELECT pg_temp.id(1,212),user_id,session_scope,'fixture-purged-session',login_at
+FROM public.login_logs WHERE id=pg_temp.id(8,3212);
+\endif
+UPDATE public.users SET status='DELETED',status_before_delete='ACTIVE',deleted_at='2030-11-29 00:00:00+07'
+WHERE id=pg_temp.id(0,212);
+SELECT pg_temp.assert_true('logs-analytics/reference/soft deletion keeps L in history and activity with its UUID',
+    (SELECT status='DELETED' FROM analytics_new_registrations WHERE account_key=pg_temp.analytics_key(212))
+    AND (SELECT user_id=pg_temp.id(0,212) FROM analytics_login_history WHERE id=pg_temp.id(8,3212))
+    AND (SELECT app_opens=1 AND direct_receivers=1 AND groups_chatted=1
+         FROM analytics_activity WHERE user_id=pg_temp.id(0,212))
+    AND NOT EXISTS (SELECT FROM analytics_friend_network WHERE user_id=pg_temp.id(0,212)));
+INSERT INTO analytics_retained_sends
+SELECT * FROM analytics_live_sends
+WHERE pg_temp.analytics_key(212) IN (sender_key,recipient_key);
 DELETE FROM public.users WHERE id=pg_temp.id(0,212);
 SELECT pg_temp.assert_true('logs-analytics/reference/purge keeps registration activity and monthly opener totals',
     (SELECT registrations=9 FROM analytics_monthly_registrations WHERE month_no=11)
     AND (SELECT unique_openers=5 FROM analytics_monthly_openers WHERE month_no=11)
     AND (SELECT count(*)=7 FROM analytics_activity)
-    AND (SELECT user_id IS NULL AND full_name='Người dùng đã xóa' AND app_opens=1
+    AND (SELECT user_id IS NULL AND username='Người dùng đã xóa'
+         FROM analytics_login_history WHERE id=pg_temp.id(8,3212))
+    AND (SELECT user_id IS NULL AND full_name='Người dùng đã xóa'
+                AND app_opens=1 AND direct_receivers=1 AND groups_chatted=1
          FROM analytics_activity WHERE account_key=pg_temp.analytics_key(212)));
 INSERT INTO public.users (id,username,email,full_name,created_at)
 VALUES (pg_temp.id(0,213),'ref0212','ref212@example.test','New Lost','2030-11-30 17:00:00+00');
 INSERT INTO public.app_open_accounts (account_key,user_id) VALUES (pg_temp.analytics_key(213),pg_temp.id(0,213));
 INSERT INTO analytics_registration_facts VALUES (pg_temp.analytics_key(213),'2030-11-30 17:00:00+00');
+UPDATE analytics_params SET login_user_id=pg_temp.id(0,213);
 SELECT pg_temp.assert_true('logs-analytics/reference/username reuse does not transfer historical registrations or activity',
     (SELECT user_id IS NULL AND full_name='Người dùng đã xóa' FROM analytics_new_registrations
      WHERE account_key=pg_temp.analytics_key(212))
     AND NOT EXISTS (SELECT FROM analytics_activity WHERE user_id=pg_temp.id(0,213))
+    AND NOT EXISTS (SELECT FROM analytics_login_history)
     AND (SELECT registrations=1 FROM analytics_monthly_registrations WHERE month_no=12)
     AND (SELECT unique_openers=5 FROM analytics_monthly_openers WHERE month_no=11));
+UPDATE analytics_params SET login_user_id=NULL;
+\if :analytics_integrated
+SELECT pg_temp.assert_true('logs-analytics/integration/purge removes sessions while keeping anonymized login and app open',
+    NOT EXISTS (SELECT FROM public.user_sessions WHERE id=pg_temp.id(1,212))
+    AND (SELECT user_id IS NULL FROM public.login_logs WHERE id=pg_temp.id(8,3212))
+    AND (SELECT count(*)=1 FROM public.app_open_events WHERE account_key=pg_temp.analytics_key(212)));
+SELECT pg_temp.assert_true('logs-analytics/integration/purged sender needs retained metadata for historical sends',
+    (SELECT count(*)=2 AND bool_and(sender_user_id IS NULL) FROM public.messages
+     WHERE id IN (pg_temp.id(2,4213),pg_temp.id(2,4214)))
+    AND NOT EXISTS (SELECT FROM analytics_live_sends WHERE sender_key=pg_temp.analytics_key(212))
+    AND (SELECT count(*)=2 FROM analytics_retained_sends WHERE sender_key=pg_temp.analytics_key(212)));
+\endif
 
 INSERT INTO public.app_open_events (id,account_key,launch_id,opened_at) VALUES
 (pg_temp.id(8,2210),pg_temp.analytics_key(201),pg_temp.id(9,2210),'2030-12-31 16:59:59.999999+00'),
