@@ -108,7 +108,7 @@ def check_app_open_concurrency(run_sql):
         INSERT INTO public.users (id,username,email,full_name,created_at)
         VALUES ('{account}','race701','race701@example.test','Concurrent fixture','2026-01-01 UTC');
     """)
-    for launch_number, identity_state in [(1, "new"), (2, "existing")]:
+    for launch_number, launch_state in [(1, "first launch"), (2, "later launch")]:
         launch = f"90000000-0000-0000-0000-{launch_number:012d}"
         record = f"""
             SELECT public.record_app_open('{account}','{launch}','USER_CLIENT') AS event_id \\gset
@@ -122,8 +122,38 @@ def check_app_open_concurrency(run_sql):
             WHERE a.user_id='{account}' AND e.launch_id='{launch}';
         """).stdout.strip()
         if len(stored.splitlines()) != 1 or original != stored or repeated != stored:
-            raise ValueError(f"Concurrent app open ({identity_state} identity) must keep one ID and timestamp")
-        print(f"Concurrent app open ({identity_state} identity) preserved the event ID and timestamp")
+            raise ValueError(f"Concurrent app open ({launch_state}) must keep one ID and timestamp")
+        print(f"Concurrent app open ({launch_state}) preserved the event ID and timestamp")
+
+
+def check_message_send_concurrency(run_sql):
+    """Concurrent retry keeps the first accepted instant without an UPDATE."""
+    sender = "00000000-0000-0000-0000-000000000721"
+    recipient = "00000000-0000-0000-0000-000000000722"
+    message = "20000000-0000-0000-0000-000000000721"
+    run_sql(f"""
+        INSERT INTO public.users (id,username,email,full_name,created_at) VALUES
+          ('{sender}','race721','race721@example.test','Send fixture','2026-01-01 UTC'),
+          ('{recipient}','race722','race722@example.test','Recipient fixture','2026-01-01 UTC');
+    """)
+
+    def record(accepted_at):
+        return f"""
+            SELECT public.record_message_send('{message}','{sender}','{recipient}',NULL,
+                '{accepted_at} UTC') AS message_id \\gset
+            SELECT message_id,accepted_at FROM public.message_send_events WHERE message_id=:'message_id';
+        """
+
+    original, repeated = run_competing_writes(
+        run_sql, record("2026-11-01 01:00"), record("2026-11-02 02:00"))
+    stored = run_sql(f"""
+        SET TIME ZONE 'UTC';
+        SELECT message_id,accepted_at FROM public.message_send_events WHERE message_id='{message}';
+    """).stdout.strip()
+    expected = f"{message}|2026-11-01 01:00:00+00".encode()
+    if original != expected or repeated != expected or stored != expected:
+        raise ValueError("Concurrent accepted-send retries must preserve the first event and timestamp")
+    print("Concurrent accepted-send retry preserved one event and its first acceptance time")
 
 
 def check_spam_review_concurrency(run_sql):
@@ -173,6 +203,7 @@ def check_spam_review_concurrency(run_sql):
 def check_concurrency(flow, run_sql):
     if flow in ("logs-analytics", "all"):
         check_app_open_concurrency(run_sql)
+        check_message_send_concurrency(run_sql)
     if flow in ("messaging-e2ee-spam", "all"):
         check_spam_review_concurrency(run_sql)
 

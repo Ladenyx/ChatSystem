@@ -61,7 +61,19 @@ python3 script/test-native.py --flow logs-analytics
 python3 script/test-native.py --flow all
 ```
 
-Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được dừng và xóa sau lượt; không kết nối server hiện có. Trên Windows dùng Docker runner. Bộ kiểm tra native đã đo dưới 2 giây/lượt trên Linux hiện tại; số đo Docker cần nghiệm thu khi có daemon chạy.
+Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được dừng và xóa sau lượt; không kết nối server hiện có. Thời gian gồm khởi tạo cụm mới và các ca ghi đồng thời của luồng đã chọn; phụ thuộc I/O của máy. Docker runner tận dụng server đang chạy để lặp DDL/Test mà không khởi tạo lại cả cụm.
+
+## Kiểm thử với PostgreSQL cài trực tiếp
+
+Khi PostgreSQL 18 đã chạy trên máy, dùng `--local-server` để tạo DB kiểm thử riêng trên server đó. Role kết nối cần quyền `CREATEDB`; cấu hình mật khẩu cục bộ qua cơ chế libpq (`pgpass`/`PGPASSFILE`), giữ file mật khẩu ngoài repo. Runner không hỏi mật khẩu tương tác và không dùng thông tin kết nối trong `.env` của Compose.
+
+Ví dụ PowerShell với PostgreSQL được cài ở đường dẫn mặc định; điều chỉnh đường dẫn hoặc role theo máy:
+
+```powershell
+py -3 script/test-db.py --local-server --flow all --pg-user postgres --pg-bin "C:\Program Files\PostgreSQL\18\bin"
+```
+
+Trên Linux/macOS có thể dùng `python3` và bỏ `--pg-bin` nếu các chương trình PostgreSQL 18 có trong `PATH`. Server luôn được kết nối qua `127.0.0.1`; thêm `--pg-port` nếu khác cổng `5432`. Runner kiểm tra phiên bản client/server, tạo DB trống với UTF-8, chạy DDL/Test và chỉ xóa DB do chính lượt đó tạo. Đây là cách nghiệm thu SQL trên PostgreSQL cài trực tiếp ở Windows; chế độ `--native` tạo Unix socket không dùng trên Windows.
 
 ## Viết case
 
@@ -81,6 +93,28 @@ Mỗi người thêm fixture riêng và case vào file test của mình. Dùng n
 Fixture riêng dùng suffix UUID 101–109 và được dọn trong transaction; bốn user mẫu chung được giữ nguyên để các luồng chạy tiếp. Test bao gồm đối chiếu cột/kiểu/NULL, PK, đích FK và hành vi xóa, cùng các trường hợp dữ liệu hợp lệ/không hợp lệ.
 
 Các ràng buộc trên bảo vệ cấu trúc lưu trữ. Backend/client vẫn phải kiểm tra phiên và quyền, admin cuối nhóm, số người trong chat 1–1, quyền đọc lịch sử/thu hồi theo đồng hồ server, xác minh proof và cấp/xoay khóa theo [DEC-05](../docs/decisions/group-permissions-and-e2ee.md). Hạn mức Selected 1–20, Context tối đa 30, canonical payload tối đa 1 MiB, idempotency và job giữ/xóa dữ liệu theo DEC-10 cũng cần phần backend; byte fixture không phải dữ liệu mật mã đã xác minh.
+
+## Mô hình dữ liệu thống kê bền vững
+
+[`sql/30-logs-and-analytics.sql`](sql/30-logs-and-analytics.sql) chỉ phụ thuộc `users` trong core. [ERD Logs/Analytics](../docs/databases/erd/logs-and-analytics.drawio.svg) chứa bảng, hàng, ô và quan hệ draw.io native, có thể mở SVG để chỉnh sửa trực tiếp. Năm bảng của luồng này gồm:
+
+| Bảng | Vai trò |
+| --- | --- |
+| `login_logs` | Metadata cấp phiên thành công, phân biệt User Client và Admin App |
+| `app_open_accounts` | Khóa thống kê độc lập dùng chung cho đăng ký, mở app và gửi tin; giữ tên bảng hiện có |
+| `account_registration_events` | Một sự kiện tạo thành công cho mỗi tài khoản `USER`/`ADMIN`, gồm cả Admin khởi tạo qua CLI |
+| `app_open_events` | Một sự kiện mở User Client cho mỗi tài khoản/lần khởi chạy |
+| `message_send_events` | Metadata gửi tin được server chấp nhận: khóa thống kê người gửi/nhận, ID nhóm và thời điểm chấp nhận |
+
+Trigger `users_record_registration` cấp khóa thống kê và ghi `users.created_at` ngay khi tạo tài khoản, kể cả tài khoản chưa đăng nhập. Yêu cầu đăng ký tạm chưa tạo `users` không phát sinh sự kiện. Dữ liệu tạo tài khoản được giữ riêng nên thay đổi hồ sơ và purge không làm mất thời điểm tạo gốc.
+
+Backend gọi `record_app_open` trong transaction cấp phiên User Client. Với tin nhắn, backend phải kiểm tra phiên, hội thoại, thành viên và payload, rồi gọi `record_message_send(message_id, sender_user_id, recipient_user_id, group_id, accepted_at)` trong **cùng transaction chấp nhận/lưu tin**. Chỉ một trong `recipient_user_id` hoặc `group_id` có giá trị; thời điểm chấp nhận do server xác định. Helper này ghi metadata và không tự cấp quyền gửi tin. Luồng standalone dùng được helper mà không cần nạp DDL Messaging.
+
+Retry cùng `message_id` và cùng người gửi/đích giữ sự kiện cùng thời điểm chấp nhận đầu tiên. Tái sử dụng ID cho người gửi/đích khác bị từ chối. `message_id` và `group_id` trong ledger là ID snapshot, không FK tới tin/nhóm đang tồn tại; xóa hoặc thu hồi tin, đóng/xóa nhóm không giảm số liệu lịch sử. Hai ledger mới chặn sửa các sự kiện đã ghi.
+
+Khi purge, `app_open_accounts.user_id` được đặt `NULL`; các sự kiện và khóa thống kê vẫn tồn tại. Khóa thống kê bất biến, liên kết chỉ được gỡ khi tài khoản đã purge và không được gán lại cho tài khoản khác. Username/email dùng lại thuộc tài khoản và khóa thống kê mới. Số liệu được giữ lâu dài theo [quyết định thống kê](../docs/decisions/statistics-and-time.md), với metadata riêng cho từng tài khoản/đích để đếm `distinct` chính xác trong khoảng ngày được chọn.
+
+Test đọc trực tiếp các ledger bền vững, gồm các trường hợp purge hai phía, dùng lại username/email, retry đổi mốc tháng, rollback, thu hồi và đóng/xóa nhóm. Các bảng tạm còn lại phục vụ tham số/fixture; không giữ bản sao lịch sử thay cho bảng thật. Chế độ `all` còn kiểm tra transaction cùng bảng Messaging/Auth/Friends thực tế; runner dùng hai kết nối riêng để kiểm tra retry đồng thời của lượt mở và metadata gửi tin.
 
 Để khởi tạo thủ công trên database mới, trống:
 

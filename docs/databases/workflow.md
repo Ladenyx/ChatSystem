@@ -40,7 +40,9 @@ Mỗi người phát triển DDL và test nghiệp vụ trong cặp file của m
 
 Tên DB có suffix riêng để nhiều terminal/worktree không drop/truncate dữ liệu của nhau. SQL của từng checkout được chụp thành bản riêng trong thư mục tạm; Docker runner không phụ thuộc source mount của một worktree khác. Runner chỉ `dropdb` sau khi chính lượt đó đã tạo DB thành công, không thao tác volume hay database phát triển.
 
-Native runner dùng cả cụm/socket/thư mục riêng và không mở TCP; đây cũng là phương án kiểm thử khi Docker daemon chưa chạy. Trên Windows, dùng Docker runner. Mục tiêu vòng nhanh 1–2 giây được đo bằng native trên Linux; thời gian Docker cần được xác nhận trên môi trường có daemon.
+Native runner dùng cả cụm/socket/thư mục riêng và không mở TCP; đây cũng là phương án kiểm thử khi Docker daemon chưa chạy. Trên Windows, dùng Docker runner hoặc `--local-server` với PostgreSQL 18 đã cài theo [hướng dẫn](../../script/README.md#kiểm-thử-với-postgresql-cài-trực-tiếp). Thời gian vòng test gồm khởi tạo cụm và các ca ghi đồng thời; Docker runner dùng server sẵn có để tránh khởi tạo lại cụm mỗi lần sửa.
+
+Luồng Logs/Analytics lưu lịch sử đăng ký và metadata gửi tin trong bảng thật, cùng khóa thống kê độc lập để giữ số liệu sau purge. Xem [mô hình và hợp đồng ghi sự kiện](../../script/README.md#mô-hình-dữ-liệu-thống-kê-bền-vững). Chỉ nạp core + file 30 vẫn chạy độc lập; chế độ `all` kiểm tra việc ghi sự kiện trong transaction với các bảng Messaging/Auth/Friends thực tế.
 
 `tests/run.sql` quản lý transaction, helper, fixture, smoke test chung và các test thành viên. Khi chọn một luồng, runner tạo entry point được lọc trong thư mục tạm; không sửa file `run.sql` trong checkout. Chế độ `all` chạy nguyên các entry point gốc.
 
