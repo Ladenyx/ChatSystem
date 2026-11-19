@@ -1,6 +1,6 @@
 # Khung SQL và kiểm thử theo luồng thành viên
 
-Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Mỗi thành viên có một cặp DDL + Test. Auth đã có DDL và test ràng buộc; Bạn bè/Chặn và hai luồng còn lại vẫn là placeholder. Test SQL không nghiệm thu backend.
+Bộ khung dùng PostgreSQL 18, `psql` và Python 3 (standard library, không cần `pip`). Mỗi thành viên có **một cặp DDL + Test riêng**. Smoke test chung kiểm tra mỏ neo/hạ tầng; test từng luồng kiểm tra các ràng buộc dữ liệu do luồng đó định nghĩa.
 
 ## Phân chia file
 
@@ -68,6 +68,19 @@ Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được d
 `tests/assertions.sql` cung cấp `pg_temp.assert_true(label, boolean)` và `pg_temp.expect_error(label, SQL, SQLSTATE[, constraint])`. `tests/fixtures.sql` có UUID user cố định: suffix 1=Alice, 2=Bob, 3=Carol, 4=Admin; đây là hồ sơ DB thử, không phải credential đăng nhập. `test-core-users.sql` giữ smoke test của mỏ neo.
 
 Mỗi người thêm fixture riêng và case vào file test của mình. Dùng nhãn có prefix như `messaging/...` để tránh trùng khi chạy `all`. Không tự `BEGIN`/`COMMIT`, reset schema hoặc định nghĩa lại `users` trong cặp file nghiệp vụ. Runner phụ trách transaction và kiểm tra dữ liệu được rollback sạch.
+
+## Mô hình dữ liệu hội thoại, E2EE và Spam
+
+[`sql/20-messaging-e2ee-spam.sql`](sql/20-messaging-e2ee-spam.sql) tạo 12 bảng của luồng Thành viên 1, chỉ phụ thuộc `users(id)` trong core. ERD chỉnh sửa được nằm ở [Hội thoại](../docs/databases/erd/messaging.drawio.svg), [E2EE](../docs/databases/erd/e2ee.drawio.svg) và [Spam](../docs/databases/erd/spam.drawio.svg). Khi đổi mô hình, cập nhật cả SVG và kỳ vọng catalog trong [`test-messaging-e2ee-spam.sql`](tests/test-messaging-e2ee-spam.sql).
+
+- Hội thoại: PK ghép cho thành viên và dấu xóa riêng; tin 1–1 lưu bản rõ, tin nhóm lưu bản mã. Thu hồi giữ hàng tin, xóa payload và kiểm tra timestamp trong 48 giờ. Loại hội thoại bất biến để giữ nhất quán cách lưu payload.
+- E2EE: thiết bị có thể chờ tin cậy; FK ghép bảo đảm thiết bị phê duyệt thuộc cùng tài khoản. Revision backup duy nhất theo user, tối đa một backup hiện hành. Epoch/envelope lịch sử độc lập với vòng đời backup.
+- Spam: snapshot không FK đến tin nguồn, nên thu hồi/xóa tin không làm mất bằng chứng đã tiếp nhận. Archive chỉ giữ ID mới, ngày, trạng thái và số lượng; tombstone chỉ giữ digest, không liên kết archive hay hồ sơ gốc, theo [DEC-10](../docs/decisions/spam-moderation-and-retention.md).
+- Purge: giữ hội thoại/tin của người khác bằng `SET NULL` cho người tạo/người gửi; dữ liệu riêng của user được `CASCADE`. User còn xuất hiện trong report/evidence hoạt động bị `RESTRICT` để server chuyển toàn bộ hồ sơ sang archive, ghi tombstone và xóa snapshot cùng transaction trước khi purge.
+
+Fixture riêng dùng suffix UUID 101–109 và được dọn trong transaction; bốn user mẫu chung được giữ nguyên để các luồng chạy tiếp. Test bao gồm đối chiếu cột/kiểu/NULL, PK, đích FK và hành vi xóa, cùng các trường hợp dữ liệu hợp lệ/không hợp lệ.
+
+Các ràng buộc trên bảo vệ cấu trúc lưu trữ. Backend/client vẫn phải kiểm tra phiên và quyền, admin cuối nhóm, số người trong chat 1–1, quyền đọc lịch sử/thu hồi theo đồng hồ server, xác minh proof và cấp/xoay khóa theo [DEC-05](../docs/decisions/group-permissions-and-e2ee.md). Hạn mức Selected 1–20, Context tối đa 30, canonical payload tối đa 1 MiB, idempotency và job giữ/xóa dữ liệu theo DEC-10 cũng cần phần backend; byte fixture không phải dữ liệu mật mã đã xác minh.
 
 Để khởi tạo thủ công trên database mới, trống:
 

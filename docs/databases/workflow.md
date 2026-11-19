@@ -28,7 +28,7 @@ script/
 
 `00-core-users.sql` là định nghĩa `users` duy nhất; PK `id` có kiểu UUID. Bảng có 14 trường theo [ERD Tài khoản & Xác thực](erd/authentication.drawio.svg), giữ nguyên hợp đồng FK `users(id)`. Không tạo `users` stub ở mỗi luồng.
 
-File `10` đã có bốn bảng xác thực còn lại và test ràng buộc; Bạn bè/Chặn cùng các file 20/30 và test nghiệp vụ tương ứng vẫn chờ triển khai trong checkout này. SQL chưa thay thế xử lý đăng nhập/xác minh ở backend. Mỗi người phát triển trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp.
+Mỗi người phát triển DDL và test nghiệp vụ trong cặp file của mình, giữ entry point và helper chung ổn định. DDL/Test có phụ thuộc chéo giữa các luồng cần hợp đồng dữ liệu rõ và được kiểm tra bằng chế độ `all` trước khi tích hợp. Với luồng `messaging-e2ee-spam`, xem [mô hình và phạm vi kiểm thử](../../script/README.md#mô-hình-dữ-liệu-hội-thoại-e2ee-và-spam).
 
 ## Vòng kiểm thử độc lập
 
