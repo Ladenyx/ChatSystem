@@ -65,7 +65,7 @@ Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được d
 
 ## Kiểm thử với PostgreSQL cài trực tiếp
 
-Khi PostgreSQL 18 đã chạy trên máy, dùng `--local-server` để tạo DB kiểm thử riêng trên server đó. Role kết nối cần quyền `CREATEDB`; cấu hình mật khẩu cục bộ qua cơ chế libpq (`pgpass`/`PGPASSFILE`), giữ file mật khẩu ngoài repo. Runner không hỏi mật khẩu tương tác và không dùng thông tin kết nối trong `.env` của Compose.
+Khi PostgreSQL 18 đã chạy trên máy, dùng `--local-server` để tạo DB kiểm thử riêng trên server đó. Role kết nối cần quyền `CREATEDB`; cấu hình mật khẩu cục bộ qua cơ chế libpq (`pgpass`/`PGPASSFILE`), giữ file mật khẩu ngoài repo. Nếu terminal đã đặt `PGPASSWORD`, gỡ biến này khi chuyển sang passfile vì libpq ưu tiên mật khẩu được chỉ định sẵn. Runner không hỏi mật khẩu tương tác và không dùng thông tin kết nối trong `.env` của Compose.
 
 Ví dụ PowerShell với PostgreSQL được cài ở đường dẫn mặc định; điều chỉnh đường dẫn hoặc role theo máy:
 
