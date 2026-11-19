@@ -2,7 +2,7 @@
 
 Progress tracker for the Java Real-Time Chat System. The project overview and setup instructions are in [README.md](README.md).
 
-**Last updated:** 2026-11-15
+**Last updated:** 2026-11-20
 
 ## Contents
 
@@ -60,7 +60,7 @@ Interface and database. The archive contains `src/`, `script/`, `git/` and the r
 |-------------|:------:|
 | `src/`: screens of the User Client (UI only) | 🚧 |
 | `src/`: screens of the Admin App (Desktop GUI, UI only) | 🚧 |
-| `script/`: database creation script | ⬜ |
+| `script/`: database creation script | ✅ |
 | `git/`: commit screenshots of every member | ⬜ |
 | Report: team information | ⬜ |
 | Report: task list of each member | ⬜ |
@@ -104,13 +104,15 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 
 | ID | Task | Status |
 |----|------|:------:|
-| X-01 | Database design and creation script | 🚧 |
+| X-01 | Database design and creation script | ✅ |
 | X-02 | Chat server: connections, message routing, presence | ⬜ |
 | X-03 | Configuration file loading (database, server, email, LLM) | ⬜ |
 | X-04 | Build and packaging of the runnable JARs | 🚧 |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ |
 
-X-01: PostgreSQL Compose and the [SQL collaboration scaffold](docs/databases/workflow.md) are ready. A canonical users anchor, one DDL/Test pair per team workstream, and isolated runners support parallel development; business DDL and acceptance tests remain pending.
+X-01: Version 1 database design and creation are complete. Six editable draw.io ERDs cover 25 tables, 158 columns and 36 foreign keys; [schema.sql](script/schema.sql) loads the shared users anchor and three domain DDL files through `\ir`. Each workstream has its own DDL/Test pair and isolated runner. See the [SQL workflow](docs/databases/workflow.md) and [Phase 2 scope](docs/management/plans/version-1-plan.md#giai-đoạn-2-thiết-kế-csdl--viết-script-khởi-tạo-x-01--script-2-ngày).
+
+[Acceptance on main](https://github.com/Ladenyx/ChatSystem/actions/runs/44610003728) passed on fresh Docker Compose and native Windows Server 2025 with PostgreSQL 18.7: 381 integrated SQL checks per environment, independent suites (95 Auth/Friends, 156 Messaging/E2EE/Spam, 140 Logs/Analytics), concurrent-write probes and resource cleanup. The [database workflow](.github/workflows/database.yml) repeats acceptance for SQL/Compose changes. Server integration, authorization, E2EE protocol execution and retention jobs belong to Version 2.
 
 X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
 
@@ -204,7 +206,7 @@ Review before each submission. The course rules give a zero for a member without
 | The archive structure matches the specification exactly | ⬜ | ⬜ |
 | The report contains every required section | ⬜ | ⬜ |
 | The self-assessment report is completed on the course template | n/a | ⬜ |
-| The database script runs from scratch on an empty database | ⬜ | ⬜ |
+| The database script runs from scratch on an empty database | ✅ | ⬜ |
 | The JARs start after editing only the configuration file | n/a | ⬜ |
 | Contribution percentages add up to 100 | ⬜ | ⬜ |
 | The demo video is public and its link is in the report | n/a | ⬜ |
