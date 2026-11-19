@@ -65,7 +65,7 @@ Thêm `--pg-bin /path/to/postgresql/18/bin` nếu cần. Cụm native được d
 
 ## Kiểm thử với PostgreSQL cài trực tiếp
 
-Khi PostgreSQL 18 đã chạy trên máy, dùng `--local-server` để tạo DB kiểm thử riêng trên server đó. Role kết nối cần quyền `CREATEDB`; cấu hình mật khẩu cục bộ qua cơ chế libpq (`pgpass`/`PGPASSFILE`), giữ file mật khẩu ngoài repo. Runner không hỏi mật khẩu tương tác và không dùng thông tin kết nối trong `.env` của Compose.
+Khi PostgreSQL 18 đã chạy trên máy, dùng `--local-server` để tạo DB kiểm thử riêng trên server đó. Role kết nối cần quyền `CREATEDB`; cấu hình mật khẩu cục bộ qua cơ chế libpq (`pgpass`/`PGPASSFILE`), giữ file mật khẩu ngoài repo. Nếu terminal đã đặt `PGPASSWORD`, gỡ biến này khi chuyển sang passfile vì libpq ưu tiên mật khẩu được chỉ định sẵn. Runner không hỏi mật khẩu tương tác và không dùng thông tin kết nối trong `.env` của Compose.
 
 Ví dụ PowerShell với PostgreSQL được cài ở đường dẫn mặc định; điều chỉnh đường dẫn hoặc role theo máy:
 
@@ -74,6 +74,17 @@ py -3 script/test-db.py --local-server --flow all --pg-user postgres --pg-bin "C
 ```
 
 Trên Linux/macOS có thể dùng `python3` và bỏ `--pg-bin` nếu các chương trình PostgreSQL 18 có trong `PATH`. Server luôn được kết nối qua `127.0.0.1`; thêm `--pg-port` nếu khác cổng `5432`. Runner kiểm tra phiên bản client/server, tạo DB trống với UTF-8, chạy DDL/Test và chỉ xóa DB do chính lượt đó tạo. Đây là cách nghiệm thu SQL trên PostgreSQL cài trực tiếp ở Windows; chế độ `--native` tạo Unix socket không dùng trên Windows.
+
+## Nghiệm thu tự động trên Docker và Windows
+
+Workflow [PostgreSQL 18 acceptance](../.github/workflows/database.yml) chạy khi PR hoặc commit vào `main` thay đổi `script/`, Compose hay chính workflow; cũng có thể chạy thủ công từ GitHub Actions. Hai job độc lập kiểm tra:
+
+- Ubuntu: Compose project/volume mới cho mỗi lượt, khởi tạo qua entrypoint của image `postgres:18` và `script/schema.sql` được mount chỉ đọc.
+- Windows Server 2025: bản PostgreSQL 18.7-1 chính thức từ [EDB](https://www.enterprisedb.com/download-postgresql-binaries), đối chiếu SHA-256, chạy trực tiếp `postgres.exe` trên loopback và nạp `schema.sql` bằng `psql.exe`. Role kiểm thử có `CREATEDB`, không có quyền superuser.
+
+Cả hai job xác nhận phiên bản, UTF-8, extension, dữ liệu tiếng Việt và database khởi tạo trống bằng [`tests/check-bootstrap.sql`](tests/check-bootstrap.sql), rồi chạy `all` và cả ba luồng riêng. Các ca ghi đồng thời và kiểm tra rollback/dọn dữ liệu nằm trong runner hiện có. Database khởi tạo được kiểm tra lại sau toàn bộ lượt để phát hiện việc runner ghi nhầm vào đó.
+
+Compose chỉ dọn project/volume riêng của lượt CI; Windows dừng server tạm và xóa passfile. Mật khẩu được sinh khi chạy, không dùng credential của team. Log GitHub Actions ghi phiên bản, số lượng bảng/cột/FK, số assertion và kết quả kiểm tra đồng thời; đây là bằng chứng nghiệm thu có thể chạy lại sau mỗi thay đổi SQL. Khi nâng bản Windows, cập nhật đồng thời URL và checksum trong workflow từ nguồn EDB.
 
 ## Viết case
 
