@@ -75,6 +75,17 @@ py -3 script/test-db.py --local-server --flow all --pg-user postgres --pg-bin "C
 
 Trên Linux/macOS có thể dùng `python3` và bỏ `--pg-bin` nếu các chương trình PostgreSQL 18 có trong `PATH`. Server luôn được kết nối qua `127.0.0.1`; thêm `--pg-port` nếu khác cổng `5432`. Runner kiểm tra phiên bản client/server, tạo DB trống với UTF-8, chạy DDL/Test và chỉ xóa DB do chính lượt đó tạo. Đây là cách nghiệm thu SQL trên PostgreSQL cài trực tiếp ở Windows; chế độ `--native` tạo Unix socket không dùng trên Windows.
 
+## Nghiệm thu tự động trên Docker và Windows
+
+Workflow [PostgreSQL 18 acceptance](../.github/workflows/database.yml) chạy khi PR hoặc commit vào `main` thay đổi `script/`, Compose hay chính workflow; cũng có thể chạy thủ công từ GitHub Actions. Hai job độc lập kiểm tra:
+
+- Ubuntu: Compose project/volume mới cho mỗi lượt, khởi tạo qua entrypoint của image `postgres:18` và `script/schema.sql` được mount chỉ đọc.
+- Windows Server 2025: bản PostgreSQL 18.7-1 chính thức từ [EDB](https://www.enterprisedb.com/download-postgresql-binaries), đối chiếu SHA-256, chạy trực tiếp `postgres.exe` trên loopback và nạp `schema.sql` bằng `psql.exe`. Role kiểm thử có `CREATEDB`, không có quyền superuser.
+
+Cả hai job xác nhận phiên bản, UTF-8, extension, dữ liệu tiếng Việt và database khởi tạo trống bằng [`tests/check-bootstrap.sql`](tests/check-bootstrap.sql), rồi chạy `all` và cả ba luồng riêng. Các ca ghi đồng thời và kiểm tra rollback/dọn dữ liệu nằm trong runner hiện có. Database khởi tạo được kiểm tra lại sau toàn bộ lượt để phát hiện việc runner ghi nhầm vào đó.
+
+Compose chỉ dọn project/volume riêng của lượt CI; Windows dừng server tạm và xóa passfile. Mật khẩu được sinh khi chạy, không dùng credential của team. Log GitHub Actions ghi phiên bản, số lượng bảng/cột/FK, số assertion và kết quả kiểm tra đồng thời; đây là bằng chứng nghiệm thu có thể chạy lại sau mỗi thay đổi SQL. Khi nâng bản Windows, cập nhật đồng thời URL và checksum trong workflow từ nguồn EDB.
+
 ## Viết case
 
 `tests/assertions.sql` cung cấp `pg_temp.assert_true(label, boolean)` và `pg_temp.expect_error(label, SQL, SQLSTATE[, constraint])`. `tests/fixtures.sql` có UUID user cố định: suffix 1=Alice, 2=Bob, 3=Carol, 4=Admin; đây là hồ sơ DB thử, không phải credential đăng nhập. `test-core-users.sql` giữ smoke test của mỏ neo.

@@ -1,0 +1,158 @@
+name: PostgreSQL 18 acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'script/**'
+      - 'compose.yaml'
+      - '.github/workflows/database.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'script/**'
+      - 'compose.yaml'
+      - '.github/workflows/database.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    name: Fresh Docker Compose
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      COMPOSE_PROJECT_NAME: chatsystem-acceptance-${{ github.run_id }}-${{ github.run_attempt }}
+      POSTGRES_DB: chatsystem_acceptance
+      POSTGRES_USER: chatsystem
+      POSTGRES_PORT: '55432'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Configure an isolated Compose project
+        shell: bash
+        run: |
+          password="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+          echo "::add-mask::$password"
+          echo "POSTGRES_PASSWORD=$password" >> "$GITHUB_ENV"
+          test -z "$(docker volume ls --quiet --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME")"
+      - name: Initialize a fresh volume through the image entrypoint
+        run: |
+          docker compose config --quiet
+          docker compose up -d --wait --wait-timeout 120 db
+          docker compose exec -T db psql -X --no-password \
+            --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" \
+            --file=/docker-entrypoint-initdb.d/tests/check-bootstrap.sql
+      - name: Run integrated and independent workstreams
+        shell: bash
+        run: |
+          for flow in all auth-friends messaging-e2ee-spam logs-analytics; do
+            python script/test-db.py --project "$COMPOSE_PROJECT_NAME" --flow "$flow"
+          done
+          docker compose exec -T db psql -X --no-password \
+            --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" \
+            --file=/docker-entrypoint-initdb.d/tests/check-bootstrap.sql
+      - name: Show PostgreSQL diagnostics
+        if: failure()
+        run: docker compose logs --no-color db
+      - name: Remove only this run's project and volume
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+
+  windows:
+    name: Native Windows PostgreSQL 18
+    runs-on: windows-2025
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      PGHOST: '127.0.0.1'
+      PGPORT: '55433'
+      PGUSER: chatsystem_test_owner
+      PGCLIENTENCODING: UTF8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Configure an isolated Windows server
+        run: |
+          "PGBIN=$(Join-Path $env:RUNNER_TEMP 'PostgreSQL 18\pgsql\bin')" >> $env:GITHUB_ENV
+          "PGDATA=$(Join-Path $env:RUNNER_TEMP 'PostgreSQL 18 data')" >> $env:GITHUB_ENV
+          "PGPASSFILE=$(Join-Path $env:RUNNER_TEMP 'pg18-pass.conf')" >> $env:GITHUB_ENV
+      - name: Install official PostgreSQL 18 Windows binaries
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'postgresql-18.7-1-windows-x64-binaries.zip'
+          $url = 'https://get.enterprisedb.com/postgresql/postgresql-18.7-1-windows-x64-binaries.zip'
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          # EDB publishes the checksum at the same URL with a .sha256 suffix.
+          $expected = 'ead0bbc27fb678fa24dcf86b738981323042abd073c744103bf7f3aed23f9a33'
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'PostgreSQL archive checksum mismatch'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath (Join-Path $env:RUNNER_TEMP 'PostgreSQL 18')
+          & "$env:PGBIN\psql.exe" --version
+          if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL binaries are unavailable' }
+      - name: Start a loopback-only PostgreSQL server
+        run: |
+          $password = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
+          Write-Output "::add-mask::$password"
+          $initPassword = Join-Path $env:RUNNER_TEMP 'pg18 init password.txt'
+          [IO.File]::WriteAllText($initPassword, $password)
+          @("127.0.0.1:$($env:PGPORT):*:postgres:$password",
+            "127.0.0.1:$($env:PGPORT):*:$($env:PGUSER):$password") |
+            Set-Content -LiteralPath $env:PGPASSFILE -Encoding ascii
+          try {
+            & "$env:PGBIN\initdb.exe" -D $env:PGDATA -U postgres --encoding=UTF8 `
+              --locale-provider=builtin --builtin-locale=C.UTF-8 --auth=scram-sha-256 --pwfile=$initPassword
+            if ($LASTEXITCODE -ne 0) { throw 'initdb failed' }
+          } finally {
+            Remove-Item -LiteralPath $initPassword -ErrorAction SilentlyContinue
+          }
+          & "$env:PGBIN\pg_ctl.exe" -D $env:PGDATA -l "$env:RUNNER_TEMP\pg18-server.log" `
+            -o "-c listen_addresses=127.0.0.1 -p $env:PGPORT" -w -t 60 start
+          if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL startup failed' }
+          & "$env:PGBIN\psql.exe" -X --no-password -U postgres -d postgres -v ON_ERROR_STOP=1 `
+            -c "CREATE ROLE chatsystem_test_owner LOGIN CREATEDB PASSWORD '$password';"
+          if ($LASTEXITCODE -ne 0) { throw 'Test role creation failed' }
+      - name: Initialize a fresh database through psql
+        run: |
+          & "$env:PGBIN\createdb.exe" --no-password --template=template0 --encoding=UTF8 `
+            --locale-provider=builtin --builtin-locale=C.UTF-8 chatsystem_acceptance
+          if ($LASTEXITCODE -ne 0) { throw 'Acceptance database creation failed' }
+          & "$env:PGBIN\psql.exe" -X --no-password -v ON_ERROR_STOP=1 -d chatsystem_acceptance -f script/schema.sql
+          if ($LASTEXITCODE -ne 0) { throw 'Schema bootstrap failed' }
+          & "$env:PGBIN\psql.exe" -X --no-password -d chatsystem_acceptance -f script/tests/check-bootstrap.sql
+          if ($LASTEXITCODE -ne 0) { throw 'Bootstrap verification failed' }
+      - name: Run integrated and independent workstreams
+        run: |
+          foreach ($flow in @('all', 'auth-friends', 'messaging-e2ee-spam', 'logs-analytics')) {
+            python script/test-db.py --local-server --pg-bin $env:PGBIN `
+              --pg-port $env:PGPORT --pg-user $env:PGUSER --flow $flow
+            if ($LASTEXITCODE -ne 0) { throw "Database checks failed for $flow" }
+          }
+          & "$env:PGBIN\psql.exe" -X --no-password -d chatsystem_acceptance -f script/tests/check-bootstrap.sql
+          if ($LASTEXITCODE -ne 0) { throw 'Acceptance database changed during tests' }
+      - name: Show PostgreSQL diagnostics
+        if: failure()
+        run: Get-Content -LiteralPath "$env:RUNNER_TEMP\pg18-server.log" -ErrorAction SilentlyContinue
+      - name: Stop this run's PostgreSQL server
+        if: always()
+        run: |
+          if (Test-Path -LiteralPath "$env:PGDATA\postmaster.pid") {
+            & "$env:PGBIN\pg_ctl.exe" -D $env:PGDATA -m fast -w -t 60 stop
+            if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL shutdown failed' }
+          }
+          Remove-Item -LiteralPath $env:PGPASSFILE -ErrorAction SilentlyContinue
