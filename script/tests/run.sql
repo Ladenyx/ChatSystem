@@ -20,7 +20,7 @@ SET LOCAL TIME ZONE 'UTC';
 \ir test-auth-friends.sql
 \ir test-messaging-e2ee-spam.sql
 \ir test-logs-analytics.sql
-SELECT format('%s scaffold checks passed (flow=%s); business checks are pending',count(*),:'flow') FROM db_checks;
+SELECT format('%s SQL checks passed (flow=%s)',count(*),:'flow') FROM db_checks;
 ROLLBACK;
 DO $$
 DECLARE
