@@ -1,4 +1,4 @@
--- Thanh vien 3: checks and workstream-specific fixtures for Login logs, App open events, Indexes.
+-- Member 3: login logs and durable registration, app-open and send statistics.
 -- Shared helpers and fixed-UUID users are loaded first; the caller rolls back.
 
 -- Namespace 8 is local to these login-event fixtures.
@@ -126,7 +126,7 @@ SELECT pg_temp.assert_true('logs-analytics/Admin App creates no app open',
     public.record_app_open(pg_temp.id(0,4),pg_temp.id(9,2),'ADMIN_APP') IS NULL);
 SELECT pg_temp.assert_true('logs-analytics/Admin App leaves open counts unchanged',
     (SELECT count(*)=1 FROM public.app_open_events)
-    AND (SELECT count(*)=1 FROM public.app_open_accounts));
+    AND (SELECT count(*)=1 FROM public.app_open_accounts WHERE user_id=pg_temp.id(0,4)));
 
 -- Re-login creates another login log but returns the original app-open event.
 INSERT INTO public.login_logs (id,user_id,login_at,session_scope)
@@ -152,7 +152,8 @@ SELECT pg_temp.assert_true('logs-analytics/accounts sharing one launch count sep
     (SELECT count(*)=3 AND count(DISTINCT account_key)=3
      FROM public.app_open_events WHERE launch_id=pg_temp.id(9,1)));
 SELECT pg_temp.assert_true('logs-analytics/statistics key differs from account UUID',
-    (SELECT count(*)=3 AND bool_and(account_key<>user_id) FROM public.app_open_accounts));
+    (SELECT count(*)=3 AND bool_and(account_key<>user_id) FROM public.app_open_accounts
+     WHERE user_id IN (pg_temp.id(0,1),pg_temp.id(0,2),pg_temp.id(0,4))));
 
 SELECT pg_temp.expect_error('logs-analytics/duplicate account launch rejected',
     $$INSERT INTO public.app_open_events (account_key,launch_id)
@@ -188,7 +189,7 @@ SELECT pg_temp.expect_error('logs-analytics/statistics identity rejects unknown 
     '23503','app_open_accounts_user_id_fkey');
 SELECT pg_temp.expect_error('logs-analytics/cannot delete statistics key with historical events',
     $$DELETE FROM public.app_open_accounts WHERE user_id=pg_temp.id(0,4)$$,
-    '23001','app_open_events_account_key_fkey');
+    '23001');
 
 INSERT INTO public.users (id,username,email,full_name,created_at) VALUES
 (pg_temp.id(0,91),'open0091','open91@example.test','Tài khoản mở app 91','2026-01-01 UTC'),
@@ -263,8 +264,11 @@ CREATE TEMP TABLE analytics_params (
             AND count_operator IN ('=','<','>') AND count_value>=0))
 );
 INSERT INTO analytics_params (from_date,through_date,chart_year) VALUES ('2030-11-01','2030-11-30',2030);
-CREATE FUNCTION pg_temp.analytics_key(number INTEGER) RETURNS UUID LANGUAGE sql IMMUTABLE AS $$
-    SELECT pg_temp.id(8,number+1000)
+-- This test-only lookup remembers generated fixture keys after user purge.
+-- Creation/send facts themselves always come from the persistent public tables.
+CREATE TEMP TABLE analytics_fixture_keys (number INTEGER PRIMARY KEY, account_key UUID UNIQUE NOT NULL);
+CREATE FUNCTION pg_temp.analytics_key(number INTEGER) RETURNS UUID LANGUAGE sql STABLE AS $$
+    SELECT account_key FROM pg_temp.analytics_fixture_keys WHERE analytics_fixture_keys.number=$1
 $$;
 
 INSERT INTO public.users (id,username,email,full_name,role,status,created_at,deleted_at,status_before_delete) VALUES
@@ -280,18 +284,14 @@ INSERT INTO public.users (id,username,email,full_name,role,status,created_at,del
 (pg_temp.id(0,210),'ref0210','ref210@example.test','Jade','USER','ACTIVE','2030-10-31 17:00:00+00',NULL,NULL),
 (pg_temp.id(0,211),'ref0211','ref211@example.test','Gone','USER','DELETED','2030-10-31 17:00:00+00','2030-11-09 17:00:00+00','ACTIVE'),
 (pg_temp.id(0,212),'ref0212','ref212@example.test','Lost','USER','ACTIVE','2030-11-19 17:00:00+00',NULL,NULL);
-INSERT INTO public.app_open_accounts (account_key,user_id)
-SELECT pg_temp.analytics_key(n),pg_temp.id(0,n) FROM generate_series(201,212) n;
+INSERT INTO analytics_fixture_keys
+SELECT n,a.account_key FROM generate_series(201,212) n
+JOIN public.app_open_accounts a ON a.user_id=pg_temp.id(0,n);
 
--- Snapshot real users.created_at into the proposed retained input. The deployed
--- schema has no registration history source that survives deleting public.users.
-CREATE TEMP TABLE analytics_registration_facts (
-    account_key UUID PRIMARY KEY,
-    created_at TIMESTAMPTZ NOT NULL
-);
-INSERT INTO analytics_registration_facts
-SELECT a.account_key,u.created_at FROM public.app_open_accounts a
-JOIN public.users u ON u.id=a.user_id WHERE u.username LIKE 'ref02%';
+-- Scope the real registration ledger to this file's fixture identities.
+CREATE TEMP VIEW analytics_registration_facts AS
+SELECT r.account_key,r.registered_at AS created_at
+FROM public.account_registration_events r JOIN analytics_fixture_keys k USING (account_key);
 CREATE TEMP TABLE analytics_pending_signups (request_id UUID PRIMARY KEY, requested_at TIMESTAMPTZ);
 INSERT INTO analytics_pending_signups
 SELECT pg_temp.id(1,n),'2030-11-01 00:00:00+07'::timestamptz FROM generate_series(201,203) n;
@@ -317,8 +317,8 @@ INSERT INTO public.login_logs (id,user_id,login_at,session_scope) VALUES
 -- Only server-accepted metadata contributes. NULL accepted_at means not accepted.
 CREATE TEMP TABLE analytics_message_inputs (
     message_id UUID PRIMARY KEY,
-    sender_key UUID NOT NULL REFERENCES analytics_registration_facts(account_key),
-    recipient_key UUID REFERENCES analytics_registration_facts(account_key), group_id UUID,
+    sender_key UUID NOT NULL REFERENCES analytics_fixture_keys(account_key),
+    recipient_key UUID REFERENCES analytics_fixture_keys(account_key), group_id UUID,
     accepted_at TIMESTAMPTZ,
     CHECK ((recipient_key IS NOT NULL)<>(group_id IS NOT NULL))
 );
@@ -423,32 +423,35 @@ LEFT JOIN analytics_direct_threads d ON d.low_key=LEAST(m.sender_key,m.recipient
     AND d.high_key=GREATEST(m.sender_key,m.recipient_key) AND m.recipient_key IS NOT NULL
 WHERE m.accepted_at IS NOT NULL;
 
-CREATE TEMP VIEW analytics_live_sends AS
-SELECT m.id AS message_id,sender.account_key AS sender_key,recipient.account_key AS recipient_key,
-       CASE WHEN c.type='GROUP' THEN c.id END AS group_id,m.created_at AS accepted_at
+-- Reference server transaction: persist each real accepted message and its
+-- statistics in the same outer transaction; no messaging-module DDL is changed.
+DO $$ BEGIN
+PERFORM public.record_message_send(m.id,m.sender_user_id,cm.user_id,
+       CASE WHEN c.type='GROUP' THEN c.id END,m.created_at)
 FROM public.messages m JOIN public.conversations c ON c.id=m.conversation_id
-JOIN public.app_open_accounts sender ON sender.user_id=m.sender_user_id
+JOIN analytics_message_inputs i ON i.message_id=m.id
 LEFT JOIN public.conversation_members cm ON c.type='DIRECT' AND cm.conversation_id=c.id
-    AND cm.user_id<>m.sender_user_id
-LEFT JOIN public.app_open_accounts recipient ON recipient.user_id=cm.user_id;
+    AND cm.user_id<>m.sender_user_id;
+END $$;
 CREATE TEMP VIEW analytics_friendships AS
 SELECT user_low_id AS user_a,user_high_id AS user_b FROM public.friendships;
 CREATE TEMP VIEW analytics_blocks AS SELECT blocker_id,blocked_id FROM public.blocks;
 \else
-CREATE TEMP VIEW analytics_live_sends AS SELECT * FROM analytics_message_inputs WHERE accepted_at IS NOT NULL;
+-- Standalone flow exercises the same storage API without loading messaging DDL.
+DO $$ BEGIN
+PERFORM public.record_message_send(i.message_id,s.user_id,r.user_id,i.group_id,i.accepted_at)
+FROM analytics_message_inputs i
+JOIN public.app_open_accounts s ON s.account_key=i.sender_key
+LEFT JOIN public.app_open_accounts r ON r.account_key=i.recipient_key
+WHERE i.accepted_at IS NOT NULL;
+END $$;
 CREATE TEMP VIEW analytics_friendships AS SELECT user_a,user_b FROM analytics_friendship_inputs WHERE is_accepted;
 CREATE TEMP VIEW analytics_blocks AS SELECT blocker_id,blocked_id FROM analytics_block_inputs;
 \endif
 
--- A purge detaches the live sender and can remove the recipient's membership.
--- Keep only the fixture's accepted-send metadata when simulating historical facts.
-CREATE TEMP TABLE analytics_retained_sends AS TABLE analytics_live_sends WITH NO DATA;
-ALTER TABLE analytics_retained_sends ADD PRIMARY KEY (message_id);
+-- Queries read the deployed ledger in both modes, including after purge/recall.
 CREATE TEMP VIEW analytics_sends AS
-SELECT s.* FROM analytics_live_sends s
-WHERE NOT EXISTS (SELECT FROM analytics_retained_sends h WHERE h.message_id=s.message_id)
-UNION ALL
-SELECT * FROM analytics_retained_sends;
+SELECT s.* FROM public.message_send_events s JOIN analytics_fixture_keys k ON k.account_key=s.sender_key;
 
 -- Reference analytics queries read the same source contract in either flow.
 CREATE TEMP VIEW analytics_bounds AS
@@ -827,7 +830,7 @@ BEGIN
 END $$;
 UPDATE analytics_params SET from_date='2030-11-01',through_date='2030-11-30',name_query=NULL;
 
--- Retention-input prototype: purge detaches identity without deleting historical facts.
+-- Purge detaches identity without deleting persistent historical facts.
 INSERT INTO public.login_logs (id,user_id,login_at,session_scope)
 VALUES (pg_temp.id(8,3212),pg_temp.id(0,212),'2030-11-20 05:00:00+00','USER_CLIENT');
 \if :analytics_integrated
@@ -843,9 +846,6 @@ SELECT pg_temp.assert_true('logs-analytics/reference/soft deletion keeps L in hi
     AND (SELECT app_opens=1 AND direct_receivers=1 AND groups_chatted=1
          FROM analytics_activity WHERE user_id=pg_temp.id(0,212))
     AND NOT EXISTS (SELECT FROM analytics_friend_network WHERE user_id=pg_temp.id(0,212)));
-INSERT INTO analytics_retained_sends
-SELECT * FROM analytics_live_sends
-WHERE pg_temp.analytics_key(212) IN (sender_key,recipient_key);
 DELETE FROM public.users WHERE id=pg_temp.id(0,212);
 SELECT pg_temp.assert_true('logs-analytics/reference/purge keeps registration activity and monthly opener totals',
     (SELECT registrations=9 FROM analytics_monthly_registrations WHERE month_no=11)
@@ -858,8 +858,8 @@ SELECT pg_temp.assert_true('logs-analytics/reference/purge keeps registration ac
          FROM analytics_activity WHERE account_key=pg_temp.analytics_key(212)));
 INSERT INTO public.users (id,username,email,full_name,created_at)
 VALUES (pg_temp.id(0,213),'ref0212','ref212@example.test','New Lost','2030-11-30 17:00:00+00');
-INSERT INTO public.app_open_accounts (account_key,user_id) VALUES (pg_temp.analytics_key(213),pg_temp.id(0,213));
-INSERT INTO analytics_registration_facts VALUES (pg_temp.analytics_key(213),'2030-11-30 17:00:00+00');
+INSERT INTO analytics_fixture_keys
+SELECT 213,account_key FROM public.app_open_accounts WHERE user_id=pg_temp.id(0,213);
 UPDATE analytics_params SET login_user_id=pg_temp.id(0,213);
 SELECT pg_temp.assert_true('logs-analytics/reference/username reuse does not transfer historical registrations or activity',
     (SELECT user_id IS NULL AND full_name='Người dùng đã xóa' FROM analytics_new_registrations
@@ -874,11 +874,10 @@ SELECT pg_temp.assert_true('logs-analytics/integration/purge removes sessions wh
     NOT EXISTS (SELECT FROM public.user_sessions WHERE id=pg_temp.id(1,212))
     AND (SELECT user_id IS NULL FROM public.login_logs WHERE id=pg_temp.id(8,3212))
     AND (SELECT count(*)=1 FROM public.app_open_events WHERE account_key=pg_temp.analytics_key(212)));
-SELECT pg_temp.assert_true('logs-analytics/integration/purged sender needs retained metadata for historical sends',
+SELECT pg_temp.assert_true('logs-analytics/integration/purged sender keeps durable accepted-send metadata',
     (SELECT count(*)=2 AND bool_and(sender_user_id IS NULL) FROM public.messages
      WHERE id IN (pg_temp.id(2,4213),pg_temp.id(2,4214)))
-    AND NOT EXISTS (SELECT FROM analytics_live_sends WHERE sender_key=pg_temp.analytics_key(212))
-    AND (SELECT count(*)=2 FROM analytics_retained_sends WHERE sender_key=pg_temp.analytics_key(212)));
+    AND (SELECT count(*)=2 FROM public.message_send_events WHERE sender_key=pg_temp.analytics_key(212)));
 \endif
 
 INSERT INTO public.app_open_events (id,account_key,launch_id,opened_at) VALUES
@@ -931,3 +930,173 @@ SELECT pg_temp.assert_true('logs-analytics/indexes/purged-label branch remains s
     (SELECT array_agg(account_key)=ARRAY[pg_temp.analytics_key(212)] FROM analytics_new_registrations)
     AND (SELECT array_agg(account_key)=ARRAY[pg_temp.analytics_key(212)] FROM analytics_activity)
     AND NOT EXISTS (SELECT FROM analytics_friend_network));
+
+-- Durable retention contract: these probes query only deployed public ledgers.
+-- Historical dates deliberately exceed both suggested 12/24-month alternatives.
+INSERT INTO public.users (id,username,email,full_name,role,created_at) VALUES
+(pg_temp.id(0,601),'ledger601','ledger601@example.test','Ledger admin','ADMIN','2000-01-01 UTC'),
+(pg_temp.id(0,602),'ledger602','ledger602@example.test','Ledger recipient B','USER','2000-01-01 UTC'),
+(pg_temp.id(0,603),'ledger603','ledger603@example.test','Ledger recipient C','USER','2000-01-01 UTC');
+CREATE TEMP TABLE analytics_retention_probe_keys AS
+SELECT user_id,account_key FROM public.app_open_accounts
+WHERE user_id IN (pg_temp.id(0,601),pg_temp.id(0,602),pg_temp.id(0,603));
+
+SELECT pg_temp.assert_true('logs-analytics/retention/all accounts register before any app open',
+    (SELECT count(*)=3 AND bool_and(r.registered_at=TIMESTAMPTZ '2000-01-01 UTC')
+     FROM public.account_registration_events r JOIN analytics_retention_probe_keys k USING (account_key))
+    AND NOT EXISTS (SELECT FROM public.app_open_events e
+        JOIN analytics_retention_probe_keys k USING (account_key)));
+SELECT pg_temp.assert_true('logs-analytics/retention/CLI-style ADMIN creation counts once',
+    (SELECT count(*)=1 FROM public.account_registration_events r
+     JOIN public.app_open_accounts a USING (account_key) JOIN public.users u ON u.id=a.user_id
+     WHERE u.id=pg_temp.id(0,601) AND u.role='ADMIN'));
+SELECT pg_temp.expect_error('logs-analytics/retention/live identity cannot be detached before purge',
+    $$UPDATE public.app_open_accounts SET user_id=NULL WHERE user_id=pg_temp.id(0,601)$$,
+    '23514','statistics_identity_immutable');
+SELECT pg_temp.expect_error('logs-analytics/retention/statistics key is immutable',
+    $$UPDATE public.app_open_accounts SET account_key=pg_temp.id(9,6690) WHERE user_id=pg_temp.id(0,601)$$,
+    '23514','statistics_identity_immutable');
+UPDATE public.users SET created_at='2000-01-02 UTC' WHERE id=pg_temp.id(0,601);
+SELECT pg_temp.assert_true('logs-analytics/retention/profile writes do not rewrite original registration time',
+    (SELECT registered_at=TIMESTAMPTZ '2000-01-01 UTC' FROM public.account_registration_events
+     WHERE account_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))));
+SELECT pg_temp.expect_error('logs-analytics/retention/registration events are immutable',
+    $$UPDATE public.account_registration_events SET registered_at=registered_at+INTERVAL '1 day'
+      WHERE account_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))$$,
+    '23514','statistics_event_immutable');
+
+\if :analytics_integrated
+INSERT INTO public.conversations (id,type,group_name,created_at)
+VALUES (pg_temp.id(1,6601),'GROUP','Retention fixture','2000-01-01 UTC');
+INSERT INTO public.conversation_members (conversation_id,user_id,role,joined_at)
+SELECT pg_temp.id(1,6601),pg_temp.id(0,n),CASE WHEN n=601 THEN 'ADMIN' ELSE 'MEMBER' END,'2000-01-02 UTC'::timestamptz
+FROM generate_series(601,603) n;
+INSERT INTO public.messages (id,conversation_id,sender_user_id,created_at,content_cipher,crypto_metadata)
+VALUES (pg_temp.id(2,6603),pg_temp.id(1,6601),pg_temp.id(0,601),'2001-10-12 UTC',decode('01','hex'),'{}');
+\endif
+
+DO $$ BEGIN
+    PERFORM public.record_message_send(pg_temp.id(2,6601),pg_temp.id(0,601),pg_temp.id(0,602),NULL,'2001-10-10 UTC');
+    PERFORM public.record_message_send(pg_temp.id(2,6602),pg_temp.id(0,601),pg_temp.id(0,603),NULL,'2001-10-11 UTC');
+    PERFORM public.record_message_send(pg_temp.id(2,6603),pg_temp.id(0,601),NULL,pg_temp.id(1,6601),'2001-10-12 UTC');
+    PERFORM public.record_message_send(pg_temp.id(2,6604),pg_temp.id(0,601),NULL,pg_temp.id(1,6601),'2001-10-13 UTC');
+END $$;
+SELECT pg_temp.assert_true('logs-analytics/retention/distinct historical destinations are two people and one group',
+    (SELECT count(*)=4 AND count(DISTINCT recipient_key)=2 AND count(DISTINCT group_id)=1
+     FROM public.message_send_events
+     WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))));
+DO $$ BEGIN
+    PERFORM public.record_message_send(pg_temp.id(2,6601),pg_temp.id(0,601),pg_temp.id(0,602),NULL,'2001-11-01 UTC');
+END $$;
+SELECT pg_temp.assert_true('logs-analytics/retention/retry preserves first acceptance month',
+    (SELECT accepted_at=TIMESTAMPTZ '2001-10-10 UTC' FROM public.message_send_events WHERE message_id=pg_temp.id(2,6601))
+    AND (SELECT count(*)=4 FROM public.message_send_events
+        WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))));
+SELECT pg_temp.expect_error('logs-analytics/retention/message ID cannot change recipient',
+    $$SELECT public.record_message_send(pg_temp.id(2,6601),pg_temp.id(0,601),pg_temp.id(0,603),NULL,'2001-10-10 UTC')$$,
+    '23505','message_send_events_pkey');
+SELECT pg_temp.expect_error('logs-analytics/retention/message ID cannot change sender',
+    $$SELECT public.record_message_send(pg_temp.id(2,6601),pg_temp.id(0,603),pg_temp.id(0,602),NULL,'2001-10-10 UTC')$$,
+    '23505','message_send_events_pkey');
+SELECT pg_temp.expect_error('logs-analytics/retention/message ID cannot change destination type',
+    $$SELECT public.record_message_send(pg_temp.id(2,6601),pg_temp.id(0,601),NULL,pg_temp.id(1,6601),'2001-10-10 UTC')$$,
+    '23505','message_send_events_pkey');
+SELECT pg_temp.expect_error('logs-analytics/retention/send event time cannot be rewritten',
+    $$UPDATE public.message_send_events SET accepted_at=accepted_at+INTERVAL '1 day' WHERE message_id=pg_temp.id(2,6601)$$,
+    '23514','statistics_event_immutable');
+SELECT pg_temp.expect_error('logs-analytics/retention/only one destination is accepted',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,602),pg_temp.id(1,6601),'2001-10-10 UTC')$$,
+    '22023');
+SELECT pg_temp.expect_error('logs-analytics/retention/destination is required',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),NULL,NULL,'2001-10-10 UTC')$$,'22023');
+SELECT pg_temp.expect_error('logs-analytics/retention/self-send is not a direct destination',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,601),NULL,'2001-10-10 UTC')$$,
+    '23514','message_send_events_destination_check');
+SELECT pg_temp.expect_error('logs-analytics/retention/send ID is required',
+    $$SELECT public.record_message_send(NULL,pg_temp.id(0,601),pg_temp.id(0,602),NULL,'2001-10-10 UTC')$$,'22004');
+SELECT pg_temp.expect_error('logs-analytics/retention/acceptance time is required',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,602),NULL,NULL)$$,'22004');
+SELECT pg_temp.expect_error('logs-analytics/retention/acceptance time must be finite',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,602),NULL,'infinity')$$,'22023');
+SELECT pg_temp.expect_error('logs-analytics/retention/unknown sender is rejected',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,699),pg_temp.id(0,602),NULL,'2001-10-10 UTC')$$,
+    '23503','message_send_events_sender_key_fkey');
+SELECT pg_temp.expect_error('logs-analytics/retention/unknown recipient is rejected',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,699),NULL,'2001-10-10 UTC')$$,
+    '23503','message_send_events_recipient_key_fkey');
+SELECT pg_temp.expect_error('logs-analytics/retention/registration key cannot be physically removed',
+    $$DELETE FROM public.app_open_accounts WHERE user_id=pg_temp.id(0,603)$$,'23001');
+
+SAVEPOINT analytics_accepted_send_rollback;
+\if :analytics_integrated
+INSERT INTO public.messages (id,conversation_id,sender_user_id,created_at,content_cipher,crypto_metadata)
+VALUES (pg_temp.id(2,6699),pg_temp.id(1,6601),pg_temp.id(0,601),'2001-10-12 UTC',decode('02','hex'),'{}');
+\endif
+DO $$ BEGIN
+    PERFORM public.record_message_send(pg_temp.id(2,6699),pg_temp.id(0,601),NULL,pg_temp.id(1,6601),'2001-10-12 UTC');
+END $$;
+ROLLBACK TO SAVEPOINT analytics_accepted_send_rollback;
+RELEASE SAVEPOINT analytics_accepted_send_rollback;
+SELECT pg_temp.assert_true('logs-analytics/retention/aborted acceptance transaction leaves no send event',
+    NOT EXISTS (SELECT FROM public.message_send_events WHERE message_id=pg_temp.id(2,6699)));
+\if :analytics_integrated
+SELECT pg_temp.assert_true('logs-analytics/integration/aborted acceptance also removes the live message',
+    NOT EXISTS (SELECT FROM public.messages WHERE id=pg_temp.id(2,6699)));
+INSERT INTO public.message_deletions (message_id,user_id) VALUES (pg_temp.id(2,6603),pg_temp.id(0,601));
+UPDATE public.messages SET content_cipher=NULL,crypto_metadata=NULL,recalled_at=created_at+INTERVAL '1 hour'
+WHERE id=pg_temp.id(2,6603);
+SELECT pg_temp.assert_true('logs-analytics/integration/self-deletion and recall preserve accepted-send metadata',
+    EXISTS (SELECT FROM public.message_send_events WHERE message_id=pg_temp.id(2,6603)));
+UPDATE public.conversations SET closed_at='2002-01-01 UTC' WHERE id=pg_temp.id(1,6601);
+SELECT pg_temp.assert_true('logs-analytics/integration/closing a group keeps historical distinct group count',
+    (SELECT count(DISTINCT group_id)=1 FROM public.message_send_events
+     WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))));
+DELETE FROM public.messages WHERE id=pg_temp.id(2,6603);
+DELETE FROM public.conversations WHERE id=pg_temp.id(1,6601);
+SELECT pg_temp.assert_true('logs-analytics/integration/removing live message and group does not erase send facts',
+    (SELECT count(*)=2 AND count(DISTINCT group_id)=1 FROM public.message_send_events WHERE group_id=pg_temp.id(1,6601)));
+\endif
+
+DELETE FROM public.users WHERE id=pg_temp.id(0,602);
+SELECT pg_temp.assert_true('logs-analytics/retention/recipient purge keeps both historical direct destinations',
+    (SELECT count(DISTINCT recipient_key)=2 FROM public.message_send_events
+     WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601)))
+    AND (SELECT user_id IS NULL FROM public.app_open_accounts
+        WHERE account_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,602))));
+SELECT pg_temp.expect_error('logs-analytics/retention/purged recipient cannot be relinked by another send',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,602),NULL,'2002-10-10 UTC')$$,
+    '23503','message_send_events_recipient_key_fkey');
+INSERT INTO public.users (id,username,email,full_name,created_at)
+VALUES (pg_temp.id(0,604),'ledger602','ledger602@example.test','New account, same name','2002-01-01 UTC');
+DO $$ BEGIN
+    PERFORM public.record_message_send(pg_temp.id(2,6605),pg_temp.id(0,601),pg_temp.id(0,604),NULL,'2002-10-10 UTC');
+END $$;
+SELECT pg_temp.assert_true('logs-analytics/retention/reused username has its own registration and statistics identity',
+    (SELECT a.account_key<>old.account_key AND r.registered_at=TIMESTAMPTZ '2002-01-01 UTC'
+     FROM public.app_open_accounts a JOIN public.account_registration_events r USING (account_key)
+     CROSS JOIN analytics_retention_probe_keys old
+     WHERE a.user_id=pg_temp.id(0,604) AND old.user_id=pg_temp.id(0,602)));
+SELECT pg_temp.expect_error('logs-analytics/retention/purged identity cannot be assigned to a new account',
+    $$UPDATE public.app_open_accounts SET user_id=pg_temp.id(0,604)
+      WHERE account_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,602))$$,
+    '23514','statistics_identity_immutable');
+SELECT pg_temp.assert_true('logs-analytics/retention/new account does not merge into old historical destination',
+    (SELECT count(DISTINCT recipient_key)=3 FROM public.message_send_events
+     WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601)))
+    AND (SELECT count(DISTINCT recipient_key)=2 FROM public.message_send_events
+        WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))
+            AND accepted_at>=TIMESTAMPTZ '2001-10-01 UTC' AND accepted_at<TIMESTAMPTZ '2001-11-01 UTC'));
+DELETE FROM public.users WHERE id=pg_temp.id(0,601);
+SELECT pg_temp.assert_true('logs-analytics/retention/sender purge preserves registration and five accepted sends',
+    (SELECT count(*)=3 FROM public.account_registration_events r JOIN analytics_retention_probe_keys k USING (account_key))
+    AND (SELECT count(*)=5 FROM public.message_send_events
+        WHERE sender_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601)))
+    AND (SELECT user_id IS NULL FROM public.app_open_accounts
+        WHERE account_key=(SELECT account_key FROM analytics_retention_probe_keys WHERE user_id=pg_temp.id(0,601))));
+SELECT pg_temp.expect_error('logs-analytics/retention/purged sender cannot create or resurrect send history',
+    $$SELECT public.record_message_send(pg_temp.id(2,6690),pg_temp.id(0,601),pg_temp.id(0,604),NULL,'2002-10-10 UTC')$$,
+    '23503','message_send_events_sender_key_fkey');
+SELECT pg_temp.assert_true('logs-analytics/retention/send ledger contains metadata only',
+    (SELECT array_agg(column_name::text ORDER BY ordinal_position)
+        = ARRAY['message_id','sender_key','recipient_key','group_id','accepted_at']
+     FROM information_schema.columns WHERE table_schema='public' AND table_name='message_send_events'));
