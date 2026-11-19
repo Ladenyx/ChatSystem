@@ -236,3 +236,157 @@ SELECT pg_temp.assert_true('auth/pending cleanup removes its OTP and preserves u
     NOT EXISTS (SELECT FROM email_verification_codes WHERE id=pg_temp.id(8,201))
     AND EXISTS (SELECT FROM users WHERE id=pg_temp.id(8,2))
     AND EXISTS (SELECT FROM email_verification_codes WHERE id=pg_temp.id(8,203)));
+
+-- Friends/Blocks storage checks. Namespace 9 avoids the shared user fixtures.
+SELECT pg_temp.assert_true('friends/three tables and six user foreign keys',
+    (SELECT count(*)=3 FROM pg_tables WHERE schemaname='public'
+        AND tablename IN ('friend_requests','friendships','blocks'))
+    AND (SELECT count(*)=6 FROM pg_constraint WHERE contype='f'
+        AND conrelid IN ('friend_requests'::regclass,'friendships'::regclass,'blocks'::regclass)));
+
+INSERT INTO users (id,username,email,full_name) VALUES
+    (pg_temp.id(9,1),'friend01','friend01@example.test','Friend One'),
+    (pg_temp.id(9,2),'friend02','friend02@example.test','Friend Two'),
+    (pg_temp.id(9,3),'friend03','friend03@example.test','Friend Three'),
+    (pg_temp.id(9,4),'friend04','friend04@example.test','Friend Four');
+
+INSERT INTO friend_requests (id,sender_id,recipient_id,status) VALUES
+    (pg_temp.id(9,101),pg_temp.id(9,1),pg_temp.id(9,2),'PENDING');
+SELECT pg_temp.assert_true('friends/pending request stores endpoints and no resolution',
+    (SELECT sender_id=pg_temp.id(9,1) AND recipient_id=pg_temp.id(9,2)
+        AND resolved_at IS NULL AND cancel_reason IS NULL
+     FROM friend_requests WHERE id=pg_temp.id(9,101)));
+SELECT pg_temp.expect_error('friends/no reverse pending request for same pair',
+    $$INSERT INTO friend_requests (id,sender_id,recipient_id,status)
+      VALUES (pg_temp.id(9,102),pg_temp.id(9,2),pg_temp.id(9,1),'PENDING')$$,
+    '23505','friend_requests_pending_pair_uq');
+SELECT pg_temp.expect_error('friends/no duplicate pending request in same direction',
+    $$INSERT INTO friend_requests (id,sender_id,recipient_id,status)
+      VALUES (pg_temp.id(9,103),pg_temp.id(9,1),pg_temp.id(9,2),'PENDING')$$,
+    '23505','friend_requests_pending_pair_uq');
+SELECT pg_temp.expect_error('friends/request cannot target sender',
+    $$INSERT INTO friend_requests (id,sender_id,recipient_id,status)
+      VALUES (pg_temp.id(9,104),pg_temp.id(9,1),pg_temp.id(9,1),'PENDING')$$,
+    '23514','friend_requests_distinct_users_check');
+SELECT pg_temp.expect_error('friends/request requires existing recipient',
+    $$INSERT INTO friend_requests (id,sender_id,recipient_id,status)
+      VALUES (pg_temp.id(9,105),pg_temp.id(9,1),pg_temp.id(9,999),'PENDING')$$,
+    '23503');
+SELECT pg_temp.expect_error('friends/request rejects unknown status',
+    $$INSERT INTO friend_requests (id,sender_id,recipient_id,status)
+      VALUES (pg_temp.id(9,106),pg_temp.id(9,1),pg_temp.id(9,3),'EXPIRED')$$,
+    '23514');
+SELECT pg_temp.expect_error('friends/pending request cannot have cancellation reason',
+    $$UPDATE friend_requests SET cancel_reason='BLOCKED' WHERE id=pg_temp.id(9,101)$$,
+    '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/pending request cannot have resolution time',
+    $$UPDATE friend_requests SET resolved_at=created_at WHERE id=pg_temp.id(9,101)$$,
+    '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/terminal request requires resolution time',
+    $$UPDATE friend_requests SET status='REJECTED' WHERE id=pg_temp.id(9,101)$$,
+    '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/cancelled request requires reason',
+    $$UPDATE friend_requests SET status='CANCELLED',resolved_at=created_at
+      WHERE id=pg_temp.id(9,101)$$, '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/rejected request cannot carry cancel reason',
+    $$UPDATE friend_requests SET status='REJECTED',resolved_at=created_at,
+      cancel_reason='BLOCKED' WHERE id=pg_temp.id(9,101)$$,
+    '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/unknown cancellation reason rejected',
+    $$UPDATE friend_requests SET status='CANCELLED',resolved_at=created_at,
+      cancel_reason='EXPIRED' WHERE id=pg_temp.id(9,101)$$,
+    '23514','friend_requests_resolution_check');
+SELECT pg_temp.expect_error('friends/resolution cannot precede creation',
+    $$UPDATE friend_requests SET status='REJECTED',resolved_at=created_at-INTERVAL '1 second'
+      WHERE id=pg_temp.id(9,101)$$, '23514','friend_requests_resolution_check');
+UPDATE friend_requests SET status='REJECTED',resolved_at=created_at WHERE id=pg_temp.id(9,101);
+INSERT INTO friend_requests (id,sender_id,recipient_id,status) VALUES
+    (pg_temp.id(9,107),pg_temp.id(9,2),pg_temp.id(9,1),'PENDING');
+UPDATE friend_requests SET status='CANCELLED',cancel_reason='SENDER_WITHDREW',
+    resolved_at=created_at WHERE id=pg_temp.id(9,107);
+INSERT INTO friend_requests (id,sender_id,recipient_id,status) VALUES
+    (pg_temp.id(9,108),pg_temp.id(9,1),pg_temp.id(9,2),'PENDING');
+UPDATE friend_requests SET status='CANCELLED',cancel_reason='BLOCKED',
+    resolved_at=created_at WHERE id=pg_temp.id(9,108);
+SELECT pg_temp.assert_true('friends/history allows new request after rejection or cancellation',
+    (SELECT count(*)=3 AND count(*) FILTER (WHERE status='PENDING')=0
+     FROM friend_requests WHERE sender_id IN (pg_temp.id(9,1),pg_temp.id(9,2))
+       AND recipient_id IN (pg_temp.id(9,1),pg_temp.id(9,2))));
+
+INSERT INTO blocks (blocker_id,blocked_id) VALUES
+    (pg_temp.id(9,1),pg_temp.id(9,2)),(pg_temp.id(9,2),pg_temp.id(9,1));
+SELECT pg_temp.assert_true('friends/blocks are directional and may coexist',
+    (SELECT count(*)=2 FROM blocks WHERE blocker_id IN (pg_temp.id(9,1),pg_temp.id(9,2))
+        AND blocked_id IN (pg_temp.id(9,1),pg_temp.id(9,2))));
+SELECT pg_temp.expect_error('friends/self block rejected',
+    $$INSERT INTO blocks (blocker_id,blocked_id) VALUES (pg_temp.id(9,1),pg_temp.id(9,1))$$,
+    '23514','blocks_distinct_users_check');
+SELECT pg_temp.expect_error('friends/duplicate directional block rejected',
+    $$INSERT INTO blocks (blocker_id,blocked_id) VALUES (pg_temp.id(9,1),pg_temp.id(9,2))$$,
+    '23505','blocks_pkey');
+SELECT pg_temp.expect_error('friends/block requires existing account',
+    $$INSERT INTO blocks (blocker_id,blocked_id) VALUES (pg_temp.id(9,1),pg_temp.id(9,999))$$,
+    '23503');
+DELETE FROM blocks WHERE blocker_id=pg_temp.id(9,1) AND blocked_id=pg_temp.id(9,2);
+SELECT pg_temp.assert_true('friends/unblock leaves reverse direction intact',
+    NOT EXISTS (SELECT FROM blocks WHERE blocker_id=pg_temp.id(9,1) AND blocked_id=pg_temp.id(9,2))
+    AND EXISTS (SELECT FROM blocks WHERE blocker_id=pg_temp.id(9,2) AND blocked_id=pg_temp.id(9,1)));
+DELETE FROM blocks WHERE blocker_id=pg_temp.id(9,2) AND blocked_id=pg_temp.id(9,1);
+
+INSERT INTO friendships (user_low_id,user_high_id) VALUES (pg_temp.id(9,1),pg_temp.id(9,2));
+SELECT pg_temp.expect_error('friends/self friendship rejected',
+    $$INSERT INTO friendships (user_low_id,user_high_id)
+      VALUES (pg_temp.id(9,2),pg_temp.id(9,2))$$,
+    '23514','friendships_order_check');
+SELECT pg_temp.expect_error('friends/reversed friendship pair rejected',
+    $$INSERT INTO friendships (user_low_id,user_high_id)
+      VALUES (pg_temp.id(9,2),pg_temp.id(9,1))$$,
+    '23514','friendships_order_check');
+SELECT pg_temp.expect_error('friends/duplicate canonical friendship rejected',
+    $$INSERT INTO friendships (user_low_id,user_high_id)
+      VALUES (pg_temp.id(9,1),pg_temp.id(9,2))$$,
+    '23505','friendships_pkey');
+SELECT pg_temp.expect_error('friends/friendship requires existing account',
+    $$INSERT INTO friendships (user_low_id,user_high_id)
+      VALUES (pg_temp.id(9,1),pg_temp.id(9,999))$$,
+    '23503');
+INSERT INTO friend_requests (id,sender_id,recipient_id,status) VALUES
+    (pg_temp.id(9,110),pg_temp.id(9,2),pg_temp.id(9,3),'PENDING');
+UPDATE friend_requests SET status='ACCEPTED',resolved_at=created_at WHERE id=pg_temp.id(9,110);
+INSERT INTO friendships (user_low_id,user_high_id) VALUES (pg_temp.id(9,2),pg_temp.id(9,3));
+SELECT pg_temp.assert_true('friends/accepted request history coexists with current friendship',
+    (SELECT status='ACCEPTED' AND cancel_reason IS NULL AND resolved_at IS NOT NULL
+     FROM friend_requests WHERE id=pg_temp.id(9,110))
+    AND EXISTS (SELECT FROM friendships
+        WHERE user_low_id=pg_temp.id(9,2) AND user_high_id=pg_temp.id(9,3)));
+INSERT INTO friend_requests (id,sender_id,recipient_id,status) VALUES
+    (pg_temp.id(9,109),pg_temp.id(9,1),pg_temp.id(9,3),'PENDING');
+INSERT INTO blocks (blocker_id,blocked_id) VALUES (pg_temp.id(9,1),pg_temp.id(9,4));
+UPDATE users SET status_before_delete=status,status='DELETED',deleted_at=CURRENT_TIMESTAMP
+    WHERE id=pg_temp.id(9,1);
+SELECT pg_temp.assert_true('friends/soft deletion retains relationships and pending invitation',
+    EXISTS (SELECT FROM friendships WHERE user_low_id=pg_temp.id(9,1))
+    AND EXISTS (SELECT FROM blocks WHERE blocker_id=pg_temp.id(9,1))
+    AND EXISTS (SELECT FROM friend_requests WHERE id=pg_temp.id(9,109) AND status='PENDING'));
+UPDATE users SET status=status_before_delete,status_before_delete=NULL,deleted_at=NULL
+    WHERE id=pg_temp.id(9,1);
+UPDATE users SET status='LOCKED' WHERE id=pg_temp.id(9,1);
+SELECT pg_temp.assert_true('friends/lock retains relationships without schema-side action gate',
+    EXISTS (SELECT FROM friendships WHERE user_low_id=pg_temp.id(9,1))
+    AND EXISTS (SELECT FROM blocks WHERE blocker_id=pg_temp.id(9,1))
+    AND EXISTS (SELECT FROM friend_requests WHERE id=pg_temp.id(9,109) AND status='PENDING'));
+DELETE FROM users WHERE id=pg_temp.id(9,1);
+SELECT pg_temp.assert_true('friends/purge cascades only relationships of removed account',
+    NOT EXISTS (SELECT FROM friendships WHERE user_low_id=pg_temp.id(9,1) OR user_high_id=pg_temp.id(9,1))
+    AND NOT EXISTS (SELECT FROM blocks WHERE blocker_id=pg_temp.id(9,1) OR blocked_id=pg_temp.id(9,1))
+    AND NOT EXISTS (SELECT FROM friend_requests WHERE sender_id=pg_temp.id(9,1)
+        OR recipient_id=pg_temp.id(9,1))
+    AND EXISTS (SELECT FROM users WHERE id=pg_temp.id(9,2))
+    AND EXISTS (SELECT FROM friendships
+        WHERE user_low_id=pg_temp.id(9,2) AND user_high_id=pg_temp.id(9,3)));
+DELETE FROM users WHERE id=pg_temp.id(9,3);
+SELECT pg_temp.assert_true('friends/purge cascades from high friendship endpoint',
+    NOT EXISTS (SELECT FROM friendships
+        WHERE user_low_id=pg_temp.id(9,2) AND user_high_id=pg_temp.id(9,3))
+    AND EXISTS (SELECT FROM users WHERE id=pg_temp.id(9,2)));
+DELETE FROM users WHERE id IN (pg_temp.id(9,2),pg_temp.id(9,4));
