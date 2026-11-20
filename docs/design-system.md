@@ -1,6 +1,6 @@
 # Chat System — Design System
 
-Nguồn: [tab design-system trên Figma](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=7-2), trích xuất 20/11/2026. Figma là nguồn thiết kế chính; [ảnh tham khảo](design-system/README.md). Các giá trị là pixel thiết kế, không khẳng định đã áp dụng đầy đủ trong JavaFX.
+Nguồn: [tab design-system trên Figma](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=7-2), trích xuất 20/11/2026. Figma là nguồn thiết kế chính; [ảnh minh họa](design-system/04-chat-example-light.png) là bản chụp tĩnh. Các giá trị là pixel thiết kế, không khẳng định đã áp dụng đầy đủ trong JavaFX.
 
 ## Màu ngữ nghĩa
 
@@ -70,7 +70,7 @@ Font **Inter**; letter spacing 0%. Các style dưới đây lấy từ Figma, li
 - **Button:** hành động chính dùng Primary; hành động phụ dùng Secondary. Có kích thước 32/40 và các trạng thái default, hover, pressed, focus, disabled, loading.
 - **Icon button:** thao tác ngắn bằng icon, kích thước 32/40, có trạng thái active; cần nhãn truy cập.
 - **Field:** trường nhập có nhãn, nội dung, helper và phản hồi lỗi; dùng viền cùng chữ mô tả lỗi thay vì chỉ đổi màu.
-- **Chat patterns:** tái sử dụng màu `message/outgoing`, `message/incoming` và trạng thái `presence/*` cho bong bóng tin nhắn và trạng thái người dùng; tham khảo [Light](design-system/03-chat-patterns-light.png) và [Dark](design-system/08-chat-patterns-dark.png).
+- **Chat patterns:** tái sử dụng màu `message/outgoing`, `message/incoming` và trạng thái `presence/*` cho bong bóng tin nhắn và trạng thái người dùng; xem các biến thể Light/Dark trong Figma.
 - **Bề mặt và nội dung:** dùng `bg/canvas` cho nền tổng, `bg/surface` cho bề mặt, `text/primary` và `text/secondary` cho phân cấp; `status/*` cho thông báo có ngữ nghĩa.
 
 [CSS variables cho HTML](design-system/tokens.css) là bản chuyển đổi tham khảo; JavaFX dùng token riêng trong [desktop.css](../src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css), không đọc file CSS HTML này.
