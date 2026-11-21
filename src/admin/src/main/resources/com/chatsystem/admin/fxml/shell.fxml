@@ -9,41 +9,48 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.chatsystem.admin.controller.AdminShellController">
+            fx:controller="com.chatsystem.admin.controller.AdminShellController"
+            styleClass="admin-shell" stylesheets="@../css/admin-shell.css">
     <left>
         <VBox styleClass="sidebar">
-            <Label text="CS / Admin App" styleClass="section-title"/>
-            <Label text="TỔNG QUAN" styleClass="nav-group"/>
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="admin-brand">
+                <StackPane styleClass="admin-brand-icon">
+                    <FontIcon iconLiteral="fth-message-square" iconSize="20"/>
+                </StackPane>
+                <VBox spacing="2">
+                    <Label text="WhatsUp" styleClass="brand"/>
+                    <Label text="Admin App" styleClass="caption"/>
+                </VBox>
+            </HBox>
             <VBox fx:id="overviewNav" spacing="4"/>
-            <Label text="QUẢN TRỊ &amp; KIỂM DUYỆT" styleClass="nav-group"/>
+            <Label text="Quản trị và kiểm duyệt" styleClass="nav-group"/>
             <VBox fx:id="managementNav" spacing="4"/>
-            <Label text="PHÂN TÍCH &amp; THỐNG KÊ" styleClass="nav-group"/>
+            <Label text="Phân tích và thống kê" styleClass="nav-group"/>
             <VBox fx:id="analyticsNav" spacing="4"/>
             <Region VBox.vgrow="ALWAYS"/>
-            <Button fx:id="themeButton" id="toggleTheme" text="Giao diện sáng" onAction="#toggleTheme" maxWidth="Infinity"/>
-            <Button text="Thoát ứng dụng" onAction="#exit" maxWidth="Infinity"/>
+            <VBox spacing="4" styleClass="admin-sidebar-footer">
+                <Button fx:id="displayButton" id="displayOptions" text="Giao diện" onAction="#openDisplayOptions"
+                        maxWidth="Infinity" styleClass="admin-shell-action">
+                    <graphic><FontIcon iconLiteral="fth-monitor" iconSize="16"/></graphic>
+                </Button>
+                <Button text="Thoát ứng dụng" onAction="#exit" maxWidth="Infinity" styleClass="admin-shell-action">
+                    <graphic><FontIcon iconLiteral="fth-log-out" iconSize="16"/></graphic>
+                </Button>
+            </VBox>
         </VBox>
     </left>
     <center>
         <BorderPane>
             <top>
-                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="toolbar">
-                    <Button fx:id="backButton" id="goBack" onAction="#goBack" accessibleText="Quay lại">
-                        <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="18"/></graphic>
+                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar">
+                    <Button fx:id="backButton" id="goBack" onAction="#goBack" accessibleText="Quay lại"
+                            styleClass="admin-shell-action">
+                        <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="16"/></graphic>
                         <tooltip><Tooltip text="Quay lại (Alt + ←)"/></tooltip>
                     </Button>
-                    <Label fx:id="pageTitle" styleClass="section-title" wrapText="true"/>
+                    <Label fx:id="pageTitle" styleClass="admin-page-title" wrapText="true"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="offline-badge"/>
-                    <Button id="openMockData" onAction="#openMockData" accessibleText="Xem dữ liệu mẫu">
-                        <graphic><FontIcon iconLiteral="fth-database" iconSize="20"/></graphic>
-                        <tooltip><Tooltip text="Xem dữ liệu mẫu"/></tooltip>
-                    </Button>
-                    <Button fx:id="displayButton" id="displayOptions" text="Hiển thị" onAction="#openDisplayOptions"/>
-                    <Button id="openUserDialog" onAction="#openUserDialog" accessibleText="Thêm người dùng">
-                        <graphic><FontIcon iconLiteral="fth-user-plus" iconSize="20"/></graphic>
-                        <tooltip><Tooltip text="Thêm người dùng"/></tooltip>
-                    </Button>
+                    <Label fx:id="overviewDataNote" text="Dữ liệu mẫu" styleClass="caption"/>
                 </HBox>
             </top>
             <center><StackPane fx:id="viewHost" id="viewHost" minWidth="0"/></center>
