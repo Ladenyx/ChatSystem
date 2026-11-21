@@ -3,6 +3,7 @@ package com.chatsystem.admin;
 import static org.junit.jupiter.api.Assertions.*;
 
 import atlantafx.base.controls.Popover;
+import com.chatsystem.admin.navigation.AdminViewInputs;
 import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.mock.MockData;
@@ -14,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -27,14 +29,20 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -242,13 +250,165 @@ class AdminApplicationTest {
         task.get(20, TimeUnit.SECONDS);
     }
 
+    @Test
+    void userFiltersKeepTheInspectorOnTheSelectedAccount() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                ((Button) root.lookup("#totalUsersCard")).fire();
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var selected = data.previewUser();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockUser>) root.lookup("#userTable");
+                var inspector = (ScrollPane) root.lookup("#userInspector");
+                assertFalse(inspector.isVisible());
+                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                assertTrue(inspector.isVisible());
+                assertEquals(selected.fullName(), ((Label) root.lookup("#profileName")).getText());
+                root.applyCss();
+                root.layout();
+                directory.scrollTo(Math.max(0, directory.getSelectionModel().getSelectedIndex() - 3));
+                capture(stage, "admin-users-light");
+                assertEquals(data.loginLogs().stream().filter(login -> login.userId().equals(selected.id())).toList(),
+                        ((TableView<?>) root.lookup("#loginHistory")).getItems());
+
+                ((TextField) root.lookup("#nameFilter")).setText("  NGUYỄN  ");
+                ((TextField) root.lookup("#usernameFilter")).setText("MINHAN");
+                assertEquals(List.of(selected), directory.getItems());
+                assertEquals(selected, directory.getSelectionModel().getSelectedItem());
+                ((ToggleButton) root.lookup("#lockedUsers")).fire();
+                assertTrue(directory.getItems().isEmpty());
+                assertFalse(inspector.isVisible());
+                ((Hyperlink) root.lookup("#clearFilters")).fire();
+                assertEquals(data.users().size(), directory.getItems().size());
+                directory.getSelectionModel().select(selected);
+                directory.scrollTo(Math.max(0, directory.getSelectionModel().getSelectedIndex() - 3));
+                ((TabPane) root.lookup("#userDetails")).getSelectionModel().select(1);
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                capture(stage, "admin-users-dark");
+                var friends = (TableView<?>) root.lookup("#friends");
+                assertFalse(friends.getItems().isEmpty());
+                assertFalse(friends.getItems().contains(selected));
+                var created = directory.getColumns().getLast();
+                created.setSortType(TableColumn.SortType.DESCENDING);
+                directory.getSortOrder().setAll(List.of(created));
+                assertEquals(data.users().stream().map(MockUser::createdAt).sorted(Comparator.reverseOrder()).toList(),
+                        directory.getItems().stream().map(MockUser::createdAt).toList());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void userDialogsUseTheAccountFromTheirRouteInput() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                navigator.navigate(AdminViews.USERS);
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var selected = data.previewUser();
+                var directory = (TableView<?>) root.lookup("#userTable");
+                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                directory.scrollTo(directory.getSelectionModel().getSelectedIndex());
+                root.applyCss();
+                root.layout();
+                capture(stage, "admin-users-compact");
+                assertTrue(root.lookup("#userInspector").localToScene(
+                        root.lookup("#userInspector").getBoundsInLocal()).getMaxX() <= 1024);
+                var actions = (FlowPane) root.lookup(".admin-profile-actions");
+                assertTrue(actions.getChildren().stream().allMatch(
+                        action -> action.getBoundsInParent().getMaxX() <= actions.getWidth() + 1));
+
+                ((Button) root.lookup("#createUser")).fire();
+                var form = ownedDialogPane(stage);
+                assertTrue(((TextField) form.lookup("#username")).isEditable());
+                assertTrue(form.lookup("#submitUserDialog").isDisabled());
+                capture(form.getScene(), "admin-user-create");
+                ((Button) form.lookup("#cancelUserDialog")).fire();
+
+                ((Button) root.lookup("#editUser")).fire();
+                form = ownedDialogPane(stage);
+                var username = (TextField) form.lookup("#username");
+                assertFalse(username.isEditable());
+                assertEquals(selected.username(), username.getText());
+                assertFalse(form.lookup("#submitUserDialog").isDisabled());
+                capture(form.getScene(), "admin-user-edit");
+                ((Button) form.lookup("#cancelUserDialog")).fire();
+
+                ((ToggleButton) root.lookup("#deletedUsers")).fire();
+                directory.getSelectionModel().selectFirst();
+                assertTrue(root.lookup("#editUser").isDisabled());
+                var notice = (Label) root.lookup("#deletionNotice");
+                assertTrue(notice.isVisible());
+                root.applyCss();
+                root.layout();
+                assertTrue(notice.getHeight() + 1 >= notice.prefHeight(notice.getWidth()),
+                        "The deletion notice fits both timestamps");
+                capture(stage, "admin-users-deleted-compact");
+                ((Button) root.lookup("#deleteOrRestore")).fire();
+                var restore = ownedDialogPane(stage);
+                assertEquals("Khôi phục tài khoản?", ((Label) restore.lookup("#confirmationTitle")).getText());
+                ((Button) restore.lookup("#cancelUserDialog")).fire();
+
+                navigator.navigate(AdminViews.SPAM);
+                navigator.themes().toggle();
+                var reported = data.user(data.spamReports().getFirst().reportedUserId());
+                var dialog = navigator.showModal(AdminViews.CONFIRM_ACTION,
+                        new AdminViewInputs.ConfirmAction(AdminViewInputs.Action.LOCK_USER, reported.id()));
+                var pane = dialog.getDialogPane();
+                assertEquals("@" + reported.username(), ((Label) pane.lookup("#account")).getText());
+                assertTrue(((Label) pane.lookup("#accountId")).getText().endsWith(reported.id()));
+                capture(pane.getScene(), "admin-user-confirm-lock");
+                var confirm = (Button) pane.lookup("#submitUserDialog");
+                assertFalse(confirm.isDefaultButton());
+                confirm.fire();
+                assertEquals(ButtonBar.ButtonData.OK_DONE, dialog.getResult().getButtonData());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static DialogPane ownedDialogPane(Stage owner) {
+        return Window.getWindows().stream().filter(Stage.class::isInstance).map(Stage.class::cast)
+                .filter(stage -> stage.getOwner() == owner).map(stage -> (DialogPane) stage.getScene().getRoot())
+                .findFirst().orElseThrow();
+    }
+
     private static void capture(Stage stage, String name) throws Exception {
+        capture(stage.getScene(), name);
+    }
+
+    private static void capture(Scene scene, String name) throws Exception {
         if (!Boolean.getBoolean("chatsystem.capture")) {
             return;
         }
-        stage.getScene().getRoot().applyCss();
-        stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        scene.getRoot().applyCss();
+        scene.getRoot().layout();
+        WritableImage image = scene.snapshot(null);
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {
