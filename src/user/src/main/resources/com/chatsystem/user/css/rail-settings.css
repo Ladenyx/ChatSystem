@@ -1,47 +1,50 @@
 .rail-settings.cs-root {
+    -rail-rule: ladder(-cs-surface, rgba(255, 255, 255, 0.09) 49%, rgba(0, 0, 0, 0.08) 50%);
     -fx-background-color: -cs-surface;
-    -fx-background-radius: 6;
-    -fx-border-color: -cs-border;
-    -fx-border-radius: 6;
-    -fx-padding: 8;
+    -fx-background-radius: 12px;
+    -fx-border-color: ladder(-cs-surface, rgba(255, 255, 255, 0.10) 49%, rgba(0, 0, 0, 0.10) 50%);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 16, 0, 0, 4);
+}
+
+.rail-settings.cs-root:dark {
+    -fx-effect: none;
 }
 
 .rail-settings .rail-settings-heading {
-    -fx-padding: 6 12 4;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
-}
-
-.rail-settings .rail-settings-item {
-    -fx-alignment: center-left;
-    -fx-min-height: 36;
-    -fx-background-color: -cs-surface-subtle;
-    -fx-background-radius: 4;
-    -fx-text-fill: -cs-text;
-    -fx-border-radius: 4;
-    -fx-padding: 0 12;
-}
-
-.rail-settings .rail-settings-item:hover {
-    -fx-background-color: -cs-hover;
-}
-
-.rail-settings .rail-settings-item:focused {
-    -fx-border-color: -cs-focus;
+    -fx-text-fill: -cs-muted;
 }
 
 .rail-settings .toggle-switch {
-    -fx-padding: 4 12;
+    -fx-padding: 8px 0 12px 0;
+    -fx-border-color: transparent transparent -rail-rule transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-font-size: 13px;
+    -fx-text-fill: -cs-text;
+}
+
+.rail-settings .toggle-switch > .label-container > .label {
+    -fx-padding: 0;
+    -fx-text-fill: -cs-text;
 }
 
 .rail-settings .toggle-switch > .thumb-area {
     -fx-background-color: -cs-border-strong, -cs-surface-subtle;
-    -fx-padding: 10 18;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12px;
+    -fx-padding: 8px 16px;
 }
 
 .rail-settings .toggle-switch > .thumb {
     -fx-background-color: -cs-muted;
-    -fx-background-insets: 3;
-    -fx-padding: 10;
+    -fx-background-insets: 2px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px;
     -fx-opacity: 1;
 }
 
@@ -51,4 +54,45 @@
 
 .rail-settings .toggle-switch:selected > .thumb {
     -fx-background-color: -cs-on-brand;
+}
+
+.rail-settings .toggle-switch:focused > .thumb-area {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 2;
+}
+
+.rail-settings .toggle-switch:selected:focused > .thumb-area {
+    -fx-background-color: -cs-focus, -cs-brand;
+    -fx-background-insets: 0, 2;
+}
+
+.rail-settings .rail-settings-item {
+    -fx-alignment: center-left;
+    -fx-min-height: 36px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-padding: 0 8px;
+    -fx-graphic-text-gap: 8px;
+    -fx-font-size: 13px;
+    -fx-text-fill: -cs-text;
+}
+
+.rail-settings .rail-settings-item .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.rail-settings .rail-settings-item:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.rail-settings .rail-settings-item:hover .ikonli-font-icon {
+    -fx-icon-color: -cs-text;
+}
+
+.rail-settings .rail-settings-item:focused {
+    -fx-border-color: -cs-focus;
 }

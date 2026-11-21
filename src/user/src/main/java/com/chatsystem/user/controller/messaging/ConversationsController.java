@@ -132,6 +132,7 @@ public final class ConversationsController implements ViewController {
         if (conversation != null) {
             conversationTitle.setText(conversation.title());
             conversationStatus.setText(catalog.statusText(conversation));
+            conversationStatus.setGraphic(ConversationAvatar.statusGraphic(conversation, catalog));
             conversationAvatar.show(conversation, catalog);
         }
     }

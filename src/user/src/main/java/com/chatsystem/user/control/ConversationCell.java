@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -34,23 +35,21 @@ public final class ConversationCell extends ListCell<MockConversation> {
         setPrefWidth(0);
 
         name.getStyleClass().add("chat-row-name");
-        name.setWrapText(true);
-        name.setMaxHeight(36);
+        name.setTextOverrun(OverrunStyle.ELLIPSIS);
         preview.getStyleClass().add("chat-caption");
-        preview.setWrapText(true);
-        preview.setMaxHeight(32);
-        VBox text = new VBox(4, name, preview);
+        preview.setTextOverrun(OverrunStyle.ELLIPSIS);
+        VBox text = new VBox(2, name, preview);
         text.setMinWidth(0);
         text.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(text, Priority.ALWAYS);
 
-        time.getStyleClass().add("chat-caption");
+        time.getStyleClass().add("chat-time");
         unread.getStyleClass().add("chat-unread");
         VBox metadata = new VBox(4, time, unread);
         metadata.setAlignment(Pos.CENTER_RIGHT);
-        metadata.setMinWidth(36);
+        metadata.setMinWidth(40);
 
-        row = new HBox(16, avatar, text, metadata);
+        row = new HBox(12, avatar, text, metadata);
         row.setMinWidth(0);
         row.prefWidthProperty().bind(Bindings.createDoubleBinding(
                 () -> Math.max(0, getWidth() - snappedLeftInset() - snappedRightInset()),

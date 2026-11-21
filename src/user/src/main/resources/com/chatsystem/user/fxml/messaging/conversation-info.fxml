@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import com.chatsystem.user.control.ConversationAvatar?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.chatsystem.user.controller.messaging.ConversationInfoController"
-      styleClass="chat-info" spacing="8" stylesheets="@../../css/chat-tokens.css,@../../css/chat.css">
-    <ConversationAvatar fx:id="avatar"/>
-    <Label fx:id="title" styleClass="page-title" wrapText="true"/>
-    <Label fx:id="status" styleClass="secondary-text" wrapText="true"/>
+      styleClass="chat-info" spacing="16" stylesheets="@../../css/chat-tokens.css,@../../css/chat.css">
+    <VBox alignment="CENTER" spacing="8" styleClass="chat-info-header">
+        <ConversationAvatar fx:id="avatar" styleClass="chat-info-avatar"/>
+        <Label fx:id="title" styleClass="chat-info-title" wrapText="true" textAlignment="CENTER"/>
+        <Label fx:id="status" styleClass="chat-header-status" graphicTextGap="6" wrapText="true"/>
+    </VBox>
+    <VBox spacing="12" styleClass="chat-info-section">
+        <Label text="Chi tiết đoạn chat" styleClass="chat-info-section-label"/>
+        <VBox spacing="8">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Loại hội thoại" styleClass="chat-info-key"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="kindValue" styleClass="chat-info-value"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Bảo mật" styleClass="chat-info-key"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="securityValue" styleClass="chat-info-value"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Thành viên" styleClass="chat-info-key"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="memberCountValue" styleClass="chat-info-value"/>
+            </HBox>
+        </VBox>
+    </VBox>
+    <VBox fx:id="participantsSection" spacing="8" styleClass="chat-info-section">
+        <Label text="Thành viên tham gia" styleClass="chat-info-section-label"/>
+        <VBox fx:id="participantsList" spacing="6"/>
+    </VBox>
 </VBox>
