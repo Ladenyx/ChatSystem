@@ -10,7 +10,7 @@
 }
 
 .rail-settings.cs-root:dark {
-    -fx-effect: none;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 16, 0, 0, 4);
 }
 
 .rail-settings .rail-settings-heading {
