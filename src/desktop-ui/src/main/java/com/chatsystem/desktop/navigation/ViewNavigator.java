@@ -136,25 +136,16 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public void showDrawer(View view) {
+        showDrawer(view, false);
+    }
+
+    /** Uses the view's own header and scrolling when it supplies its own drawer layout. */
+    public void showDrawer(View view, boolean useViewLayout) {
         ThemeManager.requireFxThread();
         LoadedView loaded = load(view);
         closeTransientUi();
         drawerTrigger = root.getScene() == null ? null : root.getScene().getFocusOwner();
-        Label title = new Label(view.title());
-        title.getStyleClass().add("section-title");
-        title.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(title, Priority.ALWAYS);
-        Button close = new Button("Đóng");
-        close.setId("drawerClose");
-        close.setAccessibleText("Đóng " + view.title());
-        close.setOnAction(event -> closeDrawer());
-        HBox header = new HBox(12, title, close);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.getStyleClass().add("drawer-header");
-        ScrollPane scroll = new ScrollPane(loaded.root());
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        BorderPane drawer = new BorderPane(scroll, header, null, null, null);
+        BorderPane drawer = useViewLayout ? new BorderPane(loaded.root()) : defaultDrawer(view, loaded.root());
         drawer.setId("drawer");
         drawer.getStyleClass().add("drawer");
         frame.setRight(drawer);
@@ -167,10 +158,28 @@ public final class ViewNavigator implements AutoCloseable {
             drawerAnimation.play();
         }
         Platform.runLater(() -> {
-            if (drawerPage == loaded) {
+            if (drawerPage == loaded && drawer.lookup("#drawerClose") instanceof Button close) {
                 close.requestFocus();
             }
         });
+    }
+
+    private BorderPane defaultDrawer(View view, Parent content) {
+        Label title = new Label(view.title());
+        title.getStyleClass().add("section-title");
+        title.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(title, Priority.ALWAYS);
+        Button close = new Button("Đóng");
+        close.setId("drawerClose");
+        close.setAccessibleText("Đóng " + view.title());
+        close.setOnAction(event -> closeDrawer());
+        HBox header = new HBox(12, title, close);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.getStyleClass().add("drawer-header");
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        return new BorderPane(scroll, header, null, null, null);
     }
 
     public boolean isDrawerOpen() {
