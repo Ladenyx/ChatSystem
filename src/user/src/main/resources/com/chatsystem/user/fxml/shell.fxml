@@ -1,56 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import com.chatsystem.user.control.ChatIcon?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.chatsystem.user.controller.UserShellController">
+            fx:controller="com.chatsystem.user.controller.UserShellController"
+            styleClass="user-shell" stylesheets="@../css/chat-tokens.css,@../css/chat.css">
     <left>
-        <VBox styleClass="rail">
+        <VBox fx:id="workspaceRail" id="workspaceRail" styleClass="rail,chat-rail">
             <Label text="CS" styleClass="app-mark"/>
             <ToggleButton fx:id="chatsButton" id="navChats" text="Đoạn chat" styleClass="nav-item"
                           onAction="#openChats" accessibleText="Đoạn chat">
-                <graphic><FontIcon iconLiteral="fth-message-square" iconSize="20"/></graphic>
+                <graphic><ChatIcon icon="chat"/></graphic>
             </ToggleButton>
             <ToggleButton fx:id="contactsButton" id="navContacts" text="Bạn bè" styleClass="nav-item"
                           onAction="#openContacts" accessibleText="Bạn bè và kết nối">
-                <graphic><FontIcon iconLiteral="fth-users" iconSize="20"/></graphic>
+                <graphic><ChatIcon icon="users"/></graphic>
             </ToggleButton>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Button fx:id="themeButton" id="toggleTheme" text="Sáng" styleClass="nav-item" onAction="#toggleTheme"/>
-            <Button id="openProfile" text="Hồ sơ" styleClass="nav-item" onAction="#openProfile">
-                <graphic><FontIcon iconLiteral="fth-settings" iconSize="20"/></graphic>
+            <Button fx:id="backButton" id="goBack" styleClass="nav-item" onAction="#goBack" accessibleText="Quay lại">
+                <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="16"/></graphic>
+                <tooltip><Tooltip text="Quay lại (Alt + ←)"/></tooltip>
             </Button>
-            <Button text="Thoát" styleClass="nav-item" onAction="#exit" accessibleText="Đóng User Client">
-                <graphic><FontIcon iconLiteral="fth-log-out" iconSize="20"/></graphic>
+            <Region VBox.vgrow="ALWAYS"/>
+            <MenuButton fx:id="settingsButton" id="workspaceSettings" text="Cài đặt" styleClass="nav-item"
+                        accessibleText="Cài đặt" popupSide="RIGHT">
+                <graphic><ChatIcon icon="settings"/></graphic>
+                <items>
+                    <MenuItem id="openProfile" text="Hồ sơ &amp; Bảo mật" onAction="#openProfile"/>
+                    <MenuItem fx:id="themeItem" id="toggleTheme" onAction="#toggleTheme"/>
+                    <MenuItem id="displayOptions" text="Tùy chọn hiển thị" onAction="#openDisplayOptions"/>
+                    <MenuItem id="openMockData" text="Xem dữ liệu mẫu" onAction="#openMockData"/>
+                </items>
+            </MenuButton>
+            <Button id="signOut" text="Đăng xuất" styleClass="nav-item" onAction="#signOut">
+                <graphic><ChatIcon icon="logout"/></graphic>
+                <tooltip><Tooltip text="Kết thúc phiên và đóng bản demo ngoại tuyến"/></tooltip>
             </Button>
         </VBox>
     </left>
-    <center>
-        <BorderPane>
-            <top>
-                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="toolbar">
-                    <Button fx:id="backButton" id="goBack" onAction="#goBack" accessibleText="Quay lại">
-                        <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="18"/></graphic>
-                        <tooltip><Tooltip text="Quay lại (Alt + ←)"/></tooltip>
-                    </Button>
-                    <Label text="ChatSystem" styleClass="brand"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="offline-badge"/>
-                    <Button id="openMockData" onAction="#openMockData" accessibleText="Xem dữ liệu mẫu">
-                        <graphic><FontIcon iconLiteral="fth-database" iconSize="20"/></graphic>
-                        <tooltip><Tooltip text="Xem dữ liệu mẫu"/></tooltip>
-                    </Button>
-                    <Button fx:id="displayButton" id="displayOptions" text="Hiển thị" onAction="#openDisplayOptions"/>
-                </HBox>
-            </top>
-            <center><StackPane fx:id="viewHost" id="viewHost" minWidth="0"/></center>
-        </BorderPane>
-    </center>
+    <center><StackPane fx:id="viewHost" id="viewHost" minWidth="0"/></center>
 </BorderPane>
