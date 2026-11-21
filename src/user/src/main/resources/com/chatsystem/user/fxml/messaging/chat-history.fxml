@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import com.chatsystem.user.control.ChatIcon?>
+<?import com.chatsystem.user.control.ConversationAvatar?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.chatsystem.user.controller.chat.ChatHistoryController"
+            visible="false" styleClass="chat-selected" minWidth="0">
+    <top>
+        <StackPane>
+            <HBox fx:id="normalHeader" alignment="CENTER_LEFT" spacing="12" styleClass="chat-header">
+                <ConversationAvatar fx:id="conversationAvatar"/>
+                <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="conversationTitle" styleClass="chat-heading" wrapText="true"/>
+                    <Label fx:id="conversationStatus" styleClass="chat-caption" wrapText="true"/>
+                </VBox>
+                <Button id="conversationInfo" onAction="#openInfo" accessibleText="Thông tin đoạn chat"
+                        styleClass="chat-outline,chat-info-button">
+                    <graphic><ChatIcon icon="info"/></graphic>
+                    <tooltip><Tooltip text="Thông tin đoạn chat"/></tooltip>
+                </Button>
+            </HBox>
+        </StackPane>
+    </top>
+    <center>
+        <VBox minWidth="0">
+            <VBox fx:id="historyNotice" styleClass="chat-history-notice"/>
+            <ScrollPane fx:id="historyScroll" id="historyScroll" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="chat-history" accessibleText="Lịch sử tin nhắn" VBox.vgrow="ALWAYS">
+                <VBox fx:id="messageRows" id="messageRows" spacing="12" minWidth="0" styleClass="chat-history-content"/>
+            </ScrollPane>
+        </VBox>
+    </center>
+    <bottom>
+        <StackPane>
+            <VBox fx:id="composer" spacing="8" styleClass="chat-composer">
+                <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
+                          prefRowCount="2" prefHeight="56" accessibleText="Soạn tin nhắn"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Button fx:id="refineDraft" id="refineDraft" onAction="#openRefine" accessibleText="Chỉnh sửa bằng AI"
+                            styleClass="chat-outline,chat-composer-icon">
+                        <graphic><ChatIcon icon="refine"/></graphic>
+                        <tooltip><Tooltip text="Chỉnh sửa (Refine)"/></tooltip>
+                    </Button>
+                    <Button fx:id="recommendReply" id="recommendReply" onAction="#openRecommend" accessibleText="Gợi ý trả lời bằng AI"
+                            styleClass="chat-outline,chat-composer-icon">
+                        <graphic><ChatIcon icon="recommend"/></graphic>
+                        <tooltip><Tooltip text="Gợi ý (Recommend)"/></tooltip>
+                    </Button>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
+                            styleClass="chat-primary,chat-composer-icon,chat-send">
+                        <graphic><ChatIcon icon="send"/></graphic>
+                        <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
+                    </Button>
+                </HBox>
+            </VBox>
+        </StackPane>
+    </bottom>
+</BorderPane>
