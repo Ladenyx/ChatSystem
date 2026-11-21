@@ -40,6 +40,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -84,10 +85,64 @@ class AdminApplicationTest {
     }
 
     @Test
+    void signInOpensOverviewWithoutKeepingThePreviewPassword() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                assertEquals(AdminViews.SIGN_IN, navigator.currentViewProperty().get());
+                var sidebar = root.lookup("#workspaceSidebar");
+                var toolbar = root.lookup("#workspaceToolbar");
+                assertFalse(sidebar.isVisible() || sidebar.isManaged());
+                assertFalse(toolbar.isVisible() || toolbar.isManaged());
+
+                var username = (TextField) root.lookup("#signInUsername");
+                var password = (PasswordField) root.lookup("#signInPassword");
+                var submit = (Button) root.lookup("#signInSubmit");
+                assertTrue(submit.isDefaultButton());
+                assertTrue(submit.isDisabled());
+                root.applyCss();
+                root.layout();
+                var form = root.lookup("#signInForm");
+                var bounds = form.localToScene(form.getBoundsInLocal());
+                assertEquals(512, (bounds.getMinX() + bounds.getMaxX()) / 2, 1);
+                assertTrue(bounds.getMaxY() < stage.getScene().getHeight());
+                username.requestFocus();
+                capture(stage, "admin-sign-in-light");
+
+                password.setText("example");
+                assertTrue(submit.isDisabled());
+                username.setText("quantri");
+                assertFalse(submit.isDisabled());
+                navigator.themes().toggle();
+                submit.requestFocus();
+                capture(stage, "admin-sign-in-dark");
+
+                submit.fire();
+                assertEquals(AdminViews.OVERVIEW, navigator.currentViewProperty().get());
+                assertTrue(sidebar.isVisible() && sidebar.isManaged());
+                assertTrue(toolbar.isVisible() && toolbar.isManaged());
+                assertTrue(password.getText().isEmpty());
+                assertFalse(navigator.goBack());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
     void sidebarOpensEveryRouteAndKeepsItsSelectionWhenGoingBack() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             DesktopWindow.show(stage, AdminApplication.WINDOW_TITLE, navigator);
             try {
                 var root = stage.getScene().getRoot();
@@ -129,6 +184,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             stage.setScene(new Scene(navigator.getRoot(), 1728, 1000));
             stage.show();
             try {
@@ -291,6 +347,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             try {
                 stage.setScene(new Scene(navigator.getRoot(), 1024, 640));
                 stage.show();
@@ -353,6 +410,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             var root = navigator.getRoot();
             stage.setScene(new Scene(root, 1366, 768));
             stage.show();

@@ -12,7 +12,7 @@
             fx:controller="com.chatsystem.admin.controller.AdminShellController"
             styleClass="admin-shell" stylesheets="@../css/admin-shell.css">
     <left>
-        <VBox styleClass="sidebar">
+        <VBox fx:id="workspaceSidebar" styleClass="sidebar">
             <HBox alignment="CENTER_LEFT" spacing="12" styleClass="admin-brand">
                 <StackPane styleClass="admin-brand-icon">
                     <FontIcon iconLiteral="fth-message-square" iconSize="20"/>
@@ -42,7 +42,7 @@
     <center>
         <BorderPane>
             <top>
-                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar">
+                <HBox fx:id="workspaceToolbar" alignment="CENTER_LEFT" spacing="12" styleClass="toolbar">
                     <Button fx:id="backButton" id="goBack" onAction="#goBack" accessibleText="Quay lại"
                             styleClass="admin-shell-action">
                         <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="16"/></graphic>

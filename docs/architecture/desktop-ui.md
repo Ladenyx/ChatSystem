@@ -59,7 +59,9 @@ Tất cả API điều hướng/theme phải gọi trên JavaFX Application Thre
 
 `UserViews` đăng ký 14 route, `AdminViews` đăng ký 11 route. Mỗi route chỉ đến một FXML riêng trong cụm phụ trách. Ví dụ, `UserViews.CONTACTS` (`U-SCR-08`) nạp `/com/chatsystem/user/fxml/contacts/contacts.fxml`. Khi triển khai màn hình, thay nội dung FXML tại đường dẫn đã đăng ký và gắn controller trong package của cụm. Mã màn hình và đường dẫn ổn định giúp các nhánh cùng dùng một route.
 
-`UserViews.ALL` và `AdminViews.ALL` là danh sách route để kiểm tra tài nguyên, kể cả trang đăng nhập và overlay. `AdminViews.PAGES` chỉ gồm các mục trong sidebar. User Client hiện mở thẳng `U-SCR-07` và Admin App mở `A-SCR-02` để xem UI ngoại tuyến. Luồng mở ứng dụng qua trang đăng nhập được nối khi triển khai shell xác thực.
+`UserViews.ALL` và `AdminViews.ALL` là danh sách route để kiểm tra tài nguyên, kể cả trang đăng nhập và overlay. `AdminViews.PAGES` chỉ gồm các mục trong sidebar.
+
+Admin App mở `A-SCR-01` trước khi hiện sidebar. Trong bản xem trước Version 1, nhập tên đăng nhập và mật khẩu mẫu rồi chọn **Đăng nhập** để mở Tổng quan (`A-SCR-02`). Luồng trình diễn dùng `reset` để bắt đầu lịch sử điều hướng tại Tổng quan.
 
 Controller cần điều hướng sử dụng lifecycle thay vì truy cập biến toàn cục:
 
