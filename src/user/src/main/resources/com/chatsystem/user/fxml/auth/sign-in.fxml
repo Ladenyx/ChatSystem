@@ -16,11 +16,7 @@
                     <VBox alignment="CENTER" minWidth="360" prefWidth="440" maxWidth="440" fillWidth="true"
                           styleClass="auth-card-column">
                         <VBox fillWidth="true" styleClass="auth-card">
-                            <VBox spacing="4">
-                                <Label text="Đăng nhập" styleClass="auth-heading" wrapText="true"/>
-                                <Label text="Đăng nhập để tiếp tục cuộc trò chuyện của bạn"
-                                       styleClass="auth-muted" wrapText="true"/>
-                            </VBox>
+                            <Label text="Đăng nhập" styleClass="auth-heading" wrapText="true"/>
                             <VBox spacing="12">
                                 <VBox spacing="4">
                                     <Label text="Tên đăng nhập" styleClass="auth-field-label"/>

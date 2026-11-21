@@ -40,21 +40,6 @@
     -fx-padding: 16px 48px 32px 48px;
 }
 
-.auth-hero-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-    -fx-text-fill: -cs-text;
-}
-
-.auth-hero-caption {
-    -fx-font-size: 12px;
-    -fx-text-fill: -cs-muted;
-}
-
-.auth-hero-note .ikonli-font-icon {
-    -fx-icon-color: -cs-muted;
-}
-
 .auth-card-column {
     -fx-padding: 8px 0;
 }
