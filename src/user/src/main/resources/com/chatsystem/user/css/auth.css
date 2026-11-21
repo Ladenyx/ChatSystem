@@ -35,11 +35,6 @@
     -fx-text-fill: -cs-text;
 }
 
-.auth-preview-note {
-    -fx-font-size: 12px;
-    -fx-text-fill: -cs-muted;
-}
-
 .auth-columns {
     -fx-spacing: 48px;
     -fx-padding: 16px 48px 32px 48px;
