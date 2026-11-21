@@ -41,9 +41,10 @@ public final class ViewNavigator implements AutoCloseable {
     private final StackPane root;
     private final ThemeManager themes;
     private final Map<View, LoadedView> pages = new HashMap<>();
-    private final Deque<View> history = new ArrayDeque<>();
+    private final Deque<NavigationEntry> history = new ArrayDeque<>();
     private final ReadOnlyObjectWrapper<View> currentView = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyBooleanWrapper canGoBack = new ReadOnlyBooleanWrapper(false);
+    private NavigationEntry currentEntry;
     private LoadedView currentPage;
     private LoadedView drawerPage;
     private Node drawerTrigger;
@@ -73,16 +74,22 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public void navigate(View view) {
+        navigate(view, ViewInput.NONE);
+    }
+
+    /** Delivers explicit input even when reselecting the current page, without adding history. */
+    public void navigate(View view, ViewInput input) {
         ThemeManager.requireFxThread();
-        Objects.requireNonNull(view, "view");
-        if (view.equals(currentView.get())) {
+        NavigationEntry entry = new NavigationEntry(view, input);
+        boolean sameView = view.equals(currentView.get());
+        if (sameView && input == ViewInput.NONE) {
             return;
         }
         LoadedView next = page(view); // Failed loads must preserve the existing page and history.
-        if (currentView.get() != null) {
-            history.push(currentView.get());
+        if (!sameView && currentEntry != null) {
+            history.push(currentEntry);
         }
-        activate(view, next);
+        activate(entry, next);
     }
 
     public boolean goBack() {
@@ -90,8 +97,8 @@ public final class ViewNavigator implements AutoCloseable {
         if (history.isEmpty()) {
             return false;
         }
-        View previous = history.peek();
-        LoadedView next = page(previous);
+        NavigationEntry previous = history.peek();
+        LoadedView next = page(previous.view());
         history.pop();
         activate(previous, next);
         return true;
@@ -99,16 +106,26 @@ public final class ViewNavigator implements AutoCloseable {
 
     /** Clears history and cached page state, e.g. when leaving an authenticated session. */
     public void reset(View view) {
+        reset(view, ViewInput.NONE);
+    }
+
+    public void reset(View view, ViewInput input) {
         ThemeManager.requireFxThread();
+        NavigationEntry entry = new NavigationEntry(view, input);
         LoadedView next = load(view);
         history.clear();
         pages.clear();
         pages.put(view, next);
-        activate(view, next);
+        activate(entry, next);
     }
 
     public Dialog<ButtonType> showModal(View view) {
+        return showModal(view, ViewInput.NONE);
+    }
+
+    public Dialog<ButtonType> showModal(View view, ViewInput input) {
         ThemeManager.requireFxThread();
+        Objects.requireNonNull(input, "input");
         requireWindow();
         LoadedView loaded = load(view);
         closeTransientUi();
@@ -129,19 +146,23 @@ public final class ViewNavigator implements AutoCloseable {
             }
             restoreFocus(trigger);
         });
-        enter(loaded, view);
+        enter(loaded, view, input);
         modal = dialog;
         dialog.show();
         return dialog;
     }
 
     public void showDrawer(View view) {
-        showDrawer(view, false);
+        showDrawer(view, ViewInput.NONE);
     }
 
-    /** Uses the view's own header and scrolling when it supplies its own drawer layout. */
-    public void showDrawer(View view, boolean useViewLayout) {
+    public void showDrawer(View view, ViewInput input) {
+        showDrawer(view, input, false);
+    }
+
+    public void showDrawer(View view, ViewInput input, boolean useViewLayout) {
         ThemeManager.requireFxThread();
+        Objects.requireNonNull(input, "input");
         LoadedView loaded = load(view);
         closeTransientUi();
         drawerTrigger = root.getScene() == null ? null : root.getScene().getFocusOwner();
@@ -150,7 +171,7 @@ public final class ViewNavigator implements AutoCloseable {
         drawer.getStyleClass().add("drawer");
         frame.setRight(drawer);
         drawerPage = loaded;
-        enter(loaded, view);
+        enter(loaded, view, input);
         if (!themes.reducedMotionProperty().get()) {
             drawerAnimation = new TranslateTransition(Duration.millis(180), drawer);
             drawerAnimation.setFromX(320);
@@ -202,7 +223,12 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public Popover showPopover(View view, Node anchor) {
+        return showPopover(view, anchor, ViewInput.NONE);
+    }
+
+    public Popover showPopover(View view, Node anchor, ViewInput input) {
         ThemeManager.requireFxThread();
+        Objects.requireNonNull(input, "input");
         requireWindow();
         if (anchor == null || anchor.getScene() != root.getScene()
                 || anchor.localToScreen(anchor.getBoundsInLocal()) == null) {
@@ -229,7 +255,7 @@ public final class ViewNavigator implements AutoCloseable {
             }
             restoreFocus(anchor);
         });
-        enter(loaded, view);
+        enter(loaded, view, input);
         popover = popup;
         popup.show(anchor);
         if (themes.reducedMotionProperty().get()) {
@@ -273,20 +299,21 @@ public final class ViewNavigator implements AutoCloseable {
         }
     }
 
-    private void activate(View view, LoadedView next) {
+    private void activate(NavigationEntry entry, LoadedView next) {
         closeTransientUi();
         leave(currentPage);
         outlet.getChildren().setAll(next.root());
         currentPage = next;
-        enter(next, view);
-        currentView.set(view);
+        currentEntry = entry;
+        enter(next, entry.view(), entry.input());
+        currentView.set(entry.view());
         canGoBack.set(!history.isEmpty());
         next.root().requestFocus();
     }
 
-    private void enter(LoadedView loaded, View view) {
+    private void enter(LoadedView loaded, View view, ViewInput input) {
         if (loaded.controller() instanceof ViewController controller) {
-            controller.onEnter(this, view);
+            controller.onEnter(this, view, input);
         }
     }
 
@@ -324,12 +351,20 @@ public final class ViewNavigator implements AutoCloseable {
         ThemeManager.requireFxThread();
         closeTransientUi();
         leave(currentPage);
+        currentEntry = null;
         currentPage = null;
         outlet.getChildren().clear();
         pages.clear();
         history.clear();
         currentView.set(null);
         canGoBack.set(false);
+    }
+
+    private record NavigationEntry(View view, ViewInput input) {
+        private NavigationEntry {
+            Objects.requireNonNull(view, "view");
+            Objects.requireNonNull(input, "input");
+        }
     }
 
     private record LoadedView(Parent root, Object controller) {

@@ -10,8 +10,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-            fx:id="drawerLayout" fx:controller="com.chatsystem.user.controller.chat.ConversationInfoController"
-            styleClass="chat-info" stylesheets="@../css/chat-tokens.css,@../css/chat.css" minWidth="0">
+            fx:id="drawerLayout" fx:controller="com.chatsystem.user.controller.messaging.ConversationInfoController"
+            styleClass="chat-info" stylesheets="@../../css/chat-tokens.css,@../../css/chat.css" minWidth="0">
     <fx:define>
         <VBox fx:id="searchPane" styleClass="chat-drawer-search" spacing="12" minWidth="0">
             <StackPane alignment="CENTER_LEFT" styleClass="chat-search">

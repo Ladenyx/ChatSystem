@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" spacing="16">
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" spacing="16"
+      fx:controller="com.chatsystem.desktop.navigation.RouteInputTestController">
     <TextField id="draft"/>
     <Button id="anchor" text="Open"/>
+    <Label fx:id="routeInput"/>
 </VBox>

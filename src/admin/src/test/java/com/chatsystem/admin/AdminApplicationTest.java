@@ -2,6 +2,7 @@ package com.chatsystem.admin;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
@@ -12,8 +13,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
@@ -57,7 +59,8 @@ class AdminApplicationTest {
     void sidebarOpensEveryRouteAndKeepsItsSelectionWhenGoingBack() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
-            new AdminApplication().start(stage);
+            var navigator = AdminApplication.createNavigator();
+            DesktopWindow.show(stage, "ChatSystem · Admin App", navigator);
             try {
                 var root = stage.getScene().getRoot();
                 capture(stage, "admin-light");
@@ -65,7 +68,7 @@ class AdminApplicationTest {
                     ToggleButton button = (ToggleButton) root.lookup("#nav-" + view.id());
                     button.fire();
                     assertTrue(button.isSelected());
-                    assertEquals(view.title(), ((Label) root.lookup("#screenTitle")).getText());
+                    assertEquals(view, navigator.currentViewProperty().get());
                 }
                 ((Button) root.lookup("#goBack")).fire();
                 assertTrue(((ToggleButton) root.lookup("#nav-A-SCR-08")).isSelected());
@@ -78,6 +81,21 @@ class AdminApplicationTest {
                 assertEquals(1, javafx.stage.Window.getWindows().size());
             } finally {
                 stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void eachRegisteredViewLoadsItsOwnFxml() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            assertEquals(11, AdminViews.ALL.size());
+            for (var view : AdminViews.ALL) {
+                var resource = view.resourceOwner().getResource(view.resource());
+                assertNotNull(resource, view.id());
+                assertInstanceOf(Parent.class, new FXMLLoader(resource).load(), view.id());
             }
             return null;
         });

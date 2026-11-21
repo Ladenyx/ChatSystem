@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-            fx:id="workspace" fx:controller="com.chatsystem.user.controller.ConversationsController"
+            fx:id="workspace" fx:controller="com.chatsystem.user.controller.messaging.ConversationsController"
             styleClass="chat-workspace" focusTraversable="true" minWidth="0">
     <fx:define><ToggleGroup fx:id="filters"/></fx:define>
     <left>
@@ -41,8 +41,6 @@
                         styleClass="chat-search-scroll" VBox.vgrow="ALWAYS">
                 <VBox fx:id="globalResults" spacing="8" minWidth="0"/>
             </ScrollPane>
-            <Label fx:id="globalSyncNotice" id="globalSearchSyncing" visible="false" wrapText="true"
-                   text="Đang đồng bộ lịch sử nhóm. Kết quả hiện tại chưa đầy đủ." styleClass="chat-caption"/>
         </VBox>
     </left>
     <center>

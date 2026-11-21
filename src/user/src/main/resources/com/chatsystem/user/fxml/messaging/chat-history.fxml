@@ -28,13 +28,6 @@
                     <tooltip><Tooltip text="Thông tin đoạn chat"/></tooltip>
                 </Button>
             </HBox>
-            <HBox fx:id="selectionHeader" visible="false" alignment="CENTER_LEFT" spacing="8" styleClass="chat-header">
-                <Label fx:id="selectedCount" styleClass="section-title" minWidth="0" wrapText="true" HBox.hgrow="ALWAYS"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="deleteSelectedButton" text="Xóa phía mình" styleClass="chat-primary"
-                        onAction="#deleteSelected"/>
-                <Button id="cancelMessageSelection" text="Hủy" styleClass="chat-outline" onAction="#cancelSelection"/>
-            </HBox>
         </StackPane>
     </top>
     <center>
@@ -63,16 +56,12 @@
                         <tooltip><Tooltip text="Gợi ý (Recommend)"/></tooltip>
                     </Button>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="sendButton" id="sendMessage" onAction="#sendMessage" accessibleText="Gửi tin nhắn"
+                    <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
                             styleClass="chat-primary,chat-composer-icon,chat-send">
                         <graphic><ChatIcon icon="send"/></graphic>
                         <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
                     </Button>
                 </HBox>
-            </VBox>
-            <VBox fx:id="selectionFooter" visible="false" spacing="4" styleClass="chat-composer">
-                <Label text="Xóa các tin đã chọn chỉ ở phía bạn." styleClass="chat-row-name" wrapText="true"/>
-                <Label text="Hủy để quay lại soạn tin." styleClass="chat-caption" wrapText="true"/>
             </VBox>
         </StackPane>
     </bottom>
