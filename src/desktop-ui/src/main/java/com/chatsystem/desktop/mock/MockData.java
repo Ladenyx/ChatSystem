@@ -51,7 +51,7 @@ public final class MockData {
         spamReports = createReports();
         appOpens = createAppOpens();
         loginLogs = createLoginLogs();
-        activities = createActivities();
+        activities = activities(activityFrom(), snapshotDate());
     }
 
     public static MockData create() {
@@ -69,6 +69,13 @@ public final class MockData {
     public LocalDate activityFrom() { return LocalDate.of(2026, 1, 1); }
     public LocalDate snapshotDate() { return SNAPSHOT_AT.atZone(DISPLAY_ZONE).toLocalDate(); }
     public MockUser previewUser() { return user(PREVIEW_USER_ID); }
+
+    /** Per-account totals for an inclusive Vietnam-local date range. */
+    public List<MockActivity> activities(LocalDate from, LocalDate to) {
+        Instant start = from.atStartOfDay(DISPLAY_ZONE).toInstant();
+        Instant end = to.plusDays(1).atStartOfDay(DISPLAY_ZONE).toInstant();
+        return createActivities(start, end);
+    }
 
     public MockUser user(String id) {
         MockUser user = usersById.get(id);
@@ -255,17 +262,16 @@ public final class MockData {
         return List.copyOf(rows);
     }
 
-    private List<MockActivity> createActivities() {
-        Instant from = activityFrom().atStartOfDay(DISPLAY_ZONE).toInstant();
+    private List<MockActivity> createActivities(Instant from, Instant to) {
         List<MockActivity> rows = new ArrayList<>();
         for (MockUser user : users) {
             int opens = (int) appOpens.stream().filter(event -> event.userId().equals(user.id()))
-                    .filter(event -> !event.at().isBefore(from)).count();
+                    .filter(event -> !event.at().isBefore(from) && event.at().isBefore(to)).count();
             var people = new HashSet<String>();
             var chattedGroups = new HashSet<String>();
             for (MockConversation chat : conversations) {
                 boolean sent = messagesFor(chat.id()).stream().anyMatch(message -> message.senderId().equals(user.id())
-                        && message.acceptedByServer() && !message.sentAt().isBefore(from));
+                        && message.acceptedByServer() && !message.sentAt().isBefore(from) && message.sentAt().isBefore(to));
                 if (sent && chat.kind() == MockConversation.Kind.GROUP) {
                     chattedGroups.add(chat.id());
                 } else if (sent) {
