@@ -1,0 +1,141 @@
+/* Profile & Security Dialog - ChatSystem Design System (Unslop Pass) */
+
+.profile-pane {
+    -fx-background-color: -cs-canvas;
+    -fx-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#profileDialog {
+    -fx-background-color: -cs-surface;
+    -fx-pref-width: 680px;
+    -fx-min-width: 540px;
+}
+
+#profileDialog > .tab-header-area {
+    -fx-background-color: -cs-surface;
+    -fx-padding: 4px 16px 0 16px;
+    -fx-border-color: transparent transparent -cs-border transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+#profileDialog > .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+#profileDialog > .tab-header-area .headers-region .tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 10px 18px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2px 0;
+}
+
+#profileDialog > .tab-header-area .headers-region .tab .tab-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -cs-muted;
+}
+
+#profileDialog > .tab-header-area .headers-region .tab:hover .tab-label {
+    -fx-text-fill: -cs-text;
+}
+
+#profileDialog > .tab-header-area .headers-region .tab:selected {
+    -fx-border-color: transparent transparent -cs-brand transparent;
+}
+
+#profileDialog > .tab-header-area .headers-region .tab:selected .tab-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-brand;
+}
+
+.profile-scroll-body {
+    -fx-background-color: -cs-surface;
+    -fx-fit-to-width: true;
+}
+
+.profile-scroll-body > .viewport {
+    -fx-background-color: -cs-surface;
+}
+
+.profile-container {
+    -fx-padding: 24px 28px;
+    -fx-spacing: 16px;
+}
+
+.profile-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.profile-section-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.profile-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -cs-text;
+}
+
+.profile-field-error {
+    -fx-font-size: 11px;
+    -fx-text-fill: -cs-danger;
+    -fx-min-height: 16px;
+}
+
+.profile-sub-card {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+    -fx-spacing: 12px;
+}
+
+.profile-badge-icon {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-background-radius: 20px;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+.profile-badge-icon .ikonli-font-icon {
+    -fx-icon-color: -cs-brand-text;
+}
+
+.profile-pin-cell, .profile-key-digit {
+    -fx-pref-width: 44px;
+    -fx-max-width: 44px;
+    -fx-min-width: 36px;
+    -fx-pref-height: 48px;
+    -fx-min-height: 48px;
+    -fx-alignment: center;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+.password-rule-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+    -fx-padding: 2px 6px;
+}
+
+.profile-notes {
+    -fx-padding: 16px 0 0 0;
+    -fx-spacing: 6px;
+}
+
+.profile-notes-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
