@@ -5,7 +5,7 @@ import java.util.List;
 
 public final class AdminViews {
     public static final View SIGN_IN = view("A-SCR-01", "Đăng nhập quản trị", "auth/sign-in.fxml");
-    public static final View OVERVIEW = view("A-SCR-02", "Dashboard Tổng quan", "overview/overview.fxml");
+    public static final View OVERVIEW = view("A-SCR-02", "Tổng quan", "overview/overview.fxml");
     public static final View USERS = view("A-SCR-03", "Quản lý Người dùng", "users/users.fxml");
     public static final View GROUPS = view("A-SCR-04", "Quản lý Nhóm Chat", "groups/groups.fxml");
     public static final View SPAM = view("A-SCR-05", "Kiểm duyệt Báo cáo Spam", "spam/spam.fxml");
