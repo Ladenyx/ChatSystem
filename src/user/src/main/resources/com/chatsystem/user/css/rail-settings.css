@@ -1,0 +1,54 @@
+.rail-settings.cs-root {
+    -fx-background-color: -cs-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 6;
+    -fx-padding: 8;
+}
+
+.rail-settings .rail-settings-heading {
+    -fx-padding: 6 12 4;
+    -fx-font-weight: 600;
+}
+
+.rail-settings .rail-settings-item {
+    -fx-alignment: center-left;
+    -fx-min-height: 36;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 4;
+    -fx-text-fill: -cs-text;
+    -fx-border-radius: 4;
+    -fx-padding: 0 12;
+}
+
+.rail-settings .rail-settings-item:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.rail-settings .rail-settings-item:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.rail-settings .toggle-switch {
+    -fx-padding: 4 12;
+}
+
+.rail-settings .toggle-switch > .thumb-area {
+    -fx-background-color: -cs-border-strong, -cs-surface-subtle;
+    -fx-padding: 10 18;
+}
+
+.rail-settings .toggle-switch > .thumb {
+    -fx-background-color: -cs-muted;
+    -fx-background-insets: 3;
+    -fx-padding: 10;
+    -fx-opacity: 1;
+}
+
+.rail-settings .toggle-switch:selected > .thumb-area {
+    -fx-background-color: -cs-brand;
+}
+
+.rail-settings .toggle-switch:selected > .thumb {
+    -fx-background-color: -cs-on-brand;
+}

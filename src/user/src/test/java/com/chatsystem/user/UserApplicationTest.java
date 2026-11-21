@@ -27,9 +27,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
@@ -93,22 +91,29 @@ class UserApplicationTest {
                 assertFalse(((Button) root.lookup("#goBack")).isDisabled());
                 ((Button) root.lookup("#goBack")).fire();
                 assertTrue(((ToggleButton) root.lookup("#navChats")).isSelected());
-                var settings = (MenuButton) root.lookup("#workspaceSettings");
-                settings.show();
-                assertTrue(settings.isShowing());
-                var themeSetting = (CustomMenuItem) settings.getItems().getFirst();
-                assertEquals("openProfile", settings.getItems().get(1).getId());
-                var darkModeSwitch = (ToggleSwitch) themeSetting.getContent();
+                var settings = (Button) root.lookup("#workspaceSettings");
+                settings.fire();
+                var settingsMenu = settingsPopup();
+                var settingsContent = (javafx.scene.layout.VBox) settingsMenu.getScene().getRoot().lookup("#settingsContent");
+                var darkModeSwitch = (ToggleSwitch) settingsContent.lookup("#darkModeSwitch");
+                assertSame(darkModeSwitch, settingsContent.getChildren().get(1));
+                assertEquals("openProfile", settingsContent.getChildren().get(2).getId());
                 assertFalse(darkModeSwitch.isSelected());
+                settingsContent.applyCss();
+                assertEquals(Color.WHITE, settingsContent.getBackground().getFills().getFirst().getFill());
+                capture(settingsMenu, "settings-light");
                 darkModeSwitch.fire();
-                assertTrue(settings.isShowing());
-                settings.hide();
-                settings.show();
+                assertTrue(settingsMenu.isShowing());
+                settingsMenu.hide();
+                settings.fire();
                 assertTrue(darkModeSwitch.isSelected());
+                settingsContent.applyCss();
+                assertEquals(Color.web("#1f1f1f"), settingsContent.getBackground().getFills().getFirst().getFill());
+                capture(settingsPopup(), "settings-dark");
                 darkModeSwitch.fire();
                 assertFalse(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
                 darkModeSwitch.fire();
-                settings.hide();
+                settingsPopup().hide();
                 assertTrue(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
                 root.applyCss();
                 assertEquals(Color.web("#1f1f1f"), ((Region) root.lookup("#conversationSidebar"))
@@ -292,8 +297,14 @@ class UserApplicationTest {
     }
 
     private static void fireSetting(Parent root, String id) {
-        var settings = (MenuButton) root.lookup("#workspaceSettings");
-        settings.getItems().stream().filter(item -> id.equals(item.getId())).findFirst().orElseThrow().fire();
+        ((Button) root.lookup("#workspaceSettings")).fire();
+        ((Button) settingsPopup().getScene().getRoot().lookup("#" + id)).fire();
+    }
+
+    private static Window settingsPopup() {
+        return Window.getWindows().stream()
+                .filter(window -> window.getScene().getRoot().lookup("#settingsContent") != null)
+                .findFirst().orElseThrow();
     }
 
     private static void capture(Window stage, String name) throws Exception {
