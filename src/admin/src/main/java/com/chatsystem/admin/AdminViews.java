@@ -4,18 +4,32 @@ import com.chatsystem.desktop.navigation.View;
 import java.util.List;
 
 public final class AdminViews {
-    public static final View OVERVIEW = View.placeholder("A-SCR-02", "Dashboard Tổng quan");
-    public static final View USERS = View.placeholder("A-SCR-03", "Quản lý Người dùng");
-    public static final View GROUPS = View.placeholder("A-SCR-04", "Quản lý Nhóm Chat");
-    public static final View SPAM = View.placeholder("A-SCR-05", "Kiểm duyệt Báo cáo Spam");
-    public static final View LOGIN_LOGS = View.placeholder("A-SCR-06", "Nhật ký Đăng nhập");
-    public static final View REGISTRATIONS = View.placeholder("A-SCR-07", "Dashboard Đăng ký mới");
-    public static final View ACTIVITY = View.placeholder("A-SCR-08", "Dashboard Hoạt động Người dùng");
-    public static final View FRIEND_NETWORK = View.placeholder("A-SCR-09", "Phân tích Mạng lưới Bạn bè");
-    public static final View EDIT_USER = View.placeholder("A-DLG-01", "Thêm / Cập nhật Người dùng");
+    public static final View SIGN_IN = view("A-SCR-01", "Đăng nhập quản trị", "auth/sign-in.fxml");
+    public static final View OVERVIEW = view("A-SCR-02", "Dashboard Tổng quan", "overview/overview.fxml");
+    public static final View USERS = view("A-SCR-03", "Quản lý Người dùng", "users/users.fxml");
+    public static final View GROUPS = view("A-SCR-04", "Quản lý Nhóm Chat", "groups/groups.fxml");
+    public static final View SPAM = view("A-SCR-05", "Kiểm duyệt Báo cáo Spam", "spam/spam.fxml");
+    public static final View LOGIN_LOGS = view("A-SCR-06", "Nhật ký Đăng nhập", "logs/login-logs.fxml");
+    public static final View REGISTRATIONS = view("A-SCR-07", "Dashboard Đăng ký mới",
+            "analytics/registrations.fxml");
+    public static final View ACTIVITY = view("A-SCR-08", "Dashboard Hoạt động Người dùng",
+            "analytics/activity.fxml");
+    public static final View FRIEND_NETWORK = view("A-SCR-09", "Phân tích Mạng lưới Bạn bè",
+            "analytics/friend-network.fxml");
+
+    public static final View EDIT_USER = view("A-DLG-01", "Thêm / Cập nhật Người dùng", "dialogs/edit-user.fxml");
+    public static final View CONFIRM_ACTION = view("A-DLG-02", "Xác nhận Thao tác Quản trị",
+            "dialogs/confirm-action.fxml");
+
+    public static final List<View> ALL = List.of(SIGN_IN, OVERVIEW, USERS, GROUPS, SPAM, LOGIN_LOGS,
+            REGISTRATIONS, ACTIVITY, FRIEND_NETWORK, EDIT_USER, CONFIRM_ACTION);
     public static final List<View> PAGES = List.of(OVERVIEW, USERS, GROUPS, SPAM, LOGIN_LOGS,
             REGISTRATIONS, ACTIVITY, FRIEND_NETWORK);
 
     private AdminViews() {
+    }
+
+    private static View view(String id, String title, String path) {
+        return new View(id, title, AdminApplication.class, "/com/chatsystem/admin/fxml/" + path);
     }
 }

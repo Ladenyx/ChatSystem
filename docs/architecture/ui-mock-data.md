@@ -81,7 +81,7 @@ Văn bản nhóm mô phỏng nội dung đã giải mã **tại client**. Nhãn 
 ./mvnw -pl src/admin javafx:run
 ```
 
-Trong User Client, mở **Cài đặt → Xem dữ liệu mẫu**. Trong Admin App, bấm nút **hình cơ sở dữ liệu** trên thanh công cụ. Trang có 5 tab: Người dùng, Hội thoại, Nhóm, Báo cáo spam và 12 tháng. Chọn hội thoại/báo cáo để đổi chi tiết; chọn năm/chỉ số để đổi chart; bảng dưới chart cung cấp giá trị chính xác khi dùng bàn phím. Nút Quay lại đưa về trang trước; theme áp dụng như các trang khác.
+Trong mỗi ứng dụng, bấm nút **hình cơ sở dữ liệu** có tooltip **Xem dữ liệu mẫu** trên toolbar. Trang có 5 tab: Người dùng, Hội thoại, Nhóm, Báo cáo spam và 12 tháng. Chọn hội thoại/báo cáo để đổi chi tiết; chọn năm/chỉ số để đổi chart; bảng dưới chart cung cấp giá trị chính xác khi dùng bàn phím. Nút Quay lại đưa về trang trước; theme áp dụng như các trang khác. Đây là trang kiểm tra bộ mẫu; các màn hình nghiệp vụ vẫn triển khai ở giai đoạn 3–4, theo tiến độ wireframe của nhóm.
 
 ```sh
 ./mvnw clean verify
