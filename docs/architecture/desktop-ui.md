@@ -1,4 +1,4 @@
-# Khung desktop — Navigation & Theme (Version 1, mục 1.2)
+# Kiến trúc giao diện desktop
 
 `UserApplication` và `AdminApplication` là hai JavaFX `Application` độc lập. Mỗi ứng dụng nạp `shell.fxml`, tạo `ViewNavigator` và mở một cửa sổ desktop. Các trang nghiệp vụ chưa hoàn thiện; bước này cung cấp nơi gắn FXML và kiểm tra luồng điều hướng.
 
@@ -13,6 +13,35 @@
 | `admin` | Sidebar phân nhóm, route và FXML của Admin App |
 
 `desktop-ui` được thêm ở mục 1.2 để chia sẻ mã UI mà không đưa JavaFX vào `common` hoặc tạo phụ thuộc giữa hai ứng dụng. Bốn module nghiệp vụ của bước 1.1 giữ nguyên trách nhiệm.
+
+## Cấu trúc thư mục theo cụm màn hình
+
+Trong `src/user/` và `src/admin/`, dùng cùng tên cụm cho controller, tài nguyên FXML, CSS và kiểm thử của màn hình. Các đường dẫn cho màn hình Bạn bè trong `src/user/` có dạng sau.
+
+```text
+src/main/java/com/chatsystem/user/controller/contacts/ContactsController.java
+src/main/resources/com/chatsystem/user/fxml/contacts/contacts.fxml
+src/main/resources/com/chatsystem/user/css/contacts.css
+src/test/java/com/chatsystem/user/controller/contacts/ContactsControllerTest.java
+```
+
+Khi cần CSS riêng, gắn stylesheet vào FXML của cụm, dùng tên lớp có tiền tố theo ứng dụng và cụm (ví dụ `.user-contacts`) và lấy màu từ theme chung. Các cụm dùng snapshot bất biến từ `MockData`. Trạng thái demo riêng của một màn hình, như bộ lọc hoặc lựa chọn đang hiển thị, thuộc cụm đó.
+
+Mỗi thành viên phụ trách các file trong cụm được giao. Bảng phân công Version 1 dùng mã trong [danh mục màn hình](../requirements/screen.md).
+
+| Module | Cụm | Màn hình / hộp thoại | Phụ trách |
+| --- | --- | --- | --- |
+| `user` | `auth/` | `U-SCR-01`–`U-SCR-06` | Thành viên 2 |
+| `user` | `contacts/` | `U-SCR-08` | Thành viên 2 |
+| `user` | `profile/` | `U-DLG-01` | Thành viên 2 |
+| `user` | `messaging/` | `U-SCR-07`, `U-SCR-09`, `U-DLG-02`–`U-DLG-05` | Thành viên 3 |
+| `admin` | `auth/`, `overview/`, `users/` | `A-SCR-01`, `A-SCR-02`, `A-SCR-03`, tương ứng | Thành viên 1 |
+| `admin` | `groups/`, `spam/` | `A-SCR-04`, `A-SCR-05`, tương ứng | Thành viên 2 |
+| `admin` | `logs/` | `A-SCR-06` | Thành viên 1 |
+| `admin` | `analytics/` | `A-SCR-07`–`A-SCR-09` | Thành viên 1 |
+| `admin` | `dialogs/` | `A-DLG-01`, `A-DLG-02` | Thành viên 1 |
+
+Thành viên 3 là đầu mối tích hợp User Client, gồm `UserApplication`, `UserViews` và shell. Thành viên 1 phụ trách tương ứng `AdminApplication`, `AdminViews` và shell của Admin App. Khi một luồng đi qua hai cụm, người phụ trách thống nhất dữ liệu cần truyền và cách mở màn hình qua lớp điều hướng. Ví dụ, Bạn bè mở hội thoại theo ID người dùng, còn màn hình Kiểm duyệt Spam mở hộp thoại xác nhận thao tác quản trị `A-DLG-02`. Phối hợp trước khi sửa các thành phần trong `desktop-ui` vì cả hai ứng dụng cùng sử dụng module này.
 
 ## Điều hướng và vòng đời
 
@@ -33,7 +62,7 @@ Tạo FXML và controller trong module phụ trách. Ví dụ thay màn hình kh
 ```java
 public static final View CONTACTS = new View(
         "U-SCR-08", "Bạn bè & Kết nối", UserApplication.class,
-        "/com/chatsystem/user/fxml/contacts.fxml");
+        "/com/chatsystem/user/fxml/contacts/contacts.fxml");
 ```
 
 Controller cần điều hướng sử dụng lifecycle thay vì truy cập biến toàn cục:
