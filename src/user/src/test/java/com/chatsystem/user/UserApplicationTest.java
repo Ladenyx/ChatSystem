@@ -12,6 +12,7 @@ import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.user.control.ChatMessageRow;
+import com.chatsystem.user.controller.ai.OfflineAiAssistantService.Scenario;
 import com.chatsystem.user.controller.chat.ChatDemoFlow;
 import com.chatsystem.user.controller.chat.OfflineChatDemoService;
 import java.awt.image.BufferedImage;
@@ -688,6 +689,207 @@ class UserApplicationTest {
         });
     }
 
+    @Test
+    void refineRequiresConsentAndApplyUpdatesOnlyTheDraft() throws Exception {
+        var navigator = onFx(UserApplication::createNavigator);
+        Stage stage = onFx(() -> shownStage(navigator.getRoot(), 1280, 720));
+        try {
+            onFx(() -> {
+                var root = navigator.getRoot();
+                selectChat(root, "direct-01");
+                var draft = (TextArea) root.lookup("#draftField");
+                var refine = (Button) root.lookup("#refineDraft");
+                assertTrue(refine.isDisabled());
+                draft.setText("Nháp gốc của mình");
+                refine.fire();
+                var popup = aiWindow(stage);
+                var panel = popup.getScene().getRoot();
+                var copy = (TextArea) panel.lookup("#aiRefineInput");
+                assertEquals(draft.getText(), copy.getText());
+                assertNull(panel.lookup("#aiOption-1"));
+                copy.setText("mình đã cập nhật tài liệu.");
+                ((ToggleButton) panel.lookup("#aiTone-POLITE")).fire();
+                assertEquals("Nháp gốc của mình", draft.getText());
+                capture(popup, "ai-refine-preview-light", "#aiAssistant");
+                ((Button) panel.lookup("#aiConfirm")).fire();
+                assertNotNull(panel.lookup("#aiLoading"));
+                return null;
+            });
+            awaitAiNode(stage, "#aiOption-3");
+            onFx(() -> {
+                var root = navigator.getRoot();
+                var popup = aiWindow(stage);
+                var panel = popup.getScene().getRoot();
+                var chat = ChatDemoFlow.get(navigator).chat();
+                var latest = chat.latest("direct-01");
+                var apply = (Button) panel.lookup("#aiApply");
+                assertTrue(apply.isDisabled());
+                var option = (CheckBox) panel.lookup("#aiOption-1");
+                option.fire();
+                capture(popup, "ai-results-light", "#aiAssistant");
+                apply.fire();
+                assertEquals(option.getUserData(), ((TextArea) root.lookup("#draftField")).getText());
+                assertEquals(latest, chat.latest("direct-01"));
+                assertNull(openAiWindow(stage));
+                return null;
+            });
+        } finally {
+            onFx(() -> { navigator.close(); stage.close(); return null; });
+        }
+    }
+
+    @Test
+    void recommendCapsTheSelectionAndPreviewsEditedCopiesWithoutMutatingMessages() throws Exception {
+        onFx(() -> {
+            var navigator = UserApplication.createNavigator();
+            var root = navigator.getRoot();
+            Stage stage = shownStage(root, 1024, 640);
+            try {
+                selectChat(root, "direct-01");
+                navigator.themes().toggle();
+                var draft = (TextArea) root.lookup("#draftField");
+                assertTrue(draft.getText().isEmpty());
+                var chat = ChatDemoFlow.get(navigator).chat();
+                var original = chat.page("direct-01", 50).messages();
+                var eligible = original.stream().filter(message -> message.state() != State.RECALLED).toList();
+                var recommend = (Button) root.lookup("#recommendReply");
+                assertFalse(recommend.isDisabled());
+                recommend.fire();
+                var popup = aiWindow(stage);
+                var panel = popup.getScene().getRoot();
+                assertTrue(panel.lookup("#aiConfirm").isDisabled());
+                assertTrue(original.stream().filter(message -> message.state() == State.RECALLED)
+                        .noneMatch(message -> panel.lookup("#aiContext-" + message.id()) != null));
+                for (int i = 0; i < 5; i++) {
+                    ((CheckBox) panel.lookup("#aiContext-" + eligible.get(i).id())).fire();
+                }
+                String first = eligible.getFirst().id();
+                assertTrue(panel.lookup("#aiContext-" + eligible.get(5).id()).isDisabled());
+                ((Button) panel.lookup("#aiEditContext")).fire();
+                var editor = (TextArea) panel.lookup("#aiContextEdit-" + first);
+                editor.setText("Bản sao ngữ cảnh đã sửa.");
+                ((Button) panel.lookup("#aiReviewContext")).fire();
+                panel.applyCss();
+                panel.layout();
+                assertTrue(panel.lookup("#aiContext-" + first).getAccessibleText().contains("Bản sao ngữ cảnh đã sửa."));
+                assertEquals(original, chat.page("direct-01", 50).messages());
+                assertEquals("", draft.getText());
+                capture(popup, "ai-recommend-preview-dark", "#aiAssistant");
+                chat.deleteForSelf("direct-01", java.util.Set.of(first));
+                ((Button) panel.lookup("#aiConfirm")).fire();
+                assertNull(panel.lookup("#aiLoading"));
+                assertTrue(((Label) panel.lookup("#aiContextSummary")).getText().contains("4 / 5"));
+                ((Button) panel.lookup("#aiCancel")).fire();
+                assertEquals("", draft.getText());
+                assertNull(openAiWindow(stage));
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+    }
+
+    @Test
+    void aiErrorsRequireAnotherConsentAndLateResultsDoNotReplaceChangedDrafts() throws Exception {
+        var navigator = onFx(UserApplication::createNavigator);
+        Stage stage = onFx(() -> shownStage(navigator.getRoot(), 1280, 720));
+        try {
+            var root = navigator.getRoot();
+            onFx(() -> {
+                selectChat(root, "direct-01");
+                ((TextArea) root.lookup("#draftField")).setText("Giữ bản nháp");
+                ((Button) root.lookup("#refineDraft")).fire();
+                return null;
+            });
+            for (var scenario : java.util.List.of(Scenario.ERROR, Scenario.TIMEOUT, Scenario.QUOTA)) {
+                onFx(() -> { submitAi(stage, scenario); return null; });
+                awaitAiNode(stage, "#aiError");
+                onFx(() -> {
+                    var panel = aiWindow(stage).getScene().getRoot();
+                    assertTrue(((Label) panel.lookup("#aiError")).getText().contains(scenario == Scenario.ERROR ? "kết nối"
+                            : scenario == Scenario.TIMEOUT ? "15 giây" : "hạn mức"));
+                    assertEquals("Giữ bản nháp", ((TextArea) root.lookup("#draftField")).getText());
+                    ((Button) panel.lookup("#aiReviewInput")).fire();
+                    assertNull(panel.lookup("#aiLoading"));
+                    assertNotNull(panel.lookup("#aiConfirm"));
+                    return null;
+                });
+            }
+            onFx(() -> {
+                submitAi(stage, Scenario.SUCCESS);
+                var draft = (TextArea) root.lookup("#draftField");
+                draft.setText("Nháp đã đổi");
+                draft.setText("Giữ bản nháp");
+                return null;
+            });
+            awaitAiNode(stage, "#aiStale");
+            onFx(() -> {
+                var panel = aiWindow(stage).getScene().getRoot();
+                assertNull(panel.lookup("#aiOption-1"));
+                assertEquals("Giữ bản nháp", ((TextArea) root.lookup("#draftField")).getText());
+                ((Button) panel.lookup("#aiContinue")).fire();
+                ((Button) root.lookup("#refineDraft")).fire();
+                submitAi(stage, Scenario.SUCCESS);
+                ((Button) aiWindow(stage).getScene().getRoot().lookup("#aiStop")).fire();
+                assertNull(openAiWindow(stage));
+                ((Button) root.lookup("#refineDraft")).fire();
+                submitAi(stage, Scenario.SUCCESS);
+                selectChat(root, "direct-02");
+                assertNull(openAiWindow(stage));
+                assertEquals("", ((TextArea) root.lookup("#draftField")).getText());
+                ((Button) root.lookup("#recommendReply")).fire();
+                var recommendation = aiWindow(stage).getScene().getRoot();
+                ((CheckBox) recommendation.lookup("#aiContext-msg-direct-02-1")).fire();
+                ((Button) recommendation.lookup("#aiConfirm")).fire();
+                return null;
+            });
+            awaitAiNode(stage, "#aiOption-3");
+            onFx(() -> {
+                var panel = aiWindow(stage).getScene().getRoot();
+                var chat = ChatDemoFlow.get(navigator).chat();
+                var messages = chat.page("direct-02", 50).messages();
+                var option = (CheckBox) panel.lookup("#aiOption-3");
+                option.fire();
+                ((Button) panel.lookup("#aiApply")).fire();
+                assertEquals(option.getUserData(), ((TextArea) root.lookup("#draftField")).getText());
+                assertEquals(messages, chat.page("direct-02", 50).messages());
+                return null;
+            });
+        } finally {
+            onFx(() -> { navigator.close(); stage.close(); return null; });
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void submitAi(Stage owner, Scenario scenario) {
+        var panel = aiWindow(owner).getScene().getRoot();
+        ((ComboBox<Scenario>) panel.lookup("#aiScenario")).setValue(scenario);
+        ((Button) panel.lookup("#aiConfirm")).fire();
+    }
+
+    private static void awaitAiNode(Stage owner, String id) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(4);
+        TimeUnit.MILLISECONDS.sleep(25);
+        while (onFx(() -> aiWindow(owner).getScene().getRoot().lookup(id) == null)) {
+            assertTrue(System.nanoTime() < deadline, "Missing AI state " + id);
+            TimeUnit.MILLISECONDS.sleep(25);
+        }
+    }
+
+    private static Window openAiWindow(Stage owner) {
+        return Window.getWindows().stream().filter(window -> window != owner && window.isShowing())
+                .filter(window -> window.getScene().getRoot().lookup("#aiAssistant") != null).findFirst().orElse(null);
+    }
+
+    private static Window aiWindow(Stage owner) {
+        Window window = openAiWindow(owner);
+        assertNotNull(window);
+        window.getScene().getRoot().applyCss();
+        window.getScene().getRoot().layout();
+        return window;
+    }
+
     private static void fireMemberAction(Parent root, String memberId, String label) {
         var menu = (Button) root.lookup("#group-member-menu-" + memberId);
         menu.getContextMenu().getItems().stream().filter(item -> item.getText().equals(label))
@@ -758,12 +960,17 @@ class UserApplicationTest {
     }
 
     private static void capture(Window stage, String name) throws Exception {
+        capture(stage, name, null);
+    }
+
+    private static void capture(Window stage, String name, String selector) throws Exception {
         if (!Boolean.getBoolean("chatsystem.capture")) {
             return;
         }
-        stage.getScene().getRoot().applyCss();
-        stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        var scene = stage.getScene();
+        scene.getRoot().applyCss();
+        scene.getRoot().layout();
+        WritableImage image = selector == null ? scene.snapshot(null) : scene.getRoot().lookup(selector).snapshot(null, null);
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {
