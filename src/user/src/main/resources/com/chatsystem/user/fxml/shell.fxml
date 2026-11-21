@@ -12,7 +12,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.chatsystem.user.controller.UserShellController">
     <left>
-        <VBox fx:id="workspaceRail" styleClass="rail">
+        <VBox styleClass="rail">
             <Label text="CS" styleClass="app-mark"/>
             <ToggleButton fx:id="chatsButton" id="navChats" text="Đoạn chat" styleClass="nav-item"
                           onAction="#openChats" accessibleText="Đoạn chat">
@@ -35,7 +35,7 @@
     <center>
         <BorderPane>
             <top>
-                <HBox fx:id="workspaceToolbar" alignment="CENTER_LEFT" spacing="16" styleClass="toolbar">
+                <HBox alignment="CENTER_LEFT" spacing="16" styleClass="toolbar">
                     <Button fx:id="backButton" id="goBack" onAction="#goBack" accessibleText="Quay lại">
                         <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="18"/></graphic>
                         <tooltip><Tooltip text="Quay lại (Alt + ←)"/></tooltip>
@@ -48,7 +48,6 @@
                         <tooltip><Tooltip text="Xem dữ liệu mẫu"/></tooltip>
                     </Button>
                     <Button fx:id="displayButton" id="displayOptions" text="Hiển thị" onAction="#openDisplayOptions"/>
-                    <Button id="signOut" text="Đăng xuất" onAction="#signOut"/>
                 </HBox>
             </top>
             <center><StackPane fx:id="viewHost" id="viewHost" minWidth="0"/></center>
