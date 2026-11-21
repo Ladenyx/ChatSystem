@@ -10,12 +10,9 @@ public final class AdminViews {
     public static final View GROUPS = view("A-SCR-04", "Quản lý Nhóm Chat", "groups/groups.fxml");
     public static final View SPAM = view("A-SCR-05", "Kiểm duyệt Báo cáo Spam", "spam/spam.fxml");
     public static final View LOGIN_LOGS = view("A-SCR-06", "Nhật ký đăng nhập", "logs/login-logs.fxml");
-    public static final View REGISTRATIONS = view("A-SCR-07", "Dashboard Đăng ký mới",
-            "analytics/registrations.fxml");
-    public static final View ACTIVITY = view("A-SCR-08", "Dashboard Hoạt động Người dùng",
-            "analytics/activity.fxml");
-    public static final View FRIEND_NETWORK = view("A-SCR-09", "Phân tích Mạng lưới Bạn bè",
-            "analytics/friend-network.fxml");
+    public static final View REGISTRATIONS = view("A-SCR-07", "Đăng ký mới", "analytics/registrations.fxml");
+    public static final View ACTIVITY = view("A-SCR-08", "Hoạt động người dùng", "analytics/activity.fxml");
+    public static final View FRIEND_NETWORK = view("A-SCR-09", "Mạng lưới bạn bè", "analytics/friend-network.fxml");
 
     public static final View EDIT_USER = view("A-DLG-01", "Hồ sơ người dùng", "dialogs/edit-user.fxml");
     public static final View CONFIRM_ACTION = view("A-DLG-02", "Xác nhận thao tác",

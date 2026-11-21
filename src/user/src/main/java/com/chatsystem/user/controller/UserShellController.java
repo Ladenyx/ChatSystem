@@ -1,5 +1,6 @@
 package com.chatsystem.user.controller;
 
+import atlantafx.base.controls.ToggleSwitch;
 import com.chatsystem.desktop.controller.DisplayOptionsController;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
@@ -10,18 +11,24 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.StackPane;
-import org.kordamp.ikonli.feather.Feather;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.stage.PopupWindow;
 
 public final class UserShellController {
+    private static final String SETTINGS_STYLESHEET = UserShellController.class.getResource(
+            "/com/chatsystem/user/css/rail-settings.css").toExternalForm();
+
     @FXML private StackPane viewHost;
+    @FXML private VBox workspaceRail;
     @FXML private ToggleButton chatsButton;
     @FXML private ToggleButton contactsButton;
     @FXML private Button backButton;
-    @FXML private Button themeButton;
-    @FXML private Button displayButton;
+    @FXML private Button settingsButton;
+    @FXML private VBox settingsContent;
+    private Popup settingsPopup;
+    @FXML private ToggleSwitch darkModeSwitch;
     private ViewNavigator navigator;
 
     public void connect(ViewNavigator navigator) {
@@ -29,13 +36,27 @@ public final class UserShellController {
         ToggleGroup group = new ToggleGroup();
         chatsButton.setToggleGroup(group);
         contactsButton.setToggleGroup(group);
-        backButton.disableProperty().bind(navigator.canGoBackProperty().not());
+        workspaceRail.managedProperty().bind(workspaceRail.visibleProperty());
+        workspaceRail.setVisible(false);
+        backButton.visibleProperty().bind(navigator.canGoBackProperty());
+        backButton.managedProperty().bind(backButton.visibleProperty());
         navigator.currentViewProperty().addListener((observable, old, view) -> {
+            workspaceRail.setVisible(view != null && !UserViews.isAuthView(view));
             chatsButton.setSelected(UserViews.CONVERSATIONS.equals(view));
             contactsButton.setSelected(UserViews.CONTACTS.equals(view));
         });
-        navigator.themes().modeProperty().addListener((observable, old, mode) -> updateTheme(mode));
-        updateTheme(navigator.themes().getMode());
+        var themes = navigator.themes();
+        themes.apply(settingsContent);
+        settingsContent.getStylesheets().add(SETTINGS_STYLESHEET);
+        darkModeSwitch.setSelected(themes.getMode() == ThemeManager.Mode.DARK);
+        themes.modeProperty().addListener((observable, old, mode) ->
+                darkModeSwitch.setSelected(mode == ThemeManager.Mode.DARK));
+        darkModeSwitch.selectedProperty().addListener((observable, old, selected) -> {
+            var mode = selected ? ThemeManager.Mode.DARK : ThemeManager.Mode.LIGHT;
+            if (themes.getMode() != mode) {
+                themes.setMode(mode);
+            }
+        });
     }
 
     public StackPane getViewHost() {
@@ -55,7 +76,26 @@ public final class UserShellController {
     }
 
     @FXML
+    private void openSettings() {
+        if (settingsPopup == null) {
+            settingsPopup = new Popup();
+            settingsPopup.setAutoHide(true);
+            settingsPopup.setHideOnEscape(true);
+            settingsPopup.setAnchorLocation(PopupWindow.AnchorLocation.WINDOW_BOTTOM_LEFT);
+            settingsPopup.getContent().add(settingsContent);
+        }
+        if (settingsPopup.isShowing()) {
+            settingsPopup.hide();
+            return;
+        }
+        var anchor = settingsButton.localToScreen(settingsButton.getBoundsInLocal());
+        settingsPopup.show(settingsButton, anchor.getMaxX() + 8, anchor.getMaxY());
+        darkModeSwitch.requestFocus();
+    }
+
+    @FXML
     private void openProfile() {
+        settingsPopup.hide();
         navigator.showModal(UserViews.PROFILE);
     }
 
@@ -65,30 +105,19 @@ public final class UserShellController {
     }
 
     @FXML
-    private void toggleTheme() {
-        navigator.themes().toggle();
-    }
-
-    @FXML
     private void openDisplayOptions() {
-        navigator.showPopover(DisplayOptionsController.VIEW, displayButton);
+        settingsPopup.hide();
+        navigator.showPopover(DisplayOptionsController.VIEW, settingsButton);
     }
 
     @FXML
     private void openMockData() {
+        settingsPopup.hide();
         navigator.navigate(MockDataPreviewController.VIEW);
     }
 
     @FXML
-    private void exit() {
+    private void signOut() {
         Platform.exit();
-    }
-
-    private void updateTheme(ThemeManager.Mode mode) {
-        boolean dark = mode == ThemeManager.Mode.DARK;
-        themeButton.setText(dark ? "Tối" : "Sáng");
-        themeButton.setGraphic(new FontIcon(dark ? Feather.MOON : Feather.SUN));
-        themeButton.setTooltip(new Tooltip(dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"));
-        themeButton.setAccessibleText(themeButton.getTooltip().getText());
     }
 }

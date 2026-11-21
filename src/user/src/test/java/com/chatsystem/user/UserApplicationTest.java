@@ -2,6 +2,7 @@ package com.chatsystem.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import atlantafx.base.controls.ToggleSwitch;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
@@ -22,15 +23,21 @@ import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.geometry.Orientation;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.chart.BarChart;
 import javafx.scene.image.WritableImage;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -74,30 +81,71 @@ class UserApplicationTest {
             app.start(stage);
             try {
                 var root = stage.getScene().getRoot();
+                enterPreviewWorkspace(root);
                 root.applyCss();
                 root.layout();
                 assertTrue(((ToggleButton) root.lookup("#navChats")).isSelected());
+                assertTrue(root.lookup("#emptyWorkspace").isVisible());
                 capture(stage, "user-light");
                 ((ToggleButton) root.lookup("#navContacts")).fire();
                 assertTrue(((ToggleButton) root.lookup("#navContacts")).isSelected());
                 assertFalse(((Button) root.lookup("#goBack")).isDisabled());
                 ((Button) root.lookup("#goBack")).fire();
                 assertTrue(((ToggleButton) root.lookup("#navChats")).isSelected());
-                ((Button) root.lookup("#toggleTheme")).fire();
+                var settings = (Button) root.lookup("#workspaceSettings");
+                settings.fire();
+                var settingsMenu = settingsPopup();
+                var settingsContent = (javafx.scene.layout.VBox) settingsMenu.getScene().getRoot().lookup("#settingsContent");
+                var darkModeSwitch = (ToggleSwitch) settingsContent.lookup("#darkModeSwitch");
+                assertSame(darkModeSwitch, settingsContent.getChildren().get(1));
+                assertEquals("openProfile", settingsContent.getChildren().get(2).getId());
+                assertFalse(darkModeSwitch.isSelected());
+                settingsContent.applyCss();
+                assertEquals(Color.WHITE, settingsContent.getBackground().getFills().getFirst().getFill());
+                capture(settingsMenu, "settings-light");
+                darkModeSwitch.fire();
+                assertTrue(settingsMenu.isShowing());
+                settingsMenu.hide();
+                settings.fire();
+                assertTrue(darkModeSwitch.isSelected());
+                settingsContent.applyCss();
+                assertEquals(Color.web("#1f1f1f"), settingsContent.getBackground().getFills().getFirst().getFill());
+                capture(settingsPopup(), "settings-dark");
+                darkModeSwitch.fire();
+                assertFalse(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
+                darkModeSwitch.fire();
+                settingsPopup().hide();
                 assertTrue(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
+                root.applyCss();
+                assertEquals(Color.web("#1f1f1f"), ((Region) root.lookup("#conversationSidebar"))
+                        .getBackground().getFills().getFirst().getFill());
                 capture(stage, "user-dark");
+                var conversations = (ListView<?>) root.lookup("#conversationItems");
+                ((ToggleButton) root.lookup("#groupFilter")).fire();
+                assertTrue(conversations.getItems().stream().allMatch(item -> ((MockConversation) item).encrypted()));
+                ((ToggleButton) root.lookup("#allFilter")).fire();
+                var filter = (TextField) root.lookup("#conversationFilter");
+                filter.setText("không có kết quả");
+                assertTrue(conversations.getItems().isEmpty());
+                filter.clear();
+                conversations.getSelectionModel().selectFirst();
+                assertFalse(root.lookup("#emptyWorkspace").isVisible());
                 ((Button) root.lookup("#conversationInfo")).fire();
                 assertNotNull(root.lookup("#drawer"));
                 capture(stage, "user-drawer");
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertNull(root.lookup("#drawer"));
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertNotNull(root.lookup("#drawer"));
                 ((Button) root.lookup("#drawerClose")).fire();
                 assertNull(root.lookup("#drawer"));
-                ((Button) root.lookup("#openProfile")).fire();
+                fireSetting(root, "openProfile");
                 assertTrue(javafx.stage.Window.getWindows().size() > 1);
                 capture(Window.getWindows().stream().filter(window -> window != stage).findFirst().orElseThrow(),
                         "user-modal");
                 ((ToggleButton) root.lookup("#navContacts")).fire();
                 assertEquals(1, javafx.stage.Window.getWindows().size());
-                ((Button) root.lookup("#displayOptions")).fire();
+                fireSetting(root, "displayOptions");
                 Window popup = Window.getWindows().stream()
                         .filter(window -> window.getScene().getRoot().lookup("#lightTheme") != null)
                         .findFirst().orElseThrow();
@@ -132,13 +180,33 @@ class UserApplicationTest {
             Stage stage = new Stage();
             var navigator = UserApplication.createNavigator();
             try {
-                stage.setScene(new Scene(navigator.getRoot(), 1024, 640));
-                stage.show();
-                navigator.getRoot().applyCss();
-                navigator.getRoot().layout();
-                assertEquals(1024, stage.getScene().getWidth());
-                assertEquals(640, stage.getScene().getHeight());
+                var root = navigator.getRoot();
+                var scene = new Scene(root, 1024, 640);
+                stage.setScene(scene);
+                root.resize(1024, 640);
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+                assertEquals(280, ((Region) root.lookup("#conversationSidebar")).getWidth());
+                assertEquals(672, ((Region) root.lookup("#chatWorkspace")).getWidth());
+                assertTrue(root.lookup("#conversationItems").lookupAll(".scroll-bar").stream()
+                        .map(ScrollBar.class::cast)
+                        .noneMatch(bar -> bar.getOrientation() == Orientation.HORIZONTAL && bar.isVisible()));
                 capture(stage, "user-small");
+                ((ListView<?>) root.lookup("#conversationItems")).getSelectionModel().selectFirst();
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                assertEquals(320, ((Region) root.lookup("#drawer")).getWidth());
+                assertEquals(352, ((Region) root.lookup("#chatWorkspace")).getWidth());
+                capture(stage, "user-small-drawer");
+                navigator.themes().toggle();
+                capture(stage, "user-small-drawer-dark");
+                navigator.closeDrawer();
+                root.resize(1280, 720);
+                root.layout();
+                assertEquals(384, ((Region) root.lookup("#conversationSidebar")).getWidth());
+                assertEquals(824, ((Region) root.lookup("#chatWorkspace")).getWidth());
             } finally {
                 navigator.close();
                 stage.close();
@@ -159,7 +227,10 @@ class UserApplicationTest {
                 stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
                 stage.show();
                 var root = navigator.getRoot();
-                ((Button) root.lookup("#openMockData")).fire();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+                fireSetting(root, "openMockData");
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 root.applyCss();
                 root.layout();
@@ -215,7 +286,7 @@ class UserApplicationTest {
                 capture(stage, "user-mock-chart-dark");
                 ((Button) root.lookup("#goBack")).fire();
                 assertEquals(UserViews.CONVERSATIONS, navigator.currentViewProperty().get());
-                ((Button) root.lookup("#openMockData")).fire();
+                fireSetting(root, "openMockData");
                 assertSame(tabs, root.lookup("#mockTabs"));
                 assertEquals(4, tabs.getSelectionModel().getSelectedIndex());
             } finally {
@@ -226,6 +297,23 @@ class UserApplicationTest {
         });
         Platform.runLater(task);
         task.get(30, TimeUnit.SECONDS);
+    }
+
+    private static void enterPreviewWorkspace(Parent root) {
+        root.applyCss();
+        root.layout();
+        assertInstanceOf(Button.class, root.lookup("#authSignInSubmit")).fire();
+    }
+
+    private static void fireSetting(Parent root, String id) {
+        ((Button) root.lookup("#workspaceSettings")).fire();
+        ((Button) settingsPopup().getScene().getRoot().lookup("#" + id)).fire();
+    }
+
+    private static Window settingsPopup() {
+        return Window.getWindows().stream()
+                .filter(window -> window.getScene().getRoot().lookup("#settingsContent") != null)
+                .findFirst().orElseThrow();
     }
 
     private static void capture(Window stage, String name) throws Exception {

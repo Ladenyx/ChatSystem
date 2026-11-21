@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
@@ -20,6 +21,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class AdminShellController {
     @FXML private StackPane viewHost;
+    @FXML private VBox workspaceSidebar;
+    @FXML private HBox workspaceToolbar;
     @FXML private VBox overviewNav;
     @FXML private VBox managementNav;
     @FXML private VBox analyticsNav;
@@ -33,6 +36,13 @@ public final class AdminShellController {
 
     public void connect(ViewNavigator navigator) {
         this.navigator = navigator;
+        var currentView = navigator.currentViewProperty();
+        var workspaceVisible = currentView.isNotNull().and(currentView.isNotEqualTo(AdminViews.SIGN_IN));
+        workspaceSidebar.visibleProperty().bind(workspaceVisible);
+        workspaceSidebar.managedProperty().bind(workspaceSidebar.visibleProperty());
+        workspaceToolbar.visibleProperty().bind(workspaceVisible);
+        workspaceToolbar.managedProperty().bind(workspaceToolbar.visibleProperty());
+
         add(overviewNav, AdminViews.OVERVIEW, "Tổng quan", Feather.GRID);
         add(managementNav, AdminViews.USERS, "Người dùng", Feather.USERS);
         add(managementNav, AdminViews.GROUPS, "Nhóm chat", Feather.MESSAGE_SQUARE);
@@ -44,9 +54,9 @@ public final class AdminShellController {
         backButton.disableProperty().bind(navigator.canGoBackProperty().not());
         backButton.visibleProperty().bind(navigator.canGoBackProperty());
         backButton.managedProperty().bind(backButton.visibleProperty());
-        overviewDataNote.visibleProperty().bind(navigator.currentViewProperty().isEqualTo(AdminViews.OVERVIEW));
+        overviewDataNote.visibleProperty().bind(currentView.isEqualTo(AdminViews.OVERVIEW));
         overviewDataNote.managedProperty().bind(overviewDataNote.visibleProperty());
-        navigator.currentViewProperty().addListener((observable, old, view) -> {
+        currentView.addListener((observable, old, view) -> {
             group.selectToggle(buttons.get(view));
             pageTitle.setText(view == null ? "" : view.title());
         });

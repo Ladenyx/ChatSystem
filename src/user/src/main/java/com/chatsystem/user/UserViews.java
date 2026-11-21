@@ -1,7 +1,10 @@
 package com.chatsystem.user;
 
 import com.chatsystem.desktop.navigation.View;
+import com.chatsystem.user.messaging.ConversationCatalog;
+import com.chatsystem.user.mock.MockConversationCatalog;
 import java.util.List;
+import java.util.Set;
 
 public final class UserViews {
     public static final View SIGN_IN = view("U-SCR-01", "Đăng nhập", "auth/sign-in.fxml");
@@ -28,7 +31,16 @@ public final class UserViews {
             FORCE_CHANGE_PASSWORD, E2EE_KEY_SETUP, CONVERSATIONS, CONTACTS, CONVERSATION_INFO,
             PROFILE, CREATE_GROUP, AI_ASSISTANT, REPORT_SPAM, ASSIGN_SUCCESSOR_ADMIN);
 
+    public static final ConversationCatalog CONVERSATIONS_DATA = new MockConversationCatalog();
+
+    private static final Set<View> AUTH_VIEWS = Set.of(SIGN_IN, SIGN_UP, VERIFY_EMAIL, FORGOT_PASSWORD,
+            FORCE_CHANGE_PASSWORD);
+
     private UserViews() {
+    }
+
+    public static boolean isAuthView(View view) {
+        return view != null && AUTH_VIEWS.contains(view);
     }
 
     private static View view(String id, String title, String path) {

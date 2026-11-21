@@ -195,6 +195,10 @@ public final class ViewNavigator implements AutoCloseable {
         });
     }
 
+    public boolean isDrawerOpen() {
+        return drawerPage != null;
+    }
+
     public void closeDrawer() {
         ThemeManager.requireFxThread();
         if (drawerAnimation != null) {

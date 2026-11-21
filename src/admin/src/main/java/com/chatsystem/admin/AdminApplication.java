@@ -21,7 +21,7 @@ public final class AdminApplication extends Application {
         AdminShellController controller = loader.getController();
         ViewNavigator navigator = new ViewNavigator(shell, controller.getViewHost(), new ThemeManager());
         controller.connect(navigator);
-        navigator.reset(AdminViews.OVERVIEW);
+        navigator.reset(AdminViews.SIGN_IN);
         return navigator;
     }
 

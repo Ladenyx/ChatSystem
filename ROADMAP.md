@@ -174,11 +174,11 @@ Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, 
 | A-10 | Spam reports: sort and filter by time, username | ⬜ | ⬜ |
 | A-11 | Lock a user's account from a spam report | ⬜ | ⬜ |
 | **Analytics and data visualization** | | | |
-| A-12 | New registrations in a date range: sort by name, creation time; filter by name | ⬜ | ⬜ |
-| A-13 | Chart: new registrations per month for a selected year | ⬜ | ⬜ |
-| A-14 | Friend counts (direct and friends-of-friends): sort, name filter, direct-count filter (`=`, `<`, `>`) | ⬜ | ⬜ |
-| A-15 | Active users in a date range (app opens, people chatted with, groups chatted in): sort, name filter, activity filter (`=`, `<`, `>`) | ⬜ | ⬜ |
-| A-16 | Chart: active users per month for a selected year | ⬜ | ⬜ |
+| A-12 | New registrations in a date range: sort by name, creation time; filter by name | 🚧 | ⬜ |
+| A-13 | Chart: new registrations per month for a selected year | 🚧 | ⬜ |
+| A-14 | Friend counts (direct and friends-of-friends): sort, name filter, direct-count filter (`=`, `<`, `>`) | 🚧 | ⬜ |
+| A-15 | Active users in a date range (app opens, people chatted with, groups chatted in): sort, name filter, activity filter (`=`, `<`, `>`) | 🚧 | ⬜ |
+| A-16 | Chart: active users per month for a selected year | 🚧 | ⬜ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
 

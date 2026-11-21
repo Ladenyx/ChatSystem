@@ -1,12 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
-</VBox>
+<ScrollPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.chatsystem.admin.controller.analytics.ActivityController"
+            stylesheets="@../../css/analytics.css" styleClass="admin-analytics-view"
+            minWidth="0" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER">
+    <VBox spacing="12" minWidth="0" styleClass="admin-analytics-content">
+        <fx:include fx:id="chart" source="monthly-chart.fxml"/>
+        <VBox spacing="12" minWidth="0" styleClass="admin-analytics-panel" VBox.vgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="Chi tiết hoạt động" styleClass="section-title"/>
+                <Label fx:id="activityCount" styleClass="caption"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Giờ Việt Nam · UTC+7" styleClass="caption"/>
+            </HBox>
+            <fx:include fx:id="filters" source="filters.fxml"/>
+            <TableView fx:id="activityRows" styleClass="admin-analytics-table" prefHeight="220"
+                       minWidth="0" minHeight="144" fixedCellSize="36" VBox.vgrow="ALWAYS"
+                       accessibleText="Hoạt động theo tài khoản">
+                <columns>
+                    <TableColumn fx:id="accountId" text="ID" minWidth="76" prefWidth="88"
+                                 styleClass="admin-analytics-meta" sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="fullName" text="Họ tên" minWidth="126" prefWidth="186"
+                                 sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="createdAt" text="Ngày tạo" minWidth="138" prefWidth="168"
+                                 styleClass="admin-analytics-meta" sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="appOpens" text="Lượt mở app" minWidth="126" prefWidth="151"
+                                 styleClass="admin-analytics-metric" sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="peopleChattedWith" text="Người đã chat" minWidth="106" prefWidth="138"
+                                 styleClass="admin-analytics-metric" sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="groupsChattedIn" text="Nhóm đã chat" minWidth="106" prefWidth="138"
+                                 styleClass="admin-analytics-metric" sortable="false" reorderable="false"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS"/>
+                </columnResizePolicy>
+                <placeholder><Label text="Không có hoạt động khớp bộ lọc" styleClass="secondary-text"/></placeholder>
+            </TableView>
+            <Label text="Bảng gồm cả tài khoản chỉ gửi tin trong khoảng đã chọn" styleClass="caption" wrapText="true"/>
+        </VBox>
+    </VBox>
+</ScrollPane>

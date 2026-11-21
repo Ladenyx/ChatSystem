@@ -14,6 +14,7 @@ import com.chatsystem.desktop.mock.model.MockUser;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -21,21 +22,26 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -44,6 +50,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -80,10 +87,64 @@ class AdminApplicationTest {
     }
 
     @Test
+    void signInOpensOverviewWithoutKeepingThePreviewPassword() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                assertEquals(AdminViews.SIGN_IN, navigator.currentViewProperty().get());
+                var sidebar = root.lookup("#workspaceSidebar");
+                var toolbar = root.lookup("#workspaceToolbar");
+                assertFalse(sidebar.isVisible() || sidebar.isManaged());
+                assertFalse(toolbar.isVisible() || toolbar.isManaged());
+
+                var username = (TextField) root.lookup("#signInUsername");
+                var password = (PasswordField) root.lookup("#signInPassword");
+                var submit = (Button) root.lookup("#signInSubmit");
+                assertTrue(submit.isDefaultButton());
+                assertTrue(submit.isDisabled());
+                root.applyCss();
+                root.layout();
+                var form = root.lookup("#signInForm");
+                var bounds = form.localToScene(form.getBoundsInLocal());
+                assertEquals(512, (bounds.getMinX() + bounds.getMaxX()) / 2, 1);
+                assertTrue(bounds.getMaxY() < stage.getScene().getHeight());
+                username.requestFocus();
+                capture(stage, "admin-sign-in-light");
+
+                password.setText("example");
+                assertTrue(submit.isDisabled());
+                username.setText("quantri");
+                assertFalse(submit.isDisabled());
+                navigator.themes().toggle();
+                submit.requestFocus();
+                capture(stage, "admin-sign-in-dark");
+
+                submit.fire();
+                assertEquals(AdminViews.OVERVIEW, navigator.currentViewProperty().get());
+                assertTrue(sidebar.isVisible() && sidebar.isManaged());
+                assertTrue(toolbar.isVisible() && toolbar.isManaged());
+                assertTrue(password.getText().isEmpty());
+                assertFalse(navigator.goBack());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
     void sidebarOpensEveryRouteAndKeepsItsSelectionWhenGoingBack() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             DesktopWindow.show(stage, AdminApplication.WINDOW_TITLE, navigator);
             try {
                 var root = stage.getScene().getRoot();
@@ -125,6 +186,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             stage.setScene(new Scene(navigator.getRoot(), 1728, 1000));
             stage.show();
             try {
@@ -188,6 +250,86 @@ class AdminApplicationTest {
     }
 
     @Test
+    void analyticsSelectMonthsAndFilterTheirOwnTables() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                var data = MockData.create();
+                navigator.navigate(AdminViews.REGISTRATIONS);
+                root.applyCss();
+                root.layout();
+                var registrations = (TableView<?>) root.lookup("#registrationRows");
+                assertEquals(12, ((BarChart<?, ?>) root.lookup("#monthlyChart")).getData().getFirst().getData().size());
+                capture(stage, "admin-analytics-registrations-light");
+                var year = (ComboBox<?>) root.lookup("#chartYear");
+                year.getSelectionModel().select(year.getItems().indexOf(2025));
+                ((Button) root.lookup("#month-5")).fire();
+                var from = (DatePicker) root.lookup("#fromDate");
+                var to = (DatePicker) root.lookup("#toDate");
+                assertEquals(LocalDate.of(2025, 5, 1), from.getValue());
+                assertEquals(LocalDate.of(2025, 5, 31), to.getValue());
+                assertEquals(data.monthlyStatistics(2025).get(4).registrations(), registrations.getItems().size());
+                assertEquals("Bảng đang lọc tháng 5/2025", ((Label) root.lookup("#monthHint")).getText());
+                ((Button) root.lookup("#month-5")).fire();
+                assertEquals(data.activityFrom(), from.getValue());
+                assertEquals("Chọn tháng để lọc bảng", ((Label) root.lookup("#monthHint")).getText());
+                from.setValue(to.getValue().plusDays(1));
+                assertTrue(root.lookup("#filterError").isVisible());
+                assertTrue(registrations.getItems().isEmpty());
+                ((Button) root.lookup("#clearAnalyticsFilters")).fire();
+                assertFalse(root.lookup("#filterError").isVisible());
+
+                navigator.navigate(AdminViews.ACTIVITY);
+                root.applyCss();
+                root.layout();
+                var trend = (LineChart<?, ?>) root.lookup("#monthlyChart");
+                assertEquals(12, trend.getData().stream().mapToInt(series -> series.getData().size()).sum());
+                assertEquals(0, trend.getData().getLast().getData().getLast().getYValue());
+                ((Button) root.lookup("#month-11")).fire();
+                var activity = (TableView<?>) root.lookup("#activityRows");
+                assertEquals(data.monthlyStatistics(2026).get(10).activeUsers(), IntStream.range(0, activity.getItems().size())
+                        .filter(index -> (Integer) activity.getColumns().get(3).getCellData(index) > 0).count());
+                ((ComboBox<?>) root.lookup("#activityMetric")).getSelectionModel().select(2);
+                ((ToggleButton) root.lookup("#greaterThan")).fire();
+                ((TextField) root.lookup("#threshold")).setText("0");
+                assertFalse(activity.getItems().isEmpty());
+                assertTrue(IntStream.range(0, activity.getItems().size())
+                        .allMatch(index -> (Integer) activity.getColumns().get(5).getCellData(index) > 0));
+                navigator.themes().toggle();
+                capture(stage, "admin-analytics-activity-dark");
+
+                navigator.navigate(AdminViews.FRIEND_NETWORK);
+                root.applyCss();
+                root.layout();
+                var network = (TableView<?>) root.lookup("#networkRows");
+                var snapshot = List.copyOf(network.getItems());
+                assertEquals(18, snapshot.size());
+                var networkYear = (ComboBox<?>) root.lookup("#chartYear");
+                networkYear.getSelectionModel().select(networkYear.getItems().indexOf(2025));
+                assertEquals(snapshot, network.getItems(), "Changing the chart year leaves the current network intact");
+                ((TextField) root.lookup("#threshold")).setText("0");
+                assertTrue(network.getItems().size() > 0 && network.getItems().size() < snapshot.size());
+                assertTrue(IntStream.range(0, network.getItems().size())
+                        .allMatch(index -> (Integer) network.getColumns().get(3).getCellData(index) == 0));
+                ((Button) root.lookup("#clearAnalyticsFilters")).fire();
+                networkYear.getSelectionModel().select(networkYear.getItems().indexOf(2026));
+                navigator.themes().toggle();
+                capture(stage, "admin-analytics-friends-light");
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
     void eachRegisteredViewLoadsItsOwnFxml() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
             assertEquals(11, AdminViews.ALL.size());
@@ -207,6 +349,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             try {
                 stage.setScene(new Scene(navigator.getRoot(), 1024, 640));
                 stage.show();
@@ -253,6 +396,19 @@ class AdminApplicationTest {
                 capture(stage, "admin-mock-chart-small-dark");
                 var months = navigator.getRoot().lookup("#mockMonths");
                 assertTrue(months.localToScene(months.getBoundsInLocal()).getMaxY() < 640);
+
+                navigator.navigate(AdminViews.ACTIVITY);
+                navigator.getRoot().applyCss();
+                navigator.getRoot().layout();
+                var analytics = (ScrollPane) navigator.getRoot().lookup(".admin-analytics-view");
+                assertTrue(analytics.getContent().getLayoutBounds().getWidth()
+                        <= analytics.getViewportBounds().getWidth() + 1);
+                var activity = (TableView<?>) analytics.lookup("#activityRows");
+                var headers = activity.lookup(".column-header-background");
+                double firstRowBottom = headers.localToScene(headers.getBoundsInLocal()).getMaxY()
+                        + activity.getFixedCellSize();
+                assertTrue(firstRowBottom <= stage.getScene().getHeight(), "The first activity row is visible");
+                capture(stage, "admin-analytics-activity-compact");
             } finally {
                 navigator.close();
                 stage.close();
@@ -326,6 +482,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             var root = navigator.getRoot();
             stage.setScene(new Scene(root, 1366, 768));
             stage.show();
@@ -405,6 +562,9 @@ class AdminApplicationTest {
                 capture(stage, "admin-users-compact");
                 assertTrue(root.lookup("#userInspector").localToScene(
                         root.lookup("#userInspector").getBoundsInLocal()).getMaxX() <= 1024);
+                var actions = (FlowPane) root.lookup(".admin-profile-actions");
+                assertTrue(actions.getChildren().stream().allMatch(
+                        action -> action.getBoundsInParent().getMaxX() <= actions.getWidth() + 1));
 
                 ((Button) root.lookup("#createUser")).fire();
                 var form = ownedDialogPane(stage);
@@ -425,7 +585,13 @@ class AdminApplicationTest {
                 ((ToggleButton) root.lookup("#deletedUsers")).fire();
                 directory.getSelectionModel().selectFirst();
                 assertTrue(root.lookup("#editUser").isDisabled());
-                assertTrue(root.lookup("#deletionNotice").isVisible());
+                var notice = (Label) root.lookup("#deletionNotice");
+                assertTrue(notice.isVisible());
+                root.applyCss();
+                root.layout();
+                assertTrue(notice.getHeight() + 1 >= notice.prefHeight(notice.getWidth()),
+                        "The deletion notice fits both timestamps");
+                capture(stage, "admin-users-deleted-compact");
                 ((Button) root.lookup("#deleteOrRestore")).fire();
                 var restore = ownedDialogPane(stage);
                 assertEquals("Khôi phục tài khoản?", ((Label) restore.lookup("#confirmationTitle")).getText());
