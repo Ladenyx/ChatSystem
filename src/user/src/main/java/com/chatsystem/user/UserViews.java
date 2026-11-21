@@ -13,6 +13,8 @@ public final class UserViews {
             UserApplication.class, "/com/chatsystem/user/fxml/group-form.fxml");
     public static final View CONVERSATION_INFO = new View("U-SCR-09", "Thông tin đoạn chat",
             UserApplication.class, "/com/chatsystem/user/fxml/conversation-info.fxml");
+    public static final View AI_ASSISTANT = new View("U-DLG-03", "Trợ lý AI",
+            UserApplication.class, "/com/chatsystem/user/fxml/ai-assistant.fxml");
 
     private UserViews() {
     }

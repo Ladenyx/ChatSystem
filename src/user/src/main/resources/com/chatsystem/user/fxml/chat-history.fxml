@@ -52,12 +52,14 @@
                 <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
                           prefRowCount="2" prefHeight="56" accessibleText="Soạn tin nhắn"/>
                 <HBox spacing="8" alignment="CENTER_LEFT">
-                    <Button id="refineDraft" disable="true" accessibleText="Chỉnh sửa bằng AI"
+                    <Button fx:id="refineButton" id="refineDraft" disable="true" accessibleText="Chỉnh sửa bằng AI"
+                            onAction="#refineDraft"
                             styleClass="chat-outline,chat-composer-icon">
                         <graphic><ChatIcon icon="refine"/></graphic>
                         <tooltip><Tooltip text="Chỉnh sửa (Refine)"/></tooltip>
                     </Button>
-                    <Button id="recommendReply" disable="true" accessibleText="Gợi ý trả lời bằng AI"
+                    <Button fx:id="recommendButton" id="recommendReply" disable="true" accessibleText="Gợi ý trả lời bằng AI"
+                            onAction="#recommendReply"
                             styleClass="chat-outline,chat-composer-icon">
                         <graphic><ChatIcon icon="recommend"/></graphic>
                         <tooltip><Tooltip text="Gợi ý (Recommend)"/></tooltip>

@@ -595,3 +595,48 @@
     -fx-min-height: 115;
     -fx-alignment: center-left;
 }
+
+.chat-ai-pane {
+    -fx-pref-width: 560;
+    -fx-max-width: 560;
+    -fx-padding: 16 20;
+    -fx-background-color: -chat-surface;
+    -fx-background-radius: 8;
+}
+
+.chat-ai-pane > .scroll-pane {
+    -fx-max-height: 438;
+}
+
+.chat-ai-pane .text-area {
+    -fx-prompt-text-fill: -chat-muted;
+    -fx-border-color: -chat-control-border;
+    -fx-border-radius: 4;
+}
+
+.chat-ai-pane .text-area:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-choice {
+    -fx-alignment: center-left;
+    -fx-min-height: 54;
+    -fx-padding: 10 12;
+    -fx-background-color: -chat-surface;
+    -fx-background-radius: 4;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 4;
+}
+
+.chat-ai-choice:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-ai-choice:selected {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-choice:choice-focused {
+    -fx-border-color: -chat-focus;
+}

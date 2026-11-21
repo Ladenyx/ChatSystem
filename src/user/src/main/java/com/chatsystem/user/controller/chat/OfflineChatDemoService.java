@@ -142,6 +142,14 @@ public final class OfflineChatDemoService {
         return new HistoryPage(messages.subList(first, messages.size()).stream().map(this::visible).toList(), first > 0);
     }
 
+    public List<MockMessage> availableAiContext(String conversationId) {
+        if (access(conversationId) != Access.AVAILABLE) {
+            return List.of();
+        }
+        return history.get(conversationId).stream().filter(this::canFind)
+                .filter(message -> !unsynced.contains(message.id())).toList();
+    }
+
     private MockMessage visible(MockMessage message) {
         if (access(message.conversationId()) == Access.MISSING_KEY) {
             return new MockMessage(message.id(), message.conversationId(), message.senderId(),

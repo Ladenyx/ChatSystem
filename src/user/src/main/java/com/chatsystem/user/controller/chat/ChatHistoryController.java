@@ -6,6 +6,8 @@ import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockMessage.State;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
+import com.chatsystem.user.controller.ai.AiAssistantController;
+import com.chatsystem.user.controller.ai.OfflineAiAssistantService.Mode;
 import com.chatsystem.user.control.ChatIcon;
 import com.chatsystem.user.control.ChatMessageRow;
 import com.chatsystem.user.control.ConversationAvatar;
@@ -49,6 +51,8 @@ public final class ChatHistoryController {
     @FXML private VBox composer;
     @FXML private TextArea draftField;
     @FXML private Button sendButton;
+    @FXML private Button refineButton;
+    @FXML private Button recommendButton;
     @FXML private VBox selectionFooter;
     @FXML private VBox readOnlyFooter;
     @FXML private Label readOnlyTitle;
@@ -63,6 +67,7 @@ public final class ChatHistoryController {
     private boolean selecting;
     private boolean restoringDraft;
     private long renderVersion;
+    private long draftRevision;
     private Alert confirmation;
     private String highlightedMessageId;
     private Runnable focusSearch;
@@ -77,10 +82,11 @@ public final class ChatHistoryController {
         historyNotice.visibleProperty().bind(Bindings.isNotEmpty(historyNotice.getChildren()));
         historyNotice.managedProperty().bind(historyNotice.visibleProperty());
         draftField.textProperty().addListener((observable, old, draft) -> {
+            draftRevision++;
             if (!restoringDraft && conversation != null && flow != null) {
                 flow.saveDraft(conversation.id(), draft);
             }
-            sendButton.setDisable(draft.isBlank());
+            updateComposerButtons();
         });
         draftField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER && !event.isShiftDown()) {
@@ -97,6 +103,7 @@ public final class ChatHistoryController {
         this.flow = flow;
         conversation = chat;
         if (changed) {
+            navigator.closePopover();
             historyLimit = OfflineChatDemoService.PAGE_SIZE;
             selectedIds.clear();
             selecting = false;
@@ -183,6 +190,45 @@ public final class ChatHistoryController {
         }
     }
 
+    @FXML
+    private void refineDraft() {
+        openAiAssistant(Mode.REFINE, refineButton);
+    }
+
+    @FXML
+    private void recommendReply() {
+        openAiAssistant(Mode.RECOMMEND, recommendButton);
+    }
+
+    private void openAiAssistant(Mode mode, Button anchor) {
+        if (!canCompose() || (mode == Mode.REFINE && draftField.getText().isBlank())) {
+            return;
+        }
+        var session = flow;
+        var owner = navigator;
+        String chatId = conversation.id();
+        long version = draftRevision;
+        AiAssistantController.open(owner, anchor, new AiAssistantController.Input(mode, conversation.title(), draftField.getText(),
+                () -> session.chat().availableAiContext(chatId),
+                senderId -> MockData.PREVIEW_USER_ID.equals(senderId) ? "Bạn" : session.data().user(senderId).fullName(),
+                () -> navigator == owner && flow == session && session.isCurrent(owner) && canCompose()
+                        && conversation.id().equals(chatId) && draftRevision == version,
+                draftField::setText));
+    }
+
+    private boolean canCompose() {
+        return navigator != null && flow != null && conversation != null && !selecting
+                && flow.chat().access(conversation.id()) == Access.AVAILABLE;
+    }
+
+    private void updateComposerButtons() {
+        boolean enabled = canCompose();
+        boolean blank = draftField.getText().isBlank();
+        sendButton.setDisable(!enabled || blank);
+        refineButton.setDisable(!enabled || blank);
+        recommendButton.setDisable(!enabled);
+    }
+
     private void retry(MockMessage message) {
         if (flow.chat().retry(message.conversationId(), message.id())) {
             renderHistory(currentPosition(true));
@@ -248,7 +294,7 @@ public final class ChatHistoryController {
         composer.setVisible(!selecting && (access == Access.AVAILABLE || access == Access.MISSING_KEY));
         draftField.setDisable(access != Access.AVAILABLE);
         draftField.setPromptText(access == Access.MISSING_KEY ? "Cần khóa E2EE hợp lệ để gửi tin." : "Nhập tin nhắn");
-        sendButton.setDisable(access != Access.AVAILABLE || draftField.getText().isBlank());
+        updateComposerButtons();
     }
 
     private void enterSelection(MockMessage message) {
