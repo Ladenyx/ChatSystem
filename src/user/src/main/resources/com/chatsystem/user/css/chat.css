@@ -265,7 +265,7 @@
 
 .chat-header {
     -fx-padding: 12 16;
-    -fx-min-height: 64;
+    -fx-min-height: 88;
     -fx-border-color: -chat-border;
     -fx-border-width: 0 0 1 0;
 }
@@ -278,4 +278,145 @@
 .chat-info {
     -fx-padding: 16;
     -fx-fill-width: false;
+}
+
+.chat-history,
+.chat-history > .viewport,
+.chat-history-content {
+    -fx-background-color: -chat-canvas;
+    -fx-background-insets: 0;
+}
+
+.chat-history {
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.chat-history-content {
+    -fx-padding: 24;
+}
+
+.chat-message-author {
+    -fx-font-weight: bold;
+}
+
+.chat-bubble {
+    -fx-padding: 10 12;
+    -fx-background-radius: 12;
+}
+
+.chat-bubble-incoming,
+.chat-bubble-unavailable {
+    -fx-background-color: -chat-incoming;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-bubble-outgoing {
+    -fx-background-color: -chat-brand;
+    -fx-text-fill: -chat-on-brand;
+}
+
+.chat-bubble-unavailable {
+    -fx-text-fill: -chat-muted;
+    -fx-font-style: italic;
+}
+
+.chat-receipt-read {
+    -fx-text-fill: -chat-brand-text;
+}
+
+.chat-message-more {
+    -fx-background-color: transparent;
+    -fx-padding: 4;
+    -fx-opacity: 0;
+}
+
+.chat-message-row:hover .chat-message-more,
+.chat-message-more:focused {
+    -fx-opacity: 1;
+}
+
+.chat-message-more:hover {
+    -fx-background-color: -chat-hover;
+    -fx-background-radius: 4;
+}
+
+.chat-composer {
+    -fx-background-color: -chat-surface;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-radius: 8 8 0 0;
+    -fx-border-color: -chat-control-border;
+    -fx-padding: 16;
+}
+
+.chat-composer .text-area,
+.chat-composer .text-area .content {
+    -fx-background-color: -chat-canvas;
+    -fx-text-fill: -chat-text;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+.chat-composer .text-area {
+    -fx-border-color: -chat-control-border;
+    -fx-border-radius: 4;
+    -fx-prompt-text-fill: -chat-muted;
+}
+
+.chat-composer .text-area:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-composer .text-area:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -chat-muted;
+}
+
+.chat-primary {
+    -fx-background-color: -chat-brand;
+    -fx-text-fill: -chat-on-brand;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-min-height: 32;
+}
+
+.chat-primary:hover {
+    -fx-background-color: -chat-brand-hover;
+}
+
+.chat-primary:focused,
+.chat-message-more:focused {
+    -fx-border-color: -chat-focus;
+    -fx-border-radius: 4;
+}
+
+.chat-composer-icon {
+    -fx-padding: 4;
+    -fx-min-width: 32;
+}
+
+.chat-send {
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -chat-icon-color: -chat-on-brand;
+}
+
+.chat-composer-icon:disabled {
+    -fx-opacity: 0.65;
+}
+
+.chat-warning {
+    -fx-background-color: -chat-warning-bg;
+    -fx-background-radius: 4;
+    -fx-padding: 10;
+    -chat-icon-color: -chat-warning;
+}
+
+.chat-warning-text {
+    -fx-text-fill: -chat-warning;
+}
+
+.chat-history-notice {
+    -fx-padding: 12 24 0;
+    -fx-spacing: 8;
 }

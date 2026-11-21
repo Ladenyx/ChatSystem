@@ -16,6 +16,9 @@
     -chat-online: #107c10;
     -chat-offline: #707070;
     -chat-icon-color: -chat-muted;
+    -chat-incoming: #f0f0f0;
+    -chat-warning: #8a3707;
+    -chat-warning-bg: #fff9f5;
 }
 
 .cs-root:dark .user-shell, .cs-root:dark .chat-info {
@@ -31,4 +34,7 @@
     -chat-brand-text: #77b7f7;
     -chat-online: #54b054;
     -chat-offline: #9e9e9e;
+    -chat-incoming: #333333;
+    -chat-warning: #fce100;
+    -chat-warning-bg: #332717;
 }

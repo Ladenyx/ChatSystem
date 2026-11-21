@@ -4,12 +4,16 @@ import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.desktop.navigation.ViewNavigator;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 
 /** Offline workspace state owned by one User Client window. */
 public final class ChatDemoFlow {
     private final MockData data = MockData.create();
+    private final OfflineChatDemoService chat = new OfflineChatDemoService(data);
+    private final Map<String, String> drafts = new HashMap<>();
     private final ReadOnlyObjectWrapper<MockConversation> selected = new ReadOnlyObjectWrapper<>();
 
     private ChatDemoFlow() {
@@ -24,8 +28,29 @@ public final class ChatDemoFlow {
         navigator.getRoot().getProperties().remove(ChatDemoFlow.class);
     }
 
+    public boolean isCurrent(ViewNavigator navigator) {
+        return navigator.currentViewProperty().get() != null
+                && navigator.getRoot().getProperties().get(ChatDemoFlow.class) == this;
+    }
+
     public MockData data() {
         return data;
+    }
+
+    public OfflineChatDemoService chat() {
+        return chat;
+    }
+
+    public String draft(String conversationId) {
+        return drafts.getOrDefault(conversationId, "");
+    }
+
+    public void saveDraft(String conversationId, String draft) {
+        if (draft.isEmpty()) {
+            drafts.remove(conversationId);
+        } else {
+            drafts.put(conversationId, draft);
+        }
     }
 
     public ReadOnlyObjectProperty<MockConversation> selectedProperty() {

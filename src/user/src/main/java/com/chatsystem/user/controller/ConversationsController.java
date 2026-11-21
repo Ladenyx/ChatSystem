@@ -1,20 +1,19 @@
 package com.chatsystem.user.controller;
 
-import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
-import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.ConversationCell;
 import com.chatsystem.user.controller.chat.ChatDemoFlow;
+import com.chatsystem.user.controller.chat.ChatHistoryController;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -37,10 +36,9 @@ public final class ConversationsController implements ViewController {
     @FXML private ToggleButton groupFilter;
     @FXML private VBox emptyWorkspace;
     @FXML private BorderPane selectedWorkspace;
-    @FXML private Label conversationTitle;
-    @FXML private Label conversationStatus;
-    @FXML private ConversationAvatar conversationAvatar;
+    @FXML private ChatHistoryController selectedWorkspaceController;
 
+    private final ObservableList<MockConversation> conversations = FXCollections.observableArrayList();
     private ViewNavigator navigator;
     private ChatDemoFlow flow;
     private FilteredList<MockConversation> visibleConversations;
@@ -55,10 +53,12 @@ public final class ConversationsController implements ViewController {
         selectedWorkspace.managedProperty().bind(selectedWorkspace.visibleProperty());
 
         conversationItems.getSelectionModel().selectedItemProperty().addListener((observable, previous, current) -> {
-            if (!updatingSelection && current != null) {
+            if (!updatingSelection && flow != null && current != null) {
                 flow.select(current);
+                flow.chat().markRead(current.id());
                 navigator.closeDrawer();
                 showSelection(current);
+                refreshSidebar();
             }
         });
         conversationFilter.textProperty().addListener((observable, previous, current) -> applyFilter());
@@ -76,19 +76,19 @@ public final class ConversationsController implements ViewController {
         this.navigator = navigator;
         flow = ChatDemoFlow.get(navigator);
         if (visibleConversations == null) {
-            MockData data = flow.data();
-            visibleConversations = new FilteredList<>(FXCollections.observableArrayList(data.conversations()));
+            visibleConversations = new FilteredList<>(conversations);
             ChatDemoFlow session = flow;
             conversationItems.setCellFactory(list -> new ConversationCell(session));
             conversationItems.setItems(visibleConversations);
             allFilter.setSelected(true);
         }
-        applyFilter();
+        refreshSidebar();
         showSelection(flow.selectedProperty().get());
     }
 
     @Override
     public void onLeave() {
+        selectedWorkspaceController.detach();
         navigator = null;
         flow = null;
     }
@@ -98,31 +98,47 @@ public final class ConversationsController implements ViewController {
         navigator.showModal(UserViews.CREATE_GROUP);
     }
 
-    @FXML
-    private void openInfo() {
-        if (!navigator.isDrawerOpen()) {
-            navigator.showDrawer(UserViews.CONVERSATION_INFO);
-        } else {
-            navigator.closeDrawer();
-        }
+    private void refreshSidebar() {
+        updateSidebar(true);
     }
 
     private void applyFilter() {
+        updateSidebar(false);
+    }
+
+    private void updateSidebar(boolean refresh) {
         if (flow == null || visibleConversations == null) {
             return;
         }
         String query = conversationFilter.getText().strip().toLowerCase(Locale.ROOT);
         updatingSelection = true;
         try {
+            var selection = conversationItems.getSelectionModel();
+            int previousIndex = selection.getSelectedIndex();
+            if (refresh) {
+                conversations.setAll(flow.chat().conversations());
+            }
             visibleConversations.setPredicate(chat -> chat.title().toLowerCase(Locale.ROOT).contains(query)
                     && (!unreadFilter.isSelected() || chat.unreadCount() > 0)
                     && (!groupFilter.isSelected() || chat.kind() == MockConversation.Kind.GROUP));
-            var selection = conversationItems.getSelectionModel();
-            int selectedIndex = visibleConversations.indexOf(flow.selectedProperty().get());
+            MockConversation selected = flow.selectedProperty().get();
+            int selectedIndex = -1;
+            for (int i = 0; selected != null && i < visibleConversations.size(); i++) {
+                if (visibleConversations.get(i).id().equals(selected.id())) {
+                    selectedIndex = i;
+                    break;
+                }
+            }
             if (selectedIndex < 0) {
                 selection.clearSelection();
             } else {
                 selection.select(selectedIndex);
+            }
+            if (refresh) {
+                conversationItems.refresh();
+                if (selectedIndex == 0 && previousIndex > 0) {
+                    conversationItems.scrollTo(0);
+                }
             }
         } finally {
             updatingSelection = false;
@@ -133,9 +149,7 @@ public final class ConversationsController implements ViewController {
         emptyWorkspace.setVisible(conversation == null);
         selectedWorkspace.setVisible(conversation != null);
         if (conversation != null) {
-            conversationTitle.setText(conversation.title());
-            conversationStatus.setText(flow.statusText(conversation));
-            conversationAvatar.show(conversation, flow);
+            selectedWorkspaceController.show(navigator, flow, conversation, this::refreshSidebar);
         }
     }
 }

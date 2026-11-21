@@ -4,6 +4,7 @@ import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.user.controller.chat.ChatDemoFlow;
+import com.chatsystem.user.controller.chat.OfflineChatDemoService.Access;
 import java.time.format.DateTimeFormatter;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
@@ -73,10 +74,17 @@ public final class ConversationCell extends ListCell<MockConversation> {
         if (chat.unreadCount() > 0) {
             name.getStyleClass().add("chat-row-unread");
         }
-        var messages = flow.data().messagesFor(chat.id());
-        MockMessage last = messages.isEmpty() ? null : messages.getLast();
-        preview.setText(last == null ? "Chưa có tin nhắn" : last.state() == MockMessage.State.RECALLED
-                ? "Tin nhắn đã thu hồi" : last.text().replaceAll("\\s+", " "));
+        MockMessage last = flow.chat().latest(chat.id());
+        if (last == null) {
+            preview.setText("Chưa có tin nhắn");
+        } else if (flow.chat().access(chat.id()) == Access.MISSING_KEY) {
+            preview.setText("Tin nhắn chưa thể giải mã");
+        } else {
+            String prefix = chat.encrypted() && !last.senderId().equals(MockData.PREVIEW_USER_ID)
+                    ? flow.data().user(last.senderId()).fullName() + ": " : "";
+            preview.setText(last.state() == MockMessage.State.RECALLED
+                    ? "Tin nhắn đã thu hồi" : prefix + last.text().replaceAll("\\s+", " "));
+        }
         time.setText(last == null ? "" : TIME.format(last.sentAt()));
         unread.setText(Integer.toString(chat.unreadCount()));
         unread.setVisible(chat.unreadCount() > 0);

@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import com.chatsystem.user.control.ChatIcon?>
-<?import com.chatsystem.user.control.ConversationAvatar?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
@@ -48,22 +46,7 @@
                 </StackPane>
                 <Label text="Chọn một đoạn chat" styleClass="section-title" wrapText="true"/>
             </VBox>
-            <BorderPane fx:id="selectedWorkspace" visible="false" styleClass="chat-selected" minWidth="0">
-                <top>
-                    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="chat-header">
-                        <ConversationAvatar fx:id="conversationAvatar"/>
-                        <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
-                            <Label fx:id="conversationTitle" styleClass="chat-heading" wrapText="true"/>
-                            <Label fx:id="conversationStatus" styleClass="chat-caption" wrapText="true"/>
-                        </VBox>
-                        <Button id="conversationInfo" onAction="#openInfo" accessibleText="Thông tin đoạn chat"
-                                styleClass="chat-outline,chat-info-button">
-                            <graphic><ChatIcon icon="info"/></graphic>
-                            <tooltip><Tooltip text="Thông tin đoạn chat"/></tooltip>
-                        </Button>
-                    </HBox>
-                </top>
-            </BorderPane>
+            <fx:include fx:id="selectedWorkspace" source="chat-history.fxml"/>
         </StackPane>
     </center>
 </BorderPane>
