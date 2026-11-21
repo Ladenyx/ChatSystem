@@ -5,23 +5,18 @@ import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
 import com.chatsystem.user.UserViews;
-import com.chatsystem.user.controller.auth.AuthDemoFlow;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class UserShellController {
     @FXML private StackPane viewHost;
-    @FXML private VBox workspaceRail;
-    @FXML private HBox workspaceToolbar;
     @FXML private ToggleButton chatsButton;
     @FXML private ToggleButton contactsButton;
     @FXML private Button backButton;
@@ -34,15 +29,8 @@ public final class UserShellController {
         ToggleGroup group = new ToggleGroup();
         chatsButton.setToggleGroup(group);
         contactsButton.setToggleGroup(group);
-        workspaceRail.managedProperty().bind(workspaceRail.visibleProperty());
-        workspaceToolbar.managedProperty().bind(workspaceToolbar.visibleProperty());
-        workspaceRail.setVisible(false);
-        workspaceToolbar.setVisible(false);
         backButton.disableProperty().bind(navigator.canGoBackProperty().not());
         navigator.currentViewProperty().addListener((observable, old, view) -> {
-            boolean workspace = view != null && !UserViews.isAuthView(view);
-            workspaceRail.setVisible(workspace);
-            workspaceToolbar.setVisible(workspace);
             chatsButton.setSelected(UserViews.CONVERSATIONS.equals(view));
             contactsButton.setSelected(UserViews.CONTACTS.equals(view));
         });
@@ -89,12 +77,6 @@ public final class UserShellController {
     @FXML
     private void openMockData() {
         navigator.navigate(MockDataPreviewController.VIEW);
-    }
-
-    @FXML
-    private void signOut() {
-        AuthDemoFlow.clear(navigator);
-        navigator.reset(UserViews.SIGN_IN);
     }
 
     @FXML
