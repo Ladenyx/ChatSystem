@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <ScrollPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.chatsystem.user.controller.auth.SignUpController"
             id="authSignUp" styleClass="auth-view" stylesheets="@../../css/auth.css" fitToWidth="true"
@@ -11,125 +11,188 @@
         <ToggleGroup fx:id="gender"/>
     </fx:define>
     <content>
-        <StackPane styleClass="auth-layout">
-            <HBox alignment="CENTER" styleClass="auth-columns">
-                <fx:include source="auth-illustration.fxml" HBox.hgrow="ALWAYS"/>
-                <VBox alignment="CENTER" minWidth="330" prefWidth="522" maxWidth="522" fillWidth="true"
-                      styleClass="auth-card-column">
-                    <VBox fillWidth="true" styleClass="auth-card">
-                        <VBox spacing="6">
-                            <Label text="Đăng ký" styleClass="auth-heading" wrapText="true"/>
-                            <Label fx:id="stepTitle" styleClass="auth-subtitle" wrapText="true"/>
-                            <Label fx:id="stepHelp" visible="false" managed="false" styleClass="auth-muted" wrapText="true"/>
-                        </VBox>
-                        <VBox fx:id="usernameStep" spacing="6">
-                            <Label text="Tên đăng nhập" styleClass="auth-field-label"/>
-                            <StackPane styleClass="auth-username-input">
-                                <TextField fx:id="authSignUpUsername" promptText="Ví dụ: ban_be" accessibleText="Tên đăng nhập"
-                                           onAction="#submit"/>
-                                <ImageView fitWidth="18" fitHeight="18" preserveRatio="true" mouseTransparent="true"
-                                           StackPane.alignment="CENTER_LEFT" translateX="12">
-                                    <image><Image url="@../../images/auth-username-icon.png"/></image>
-                                </ImageView>
-                            </StackPane>
-                            <Label fx:id="authSignUpUsernameError" labelFor="$authSignUpUsername" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <Label text="6–30 ký tự, chỉ dùng chữ không dấu, số, dấu _ và dấu -" wrapText="true" styleClass="auth-muted"/>
-                        </VBox>
-                        <VBox fx:id="passwordStep" spacing="6" visible="false" managed="false">
-                            <Label text="Mật khẩu" styleClass="auth-field-label"/>
-                            <StackPane styleClass="auth-password-input">
-                                <PasswordField fx:id="authSignUpPassword" promptText="Mật khẩu" accessibleText="Mật khẩu" onAction="#submit"/>
-                                <TextField fx:id="visiblePassword" promptText="Mật khẩu" accessibleText="Mật khẩu" onAction="#submit"
-                                           visible="false" managed="false"/>
-                                <Button fx:id="showPassword" text="Hiện" accessibleText="Hiện mật khẩu"
-                                        styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
-                                    <graphic>
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true" mouseTransparent="true">
-                                            <image><Image url="@../../images/auth-visibility-off.png"/></image>
-                                        </ImageView>
-                                    </graphic>
-                                </Button>
-                            </StackPane>
-                            <Label fx:id="authSignUpPasswordError" labelFor="$authSignUpPassword" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <GridPane hgap="8" vgap="3" styleClass="auth-rules">
-                                <columnConstraints>
-                                    <ColumnConstraints percentWidth="50"/>
-                                    <ColumnConstraints percentWidth="50"/>
-                                </columnConstraints>
-                                <Label fx:id="ruleLength" text="○ 8–128 ký tự" styleClass="auth-muted" wrapText="true"/>
-                                <Label fx:id="ruleUpper" text="○ Có chữ hoa" styleClass="auth-muted" wrapText="true" GridPane.columnIndex="1"/>
-                                <Label fx:id="ruleLower" text="○ Có chữ thường" styleClass="auth-muted" wrapText="true" GridPane.rowIndex="1"/>
-                                <Label fx:id="ruleDigit" text="○ Có chữ số" styleClass="auth-muted" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                                <Label fx:id="ruleSymbol" text="○ Có ký tự đặc biệt" styleClass="auth-muted" wrapText="true" GridPane.rowIndex="2"/>
-                            </GridPane>
-                            <Label text="Nhập lại mật khẩu" styleClass="auth-field-label"/>
-                            <StackPane styleClass="auth-password-input">
-                                <PasswordField fx:id="authSignUpPasswordConfirm" promptText="Nhập lại mật khẩu" accessibleText="Nhập lại mật khẩu" onAction="#submit"/>
-                                <TextField fx:id="visibleConfirmation" promptText="Nhập lại mật khẩu" accessibleText="Nhập lại mật khẩu" onAction="#submit"
-                                           visible="false" managed="false"/>
-                                <Button fx:id="showConfirmation" text="Hiện" accessibleText="Hiện mật khẩu"
-                                        styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
-                                    <graphic>
-                                        <ImageView fitWidth="18" fitHeight="18" preserveRatio="true" mouseTransparent="true">
-                                            <image><Image url="@../../images/auth-visibility-off.png"/></image>
-                                        </ImageView>
-                                    </graphic>
-                                </Button>
-                            </StackPane>
-                            <Label fx:id="authSignUpPasswordConfirmError" labelFor="$authSignUpPasswordConfirm" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                        </VBox>
-                        <VBox fx:id="emailStep" spacing="6" visible="false" managed="false">
-                            <Label text="Email" styleClass="auth-field-label"/>
-                            <TextField fx:id="authSignUpEmail" promptText="ban_be@example.test" accessibleText="Email" onAction="#submit"/>
-                            <Label fx:id="authSignUpEmailError" labelFor="$authSignUpEmail" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <Label fx:id="emailWait" visible="false" managed="false" wrapText="true" styleClass="auth-muted"/>
-                        </VBox>
-                        <VBox fx:id="profileStep" spacing="6" visible="false" managed="false">
-                            <Label text="Họ tên" styleClass="auth-field-label"/>
-                            <TextField fx:id="authSignUpFullName" promptText="Nguyễn Văn An" accessibleText="Họ tên" onAction="#submit"/>
-                            <Label fx:id="authSignUpFullNameError" labelFor="$authSignUpFullName" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <Label text="Địa chỉ (tùy chọn)" styleClass="auth-field-label"/>
-                            <TextField fx:id="address" id="authSignUpAddress" promptText="Nhập địa chỉ"
-                                       accessibleText="Địa chỉ (tùy chọn)" onAction="#submit"/>
-                            <Label fx:id="authSignUpAddressError" labelFor="$address" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <Label text="Ngày sinh (tùy chọn)" styleClass="auth-field-label"/>
-                            <DatePicker fx:id="dateOfBirth" id="authSignUpBirthDate" promptText="DD/MM/YYYY"
-                                        accessibleText="Ngày sinh" maxWidth="Infinity"/>
-                            <Label fx:id="authSignUpBirthDateError" labelFor="$dateOfBirth" visible="false"
-                                   managed="false" wrapText="true" styleClass="auth-error,auth-inline-error"/>
-                            <Label text="Giới tính (tùy chọn)" styleClass="auth-field-label"/>
-                            <HBox alignment="CENTER_LEFT" spacing="24">
-                                <RadioButton id="authSignUpGenderMale" text="Nam" toggleGroup="$gender"/>
-                                <RadioButton id="authSignUpGenderFemale" text="Nữ" toggleGroup="$gender"/>
-                                <RadioButton id="authSignUpGenderOther" text="Khác" toggleGroup="$gender"/>
+        <BorderPane styleClass="auth-layout">
+            <top><fx:include source="auth-header.fxml"/></top>
+            <center>
+                <HBox alignment="CENTER" styleClass="auth-columns">
+                    <fx:include source="auth-illustration.fxml" HBox.hgrow="ALWAYS"/>
+                    <VBox alignment="CENTER" minWidth="360" prefWidth="440" maxWidth="440" fillWidth="true"
+                          styleClass="auth-card-column">
+                        <VBox fillWidth="true" styleClass="auth-card">
+                            <VBox spacing="8">
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label text="Đăng ký" styleClass="auth-heading" wrapText="true"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="stepCounter" minWidth="-Infinity" styleClass="auth-step-counter"/>
+                                </HBox>
+                                <HBox fx:id="stepProgress" spacing="4" styleClass="auth-progress">
+                                    <Region styleClass="auth-progress-segment" HBox.hgrow="ALWAYS"/>
+                                    <Region styleClass="auth-progress-segment" HBox.hgrow="ALWAYS"/>
+                                    <Region styleClass="auth-progress-segment" HBox.hgrow="ALWAYS"/>
+                                    <Region styleClass="auth-progress-segment" HBox.hgrow="ALWAYS"/>
+                                </HBox>
+                                <VBox spacing="4">
+                                    <Label fx:id="stepTitle" styleClass="auth-subtitle" wrapText="true"/>
+                                    <Label fx:id="stepHelp" visible="false" managed="false" styleClass="auth-muted"
+                                           wrapText="true"/>
+                                </VBox>
+                            </VBox>
+                            <VBox fx:id="usernameStep" spacing="4">
+                                <Label text="Tên đăng nhập" styleClass="auth-field-label"/>
+                                <StackPane styleClass="auth-username-input">
+                                    <TextField fx:id="authSignUpUsername" promptText="Ví dụ: ban_be"
+                                               accessibleText="Tên đăng nhập" onAction="#submit"/>
+                                    <FontIcon iconLiteral="fth-user" iconSize="16" styleClass="auth-input-icon"
+                                              mouseTransparent="true" StackPane.alignment="CENTER_LEFT">
+                                        <StackPane.margin><Insets left="12"/></StackPane.margin>
+                                    </FontIcon>
+                                </StackPane>
+                                <Label fx:id="authSignUpUsernameError" labelFor="$authSignUpUsername"
+                                       visible="false" managed="false" wrapText="true"
+                                       styleClass="auth-error,auth-inline-error"/>
+                                <Label text="6–30 ký tự, chỉ dùng chữ không dấu, số, dấu _ và dấu -"
+                                       wrapText="true" styleClass="auth-muted,auth-rules"/>
+                            </VBox>
+                            <VBox fx:id="passwordStep" spacing="12" visible="false" managed="false">
+                                <VBox spacing="4">
+                                    <Label text="Mật khẩu" styleClass="auth-field-label"/>
+                                    <StackPane styleClass="auth-password-input">
+                                        <PasswordField fx:id="authSignUpPassword" promptText="Nhập mật khẩu"
+                                                       accessibleText="Mật khẩu" onAction="#submit"/>
+                                        <TextField fx:id="visiblePassword" promptText="Nhập mật khẩu"
+                                                   accessibleText="Mật khẩu" onAction="#submit"
+                                                   visible="false" managed="false"/>
+                                        <Button fx:id="showPassword" text="Hiện" accessibleText="Hiện mật khẩu"
+                                                styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT"
+                                                contentDisplay="GRAPHIC_ONLY">
+                                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-eye-off" iconSize="16"
+                                                          mouseTransparent="true"/>
+                                            </graphic>
+                                        </Button>
+                                    </StackPane>
+                                    <Label fx:id="authSignUpPasswordError" labelFor="$authSignUpPassword"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                    <GridPane hgap="12" vgap="4" styleClass="auth-rules">
+                                        <columnConstraints>
+                                            <ColumnConstraints percentWidth="50"/>
+                                            <ColumnConstraints percentWidth="50"/>
+                                        </columnConstraints>
+                                        <Label fx:id="ruleLength" text="8–128 ký tự" wrapText="true"
+                                               graphicTextGap="8">
+                                            <graphic><Region styleClass="auth-rule-dot"/></graphic>
+                                        </Label>
+                                        <Label fx:id="ruleUpper" text="Có chữ hoa" wrapText="true"
+                                               graphicTextGap="8" GridPane.columnIndex="1">
+                                            <graphic><Region styleClass="auth-rule-dot"/></graphic>
+                                        </Label>
+                                        <Label fx:id="ruleLower" text="Có chữ thường" wrapText="true"
+                                               graphicTextGap="8" GridPane.rowIndex="1">
+                                            <graphic><Region styleClass="auth-rule-dot"/></graphic>
+                                        </Label>
+                                        <Label fx:id="ruleDigit" text="Có chữ số" wrapText="true"
+                                               graphicTextGap="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                            <graphic><Region styleClass="auth-rule-dot"/></graphic>
+                                        </Label>
+                                        <Label fx:id="ruleSymbol" text="Có ký tự đặc biệt" wrapText="true"
+                                               graphicTextGap="8" GridPane.rowIndex="2">
+                                            <graphic><Region styleClass="auth-rule-dot"/></graphic>
+                                        </Label>
+                                    </GridPane>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Nhập lại mật khẩu" styleClass="auth-field-label"/>
+                                    <StackPane styleClass="auth-password-input">
+                                        <PasswordField fx:id="authSignUpPasswordConfirm"
+                                                       promptText="Nhập lại mật khẩu"
+                                                       accessibleText="Nhập lại mật khẩu" onAction="#submit"/>
+                                        <TextField fx:id="visibleConfirmation" promptText="Nhập lại mật khẩu"
+                                                   accessibleText="Nhập lại mật khẩu" onAction="#submit"
+                                                   visible="false" managed="false"/>
+                                        <Button fx:id="showConfirmation" text="Hiện" accessibleText="Hiện mật khẩu"
+                                                styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT"
+                                                contentDisplay="GRAPHIC_ONLY">
+                                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-eye-off" iconSize="16"
+                                                          mouseTransparent="true"/>
+                                            </graphic>
+                                        </Button>
+                                    </StackPane>
+                                    <Label fx:id="authSignUpPasswordConfirmError"
+                                           labelFor="$authSignUpPasswordConfirm" visible="false" managed="false"
+                                           wrapText="true" styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                            </VBox>
+                            <VBox fx:id="emailStep" spacing="4" visible="false" managed="false">
+                                <Label text="Email" styleClass="auth-field-label"/>
+                                <TextField fx:id="authSignUpEmail" promptText="ban_be@example.test"
+                                           accessibleText="Email" onAction="#submit"/>
+                                <Label fx:id="authSignUpEmailError" labelFor="$authSignUpEmail"
+                                       visible="false" managed="false" wrapText="true"
+                                       styleClass="auth-error,auth-inline-error"/>
+                                <Label fx:id="emailWait" visible="false" managed="false" wrapText="true"
+                                       styleClass="auth-muted"/>
+                            </VBox>
+                            <VBox fx:id="profileStep" spacing="12" visible="false" managed="false">
+                                <VBox spacing="4">
+                                    <Label text="Họ tên" styleClass="auth-field-label"/>
+                                    <TextField fx:id="authSignUpFullName" promptText="Nguyễn Văn An"
+                                               accessibleText="Họ tên" onAction="#submit"/>
+                                    <Label fx:id="authSignUpFullNameError" labelFor="$authSignUpFullName"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Địa chỉ (tùy chọn)" styleClass="auth-field-label"/>
+                                    <TextField fx:id="address" id="authSignUpAddress" promptText="Nhập địa chỉ"
+                                               accessibleText="Địa chỉ (tùy chọn)" onAction="#submit"/>
+                                    <Label fx:id="authSignUpAddressError" labelFor="$address"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Ngày sinh (tùy chọn)" styleClass="auth-field-label"/>
+                                    <DatePicker fx:id="dateOfBirth" id="authSignUpBirthDate"
+                                                promptText="DD/MM/YYYY" accessibleText="Ngày sinh"
+                                                maxWidth="Infinity"/>
+                                    <Label fx:id="authSignUpBirthDateError" labelFor="$dateOfBirth"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                                <VBox spacing="6">
+                                    <Label text="Giới tính (tùy chọn)" styleClass="auth-field-label"/>
+                                    <HBox alignment="CENTER_LEFT" spacing="24">
+                                        <RadioButton id="authSignUpGenderMale" text="Nam" toggleGroup="$gender"/>
+                                        <RadioButton id="authSignUpGenderFemale" text="Nữ" toggleGroup="$gender"/>
+                                        <RadioButton id="authSignUpGenderOther" text="Khác" toggleGroup="$gender"/>
+                                    </HBox>
+                                    <Button fx:id="clearGenderButton" text="Bỏ chọn" onAction="#clearGender"
+                                            visible="false" managed="false"
+                                            styleClass="auth-link,auth-inline-link"/>
+                                </VBox>
+                            </VBox>
+                            <Label fx:id="formError" visible="false" managed="false" wrapText="true"
+                                   focusTraversable="false" styleClass="auth-error"/>
+                            <Button fx:id="authSignUpContinue" text="Tiếp tục" onAction="#submit"
+                                    defaultButton="true" maxWidth="Infinity" styleClass="auth-primary"/>
+                            <Button fx:id="backButton" text="Quay lại" accessibleText="Quay lại"
+                                    onAction="#back" graphicTextGap="6" styleClass="auth-link,auth-back">
+                                <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="14"/></graphic>
+                            </Button>
+                            <HBox alignment="CENTER" spacing="4" visible="${usernameStep.visible}"
+                                  managed="${usernameStep.visible}">
+                                <Label text="Đã có tài khoản?" styleClass="auth-muted"/>
+                                <Button fx:id="authSignUpCancel" text="Đăng nhập"
+                                        accessibleText="Quay lại đăng nhập" onAction="#cancel"
+                                        styleClass="auth-link,auth-neutral-link"/>
                             </HBox>
-                            <Button fx:id="clearGenderButton" text="Bỏ chọn" onAction="#clearGender"
-                                    visible="false" managed="false" styleClass="auth-link,auth-back"/>
                         </VBox>
-                        <Label fx:id="formError" visible="false" managed="false" wrapText="true" focusTraversable="false" styleClass="auth-error"/>
-                        <Button fx:id="authSignUpContinue" text="Tiếp tục" onAction="#submit" defaultButton="true" maxWidth="Infinity" styleClass="auth-primary"/>
-                        <Button fx:id="backButton" text="‹ Quay lại" accessibleText="Quay lại" onAction="#back" styleClass="auth-link,auth-back"/>
-                        <HBox alignment="CENTER" spacing="4" visible="${usernameStep.visible}" managed="${usernameStep.visible}">
-                            <Label text="Đã có tài khoản?" styleClass="auth-muted"/>
-                            <Button fx:id="authSignUpCancel" text="Đăng nhập" accessibleText="Quay lại đăng nhập"
-                                    onAction="#cancel" styleClass="auth-link,auth-neutral-link"/>
-                        </HBox>
                     </VBox>
-                </VBox>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="12" maxHeight="54" translateY="46" mouseTransparent="true"
-                  StackPane.alignment="TOP_CENTER" styleClass="auth-header">
-                <ImageView fitWidth="54" fitHeight="54" preserveRatio="true">
-                    <image><Image url="@../../images/auth-app-mark.png"/></image>
-                </ImageView>
-                <Label text="Xem trước ngoại tuyến" styleClass="auth-preview-badge"/>
-            </HBox>
-        </StackPane>
+                </HBox>
+            </center>
+        </BorderPane>
     </content>
 </ScrollPane>

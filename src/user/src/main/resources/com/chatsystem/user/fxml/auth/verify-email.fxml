@@ -1,56 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <ScrollPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.chatsystem.user.controller.auth.VerifyEmailController"
             id="authVerifyEmail" styleClass="auth-view" stylesheets="@../../css/auth.css" fitToWidth="true"
             fitToHeight="true" hbarPolicy="NEVER" focusTraversable="false">
     <content>
-        <StackPane styleClass="auth-layout">
-            <HBox alignment="CENTER" styleClass="auth-columns">
-                <fx:include source="auth-illustration.fxml" HBox.hgrow="ALWAYS"/>
-                <VBox alignment="CENTER" minWidth="330" prefWidth="522" maxWidth="522" fillWidth="true"
-                      styleClass="auth-card-column">
-                    <VBox fillWidth="true" styleClass="auth-card">
-                        <VBox spacing="6">
-                            <Label text="Xác minh email" styleClass="auth-heading" wrapText="true"/>
-                            <Label text="Nhập 6 chữ số (tùy chọn). Bản xem trước không gửi hoặc kiểm tra mã." styleClass="auth-muted" wrapText="true"/>
-                            <Label fx:id="maskedEmail" wrapText="true" styleClass="auth-field-label"/>
+        <BorderPane styleClass="auth-layout">
+            <top><fx:include source="auth-header.fxml"/></top>
+            <center>
+                <HBox alignment="CENTER" styleClass="auth-columns">
+                    <fx:include source="auth-illustration.fxml" HBox.hgrow="ALWAYS"/>
+                    <VBox alignment="CENTER" minWidth="360" prefWidth="440" maxWidth="440" fillWidth="true"
+                          styleClass="auth-card-column">
+                        <VBox fillWidth="true" styleClass="auth-card">
+                            <VBox spacing="4">
+                                <Label text="Xác minh email" styleClass="auth-heading" wrapText="true"/>
+                                <Label text="Nhập mã 6 chữ số (bản xem trước không gửi hoặc kiểm tra mã)"
+                                       styleClass="auth-muted" wrapText="true"/>
+                                <Label fx:id="maskedEmail" wrapText="true" styleClass="auth-field-label"/>
+                            </VBox>
+                            <HBox alignment="CENTER" spacing="8">
+                                <TextField fx:id="authVerifyDigit1" alignment="CENTER" accessibleText="Chữ số thứ 1"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="authVerifyDigit2" alignment="CENTER" accessibleText="Chữ số thứ 2"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="authVerifyDigit3" alignment="CENTER" accessibleText="Chữ số thứ 3"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="authVerifyDigit4" alignment="CENTER" accessibleText="Chữ số thứ 4"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="authVerifyDigit5" alignment="CENTER" accessibleText="Chữ số thứ 5"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="authVerifyDigit6" alignment="CENTER" accessibleText="Chữ số thứ 6"
+                                           onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
+                            </HBox>
+                            <Label fx:id="feedback" visible="false" managed="false" wrapText="true"
+                                   styleClass="auth-inline-error,auth-error"/>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="authVerifyResend" text="Gửi lại mã" disable="true"
+                                        styleClass="auth-link"/>
+                            </HBox>
+                            <Button fx:id="authVerifySubmit" text="Xác minh" onAction="#verify"
+                                    defaultButton="true" maxWidth="Infinity" styleClass="auth-primary"/>
+                            <HBox alignment="CENTER_LEFT">
+                                <Button fx:id="authVerifyCancel" text="Quay lại" accessibleText="Quay lại"
+                                        onAction="#cancel" graphicTextGap="6" styleClass="auth-link,auth-back">
+                                    <graphic><FontIcon iconLiteral="fth-arrow-left" iconSize="14"/></graphic>
+                                </Button>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="authVerifyChangeEmail" text="Đổi email" onAction="#changeEmail"
+                                        styleClass="auth-link"/>
+                            </HBox>
                         </VBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10">
-                            <TextField fx:id="authVerifyDigit1" alignment="CENTER" accessibleText="Chữ số thứ 1"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                            <TextField fx:id="authVerifyDigit2" alignment="CENTER" accessibleText="Chữ số thứ 2"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                            <TextField fx:id="authVerifyDigit3" alignment="CENTER" accessibleText="Chữ số thứ 3"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                            <TextField fx:id="authVerifyDigit4" alignment="CENTER" accessibleText="Chữ số thứ 4"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                            <TextField fx:id="authVerifyDigit5" alignment="CENTER" accessibleText="Chữ số thứ 5"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                            <TextField fx:id="authVerifyDigit6" alignment="CENTER" accessibleText="Chữ số thứ 6"
-                                       onAction="#verify" styleClass="auth-code-digit" HBox.hgrow="ALWAYS"/>
-                        </HBox>
-                        <Label fx:id="feedback" visible="false" managed="false" wrapText="true" styleClass="auth-inline-error,auth-error"/>
-                        <HBox alignment="CENTER">
-                            <Button fx:id="authVerifyResend" text="Gửi lại mã" disable="true" styleClass="auth-link"/>
-                        </HBox>
-                        <Button fx:id="authVerifySubmit" text="Xác minh" onAction="#verify" defaultButton="true" maxWidth="Infinity" styleClass="auth-primary"/>
-                        <Button fx:id="authVerifyChangeEmail" text="Đổi email" onAction="#changeEmail" styleClass="auth-link,auth-back"/>
-                        <Button fx:id="authVerifyCancel" text="‹ Quay lại" accessibleText="Quay lại"
-                                onAction="#cancel" styleClass="auth-link,auth-back"/>
                     </VBox>
-                </VBox>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="12" maxHeight="54" translateY="46" mouseTransparent="true"
-                  StackPane.alignment="TOP_CENTER" styleClass="auth-header">
-                <ImageView fitWidth="54" fitHeight="54" preserveRatio="true">
-                    <image><Image url="@../../images/auth-app-mark.png"/></image>
-                </ImageView>
-                <Label text="Xem trước ngoại tuyến" styleClass="auth-preview-badge"/>
-            </HBox>
-        </StackPane>
+                </HBox>
+            </center>
+        </BorderPane>
     </content>
 </ScrollPane>

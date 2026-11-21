@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<HBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      alignment="CENTER_LEFT" spacing="12" styleClass="auth-header">
+    <StackPane styleClass="auth-brand-icon" accessibleText="WhatsUp">
+        <FontIcon iconLiteral="fth-message-square" iconSize="18"/>
+    </StackPane>
+    <Label text="WhatsUp" styleClass="auth-brand-name"/>
+    <Region HBox.hgrow="ALWAYS"/>
+    <Label text="Xem trước ngoại tuyến" styleClass="auth-preview-note"/>
+</HBox>
