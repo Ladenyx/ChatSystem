@@ -40,13 +40,16 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class UsersController implements ViewController {
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/uuuu")
             .withZone(MockData.DISPLAY_ZONE);
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm")
             .withZone(MockData.DISPLAY_ZONE);
-    private static final PseudoClass RESTORE = PseudoClass.getPseudoClass("restore");
+    private static final PseudoClass MISSING = PseudoClass.getPseudoClass("missing");
+    private static final PseudoClass DESTRUCTIVE = PseudoClass.getPseudoClass("destructive");
 
     @FXML private TextField nameFilter;
     @FXML private TextField usernameFilter;
@@ -75,8 +78,10 @@ public final class UsersController implements ViewController {
     @FXML private Label profileGender;
     @FXML private Button editUser;
     @FXML private Button toggleLock;
+    @FXML private FontIcon lockIcon;
     @FXML private Button resetPassword;
     @FXML private Button deleteOrRestore;
+    @FXML private FontIcon lifecycleIcon;
     @FXML private TableView<MockLoginLog> loginHistory;
     @FXML private TableColumn<MockLoginLog, String> loginAt;
     @FXML private TableColumn<MockLoginLog, String> loginApp;
@@ -195,13 +200,13 @@ public final class UsersController implements ViewController {
         profileHandle.setText("@" + user.username());
         profileIdentity.setText("ID " + user.id());
         showStatus(profileStatus, user.status());
-        profileEmail.setText(user.email());
-        profileAddress.setText(user.address().isBlank() ? "Chưa cung cấp" : user.address());
-        profileBirthDate.setText(user.birthDate().map(DATE::format).orElse("Chưa cung cấp"));
-        profileGender.setText(switch (user.gender()) {
+        showProfileValue(profileEmail, user.email());
+        showProfileValue(profileAddress, user.address());
+        showProfileValue(profileBirthDate, user.birthDate().map(DATE::format).orElse(""));
+        showProfileValue(profileGender, switch (user.gender()) {
             case MALE -> "Nam";
             case FEMALE -> "Nữ";
-            case UNSPECIFIED -> "Chưa cung cấp";
+            case UNSPECIFIED -> "";
         });
 
         boolean deleted = user.status() == Status.DELETED;
@@ -211,9 +216,12 @@ public final class UsersController implements ViewController {
         editUser.setDisable(deleted);
         toggleLock.setDisable(deleted);
         resetPassword.setDisable(deleted);
-        toggleLock.setText(user.status() == Status.LOCKED ? "Mở khóa tài khoản" : "Khóa tài khoản");
+        boolean locked = user.status() == Status.LOCKED;
+        toggleLock.setText(locked ? "Mở khóa tài khoản" : "Khóa tài khoản");
+        lockIcon.setIconCode(locked ? Feather.UNLOCK : Feather.LOCK);
         deleteOrRestore.setText(deleted ? "Khôi phục trước hạn" : "Xóa mềm 30 ngày");
-        deleteOrRestore.pseudoClassStateChanged(RESTORE, deleted);
+        lifecycleIcon.setIconCode(deleted ? Feather.ROTATE_CCW : Feather.TRASH_2);
+        deleteOrRestore.pseudoClassStateChanged(DESTRUCTIVE, !deleted);
 
         setDetailRows(loginHistory, UserManagementFixtures.loginHistory(user.id()));
         setDetailRows(friends, UserManagementFixtures.friends(user.id()));
@@ -269,6 +277,12 @@ public final class UsersController implements ViewController {
         table.getSelectionModel().clearSelection();
         table.getFocusModel().focus(-1);
         table.scrollTo(0);
+    }
+
+    private static void showProfileValue(Label label, String value) {
+        boolean missing = value.isBlank();
+        label.setText(missing ? "Chưa cung cấp" : value);
+        label.pseudoClassStateChanged(MISSING, missing);
     }
 
     private static void showStatus(Label label, Status status) {

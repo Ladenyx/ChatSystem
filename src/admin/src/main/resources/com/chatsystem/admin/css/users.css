@@ -168,6 +168,7 @@
 
 .admin-users-table .table-cell.admin-date-column,
 .admin-users-table .table-cell.admin-time-column,
+.admin-inspector-table .table-cell.admin-friend-handle,
 .admin-account-meta,
 .admin-profile-handle {
     -fx-font-family: "Monospaced";
@@ -218,8 +219,7 @@
     -fx-padding: 24px;
 }
 
-.admin-inspector-icon,
-.admin-profile-initials {
+.admin-inspector-icon {
     -fx-alignment: center;
     -fx-min-width: 44px;
     -fx-max-width: 44px;
@@ -233,20 +233,35 @@
     -fx-icon-color: -cs-muted;
 }
 
+.admin-profile-summary {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: -admin-user-rule;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px;
+}
+
 .admin-profile-initials {
+    -fx-alignment: center;
+    -fx-min-width: 48px;
+    -fx-max-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-height: 48px;
     -fx-background-color: -cs-brand;
+    -fx-background-radius: 8px;
     -fx-text-fill: -cs-on-brand;
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-font-weight: 600;
 }
 
 .admin-profile-name {
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
     -fx-font-weight: 600;
 }
 
-.admin-profile-handle {
-    -fx-text-fill: -cs-brand-text;
+.admin-profile-summary .admin-user-status {
+    -fx-text-fill: -cs-text;
 }
 
 .admin-profile-fields {
@@ -255,34 +270,63 @@
     -fx-padding: 12px 0 0;
 }
 
+.admin-profile-value:missing {
+    -fx-text-fill: -cs-muted;
+}
+
 .admin-profile-actions .button {
     -fx-alignment: center-left;
-    -fx-background-color: transparent;
-    -fx-background-insets: 0;
-    -fx-background-radius: 8px;
+    -fx-background-color: -admin-user-rule, -cs-surface;
+    -fx-background-insets: 0, 1px;
+    -fx-background-radius: 8px, 7px;
     -fx-border-color: transparent;
     -fx-border-radius: 8px;
-    -fx-min-height: 32px;
-    -fx-font-size: 13px;
-    -fx-padding: 4px 8px;
+    -fx-border-width: 2px;
+    -fx-min-height: 36px;
+    -fx-font-size: 12px;
+    -fx-graphic-text-gap: 8px;
+    -fx-padding: 4px 6px;
     -fx-text-fill: -cs-text;
 }
 
-.admin-profile-actions .admin-edit-profile {
-    -fx-border-color: -cs-border;
-    -fx-font-weight: 600;
+.admin-profile-actions .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
 }
 
 .admin-profile-actions .button:hover {
-    -fx-background-color: -cs-hover;
+    -fx-background-color: -admin-user-rule, -cs-hover;
 }
 
-.admin-profile-actions .admin-lifecycle-action {
+.admin-profile-actions .button:pressed {
+    -fx-opacity: 0.86;
+}
+
+.admin-profile-actions .admin-edit-profile {
+    -fx-background-color: -cs-text;
+    -fx-background-insets: 0;
+    -fx-text-fill: -cs-surface;
+    -fx-font-weight: 600;
+}
+
+.admin-profile-actions .admin-edit-profile .ikonli-font-icon {
+    -fx-icon-color: -cs-surface;
+}
+
+.admin-profile-actions .admin-edit-profile:hover {
+    -fx-background-color: -cs-border-strong;
+}
+
+.admin-profile-actions .button:destructive {
+    -fx-background-color: transparent;
     -fx-text-fill: -cs-danger;
 }
 
-.admin-profile-actions .admin-lifecycle-action:restore {
-    -fx-text-fill: -cs-brand-text;
+.admin-profile-actions .button:destructive .ikonli-font-icon {
+    -fx-icon-color: -cs-danger;
+}
+
+.admin-profile-actions .button:destructive:hover {
+    -fx-background-color: -cs-danger-bg;
 }
 
 .admin-user-directory .text-field:focused,
@@ -324,4 +368,47 @@
 
 .admin-inspector-tab {
     -fx-padding: 8px 0 0;
+}
+
+.admin-inspector-tab .hyperlink {
+    -fx-min-height: 28px;
+    -fx-padding: 4px 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+}
+
+.admin-inspector-tab .hyperlink:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-inspector-table .column-header .label,
+.admin-inspector-table .table-cell {
+    -fx-padding: 0 12px;
+}
+
+.admin-inspector-table .table-cell {
+    -fx-border-width: 0;
+}
+
+.admin-inspector-table .table-cell.admin-friend-handle {
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-inspector-table .table-row-cell {
+    -fx-border-width: 0 0 1px;
+}
+
+.admin-inspector-table .table-row-cell:filled:selected {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 0 0 0 2px;
+}
+
+.admin-inspector-table:focused .table-row-cell:filled:focused {
+    -fx-background-color: -cs-focus, -cs-surface;
+    -fx-background-insets: 0, 1px;
+}
+
+.admin-inspector-table:focused .table-row-cell:filled:selected:focused {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 1px 1px 1px 2px;
 }

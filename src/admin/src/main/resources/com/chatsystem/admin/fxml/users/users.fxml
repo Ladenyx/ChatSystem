@@ -92,77 +92,81 @@
         <ScrollPane fx:id="userInspector" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
                     minWidth="0" visible="false" managed="false" focusTraversable="false"
                     styleClass="admin-user-inspector">
-            <VBox spacing="16" minWidth="0" styleClass="admin-profile-content">
-                <VBox spacing="12">
+            <VBox spacing="12" minWidth="0" styleClass="admin-profile-content">
+                <VBox spacing="12" minWidth="0" styleClass="admin-profile-summary">
                     <HBox alignment="CENTER_LEFT" spacing="12">
                         <Label fx:id="profileInitials" styleClass="admin-profile-initials"/>
                         <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
-                            <Label fx:id="profileName" styleClass="admin-profile-name" wrapText="true"/>
-                            <Label fx:id="profileHandle" styleClass="admin-profile-handle" wrapText="true"/>
+                            <Label fx:id="profileName" styleClass="admin-profile-name"
+                                   minWidth="0" wrapText="true"/>
+                            <Label fx:id="profileHandle" styleClass="caption,admin-profile-handle"
+                                   minWidth="0" wrapText="true"/>
+                            <HBox alignment="CENTER_LEFT" spacing="12" minWidth="0">
+                                <Label fx:id="profileStatus" styleClass="admin-user-status"/>
+                                <Label fx:id="profileIdentity" styleClass="caption,admin-account-meta"
+                                       minWidth="0" wrapText="true"/>
+                            </HBox>
                         </VBox>
                     </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label fx:id="profileStatus" styleClass="admin-user-status"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="profileIdentity" styleClass="caption,admin-account-meta" wrapText="true"/>
-                    </HBox>
                     <Label fx:id="deletionNotice" styleClass="admin-deletion-notice" wrapText="true"
-                           maxWidth="Infinity" visible="false" managed="false"/>
+                           minWidth="0" minHeight="-Infinity" maxWidth="Infinity"
+                           visible="false" managed="false"/>
+
+                    <GridPane hgap="16" vgap="8" minWidth="0" styleClass="admin-profile-fields">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="58"/>
+                            <ColumnConstraints percentWidth="42"/>
+                        </columnConstraints>
+                        <VBox spacing="4" minWidth="0">
+                            <Label text="Email" styleClass="caption"/>
+                            <Label fx:id="profileEmail" styleClass="admin-profile-value" minWidth="0" wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="4" minWidth="0" GridPane.columnIndex="1">
+                            <Label text="Địa chỉ" styleClass="caption"/>
+                            <Label fx:id="profileAddress" styleClass="admin-profile-value" minWidth="0" wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="4" minWidth="0" GridPane.rowIndex="1">
+                            <Label text="Ngày sinh" styleClass="caption"/>
+                            <Label fx:id="profileBirthDate" styleClass="admin-profile-value" minWidth="0" wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="4" minWidth="0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label text="Giới tính" styleClass="caption"/>
+                            <Label fx:id="profileGender" styleClass="admin-profile-value" minWidth="0" wrapText="true"/>
+                        </VBox>
+                    </GridPane>
                 </VBox>
 
-                <GridPane hgap="12" vgap="12" styleClass="admin-profile-fields">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="54"/>
-                        <ColumnConstraints percentWidth="46"/>
-                    </columnConstraints>
-                    <VBox spacing="4">
-                        <Label text="Email" styleClass="caption"/>
-                        <Label fx:id="profileEmail" wrapText="true"/>
-                    </VBox>
-                    <VBox spacing="4" GridPane.columnIndex="1">
-                        <Label text="Địa chỉ" styleClass="caption"/>
-                        <Label fx:id="profileAddress" wrapText="true"/>
-                    </VBox>
-                    <VBox spacing="4" GridPane.rowIndex="1">
-                        <Label text="Ngày sinh" styleClass="caption"/>
-                        <Label fx:id="profileBirthDate" wrapText="true"/>
-                    </VBox>
-                    <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                        <Label text="Giới tính" styleClass="caption"/>
-                        <Label fx:id="profileGender" wrapText="true"/>
-                    </VBox>
-                </GridPane>
+                <FlowPane hgap="8" vgap="8" prefWrapLength="480" minWidth="0" styleClass="admin-profile-actions">
+                    <Button fx:id="editUser" text="Sửa hồ sơ" onAction="#openEditUser" styleClass="admin-edit-profile">
+                        <graphic><FontIcon iconLiteral="fth-edit-2" iconSize="16"/></graphic>
+                    </Button>
+                    <Button fx:id="toggleLock" text="Khóa tài khoản" onAction="#openLockConfirmation">
+                        <graphic><FontIcon fx:id="lockIcon" iconLiteral="fth-lock" iconSize="16"/></graphic>
+                    </Button>
+                    <Button fx:id="resetPassword" text="Đặt lại mật khẩu" onAction="#openResetConfirmation">
+                        <graphic><FontIcon iconLiteral="fth-key" iconSize="16"/></graphic>
+                    </Button>
+                    <Button fx:id="deleteOrRestore" text="Xóa mềm 30 ngày" onAction="#openDeletionConfirmation">
+                        <graphic><FontIcon fx:id="lifecycleIcon" iconLiteral="fth-trash-2" iconSize="16"/></graphic>
+                    </Button>
+                </FlowPane>
 
-                <GridPane hgap="8" vgap="4" styleClass="admin-profile-actions">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="50"/>
-                        <ColumnConstraints percentWidth="50"/>
-                    </columnConstraints>
-                    <Button fx:id="editUser" text="Sửa hồ sơ" onAction="#openEditUser" styleClass="admin-edit-profile"
-                            maxWidth="Infinity" minWidth="0" wrapText="true"/>
-                    <Button fx:id="toggleLock" text="Khóa tài khoản" onAction="#openLockConfirmation"
-                            maxWidth="Infinity" minWidth="0" wrapText="true" GridPane.columnIndex="1"/>
-                    <Button fx:id="resetPassword" text="Đặt lại mật khẩu" onAction="#openResetConfirmation"
-                            maxWidth="Infinity" minWidth="0" wrapText="true" GridPane.rowIndex="1"/>
-                    <Button fx:id="deleteOrRestore" text="Xóa mềm 30 ngày" onAction="#openDeletionConfirmation"
-                            styleClass="admin-lifecycle-action" maxWidth="Infinity" minWidth="0" wrapText="true"
-                            GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                </GridPane>
-
-                <TabPane fx:id="userDetails" tabClosingPolicy="UNAVAILABLE" minHeight="152" tabMinHeight="36"
-                         prefHeight="216" minWidth="0" VBox.vgrow="ALWAYS">
+                <TabPane fx:id="userDetails" tabClosingPolicy="UNAVAILABLE" minHeight="168" tabMinHeight="36"
+                         prefHeight="240" minWidth="0" VBox.vgrow="ALWAYS">
                     <Tab text="Lịch sử đăng nhập">
                         <VBox spacing="8" styleClass="admin-inspector-tab">
-                            <HBox spacing="4" alignment="CENTER_LEFT">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
                                 <Label text="Giờ Việt Nam · UTC+7" styleClass="caption" wrapText="true"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Hyperlink id="systemLoginLogs" text="Nhật ký hệ thống" onAction="#openLoginLogs"
+                                           accessibleText="Mở nhật ký đăng nhập toàn hệ thống"
                                            contentDisplay="RIGHT" graphicTextGap="8">
                                     <graphic><FontIcon iconLiteral="fth-arrow-right" iconSize="16"/></graphic>
                                 </Hyperlink>
                             </HBox>
-                            <TableView fx:id="loginHistory" fixedCellSize="32" minHeight="72" minWidth="0"
-                                       styleClass="admin-users-table" accessibleText="Lịch sử đăng nhập"
+                            <TableView fx:id="loginHistory" fixedCellSize="36" minHeight="72" minWidth="0"
+                                       styleClass="admin-users-table,admin-inspector-table"
+                                       accessibleText="Lịch sử đăng nhập"
                                        VBox.vgrow="ALWAYS">
                                 <columns>
                                     <TableColumn fx:id="loginAt" text="Đăng nhập lúc" minWidth="144" prefWidth="176"
@@ -180,14 +184,15 @@
                     <Tab text="Danh sách bạn bè">
                         <VBox spacing="8" styleClass="admin-inspector-tab">
                             <Label fx:id="friendCount" styleClass="caption"/>
-                            <TableView fx:id="friends" fixedCellSize="32" minHeight="72" minWidth="0"
-                                       styleClass="admin-users-table" accessibleText="Danh sách bạn bè trực tiếp"
+                            <TableView fx:id="friends" fixedCellSize="36" minHeight="72" minWidth="0"
+                                       styleClass="admin-users-table,admin-inspector-table"
+                                       accessibleText="Danh sách bạn bè trực tiếp"
                                        VBox.vgrow="ALWAYS">
                                 <columns>
                                     <TableColumn fx:id="friendName" text="Họ tên" minWidth="106" prefWidth="166"
                                                  sortable="false" reorderable="false"/>
                                     <TableColumn fx:id="friendUsername" text="Tên đăng nhập" minWidth="104" prefWidth="128"
-                                                 sortable="false" reorderable="false"/>
+                                                 styleClass="admin-friend-handle" sortable="false" reorderable="false"/>
                                 </columns>
                                 <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/>

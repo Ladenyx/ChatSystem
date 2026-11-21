@@ -42,6 +42,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -333,6 +334,9 @@ class AdminApplicationTest {
                 capture(stage, "admin-users-compact");
                 assertTrue(root.lookup("#userInspector").localToScene(
                         root.lookup("#userInspector").getBoundsInLocal()).getMaxX() <= 1024);
+                var actions = (FlowPane) root.lookup(".admin-profile-actions");
+                assertTrue(actions.getChildren().stream().allMatch(
+                        action -> action.getBoundsInParent().getMaxX() <= actions.getWidth() + 1));
 
                 ((Button) root.lookup("#createUser")).fire();
                 var form = ownedDialogPane(stage);
@@ -353,7 +357,13 @@ class AdminApplicationTest {
                 ((ToggleButton) root.lookup("#deletedUsers")).fire();
                 directory.getSelectionModel().selectFirst();
                 assertTrue(root.lookup("#editUser").isDisabled());
-                assertTrue(root.lookup("#deletionNotice").isVisible());
+                var notice = (Label) root.lookup("#deletionNotice");
+                assertTrue(notice.isVisible());
+                root.applyCss();
+                root.layout();
+                assertTrue(notice.getHeight() + 1 >= notice.prefHeight(notice.getWidth()),
+                        "The deletion notice fits both timestamps");
+                capture(stage, "admin-users-deleted-compact");
                 ((Button) root.lookup("#deleteOrRestore")).fire();
                 var restore = ownedDialogPane(stage);
                 assertEquals("Khôi phục tài khoản?", ((Label) restore.lookup("#confirmationTitle")).getText());
