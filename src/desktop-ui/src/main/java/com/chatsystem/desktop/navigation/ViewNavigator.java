@@ -108,10 +108,18 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public Dialog<ButtonType> showModal(View view) {
+        return showModal(view, false);
+    }
+
+    /** A form launched from a drawer can return to that drawer on close. */
+    public Dialog<ButtonType> showModal(View view, boolean keepDrawer) {
         ThemeManager.requireFxThread();
         requireWindow();
         LoadedView loaded = load(view);
-        closeTransientUi();
+        closePopupAndModal();
+        if (!keepDrawer) {
+            closeDrawer();
+        }
         Node trigger = root.getScene().getFocusOwner();
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(root.getScene().getWindow());
@@ -130,31 +138,25 @@ public final class ViewNavigator implements AutoCloseable {
             restoreFocus(trigger);
         });
         enter(loaded, view);
+        if (loaded.controller() instanceof DialogViewController controller) {
+            controller.configureDialog(dialog);
+        }
         modal = dialog;
         dialog.show();
         return dialog;
     }
 
     public void showDrawer(View view) {
+        showDrawer(view, false);
+    }
+
+    /** Uses the view's own header and scrolling when it supplies its own drawer layout. */
+    public void showDrawer(View view, boolean useViewLayout) {
         ThemeManager.requireFxThread();
         LoadedView loaded = load(view);
         closeTransientUi();
         drawerTrigger = root.getScene() == null ? null : root.getScene().getFocusOwner();
-        Label title = new Label(view.title());
-        title.getStyleClass().add("section-title");
-        title.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(title, Priority.ALWAYS);
-        Button close = new Button("Đóng");
-        close.setId("drawerClose");
-        close.setAccessibleText("Đóng " + view.title());
-        close.setOnAction(event -> closeDrawer());
-        HBox header = new HBox(12, title, close);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.getStyleClass().add("drawer-header");
-        ScrollPane scroll = new ScrollPane(loaded.root());
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        BorderPane drawer = new BorderPane(scroll, header, null, null, null);
+        BorderPane drawer = useViewLayout ? new BorderPane(loaded.root()) : defaultDrawer(view, loaded.root());
         drawer.setId("drawer");
         drawer.getStyleClass().add("drawer");
         frame.setRight(drawer);
@@ -167,10 +169,32 @@ public final class ViewNavigator implements AutoCloseable {
             drawerAnimation.play();
         }
         Platform.runLater(() -> {
-            if (drawerPage == loaded) {
+            if (drawerPage == loaded && drawer.lookup("#drawerClose") instanceof Button close) {
                 close.requestFocus();
             }
         });
+    }
+
+    private BorderPane defaultDrawer(View view, Parent content) {
+        Label title = new Label(view.title());
+        title.getStyleClass().add("section-title");
+        title.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(title, Priority.ALWAYS);
+        Button close = new Button("Đóng");
+        close.setId("drawerClose");
+        close.setAccessibleText("Đóng " + view.title());
+        close.setOnAction(event -> closeDrawer());
+        HBox header = new HBox(12, title, close);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.getStyleClass().add("drawer-header");
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        return new BorderPane(scroll, header, null, null, null);
+    }
+
+    public boolean isDrawerOpen() {
+        return drawerPage != null;
     }
 
     public void closeDrawer() {
@@ -291,13 +315,17 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     private void closeTransientUi() {
+        closePopupAndModal();
+        closeDrawer();
+    }
+
+    private void closePopupAndModal() {
         if (popover != null) {
             popover.hide(Duration.ZERO);
         }
         if (modal != null) {
             modal.close();
         }
-        closeDrawer();
     }
 
     private void restoreFocus(Node node) {

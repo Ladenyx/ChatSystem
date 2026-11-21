@@ -5,23 +5,25 @@ import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
 import com.chatsystem.user.UserViews;
+import com.chatsystem.user.controller.chat.ChatDemoFlow;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.StackPane;
-import org.kordamp.ikonli.feather.Feather;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.layout.VBox;
 
 public final class UserShellController {
     @FXML private StackPane viewHost;
+    @FXML private VBox workspaceRail;
     @FXML private ToggleButton chatsButton;
     @FXML private ToggleButton contactsButton;
     @FXML private Button backButton;
-    @FXML private Button themeButton;
-    @FXML private Button displayButton;
+    @FXML private MenuButton settingsButton;
+    @FXML private MenuItem themeItem;
     private ViewNavigator navigator;
 
     public void connect(ViewNavigator navigator) {
@@ -29,8 +31,12 @@ public final class UserShellController {
         ToggleGroup group = new ToggleGroup();
         chatsButton.setToggleGroup(group);
         contactsButton.setToggleGroup(group);
-        backButton.disableProperty().bind(navigator.canGoBackProperty().not());
+        workspaceRail.managedProperty().bind(workspaceRail.visibleProperty());
+        workspaceRail.setVisible(false);
+        backButton.visibleProperty().bind(navigator.canGoBackProperty());
+        backButton.managedProperty().bind(backButton.visibleProperty());
         navigator.currentViewProperty().addListener((observable, old, view) -> {
+            workspaceRail.setVisible(view != null);
             chatsButton.setSelected(UserViews.CONVERSATIONS.equals(view));
             contactsButton.setSelected(UserViews.CONTACTS.equals(view));
         });
@@ -71,7 +77,7 @@ public final class UserShellController {
 
     @FXML
     private void openDisplayOptions() {
-        navigator.showPopover(DisplayOptionsController.VIEW, displayButton);
+        navigator.showPopover(DisplayOptionsController.VIEW, settingsButton);
     }
 
     @FXML
@@ -80,15 +86,12 @@ public final class UserShellController {
     }
 
     @FXML
-    private void exit() {
+    private void signOut() {
+        ChatDemoFlow.clear(navigator);
         Platform.exit();
     }
 
     private void updateTheme(ThemeManager.Mode mode) {
-        boolean dark = mode == ThemeManager.Mode.DARK;
-        themeButton.setText(dark ? "Tối" : "Sáng");
-        themeButton.setGraphic(new FontIcon(dark ? Feather.MOON : Feather.SUN));
-        themeButton.setTooltip(new Tooltip(dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"));
-        themeButton.setAccessibleText(themeButton.getTooltip().getText());
+        themeItem.setText(mode == ThemeManager.Mode.DARK ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối");
     }
 }

@@ -1,40 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import com.chatsystem.user.control.ChatIcon?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.chatsystem.user.controller.ConversationsController"
-            focusTraversable="true" minWidth="0">
+            fx:id="workspace" fx:controller="com.chatsystem.user.controller.ConversationsController"
+            styleClass="chat-workspace" focusTraversable="true" minWidth="0">
+    <fx:define><ToggleGroup fx:id="filters"/></fx:define>
     <left>
-        <VBox styleClass="conversation-list">
-            <Label text="Đoạn chat" styleClass="section-title"/>
-            <Button id="createGroup" text="Tạo nhóm mới" onAction="#createGroup" maxWidth="Infinity"/>
-            <VBox alignment="CENTER" spacing="12" styleClass="empty-state" VBox.vgrow="ALWAYS">
-                <Label text="Chưa có cuộc trò chuyện" wrapText="true" styleClass="section-title"/>
-                <Label text="Các cuộc trò chuyện sẽ xuất hiện tại đây." wrapText="true" styleClass="secondary-text"/>
-            </VBox>
+        <VBox fx:id="conversationSidebar" id="conversationSidebar" styleClass="chat-sidebar" minWidth="280" maxWidth="384">
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="chat-sidebar-header">
+                <Label text="Đoạn chat" styleClass="chat-heading" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="createGroupButton" id="createGroup" text="Tạo nhóm mới" onAction="#createGroup" styleClass="chat-outline"/>
+            </HBox>
+            <StackPane alignment="CENTER_LEFT" styleClass="chat-search">
+                <TextField fx:id="conversationFilter" promptText="Tìm người, nhóm, tin nhắn" accessibleText="Tìm hội thoại và tin nhắn"/>
+                <ChatIcon icon="search" styleClass="chat-icon,chat-search-icon"/>
+            </StackPane>
+            <HBox fx:id="filterBar" spacing="8">
+                <ToggleButton fx:id="allFilter" text="Tất cả" toggleGroup="$filters" styleClass="chat-outline"
+                              maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <ToggleButton fx:id="unreadFilter" text="Chưa đọc" toggleGroup="$filters" styleClass="chat-outline"
+                              maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <ToggleButton fx:id="groupFilter" text="Nhóm" toggleGroup="$filters" styleClass="chat-outline"
+                              maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <ListView fx:id="conversationItems" id="conversationItems" accessibleText="Danh sách đoạn chat"
+                      styleClass="chat-list" VBox.vgrow="ALWAYS">
+                <placeholder><Label text="Không có đoạn chat phù hợp" wrapText="true" styleClass="chat-caption"/></placeholder>
+            </ListView>
+            <ScrollPane fx:id="globalSearch" id="globalSearch" visible="false" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="chat-search-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="globalResults" spacing="8" minWidth="0"/>
+            </ScrollPane>
+            <Label fx:id="globalSyncNotice" id="globalSearchSyncing" visible="false" wrapText="true"
+                   text="Đang đồng bộ lịch sử nhóm. Kết quả hiện tại chưa đầy đủ." styleClass="chat-caption"/>
         </VBox>
     </left>
     <center>
-        <BorderPane styleClass="surface" minWidth="0">
-            <top>
-                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="toolbar">
-                    <Label text="Hội thoại" styleClass="section-title"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button id="conversationInfo" text="Thông tin" onAction="#openInfo"/>
-                </HBox>
-            </top>
-            <center>
-                <VBox alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0">
-                    <Label text="Bắt đầu cuộc trò chuyện" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-                    <Label text="Mở Bạn bè &amp; Kết nối hoặc tạo nhóm mới để bắt đầu." styleClass="secondary-text"
-                           wrapText="true" textAlignment="CENTER"/>
-                    <Button text="Mở Bạn bè" onAction="#openContacts" styleClass="accent"/>
-                </VBox>
-            </center>
-        </BorderPane>
+        <StackPane id="chatWorkspace" minWidth="0">
+            <VBox fx:id="emptyWorkspace" id="emptyWorkspace" alignment="CENTER" spacing="12" styleClass="chat-empty">
+                <StackPane styleClass="chat-empty-icon">
+                    <ChatIcon icon="chat"/>
+                </StackPane>
+                <Label text="Chọn một đoạn chat" styleClass="section-title" wrapText="true"/>
+            </VBox>
+            <fx:include fx:id="selectedWorkspace" source="chat-history.fxml"/>
+        </StackPane>
     </center>
 </BorderPane>
