@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import atlantafx.base.controls.Popover;
 import com.chatsystem.desktop.controller.DisplayOptionsController;
+import com.chatsystem.desktop.navigation.RouteInputTestController.Input;
 import com.chatsystem.desktop.theme.ThemeManager;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -12,9 +13,12 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -62,6 +66,65 @@ class ViewNavigatorTest {
                 assertSame(field, nav.getRoot().lookup("#draft"));
                 assertEquals("Bản nháp cần giữ", field.getText());
                 assertFalse(nav.goBack());
+            }
+            return null;
+        });
+    }
+
+    @Test
+    void cachedPageReceivesInputAgainAndBackRestoresItsEntry() throws Exception {
+        onFx(() -> {
+            try (Fixture fixture = new Fixture()) {
+                ViewNavigator nav = fixture.nav;
+                Parent root = nav.getRoot();
+                var field = root.lookup("#draft");
+                nav.navigate(FIRST, new Input("usr-02"));
+                assertEquals("usr-02", inputText(root));
+                nav.navigate(FIRST, new Input("usr-03"));
+                assertEquals("usr-03", inputText(root));
+                assertSame(field, root.lookup("#draft"));
+                assertFalse(nav.goBack());
+
+                nav.navigate(SECOND);
+                nav.navigate(FIRST, new Input("usr-04"));
+                assertEquals("usr-04", inputText(root));
+                assertTrue(nav.goBack());
+                assertTrue(nav.goBack());
+                assertEquals("usr-03", inputText(root));
+                assertFalse(nav.goBack());
+
+                nav.navigate(SECOND);
+                nav.reset(FIRST);
+                assertNotSame(field, root.lookup("#draft"));
+                assertEquals("", inputText(root));
+                assertFalse(nav.goBack());
+            }
+            return null;
+        });
+    }
+
+    @Test
+    void eachOverlayReceivesItsOwnInputWithoutChangingThePageInput() throws Exception {
+        onFx(() -> {
+            try (Fixture fixture = new Fixture()) {
+                ViewNavigator nav = fixture.nav;
+                Parent root = nav.getRoot();
+                nav.reset(FIRST, new Input("page"));
+                Button anchor = (Button) root.lookup("#anchor");
+
+                Dialog<?> modal = nav.showModal(FIRST, new Input("modal"));
+                assertEquals("modal", inputText((Parent) modal.getDialogPane().getContent()));
+                modal.close();
+
+                nav.showDrawer(FIRST, new Input("drawer"));
+                BorderPane drawer = (BorderPane) root.lookup("#drawer");
+                ScrollPane scroll = (ScrollPane) drawer.getCenter();
+                assertEquals("drawer", inputText((Parent) scroll.getContent()));
+                nav.closeDrawer();
+
+                Popover popup = nav.showPopover(FIRST, anchor, new Input("popover"));
+                assertEquals("popover", inputText((Parent) popup.getContentNode()));
+                assertEquals("page", inputText(root));
             }
             return null;
         });
@@ -173,6 +236,10 @@ class ViewNavigatorTest {
             }
             return null;
         });
+    }
+
+    private static String inputText(Parent root) {
+        return assertInstanceOf(Label.class, root.lookup("#routeInput")).getText();
     }
 
     private static <T> T onFx(Callable<T> operation) throws Exception {

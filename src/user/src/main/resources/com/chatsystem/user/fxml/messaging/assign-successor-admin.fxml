@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.chatsystem.user.controller.group.GroupFormController" styleClass="chat-group-form"
-      minWidth="0" spacing="12">
+      minWidth="300" prefWidth="440" spacing="12">
     <HBox alignment="CENTER_LEFT" spacing="12">
         <Label fx:id="heading" styleClass="chat-heading" wrapText="true" minWidth="0" maxWidth="Infinity"
                HBox.hgrow="ALWAYS"/>
@@ -31,6 +31,5 @@
             <VBox fx:id="candidates" minWidth="0" spacing="8"/>
         </ScrollPane>
     </VBox>
-    <Label fx:id="feedback" id="groupFormFeedback" visible="false" styleClass="chat-warning-text" wrapText="true"/>
     <Label fx:id="footnote" styleClass="chat-caption" wrapText="true"/>
 </VBox>
