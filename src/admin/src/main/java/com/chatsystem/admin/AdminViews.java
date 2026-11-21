@@ -9,7 +9,7 @@ public final class AdminViews {
     public static final View USERS = view("A-SCR-03", "Quản lý người dùng", "users/users.fxml");
     public static final View GROUPS = view("A-SCR-04", "Quản lý Nhóm Chat", "groups/groups.fxml");
     public static final View SPAM = view("A-SCR-05", "Kiểm duyệt Báo cáo Spam", "spam/spam.fxml");
-    public static final View LOGIN_LOGS = view("A-SCR-06", "Nhật ký Đăng nhập", "logs/login-logs.fxml");
+    public static final View LOGIN_LOGS = view("A-SCR-06", "Nhật ký đăng nhập", "logs/login-logs.fxml");
     public static final View REGISTRATIONS = view("A-SCR-07", "Dashboard Đăng ký mới",
             "analytics/registrations.fxml");
     public static final View ACTIVITY = view("A-SCR-08", "Dashboard Hoạt động Người dùng",

@@ -167,7 +167,7 @@ Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, 
 | A-05 | View a user's login history | 🚧 | ⬜ |
 | A-06 | View a user's friend list | 🚧 | ⬜ |
 | **Access logs and groups** | | | |
-| A-07 | Login log in chronological order (time, username, full name) | ⬜ | ⬜ |
+| A-07 | Login log in chronological order (time, username, full name) | 🚧 | ⬜ |
 | A-08 | Group list: sort by name, creation time; filter by name | ⬜ | ⬜ |
 | A-09 | Members and admins of a group | ⬜ | ⬜ |
 | **Spam resolution** | | | |

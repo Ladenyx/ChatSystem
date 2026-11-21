@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -38,6 +39,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -220,6 +222,18 @@ class AdminApplicationTest {
                 var activityLegend = overview.lookup("#activityLegend");
                 assertTrue(activityLegend.isVisible() && activityLegend.getBoundsInParent().getWidth() > 0);
                 capture(stage, "admin-small");
+
+                ((ToggleButton) navigator.getRoot().lookup("#nav-A-SCR-06")).fire();
+                navigator.getRoot().applyCss();
+                navigator.getRoot().layout();
+                var timeline = (TableView<?>) navigator.getRoot().lookup("#loginEvents");
+                var bounds = timeline.localToScene(timeline.getBoundsInLocal());
+                assertTrue(bounds.getMaxX() <= 1024 && bounds.getMaxY() <= 640);
+                assertTrue(timeline.getVisibleLeafColumns().stream().mapToDouble(TableColumn::getWidth).sum()
+                        <= timeline.getWidth());
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-compact");
+
                 navigator.navigate(MockDataPreviewController.VIEW);
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 navigator.getRoot().applyCss();
@@ -239,6 +253,64 @@ class AdminApplicationTest {
                 capture(stage, "admin-mock-chart-small-dark");
                 var months = navigator.getRoot().lookup("#mockMonths");
                 assertTrue(months.localToScene(months.getBoundsInLocal()).getMaxY() < 640);
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void systemLoginTimelineShowsAllEventsInVietnamTime() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                navigator.navigate(AdminViews.USERS);
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var directory = (TableView<?>) root.lookup("#userTable");
+                directory.getSelectionModel().select(directory.getItems().indexOf(data.previewUser()));
+                root.applyCss();
+                root.layout();
+                ((Hyperlink) root.lookup("#systemLoginLogs")).fire();
+                assertEquals(AdminViews.LOGIN_LOGS, navigator.currentViewProperty().get());
+
+                var timeline = (TableView<?>) root.lookup("#loginEvents");
+                var events = data.loginLogs().stream()
+                        .sorted(Comparator.comparing(MockLoginLog::loggedInAt).reversed()).toList();
+                assertEquals(events, timeline.getItems());
+                assertEquals(events.size() + " lượt đăng nhập", ((Label) root.lookup("#loginCount")).getText());
+                var columns = timeline.getColumns();
+                assertEquals(3, columns.size());
+                assertFalse(timeline.isEditable());
+                assertTrue(columns.stream().noneMatch(TableColumn::isSortable));
+                var latestAccount = data.user(events.getFirst().userId());
+                assertEquals("15/11/2026 09:00", columns.get(0).getCellData(0));
+                assertEquals(latestAccount.username(), columns.get(1).getCellData(0));
+                assertEquals(latestAccount.fullName(), columns.get(2).getCellData(0));
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-light");
+                navigator.themes().toggle();
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-dark");
+
+                timeline.getSelectionModel().selectFirst();
+                timeline.getFocusModel().focus(0);
+                timeline.requestFocus();
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-focus-dark");
+
+                navigator.goBack();
+                assertEquals(AdminViews.USERS, navigator.currentViewProperty().get());
+                assertEquals(data.previewUser(), directory.getSelectionModel().getSelectedItem());
             } finally {
                 navigator.close();
                 stage.close();
@@ -380,6 +452,24 @@ class AdminApplicationTest {
         });
         Platform.runLater(task);
         task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static void assertLoginTextAlignment(TableView<?> timeline, int rowIndex) {
+        var root = timeline.getScene().getRoot();
+        root.applyCss();
+        root.layout();
+        var row = timeline.lookupAll(".table-row-cell").stream()
+                .filter(node -> node instanceof TableRow<?> candidate && candidate.getIndex() == rowIndex)
+                .findFirst().orElseThrow();
+        var headers = textLeftEdges(timeline, ".column-header .label .text");
+        assertEquals(timeline.getVisibleLeafColumns().size(), headers.size());
+        assertEquals(headers, textLeftEdges(row, ".table-cell .text"), "Headers and cells share their text origins");
+    }
+
+    private static List<Double> textLeftEdges(Node parent, String selector) {
+        return parent.lookupAll(selector).stream()
+                .map(text -> text.localToScene(text.getLayoutBounds()).getMinX())
+                .sorted().toList();
     }
 
     private static DialogPane ownedDialogPane(Stage owner) {
