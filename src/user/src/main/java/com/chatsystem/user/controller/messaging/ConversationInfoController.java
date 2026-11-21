@@ -114,7 +114,9 @@ public final class ConversationInfoController implements ViewController {
                     action("resignConversationAdmin", "fth-shield", "Chọn Admin kế nhiệm", false,
                             () -> openGroupForm(chat, GroupFormController.Mode.SUCCESSOR)),
                     action("clearConversationHistory", "fth-trash-2", "Xóa lịch sử phía mình", false, null),
-                    action("reportConversation", "fth-flag", "Báo cáo spam", true, null),
+                    action("reportConversation", "fth-flag", "Báo cáo spam", true,
+                            () -> navigator.showModal(UserViews.REPORT_SPAM,
+                                    new UserViewInputs.ReportSpam(chat.id(), List.of()), true)),
                     action("leaveConversationGroup", "fth-log-out", "Rời nhóm", true, null));
             var groupOptions = new VBox(8, sectionLabel("Quản lý nhóm"), groupButtons);
             groupOptions.getStyleClass().add("chat-drawer-section");
@@ -123,7 +125,9 @@ public final class ConversationInfoController implements ViewController {
             var optionButtons = new VBox(4,
                     action("blockConversationPeer", "fth-slash", "Chặn người dùng", true, null),
                     action("clearConversationHistory", "fth-trash-2", "Xóa lịch sử phía mình", false, null),
-                    action("reportConversation", "fth-flag", "Báo cáo spam", true, null));
+                    action("reportConversation", "fth-flag", "Báo cáo spam", true,
+                            () -> navigator.showModal(UserViews.REPORT_SPAM,
+                                    new UserViewInputs.ReportSpam(chat.id(), List.of()), true)));
             var options = new VBox(8, sectionLabel("Tùy chọn hội thoại"), optionButtons);
             options.getStyleClass().add("chat-drawer-section");
             infoContent.getChildren().add(options);
