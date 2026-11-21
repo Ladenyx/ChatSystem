@@ -1,0 +1,106 @@
+.admin-login-logs-page {
+    -fx-padding: 16px 24px;
+}
+
+.admin-login-logs-panel {
+    -admin-login-rule: ladder(-cs-surface, rgba(255, 255, 255, 0.09) 49%, rgba(0, 0, 0, 0.09) 50%);
+    -fx-background-color: -cs-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -admin-login-rule;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px;
+}
+
+.admin-login-log-meta {
+    -fx-padding: 0 12px;
+}
+
+.admin-login-log-count {
+    -fx-font-weight: 600;
+}
+
+.admin-login-events {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-padding: 0;
+}
+
+.admin-login-events:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-login-events .column-header-background {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.admin-login-events .column-header,
+.admin-login-events .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 36px;
+}
+
+.admin-login-events .column-header .label {
+    -fx-alignment: center-left;
+    -fx-padding: 0 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-login-events .table-cell {
+    -fx-alignment: center-left;
+    -fx-border-width: 0;
+    -fx-padding: 0 12px;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-login-events .table-cell.admin-login-time,
+.admin-login-events .table-cell.admin-login-username {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 13px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-login-events .table-row-cell {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.admin-login-events .table-row-cell:filled {
+    -fx-border-color: -admin-login-rule transparent transparent;
+}
+
+.admin-login-events .table-row-cell:filled:day-start {
+    -fx-border-color: -cs-border transparent transparent;
+}
+
+.admin-login-events .table-row-cell:day-start .table-cell.admin-login-time {
+    -fx-text-fill: -cs-text;
+    -fx-font-weight: 600;
+}
+
+.admin-login-events .table-row-cell:filled:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-login-events .table-row-cell:filled:selected {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 0 0 0 2px;
+}
+
+.admin-login-events:focused .table-row-cell:filled:focused {
+    -fx-background-color: -cs-focus, -cs-surface;
+    -fx-background-insets: 0, 1px;
+    -fx-border-color: -cs-focus;
+}
+
+.admin-login-events:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 1px 1px 1px 2px;
+}
