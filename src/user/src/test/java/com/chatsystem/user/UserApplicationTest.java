@@ -32,6 +32,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.ScrollBar;
@@ -404,6 +405,142 @@ class UserApplicationTest {
         } finally {
             onFx(() -> { navigator.close(); stage.close(); return null; });
         }
+    }
+
+    @Test
+    void globalSearchShowsPartialResultsAndJumpsToAnOlderMessage() throws Exception {
+        var navigator = onFx(UserApplication::createNavigator);
+        Stage stage = onFx(() -> shownStage(navigator.getRoot(), 1280, 720));
+        try {
+            var root = navigator.getRoot();
+            onFx(() -> {
+                var filter = (TextField) root.lookup("#conversationFilter");
+                filter.setText("giao dien");
+                assertNotNull(root.lookup("#globalConversationHeading"));
+                assertNotNull(root.lookup("#globalMessageHeading"));
+                assertNotNull(root.lookup("#global-conversation-grp-02"));
+                assertTrue(root.lookup("#globalSearchSyncing").isVisible());
+                capture(stage, "drawer-global-search-light");
+                filter.setText("Chào mọi người");
+                assertNull(root.lookup("#global-message-msg-grp-01-1"));
+                return null;
+            });
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(4);
+            while (onFx(() -> root.lookup("#global-message-msg-grp-01-1") == null) && System.nanoTime() < deadline) {
+                Thread.sleep(25);
+            }
+            onFx(() -> {
+                Button hit = (Button) root.lookup("#global-message-msg-grp-01-1");
+                assertNotNull(hit);
+                assertFalse(root.lookup("#globalSearchSyncing").isVisible());
+                hit.fire();
+                assertEquals(56, rowCount(root));
+                var highlighted = (ChatMessageRow) root.lookup("#search-highlighted-message");
+                assertEquals("msg-grp-01-1", highlighted.messageId());
+                return null;
+            });
+            onFx(() -> {
+                var scroll = (ScrollPane) root.lookup("#historyScroll");
+                double top = scroll.localToScene(0, 0).getY();
+                double messageY = messageY(root, "msg-grp-01-1");
+                assertTrue(messageY >= top - 1 && messageY < top + 100);
+                var highlighted = (ChatMessageRow) root.lookup("#search-highlighted-message");
+                assertNotNull(highlighted.getBackground());
+                assertEquals(Color.web("#ebf3fc"), highlighted.getBackground().getFills().getFirst().getFill());
+                capture(stage, "drawer-jump-light");
+                var stale = (Button) root.lookup("#global-message-msg-grp-01-1");
+                ChatDemoFlow.get(navigator).chat().deleteForSelf("grp-01", java.util.Set.of("msg-grp-01-1"));
+                stale.fire();
+                assertNull(root.lookup("#global-message-msg-grp-01-1"));
+                assertNotNull(root.lookup("#unavailableSearchResult"));
+                assertEquals("Chào mọi người", ((TextField) root.lookup("#conversationFilter")).getText());
+                capture(stage, "drawer-stale-search-light");
+                ((TextField) root.lookup("#conversationFilter")).setText("không có kết quả nào");
+                assertNotNull(root.lookup("#globalSearchEmpty"));
+                return null;
+            });
+        } finally {
+            onFx(() -> { navigator.close(); stage.close(); return null; });
+        }
+    }
+
+    @Test
+    void drawerNavigatesScopedResultsAndConfirmsHistoryClearAndBlock() throws Exception {
+        onFx(() -> {
+            var navigator = UserApplication.createNavigator();
+            var root = navigator.getRoot();
+            Stage stage = shownStage(root, 1024, 640);
+            try {
+                selectChat(root, "direct-01");
+                var draft = (TextArea) root.lookup("#draftField");
+                draft.setText("Giữ lại bản nháp");
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertEquals("Thông tin đoạn chat", ((Label) root.lookup("#drawerHeading")).getText());
+                capture(stage, "drawer-direct-light");
+                ((Button) root.lookup("#searchInConversation")).fire();
+                var local = (TextField) root.lookup("#conversationSearchField");
+                local.setText("không có kết quả");
+                root.applyCss();
+                root.layout();
+                assertNotNull(root.lookup("#localSearchEmpty"));
+                local.setText("mình");
+                Button next = (Button) root.lookup("#nextSearchResult");
+                Button previous = (Button) root.lookup("#previousSearchResult");
+                assertTrue(previous.isDisabled());
+                next.fire();
+                String first = ((ChatMessageRow) root.lookup("#search-highlighted-message")).messageId();
+                assertTrue(first.contains("direct-01") || first.equals("demo-expired-recall"));
+                assertTrue(previous.isDisabled());
+                next.fire();
+                assertNotEquals(first, ((ChatMessageRow) root.lookup("#search-highlighted-message")).messageId());
+                assertFalse(previous.isDisabled());
+                capture(stage, "drawer-local-search-light");
+                previous.fire();
+                assertEquals(first, ((ChatMessageRow) root.lookup("#search-highlighted-message")).messageId());
+                ((Button) root.lookup("#drawerBack")).fire();
+                var global = (TextField) root.lookup("#conversationFilter");
+                global.setText("lần trước");
+                assertNotNull(root.lookup("#global-message-demo-expired-recall"));
+                ((Button) root.lookup("#clearConversationHistory")).fire();
+                confirmDialog(stage, ButtonType.CANCEL.getText());
+                assertTrue(rowCount(root) > 0);
+                ((Button) root.lookup("#clearConversationHistory")).fire();
+                confirmDialog(stage, "Xóa lịch sử phía mình");
+                assertEquals(0, rowCount(root));
+                assertNull(root.lookup("#global-message-demo-expired-recall"));
+                assertEquals("Giữ lại bản nháp", draft.getText());
+                ((Button) root.lookup("#blockConversationPeer")).fire();
+                confirmDialog(stage, "Chặn người dùng");
+                assertFalse(draft.getParent().isVisible());
+                ((Button) root.lookup("#blockConversationPeer")).fire();
+                confirmDialog(stage, "Bỏ chặn người dùng");
+                assertTrue(draft.getParent().isVisible());
+                assertEquals("Giữ lại bản nháp", draft.getText());
+                global.clear();
+                selectChat(root, "grp-01");
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertEquals("Thông tin nhóm", ((Label) root.lookup("#drawerHeading")).getText());
+                root.applyCss();
+                root.layout();
+                assertEquals(8, root.lookupAll(".chat-member-row").size());
+                assertNull(root.lookup("#blockConversationPeer"));
+                navigator.themes().toggle();
+                capture(stage, "drawer-group-dark");
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+    }
+
+    private static Stage shownStage(Parent root, int width, int height) {
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root, width, height));
+        stage.show();
+        root.applyCss();
+        root.layout();
+        return stage;
     }
 
     private static void awaitState(OfflineChatDemoService chat, String chatId, State expected) throws Exception {

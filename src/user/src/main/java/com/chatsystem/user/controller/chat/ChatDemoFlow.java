@@ -6,8 +6,13 @@ import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiPredicate;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.ReadOnlyLongProperty;
+import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.util.Duration;
 
 /** Offline workspace state owned by one User Client window. */
 public final class ChatDemoFlow {
@@ -15,6 +20,10 @@ public final class ChatDemoFlow {
     private final OfflineChatDemoService chat = new OfflineChatDemoService(data);
     private final Map<String, String> drafts = new HashMap<>();
     private final ReadOnlyObjectWrapper<MockConversation> selected = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyLongWrapper searchRevision = new ReadOnlyLongWrapper();
+    private BiPredicate<String, String> messageNavigator;
+    private Runnable reloadConversation;
+    private PauseTransition searchSync;
 
     private ChatDemoFlow() {
     }
@@ -39,6 +48,49 @@ public final class ChatDemoFlow {
 
     public OfflineChatDemoService chat() {
         return chat;
+    }
+
+    public void connectWorkspace(BiPredicate<String, String> messageNavigator, Runnable reloadConversation) {
+        this.messageNavigator = messageNavigator;
+        this.reloadConversation = reloadConversation;
+    }
+
+    public void disconnectWorkspace() {
+        messageNavigator = null;
+        reloadConversation = null;
+    }
+
+    public boolean jumpToMessage(String conversationId, String messageId) {
+        return messageNavigator != null && messageNavigator.test(conversationId, messageId);
+    }
+
+    public void conversationChanged() {
+        if (reloadConversation != null) {
+            reloadConversation.run();
+        }
+        searchChanged();
+    }
+
+    public ReadOnlyLongProperty searchRevisionProperty() {
+        return searchRevision.getReadOnlyProperty();
+    }
+
+    public void searchChanged() {
+        searchRevision.set(searchRevision.get() + 1);
+    }
+
+    public OfflineChatDemoService.SearchResults search(String conversationId, String query) {
+        var result = chat.search(conversationId, query);
+        if (result.syncing() && searchSync == null) {
+            searchSync = new PauseTransition(Duration.millis(900));
+            searchSync.setOnFinished(event -> {
+                chat.finishHistorySync();
+                searchSync = null;
+                searchChanged();
+            });
+            searchSync.play();
+        }
+        return result;
     }
 
     public String draft(String conversationId) {

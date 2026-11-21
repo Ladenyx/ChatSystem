@@ -19,6 +19,7 @@
     -chat-incoming: #f0f0f0;
     -chat-warning: #8a3707;
     -chat-warning-bg: #fff9f5;
+    -chat-danger: #b10e1c;
 }
 
 .cs-root:dark .user-shell, .cs-root:dark .chat-info {
@@ -37,4 +38,5 @@
     -chat-incoming: #333333;
     -chat-warning: #fce100;
     -chat-warning-bg: #332717;
+    -chat-danger: #f1707b;
 }

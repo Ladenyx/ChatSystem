@@ -1,6 +1,7 @@
 package com.chatsystem.user.control;
 
 import com.chatsystem.desktop.mock.model.MockConversation;
+import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.user.controller.chat.ChatDemoFlow;
 import java.util.Locale;
 import javafx.geometry.Pos;
@@ -22,13 +23,21 @@ public final class ConversationAvatar extends StackPane {
     }
 
     public void show(MockConversation chat, ChatDemoFlow flow) {
-        initials.setText(initials(chat.title()));
+        show(chat.title(), chat.encrypted(), flow.isOnline(chat));
+    }
+
+    public void show(MockUser user) {
+        show(user.fullName(), false, user.presence() == MockUser.Presence.ONLINE);
+    }
+
+    private void show(String title, boolean encrypted, boolean online) {
+        initials.setText(initials(title));
         presence.getStyleClass().setAll("chat-presence");
-        if (chat.encrypted()) {
+        if (encrypted) {
             presence.getStyleClass().add("chat-presence-encrypted");
             presence.getChildren().setAll(lock);
         } else {
-            presence.getStyleClass().add(flow.isOnline(chat) ? "chat-presence-online" : "chat-presence-offline");
+            presence.getStyleClass().add(online ? "chat-presence-online" : "chat-presence-offline");
             presence.getChildren().clear();
         }
     }

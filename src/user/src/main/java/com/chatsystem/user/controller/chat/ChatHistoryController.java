@@ -61,6 +61,8 @@ public final class ChatHistoryController {
     private boolean restoringDraft;
     private long renderVersion;
     private Alert confirmation;
+    private String highlightedMessageId;
+    private Runnable focusSearch;
 
     @FXML
     private void initialize() {
@@ -94,6 +96,8 @@ public final class ChatHistoryController {
             historyLimit = OfflineChatDemoService.PAGE_SIZE;
             selectedIds.clear();
             selecting = false;
+            highlightedMessageId = null;
+            focusSearch = null;
             restoringDraft = true;
             draftField.setText(flow.draft(chat.id()));
             restoringDraft = false;
@@ -125,8 +129,33 @@ public final class ChatHistoryController {
         if (navigator.isDrawerOpen()) {
             navigator.closeDrawer();
         } else {
-            navigator.showDrawer(UserViews.CONVERSATION_INFO);
+            navigator.showDrawer(UserViews.CONVERSATION_INFO, true);
         }
+    }
+
+    public void revealMessage(String messageId, int requiredLimit) {
+        highlightedMessageId = messageId;
+        focusSearch = null;
+        selecting = false;
+        selectedIds.clear();
+        updateChrome();
+        historyLimit = Math.max(historyLimit, requiredLimit);
+        renderHistory(new ScrollTarget(false, messageId, -24, 0));
+    }
+
+    public void showUnavailableResult(Runnable focusSearch) {
+        this.focusSearch = focusSearch;
+        highlightedMessageId = null;
+        renderHistory(currentPosition(false));
+    }
+
+    public void refreshAfterDrawerChange() {
+        highlightedMessageId = null;
+        focusSearch = null;
+        selecting = false;
+        selectedIds.clear();
+        updateChrome();
+        renderHistory(ScrollTarget.bottom());
     }
 
     @FXML
@@ -288,6 +317,22 @@ public final class ChatHistoryController {
         var page = chat.page(conversation.id(), historyLimit);
         Access access = chat.access(conversation.id());
         historyNotice.getChildren().clear();
+        if (focusSearch != null) {
+            Label feedback = new Label("Tin nhắn này không còn khả dụng. Kết quả đã được cập nhật.");
+            feedback.setWrapText(true);
+            Button retrySearch = new Button("Chọn kết quả khác");
+            retrySearch.getStyleClass().add("chat-outline");
+            retrySearch.setOnAction(event -> {
+                Runnable action = focusSearch;
+                focusSearch = null;
+                renderHistory(currentPosition(false));
+                action.run();
+            });
+            VBox state = new VBox(8, feedback, retrySearch);
+            state.setId("unavailableSearchResult");
+            state.getStyleClass().add("chat-search-feedback");
+            historyNotice.getChildren().add(state);
+        }
         messageRows.getChildren().clear();
         if (access != Access.AVAILABLE) {
             addAccessNotice(access);
@@ -330,8 +375,13 @@ public final class ChatHistoryController {
                     },
                     () -> confirmDelete(Set.of(message.id())),
                     chat.canRecall(message) ? () -> confirmRecall(message) : null);
-            messageRows.getChildren().add(new ChatMessageRow(message, flow.data().user(message.senderId()).fullName(),
-                    access == Access.MISSING_KEY, selecting, selectedIds.contains(message.id()), actions));
+            var row = new ChatMessageRow(message, flow.data().user(message.senderId()).fullName(),
+                    access == Access.MISSING_KEY, selecting, selectedIds.contains(message.id()), actions);
+            if (message.id().equals(highlightedMessageId) && message.state() != State.RECALLED) {
+                row.setId("search-highlighted-message");
+                row.getStyleClass().add("chat-search-highlight");
+            }
+            messageRows.getChildren().add(row);
         }
         Platform.runLater(() -> {
             if (version == renderVersion && navigator != null && historyScroll.getScene() != null) {
@@ -371,7 +421,10 @@ public final class ChatHistoryController {
         if (followBottom && (height <= 0 || historyScroll.getVvalue() > 0.995)) {
             return ScrollTarget.bottom();
         }
-        double offset = historyScroll.getVvalue() * height;
+        var viewport = historyScroll.lookup(".viewport");
+        double offset = viewport == null ? historyScroll.getVvalue() * height
+                : viewport.localToScene(0, 0).getY() - messageRows.localToScene(0, 0).getY();
+        offset = Math.clamp(offset, 0, height);
         for (var node : messageRows.getChildren()) {
             if (node instanceof ChatMessageRow row && row.getBoundsInParent().getMaxY() > offset) {
                 return new ScrollTarget(false, row.messageId(), offset - row.getBoundsInParent().getMinY(), offset);
@@ -387,6 +440,7 @@ public final class ChatHistoryController {
         double height = scrollableHeight();
         if (position.atBottom()) {
             historyScroll.setVvalue(height > 0 ? 1 : 0);
+            root.layout();
             return;
         }
         double offset = position.fallback();
@@ -397,6 +451,7 @@ public final class ChatHistoryController {
             }
         }
         historyScroll.setVvalue(height > 0 ? Math.clamp(offset / height, 0, 1) : 0);
+        root.layout();
     }
 
     private double scrollableHeight() {
