@@ -88,7 +88,8 @@ public final class ConversationsController implements ViewController {
     public void onEnter(ViewNavigator navigator, View view) {
         this.navigator = navigator;
         flow = ChatDemoFlow.get(navigator);
-        flow.connectWorkspace(this::jumpToMessage, selectedWorkspaceController::refreshAfterDrawerChange);
+        flow.connectWorkspace(this::jumpToMessage, selectedWorkspaceController::refreshAfterDrawerChange,
+                this::openCreatedGroup);
         flow.searchRevisionProperty().addListener(searchChanged);
         if (visibleConversations == null) {
             visibleConversations = new FilteredList<>(conversations);
@@ -224,6 +225,13 @@ public final class ConversationsController implements ViewController {
         flow.chat().markRead(chat.id());
         showSelection(chat);
         refreshSidebar();
+    }
+
+    private void openCreatedGroup(MockConversation chat) {
+        conversationFilter.clear();
+        allFilter.setSelected(true);
+        openConversation(chat);
+        conversationItems.scrollTo(chat);
     }
 
     private boolean jumpToMessage(String conversationId, String messageId) {

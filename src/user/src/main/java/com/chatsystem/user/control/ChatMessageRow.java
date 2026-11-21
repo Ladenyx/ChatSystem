@@ -51,7 +51,8 @@ public final class ChatMessageRow extends HBox {
         bubble.getStyleClass().add("chat-bubble");
         bubble.getStyleClass().add(recalled || locked ? "chat-bubble-unavailable"
                 : outgoing ? "chat-bubble-outgoing" : "chat-bubble-incoming");
-        String status = outgoing && !locked && !recalled ? "  " + deliveryLabel(message.state()) : "";
+        String status = outgoing && !locked && !recalled
+                ? "  " + deliveryLabel(message.state(), actions.retry() != null) : "";
         Label metadata = new Label(TIME.format(message.sentAt()) + status);
         metadata.setWrapText(true);
         metadata.getStyleClass().add("chat-caption");
@@ -142,10 +143,10 @@ public final class ChatMessageRow extends HBox {
         }
     }
 
-    private static String deliveryLabel(State state) {
+    private static String deliveryLabel(State state, boolean canRetry) {
         return switch (state) {
             case PENDING -> "Đang chờ";
-            case FAILED -> "Đang chờ / Thử lại";
+            case FAILED -> canRetry ? "Đang chờ / Thử lại" : "Không gửi được";
             case STORED -> "Server đã lưu";
             case DELIVERED -> "Đã nhận";
             case READ -> "Đã xem";

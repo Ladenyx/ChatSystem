@@ -7,7 +7,10 @@ public final class UserViews {
             UserApplication.class, "/com/chatsystem/user/fxml/conversations.fxml");
     public static final View CONTACTS = View.placeholder("U-SCR-08", "Bạn bè & Kết nối");
     public static final View PROFILE = View.placeholder("U-DLG-01", "Hồ sơ & Bảo mật");
-    public static final View CREATE_GROUP = View.placeholder("U-DLG-02", "Tạo nhóm chat mới");
+    public static final View CREATE_GROUP = new View("U-DLG-02", "Tạo nhóm chat mới",
+            UserApplication.class, "/com/chatsystem/user/fxml/group-form.fxml");
+    public static final View SUCCESSOR_ADMIN = new View("U-DLG-05", "Chọn Admin kế nhiệm",
+            UserApplication.class, "/com/chatsystem/user/fxml/group-form.fxml");
     public static final View CONVERSATION_INFO = new View("U-SCR-09", "Thông tin đoạn chat",
             UserApplication.class, "/com/chatsystem/user/fxml/conversation-info.fxml");
 

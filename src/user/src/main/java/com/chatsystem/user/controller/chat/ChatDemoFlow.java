@@ -7,6 +7,7 @@ import com.chatsystem.desktop.navigation.ViewNavigator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
@@ -21,8 +22,10 @@ public final class ChatDemoFlow {
     private final Map<String, String> drafts = new HashMap<>();
     private final ReadOnlyObjectWrapper<MockConversation> selected = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyLongWrapper searchRevision = new ReadOnlyLongWrapper();
+    private final ReadOnlyLongWrapper conversationRevision = new ReadOnlyLongWrapper();
     private BiPredicate<String, String> messageNavigator;
-    private Runnable reloadConversation;
+    private Consumer<MockConversation> reloadConversation;
+    private Consumer<MockConversation> openCreatedGroup;
     private PauseTransition searchSync;
 
     private ChatDemoFlow() {
@@ -50,14 +53,17 @@ public final class ChatDemoFlow {
         return chat;
     }
 
-    public void connectWorkspace(BiPredicate<String, String> messageNavigator, Runnable reloadConversation) {
+    public void connectWorkspace(BiPredicate<String, String> messageNavigator, Consumer<MockConversation> reloadConversation,
+                                 Consumer<MockConversation> openCreatedGroup) {
         this.messageNavigator = messageNavigator;
         this.reloadConversation = reloadConversation;
+        this.openCreatedGroup = openCreatedGroup;
     }
 
     public void disconnectWorkspace() {
         messageNavigator = null;
         reloadConversation = null;
+        openCreatedGroup = null;
     }
 
     public boolean jumpToMessage(String conversationId, String messageId) {
@@ -65,10 +71,23 @@ public final class ChatDemoFlow {
     }
 
     public void conversationChanged() {
-        if (reloadConversation != null) {
-            reloadConversation.run();
+        if (reloadConversation != null && selected.get() != null) {
+            MockConversation updated = chat.conversation(selected.get().id());
+            selected.set(updated);
+            reloadConversation.accept(updated);
         }
+        conversationRevision.set(conversationRevision.get() + 1);
         searchChanged();
+    }
+
+    public ReadOnlyLongProperty conversationRevisionProperty() {
+        return conversationRevision.getReadOnlyProperty();
+    }
+
+    public void openCreatedGroup(MockConversation group) {
+        if (openCreatedGroup != null) {
+            openCreatedGroup.accept(group);
+        }
     }
 
     public ReadOnlyLongProperty searchRevisionProperty() {
@@ -120,7 +139,11 @@ public final class ChatDemoFlow {
 
     public String statusText(MockConversation chat) {
         if (chat.encrypted()) {
-            return "Mã hóa đầu cuối · Demo";
+            return switch (this.chat.access(chat.id())) {
+                case GROUP_LEFT -> "Đã rời nhóm · Chỉ đọc";
+                case GROUP_REMOVED -> "Đã bị xóa khỏi nhóm · Chỉ đọc";
+                default -> "Mã hóa đầu cuối · Demo";
+            };
         }
         return isOnline(chat) ? "Đang hoạt động" : "Ngoại tuyến";
     }

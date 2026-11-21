@@ -546,3 +546,52 @@
     -fx-border-color: -chat-border;
     -fx-padding: 12;
 }
+
+.chat-group-dialog,
+.chat-group-form {
+    -fx-background-color: -chat-surface;
+}
+
+.chat-group-dialog > .chat-group-form {
+    -fx-padding: 24 24 8;
+    -fx-pref-width: 600;
+}
+
+.chat-group-candidate-label {
+    -fx-padding: 0 0 0 12;
+}
+
+.chat-group-form .text-field {
+    -fx-min-height: 40;
+    -fx-border-color: -chat-control-border;
+    -fx-border-radius: 4;
+}
+
+.chat-group-form .text-field:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-group-dialog > .button-bar {
+    -fx-padding: 8 24 24;
+}
+
+.chat-group-candidate {
+    -fx-padding: 10 12;
+    -fx-min-height: 64;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 4;
+    -fx-graphic-text-gap: 12;
+}
+
+.chat-group-candidate:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-group-candidate:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-group-read-only {
+    -fx-min-height: 115;
+    -fx-alignment: center-left;
+}

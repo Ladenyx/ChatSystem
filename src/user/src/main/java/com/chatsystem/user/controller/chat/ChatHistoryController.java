@@ -50,6 +50,9 @@ public final class ChatHistoryController {
     @FXML private TextArea draftField;
     @FXML private Button sendButton;
     @FXML private VBox selectionFooter;
+    @FXML private VBox readOnlyFooter;
+    @FXML private Label readOnlyTitle;
+    @FXML private Label readOnlyText;
 
     private final Set<String> selectedIds = new LinkedHashSet<>();
     private ViewNavigator navigator;
@@ -70,6 +73,7 @@ public final class ChatHistoryController {
         selectionHeader.managedProperty().bind(selectionHeader.visibleProperty());
         composer.managedProperty().bind(composer.visibleProperty());
         selectionFooter.managedProperty().bind(selectionFooter.visibleProperty());
+        readOnlyFooter.managedProperty().bind(readOnlyFooter.visibleProperty());
         historyNotice.visibleProperty().bind(Bindings.isNotEmpty(historyNotice.getChildren()));
         historyNotice.managedProperty().bind(historyNotice.visibleProperty());
         draftField.textProperty().addListener((observable, old, draft) -> {
@@ -102,9 +106,7 @@ public final class ChatHistoryController {
             draftField.setText(flow.draft(chat.id()));
             restoringDraft = false;
         }
-        conversationTitle.setText(chat.title());
-        conversationStatus.setText(flow.statusText(chat));
-        conversationAvatar.show(chat, flow);
+        updateHeader();
         updateChrome();
         ScrollTarget start = flow.chat().access(chat.id()) == Access.MISSING_KEY
                 ? new ScrollTarget(false, null, 0, 0) : ScrollTarget.bottom();
@@ -149,13 +151,22 @@ public final class ChatHistoryController {
         renderHistory(currentPosition(false));
     }
 
-    public void refreshAfterDrawerChange() {
+    public void refreshAfterDrawerChange(MockConversation updated) {
+        ScrollTarget position = currentPosition(true);
+        conversation = updated;
+        updateHeader();
         highlightedMessageId = null;
         focusSearch = null;
         selecting = false;
         selectedIds.clear();
         updateChrome();
-        renderHistory(ScrollTarget.bottom());
+        renderHistory(position);
+    }
+
+    private void updateHeader() {
+        conversationTitle.setText(conversation.title());
+        conversationStatus.setText(flow.statusText(conversation));
+        conversationAvatar.show(conversation, flow);
     }
 
     @FXML
@@ -229,6 +240,11 @@ public final class ChatHistoryController {
         deleteSelectedButton.setDisable(selectedIds.isEmpty());
         selectionFooter.setVisible(selecting);
         Access access = flow.chat().access(conversation.id());
+        readOnlyFooter.setVisible(!selecting && access.readOnlyGroup());
+        if (access.readOnlyGroup()) {
+            readOnlyTitle.setText(access == Access.GROUP_LEFT ? "Bạn đã rời nhóm" : "Bạn đã bị xóa khỏi nhóm");
+            readOnlyText.setText(groupHistoryNotice(access));
+        }
         composer.setVisible(!selecting && (access == Access.AVAILABLE || access == Access.MISSING_KEY));
         draftField.setDisable(access != Access.AVAILABLE);
         draftField.setPromptText(access == Access.MISSING_KEY ? "Cần khóa E2EE hợp lệ để gửi tin." : "Nhập tin nhắn");
@@ -395,6 +411,7 @@ public final class ChatHistoryController {
             case BLOCKED_BY_SELF -> "Bạn đã chặn người này. Bạn không thể gửi tin nhắn.";
             case BLOCKED_BY_PEER -> "Bạn không thể gửi tin nhắn trong đoạn chat này.";
             case MISSING_KEY -> "Thiết bị chưa có khóa hợp lệ để giải mã lịch sử nhóm. Bản nháp được giữ.";
+            case GROUP_LEFT, GROUP_REMOVED -> groupHistoryNotice(access);
             case AVAILABLE -> throw new IllegalArgumentException("Available conversations need no notice");
         };
         addWarning(text);
@@ -404,6 +421,11 @@ public final class ChatHistoryController {
             setup.setDisable(true);
             historyNotice.getChildren().add(setup);
         }
+    }
+
+    private static String groupHistoryNotice(Access access) {
+        return access == Access.GROUP_LEFT ? "Bạn chỉ có thể xem lịch sử đã có trước khi rời nhóm."
+                : "Bạn chỉ có thể xem những tin nhắn đã từng đọc trước khi bị xóa khỏi nhóm.";
     }
 
     private void addWarning(String text) {

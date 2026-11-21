@@ -74,6 +74,11 @@
                 <Label text="Xóa các tin đã chọn chỉ ở phía bạn." styleClass="chat-row-name" wrapText="true"/>
                 <Label text="Hủy để quay lại soạn tin." styleClass="chat-caption" wrapText="true"/>
             </VBox>
+            <VBox fx:id="readOnlyFooter" id="readOnlyGroupFooter" visible="false" spacing="8"
+                  styleClass="chat-composer,chat-group-read-only">
+                <Label fx:id="readOnlyTitle" wrapText="true" styleClass="chat-result-title"/>
+                <Label fx:id="readOnlyText" wrapText="true" styleClass="chat-caption"/>
+            </VBox>
         </StackPane>
     </bottom>
 </BorderPane>

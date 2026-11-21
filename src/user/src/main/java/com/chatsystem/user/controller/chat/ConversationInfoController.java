@@ -10,16 +10,21 @@ import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.control.ChatIcon;
 import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.SearchResultCard;
+import com.chatsystem.user.controller.group.GroupFormController;
+import com.chatsystem.user.controller.group.OfflineGroupDemoService.ExitAction;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -45,6 +50,7 @@ public final class ConversationInfoController implements ViewController {
 
     private final List<SearchResultCard> cards = new ArrayList<>();
     private final InvalidationListener revisionListener = ignored -> updateView();
+    private final InvalidationListener conversationListener = ignored -> refreshConversation();
     private List<MockMessage> matches = List.of();
     private String selectedMessageId;
     private ViewNavigator navigator;
@@ -85,12 +91,14 @@ public final class ConversationInfoController implements ViewController {
         flow = ChatDemoFlow.get(navigator);
         conversation = flow.selectedProperty().get();
         flow.searchRevisionProperty().addListener(revisionListener);
+        flow.conversationRevisionProperty().addListener(conversationListener);
         showInfo();
     }
 
     @Override
     public void onLeave() {
         flow.searchRevisionProperty().removeListener(revisionListener);
+        flow.conversationRevisionProperty().removeListener(conversationListener);
         flow = null;
         navigator = null;
         if (confirmation != null) {
@@ -125,6 +133,13 @@ public final class ConversationInfoController implements ViewController {
         }
     }
 
+    private void refreshConversation() {
+        conversation = flow.selectedProperty().get();
+        if (drawerLayout.getCenter() == infoPane) {
+            showDetails();
+        }
+    }
+
     private void showDetails() {
         infoContent.getChildren().clear();
         if (conversation == null) {
@@ -132,9 +147,10 @@ public final class ConversationInfoController implements ViewController {
         }
         var avatar = new ConversationAvatar();
         avatar.show(conversation, flow);
-        var identity = section(avatar, text(conversation.title(), "chat-heading"),
-                text(conversation.encrypted() ? "E2EE · " + conversation.participantIds().size() + " thành viên"
-                        : flow.statusText(conversation), "chat-caption"));
+        boolean activeGroup = conversation.encrypted() && !flow.chat().access(conversation.id()).readOnlyGroup();
+        String status = activeGroup ? "E2EE · " + conversation.participantIds().size() + " thành viên"
+                : flow.statusText(conversation);
+        var identity = section(avatar, text(conversation.title(), "chat-heading"), text(status, "chat-caption"));
         identity.getStyleClass().add("chat-drawer-identity");
         identity.getChildren().add(action("searchInConversation", "search", "Tìm kiếm trong hội thoại", false,
                 this::startSearch));
@@ -151,16 +167,23 @@ public final class ConversationInfoController implements ViewController {
     }
 
     private void addGroupDetails() {
-        var group = flow.data().groups().stream().filter(item -> item.id().equals(conversation.id()))
-                .findFirst().orElseThrow();
-        boolean admin = group.members().stream().anyMatch(member -> member.userId().equals(MockData.PREVIEW_USER_ID)
-                && member.role() == MockGroup.Role.ADMIN);
+        var groups = flow.chat().groups();
+        String groupId = conversation.id();
+        var group = groups.group(groupId);
+        if (flow.chat().access(groupId).readOnlyGroup()) {
+            infoContent.getChildren().add(section(text("Chỉ xem lịch sử được phép đọc trước khi mất tư cách thành viên.",
+                    "chat-caption"), encryptionAction(), clearAction(), reportAction()));
+            return;
+        }
+        boolean admin = groups.isAdmin(groupId);
         if (admin) {
             infoContent.getChildren().add(section(text("Quản lý nhóm", "chat-section-label"),
-                    action("renameConversationGroup", "refine", "Đổi tên nhóm", false, null)));
+                    action("renameConversationGroup", "refine", "Đổi tên nhóm", false,
+                            () -> GroupFormController.openRename(navigator, groupId))));
         }
         var members = section(text("Thành viên", "chat-section-label"),
-                action("addConversationMember", "add-member", "Thêm thành viên", false, null));
+                action("addConversationMember", "add-member", "Thêm thành viên", false,
+                        () -> GroupFormController.openAdd(navigator, groupId)));
         for (var member : group.members()) {
             var user = flow.data().user(member.userId());
             boolean self = user.id().equals(MockData.PREVIEW_USER_ID);
@@ -173,28 +196,78 @@ public final class ConversationInfoController implements ViewController {
             memberRow.setAlignment(Pos.CENTER_LEFT);
             memberRow.getStyleClass().add("chat-member-row");
             if (admin && !self) {
-                Button options = new Button("", new ChatIcon("message-more"));
-                options.setAccessibleText("Quản lý " + user.fullName());
-                options.getStyleClass().add("chat-drawer-icon");
-                options.setDisable(true);
-                memberRow.getChildren().add(options);
+                memberRow.getChildren().add(memberMenu(groupId, member, user.fullName()));
             }
             members.getChildren().add(memberRow);
         }
 
-        var security = section(text("An toàn và hỗ trợ", "chat-section-label"));
+        var security = section(text("An toàn và hỗ trợ", "chat-section-label"), encryptionAction(), reportAction());
+        var role = section(text("Vai trò và tư cách thành viên", "chat-section-label"));
+        if (admin) {
+            role.getChildren().add(action("resignConversationAdmin", "resign-admin", "Thôi quyền Admin", true,
+                    () -> requestExit(ExitAction.STEP_DOWN)));
+        }
+        role.getChildren().add(action("leaveConversationGroup", "logout", "Rời nhóm", true,
+                () -> requestExit(ExitAction.LEAVE)));
+        infoContent.getChildren().addAll(members, security,
+                section(text("Dữ liệu hội thoại", "chat-section-label"), clearAction()), role);
+    }
+
+    private VBox encryptionAction() {
         Label description = text("Nội dung nhóm chỉ đọc được trên thiết bị có khóa E2EE hợp lệ.", "chat-caption");
         description.setVisible(false);
         description.managedProperty().bind(description.visibleProperty());
-        security.getChildren().addAll(action("showConversationEncryption", "lock", "Thông tin mã hóa E2EE", false,
-                        () -> description.setVisible(!description.isVisible())), description, reportAction());
-        var role = section(text("Vai trò và tư cách thành viên", "chat-section-label"));
-        if (admin) {
-            role.getChildren().add(action("resignConversationAdmin", "resign-admin", "Thôi quyền Admin", true, null));
+        return new VBox(4, action("showConversationEncryption", "lock", "Thông tin mã hóa E2EE", false,
+                () -> description.setVisible(!description.isVisible())), description);
+    }
+
+    private Button memberMenu(String groupId, MockGroup.Member member, String name) {
+        var options = new Button("", new ChatIcon("message-more"));
+        options.setId("group-member-menu-" + member.userId());
+        options.setAccessibleText("Thao tác với " + name);
+        options.getStyleClass().add("chat-drawer-icon");
+        boolean admin = member.role() == MockGroup.Role.ADMIN;
+        String label = admin ? "Thu hồi quyền Admin" : "Cấp quyền Admin";
+        MenuItem role = new MenuItem(label);
+        role.setOnAction(event -> confirm(label, label + " của " + name + "?",
+                () -> flow.chat().groups().changeRole(groupId, member.userId(),
+                        admin ? MockGroup.Role.MEMBER : MockGroup.Role.ADMIN)));
+        MenuItem remove = new MenuItem("Xóa thành viên");
+        remove.setOnAction(event -> confirm("Xóa thành viên",
+                name + " sẽ không nhận được tin mới của nhóm. Họ vẫn giữ lịch sử từng đọc.",
+                () -> flow.chat().groups().removeMember(groupId, member.userId())));
+        var menu = new ContextMenu(role, remove);
+        options.setContextMenu(menu);
+        options.setOnAction(event -> menu.show(options, Side.BOTTOM, 0, 0));
+        return options;
+    }
+
+    private void requestExit(ExitAction action) {
+        String groupId = conversation.id();
+        var groups = flow.chat().groups();
+        if (groups.needsSuccessor(groupId)) {
+            GroupFormController.openSuccessor(navigator, groupId, action);
+            return;
         }
-        role.getChildren().add(action("leaveConversationGroup", "logout", "Rời nhóm", true, null));
-        infoContent.getChildren().addAll(members, security,
-                section(text("Dữ liệu hội thoại", "chat-section-label"), clearAction()), role);
+        boolean last = groups.group(groupId).members().size() == 1;
+        if (action == ExitAction.STEP_DOWN && last) {
+            showGroupError("Bạn là thành viên duy nhất. Hãy rời nhóm nếu muốn đóng nhóm.");
+            return;
+        }
+        boolean leaving = action == ExitAction.LEAVE;
+        String label = leaving ? "Rời nhóm" : "Thôi quyền Admin";
+        String message = leaving
+                ? last ? "Bạn là thành viên cuối cùng. Nhóm sẽ đóng sau khi bạn rời."
+                       : "Bạn sẽ chỉ còn quyền xem lịch sử trước khi rời nhóm."
+                : "Bạn sẽ ở lại nhóm với vai trò thành viên.";
+        confirm(label, message, () -> flow.chat().exitGroup(groupId, action, null));
+    }
+
+    private void showGroupError(String message) {
+        var feedback = text(message, "chat-warning-text");
+        feedback.setStyle("-fx-padding: 12 16;");
+        infoContent.getChildren().addFirst(feedback);
+        infoPane.setVvalue(0);
     }
 
     private Button clearAction() {
@@ -227,9 +300,12 @@ public final class ConversationInfoController implements ViewController {
         dialog.setOnHidden(event -> {
             confirmation = null;
             if (flow != null && dialog.getResult() == proceed) {
-                change.run();
-                flow.conversationChanged();
-                showDetails();
+                try {
+                    change.run();
+                    flow.conversationChanged();
+                } catch (IllegalArgumentException | IllegalStateException exception) {
+                    showGroupError(exception.getMessage());
+                }
             }
         });
         dialog.show();

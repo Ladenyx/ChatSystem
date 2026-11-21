@@ -543,6 +543,157 @@ class UserApplicationTest {
         return stage;
     }
 
+    @Test
+    void createGroupAndManageMembersFromTheDrawer() throws Exception {
+        onFx(() -> {
+            var navigator = UserApplication.createNavigator();
+            var root = navigator.getRoot();
+            Stage stage = shownStage(root, 1280, 720);
+            try {
+                var flow = ChatDemoFlow.get(navigator);
+                var groups = flow.chat().groups();
+                ((Button) root.lookup("#createGroup")).fire();
+                var create = openDialogPane(stage);
+                var createSubmit = (Button) create.lookup("#groupFormSubmit");
+                assertTrue(createSubmit.isDisabled());
+                ((TextField) create.lookup("#groupNameField")).setText("Nhóm Ôn tập Java");
+                assertTrue(createSubmit.isDisabled());
+                assertNull(create.lookup("#group-candidate-usr-05"));
+                assertNull(create.lookup("#group-candidate-usr-06"));
+                ((TextField) create.lookup("#memberSearchField")).setText("bao chau");
+                ((CheckBox) create.lookup("#group-candidate-usr-02")).fire();
+                assertFalse(createSubmit.isDisabled());
+                ((TextField) create.lookup("#memberSearchField")).clear();
+                capture(create.getScene().getWindow(), "group-create-light");
+                createSubmit.fire();
+                var created = flow.selectedProperty().get();
+                assertEquals("Nhóm Ôn tập Java", created.title());
+                assertTrue(created.encrypted());
+                assertTrue(groups.isAdmin(created.id()));
+                assertEquals(0, rowCount(root));
+
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#renameConversationGroup")).fire();
+                var rename = openDialogPane(stage);
+                ((TextField) rename.lookup("#groupNameField")).setText("Java buổi tối");
+                ((Button) rename.lookup("#groupFormSubmit")).fire();
+                assertEquals("Java buổi tối", flow.selectedProperty().get().title());
+                assertEquals("Java buổi tối", ((Label) root.lookup("#conversationTitle")).getText());
+                assertNotNull(root.lookup("#drawerClose"));
+                ((Button) root.lookup("#addConversationMember")).fire();
+                var add = openDialogPane(stage);
+                assertNull(add.lookup("#group-candidate-usr-02"));
+                ((CheckBox) add.lookup("#group-candidate-usr-03")).fire();
+                ((Button) add.lookup("#groupFormSubmit")).fire();
+                assertEquals(3, groups.group(created.id()).members().size());
+
+                fireMemberAction(root, "usr-03", "Cấp quyền Admin");
+                confirmDialog(stage, "Cấp quyền Admin");
+                assertFalse(groups.needsSuccessor(created.id()));
+                fireMemberAction(root, "usr-03", "Thu hồi quyền Admin");
+                confirmDialog(stage, "Thu hồi quyền Admin");
+                assertTrue(groups.needsSuccessor(created.id()));
+                fireMemberAction(root, "usr-03", "Xóa thành viên");
+                confirmDialog(stage, "Xóa thành viên");
+                assertEquals(2, groups.group(created.id()).members().size());
+                assertNull(root.lookup("#group-member-menu-usr-03"));
+
+                ((Button) root.lookup("#resignConversationAdmin")).fire();
+                var successor = openDialogPane(stage);
+                assertTrue(((Button) successor.lookup("#groupFormSubmit")).isDisabled());
+                ((CheckBox) successor.lookup("#group-candidate-usr-02")).fire();
+                ((Button) successor.lookup("#groupFormCancel")).fire();
+                assertTrue(groups.isAdmin(created.id()));
+                assertNotNull(root.lookup("#drawerClose"));
+
+                ((Button) root.lookup("#resignConversationAdmin")).fire();
+                successor = openDialogPane(stage);
+                ((CheckBox) successor.lookup("#group-candidate-usr-02")).fire();
+                capture(successor.getScene().getWindow(), "group-successor-step-down");
+                ((Button) successor.lookup("#groupFormSubmit")).fire();
+                assertFalse(groups.isAdmin(created.id()));
+                assertNull(root.lookup("#renameConversationGroup"));
+                assertNull(root.lookup("#group-member-menu-usr-02"));
+                assertFalse(root.lookup("#addConversationMember").isDisabled());
+                ((Button) root.lookup("#addConversationMember")).fire();
+                add = openDialogPane(stage);
+                ((CheckBox) add.lookup("#group-candidate-usr-04")).fire();
+                ((Button) add.lookup("#groupFormSubmit")).fire();
+                assertEquals(3, groups.group(created.id()).members().size());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+    }
+
+    @Test
+    void groupLeaveUsesSuccessorWhenNeededAndShowsReadOnlyHistory() throws Exception {
+        onFx(() -> {
+            var navigator = UserApplication.createNavigator();
+            var root = navigator.getRoot();
+            Stage stage = shownStage(root, 1024, 640);
+            try {
+                var flow = ChatDemoFlow.get(navigator);
+                var chat = flow.chat();
+                var created = chat.createGroup("Java bàn giao", java.util.List.of("usr-02", "usr-03"));
+                var message = chat.send(created.id(), "Tin cũ vẫn đọc được.");
+                chat.acknowledge(created.id(), message.id(), false);
+                flow.openCreatedGroup(created);
+                ((TextArea) root.lookup("#draftField")).setText("Bản nháp chưa gửi");
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                navigator.themes().toggle();
+                ((Button) root.lookup("#leaveConversationGroup")).fire();
+                var leave = openDialogPane(stage);
+                var first = (CheckBox) leave.lookup("#group-candidate-usr-02");
+                first.fire();
+                ((CheckBox) leave.lookup("#group-candidate-usr-03")).fire();
+                assertFalse(first.isSelected());
+                capture(leave.getScene().getWindow(), "group-successor-leave-dark");
+                ((Button) leave.lookup("#groupFormSubmit")).fire();
+                assertEquals(OfflineChatDemoService.Access.GROUP_LEFT, chat.access(created.id()));
+                assertEquals(1, rowCount(root));
+                assertTrue(root.lookup("#readOnlyGroupFooter").isVisible());
+                assertNull(root.lookup("#addConversationMember"));
+                assertEquals("Bản nháp chưa gửi", flow.draft(created.id()));
+                assertNull(chat.send(created.id(), "Tin sau khi rời"));
+                capture(stage, "group-left-read-only-dark");
+
+                selectChat(root, "grp-04");
+                assertEquals(OfflineChatDemoService.Access.GROUP_REMOVED, chat.access("grp-04"));
+                assertEquals(2, rowCount(root));
+                assertTrue(root.lookup("#readOnlyGroupFooter").isVisible());
+
+                var last = chat.createGroup("Một thành viên", java.util.List.of("usr-02"));
+                chat.groups().removeMember(last.id(), "usr-02");
+                flow.openCreatedGroup(last);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#leaveConversationGroup")).fire();
+                assertNull(openDialogPane(stage).lookup("#groupFormSubmit"));
+                confirmDialog(stage, "Rời nhóm");
+                assertTrue(chat.groups().group(last.id()).members().isEmpty());
+                assertTrue(root.lookup("#readOnlyGroupFooter").isVisible());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+    }
+
+    private static void fireMemberAction(Parent root, String memberId, String label) {
+        var menu = (Button) root.lookup("#group-member-menu-" + memberId);
+        menu.getContextMenu().getItems().stream().filter(item -> item.getText().equals(label))
+                .findFirst().orElseThrow().fire();
+    }
+
     private static void awaitState(OfflineChatDemoService chat, String chatId, State expected) throws Exception {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(4);
         State observed;
@@ -586,12 +737,19 @@ class UserApplicationTest {
     }
 
     private static void confirmDialog(Stage owner, String action) {
-        DialogPane pane = Window.getWindows().stream().filter(window -> window != owner && window.isShowing())
-                .map(window -> window.getScene().getRoot()).filter(DialogPane.class::isInstance)
-                .map(DialogPane.class::cast).findFirst().orElseThrow();
+        DialogPane pane = openDialogPane(owner);
         ButtonType button = pane.getButtonTypes().stream().filter(type -> type.getText().equals(action))
                 .findFirst().orElseThrow();
         ((Button) pane.lookupButton(button)).fire();
+    }
+
+    private static DialogPane openDialogPane(Stage owner) {
+        var pane = Window.getWindows().stream().filter(window -> window != owner && window.isShowing())
+                .map(window -> window.getScene().getRoot()).filter(DialogPane.class::isInstance)
+                .map(DialogPane.class::cast).findFirst().orElseThrow();
+        pane.applyCss();
+        pane.layout();
+        return pane;
     }
 
     private static void fireSetting(Parent root, String id) {
