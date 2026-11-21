@@ -6,7 +6,7 @@ import java.util.List;
 public final class AdminViews {
     public static final View SIGN_IN = view("A-SCR-01", "Đăng nhập quản trị", "auth/sign-in.fxml");
     public static final View OVERVIEW = view("A-SCR-02", "Tổng quan", "overview/overview.fxml");
-    public static final View USERS = view("A-SCR-03", "Quản lý Người dùng", "users/users.fxml");
+    public static final View USERS = view("A-SCR-03", "Quản lý người dùng", "users/users.fxml");
     public static final View GROUPS = view("A-SCR-04", "Quản lý Nhóm Chat", "groups/groups.fxml");
     public static final View SPAM = view("A-SCR-05", "Kiểm duyệt Báo cáo Spam", "spam/spam.fxml");
     public static final View LOGIN_LOGS = view("A-SCR-06", "Nhật ký Đăng nhập", "logs/login-logs.fxml");
@@ -17,8 +17,8 @@ public final class AdminViews {
     public static final View FRIEND_NETWORK = view("A-SCR-09", "Phân tích Mạng lưới Bạn bè",
             "analytics/friend-network.fxml");
 
-    public static final View EDIT_USER = view("A-DLG-01", "Thêm / Cập nhật Người dùng", "dialogs/edit-user.fxml");
-    public static final View CONFIRM_ACTION = view("A-DLG-02", "Xác nhận Thao tác Quản trị",
+    public static final View EDIT_USER = view("A-DLG-01", "Hồ sơ người dùng", "dialogs/edit-user.fxml");
+    public static final View CONFIRM_ACTION = view("A-DLG-02", "Xác nhận thao tác",
             "dialogs/confirm-action.fxml");
 
     public static final List<View> ALL = List.of(SIGN_IN, OVERVIEW, USERS, GROUPS, SPAM, LOGIN_LOGS,

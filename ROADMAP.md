@@ -160,12 +160,12 @@ Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, 
 | ID | Feature | UI | Logic |
 |----|---------|:--:|:-----:|
 | **User oversight** | | | |
-| A-01 | User list: filter by name, username, status; sort by name, creation date | ⬜ | ⬜ |
-| A-02 | Create, update and delete users | ⬜ | ⬜ |
-| A-03 | Lock and unlock accounts | ⬜ | ⬜ |
-| A-04 | Reset a user's password | ⬜ | ⬜ |
-| A-05 | View a user's login history | ⬜ | ⬜ |
-| A-06 | View a user's friend list | ⬜ | ⬜ |
+| A-01 | User list: filter by name, username, status; sort by name, creation date | 🚧 | ⬜ |
+| A-02 | Create, update and delete users | 🚧 | ⬜ |
+| A-03 | Lock and unlock accounts | 🚧 | ⬜ |
+| A-04 | Reset a user's password | 🚧 | ⬜ |
+| A-05 | View a user's login history | 🚧 | ⬜ |
+| A-06 | View a user's friend list | 🚧 | ⬜ |
 | **Access logs and groups** | | | |
 | A-07 | Login log in chronological order (time, username, full name) | ⬜ | ⬜ |
 | A-08 | Group list: sort by name, creation time; filter by name | ⬜ | ⬜ |

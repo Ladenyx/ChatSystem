@@ -1,0 +1,327 @@
+.admin-users-page {
+    -admin-user-rule: ladder(-cs-surface, rgba(255, 255, 255, 0.09) 49%, rgba(0, 0, 0, 0.09) 50%);
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12px;
+    -fx-border-color: -admin-user-rule;
+    -fx-border-radius: 12px;
+    -fx-padding: 0;
+}
+
+.admin-users-page > .split-pane-divider {
+    -fx-background-color: -admin-user-rule;
+    -fx-background-insets: 0 4px 0 3px;
+    -fx-padding: 0 4px;
+}
+
+.admin-users-page > .split-pane-divider > .horizontal-grabber {
+    -fx-background-color: -cs-border-strong;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+    -fx-padding: 8px 2px;
+}
+
+.admin-user-directory,
+.admin-profile-content {
+    -fx-padding: 16px;
+}
+
+.admin-user-directory .text-field,
+.admin-user-primary {
+    -fx-min-height: 36px;
+    -fx-font-size: 13px;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.admin-user-directory .text-field {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-user-primary {
+    -fx-background-color: -cs-text;
+    -fx-border-color: transparent;
+    -fx-text-fill: -cs-surface;
+    -fx-font-weight: 600;
+    -fx-graphic-text-gap: 8px;
+    -fx-padding: 4px 12px;
+}
+
+.admin-user-primary .ikonli-font-icon {
+    -fx-icon-color: -cs-surface;
+}
+
+.admin-user-primary:hover {
+    -fx-opacity: 0.86;
+}
+
+.admin-user-filters {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px;
+    -fx-padding: 4px;
+}
+
+.admin-user-filters .toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-min-height: 28px;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-user-filters .toggle-button:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-user-filters .toggle-button:selected {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -admin-user-rule;
+    -fx-text-fill: -cs-text;
+    -fx-font-weight: 600;
+}
+
+.admin-users-page .hyperlink {
+    -fx-font-size: 12px;
+    -fx-padding: 4px;
+    -fx-text-fill: -cs-muted;
+    -fx-underline: false;
+}
+
+.admin-users-page .hyperlink .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-users-page .hyperlink:hover {
+    -fx-text-fill: -cs-text;
+    -fx-underline: true;
+}
+
+.admin-users-table {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-font-size: 13px;
+    -fx-padding: 0;
+}
+
+.admin-users-table .column-header-background {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.admin-users-table .column-header,
+.admin-users-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 32px;
+}
+
+.admin-users-table .column-header .label {
+    -fx-alignment: center-left;
+    -fx-padding: 0 8px;
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-users-table .table-row-cell {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px 1px 1px 2px;
+}
+
+.admin-users-table .table-row-cell:filled {
+    -fx-border-color: transparent transparent -admin-user-rule transparent;
+}
+
+.admin-users-table .table-row-cell:filled:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-users-table .table-row-cell:filled:selected {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: transparent transparent -admin-user-rule -cs-focus;
+}
+
+.admin-directory-table .table-row-cell:filled:selected .admin-user-name {
+    -fx-text-fill: -cs-brand-text;
+}
+
+.admin-users-table:focused .table-row-cell:filled:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-users-table .table-cell {
+    -fx-alignment: center-left;
+    -fx-border-color: transparent;
+    -fx-padding: 0 8px;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-users-table .table-cell.admin-date-column,
+.admin-users-table .table-cell.admin-time-column,
+.admin-account-meta,
+.admin-profile-handle {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+}
+
+.admin-users-table .table-cell.admin-date-column,
+.admin-users-table .column-header.admin-date-column .label {
+    -fx-alignment: center-right;
+}
+
+.admin-user-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.admin-user-status {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+    -fx-graphic-text-gap: 8px;
+}
+
+.admin-status-dot {
+    -fx-min-width: 6px;
+    -fx-max-width: 6px;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+    -fx-background-radius: 3px;
+    -fx-background-color: -cs-border-strong;
+}
+
+.admin-user-status.status-active .admin-status-dot {
+    -fx-background-color: -cs-success;
+}
+
+.admin-user-status.status-locked .admin-status-dot {
+    -fx-background-color: -cs-warning;
+}
+
+.admin-user-inspector,
+.admin-user-inspector > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.admin-inspector-empty {
+    -fx-padding: 24px;
+}
+
+.admin-inspector-icon,
+.admin-profile-initials {
+    -fx-alignment: center;
+    -fx-min-width: 44px;
+    -fx-max-width: 44px;
+    -fx-min-height: 44px;
+    -fx-max-height: 44px;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px;
+}
+
+.admin-inspector-icon .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-profile-initials {
+    -fx-background-color: -cs-brand;
+    -fx-text-fill: -cs-on-brand;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.admin-profile-name {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.admin-profile-handle {
+    -fx-text-fill: -cs-brand-text;
+}
+
+.admin-profile-fields {
+    -fx-border-color: -admin-user-rule;
+    -fx-border-width: 1px 0 0;
+    -fx-padding: 12px 0 0;
+}
+
+.admin-profile-actions .button {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-min-height: 32px;
+    -fx-font-size: 13px;
+    -fx-padding: 4px 8px;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-profile-actions .admin-edit-profile {
+    -fx-border-color: -cs-border;
+    -fx-font-weight: 600;
+}
+
+.admin-profile-actions .button:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-profile-actions .admin-lifecycle-action {
+    -fx-text-fill: -cs-danger;
+}
+
+.admin-profile-actions .admin-lifecycle-action:restore {
+    -fx-text-fill: -cs-brand-text;
+}
+
+.admin-user-directory .text-field:focused,
+.admin-user-primary:focused,
+.admin-user-filters .toggle-button:focused,
+.admin-users-table:focused,
+.admin-profile-actions .button:focused,
+.admin-users-page .hyperlink:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-deletion-notice {
+    -fx-background-color: -cs-warning-bg;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px;
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-warning;
+}
+
+.admin-inspector-panel .tab-pane {
+    -color-tab-bg-selected: -cs-surface;
+    -color-tab-fg-selected: -cs-text;
+    -color-tab-border-selected: -cs-focus;
+}
+
+.admin-inspector-panel .tab-pane .tab-header-background {
+    -fx-background-color: -admin-user-rule, -cs-surface;
+    -fx-background-insets: 0, 0 0 1px 0;
+}
+
+.admin-inspector-panel .tab {
+    -fx-padding: 4px 8px;
+}
+
+.admin-inspector-panel .tab .tab-label {
+    -fx-font-size: 13px;
+    -fx-padding: 4px 0;
+}
+
+.admin-inspector-tab {
+    -fx-padding: 8px 0 0;
+}
