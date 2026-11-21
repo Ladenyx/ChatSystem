@@ -1,0 +1,169 @@
+/* Spam reporting dialog styles (P1 / REPORT-GROUP) */
+.chat-report-dialog {
+    -fx-background-color: -chat-surface;
+}
+
+.chat-report-dialog > .dialog-pane {
+    -fx-background-color: -chat-surface;
+    -fx-padding: 0;
+}
+
+.chat-report-dialog > .dialog-pane > .button-bar {
+    -fx-padding: 0;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+}
+
+.chat-report-form {
+    -fx-background-color: -chat-surface;
+    -fx-padding: 24;
+    -fx-pref-width: 600;
+    -fx-max-width: 600;
+    -fx-spacing: 16;
+}
+
+.chat-report-header {
+    -fx-alignment: center-left;
+    -fx-spacing: 16;
+}
+
+.chat-report-header .chat-heading {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-report-close-btn {
+    -fx-min-width: 80;
+    -fx-pref-width: 80;
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 4;
+    -fx-background-color: transparent;
+    -fx-text-fill: -chat-text;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.chat-report-close-btn:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-report-section {
+    -fx-spacing: 4;
+}
+
+.chat-report-field-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-report-text-field {
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-border-color: -chat-control-border;
+    -fx-border-radius: 4;
+    -fx-background-color: -chat-surface;
+    -fx-text-fill: -chat-text;
+    -fx-padding: 8 12;
+}
+
+.chat-report-text-field:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-report-excerpt-card {
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.chat-report-excerpt-card:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-report-classification {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -chat-muted;
+}
+
+.chat-report-content {
+    -fx-font-size: 14px;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-report-actions {
+    -fx-spacing: 8;
+    -fx-alignment: center;
+    -fx-pref-height: 32;
+}
+
+.chat-report-actions .button {
+    -fx-min-height: 32;
+    -fx-pref-height: 32;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.chat-report-btn-outline {
+    -fx-border-color: -chat-border;
+    -fx-background-color: transparent;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-report-btn-outline:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-report-btn-primary {
+    -fx-background-color: -chat-brand;
+    -fx-text-fill: -chat-on-brand;
+    -fx-border-color: -chat-brand;
+}
+
+.chat-report-btn-primary:hover {
+    -fx-background-color: -chat-brand-hover;
+}
+
+.chat-report-summary-box {
+    -fx-background-color: -chat-incoming;
+    -fx-background-radius: 6;
+    -fx-padding: 12;
+    -fx-spacing: 6;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 6;
+}
+
+.chat-report-summary-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: -chat-text;
+    -fx-line-spacing: 4;
+}
+
+.chat-report-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-max-height: 240;
+    -fx-pref-height: 180;
+}
+
+.chat-report-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.chat-report-accepted-box {
+    -fx-padding: 24;
+    -fx-spacing: 16;
+    -fx-alignment: center-left;
+    -fx-background-color: -chat-surface;
+}
