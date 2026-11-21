@@ -11,6 +11,7 @@ import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.desktop.navigation.ViewNavigator;
+import com.chatsystem.desktop.theme.ThemeManager.Mode;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,6 +38,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -147,7 +149,7 @@ class UserApplicationTest {
                 assertEquals(640, stage.getScene().getHeight());
                 var signIn = requireNode(navigator.getRoot(), "authSignIn");
                 assertTrue(signIn.getBoundsInLocal().getWidth() > 0);
-                capture(stage, "user-auth-small");
+                assertReadableSignInInBothThemes(stage, navigator, "user-auth-small");
                 enterPreviewWorkspace(navigator.getRoot());
                 capture(stage, "user-small");
             } finally {
@@ -168,7 +170,7 @@ class UserApplicationTest {
             var rail = requireNode(root, "workspaceRail");
             assertFalse(rail.isVisible());
             assertFalse(rail.isManaged());
-            capture(stage, "U-SCR-01-sign-in");
+            assertReadableSignInInBothThemes(stage, navigator, "U-SCR-01-sign-in");
 
             var toggle = assertInstanceOf(Button.class, requireNode(root, "authSignInShowPassword"));
             var masked = assertInstanceOf(PasswordField.class, requireNode(root, "authSignInPassword"));
@@ -201,24 +203,25 @@ class UserApplicationTest {
             var root = navigator.getRoot();
             click(root, "authOpenSignUp");
             assertEquals(UserViews.SIGN_UP, navigator.currentViewProperty().get());
-            capture(stage, "U-SCR-02-sign-up-username");
+            captureAuth(stage, "U-SCR-02-sign-up-username");
             click(root, "authSignUpContinue");
             assertPasswordRulesShown(root);
-            capture(stage, "U-SCR-02-sign-up-password");
+            captureAuth(stage, "U-SCR-02-sign-up-password");
             click(root, "authSignUpContinue");
             enterText(root, "authSignUpEmail", "preview@example.test");
-            capture(stage, "U-SCR-02-sign-up-email");
+            captureAuth(stage, "U-SCR-02-sign-up-email");
             click(root, "authSignUpContinue");
             assertEquals(UserViews.VERIFY_EMAIL, navigator.currentViewProperty().get());
             assertEquals("p***@example.test", labelText(root, "maskedEmail"));
-            capture(stage, "U-SCR-03-verify-email");
+            assertPreviewResendDisabled(root, "authVerifyResend");
+            captureAuth(stage, "U-SCR-03-verify-email");
             click(root, "authVerifyChangeEmail");
             assertEquals("preview@example.test", authField(root, "authSignUpEmail").getText());
             click(root, "authSignUpContinue");
             click(root, "authVerifySubmit");
             assertEquals(UserViews.SIGN_UP, navigator.currentViewProperty().get());
             assertShowing(requireNode(root, "authSignUpFullName"));
-            capture(stage, "U-SCR-02-sign-up-profile");
+            captureAuth(stage, "U-SCR-02-sign-up-profile");
             click(root, "authSignUpContinue");
             assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
         });
@@ -230,20 +233,21 @@ class UserApplicationTest {
             var root = navigator.getRoot();
             click(root, "authOpenForgotPassword");
             assertEquals(UserViews.FORGOT_PASSWORD, navigator.currentViewProperty().get());
-            capture(stage, "U-SCR-04-forgot-username");
+            captureAuth(stage, "U-SCR-04-forgot-username");
             click(root, "authForgotContinue");
             assertShowing(requireNode(root, "authForgotEmail"));
-            capture(stage, "U-SCR-04-forgot-email");
+            captureAuth(stage, "U-SCR-04-forgot-email");
             click(root, "authForgotContinue");
             assertShowing(requireNode(root, "checkEmailStep"));
-            capture(stage, "U-SCR-04-check-email");
+            assertPreviewResendDisabled(root, "authForgotResend");
+            captureAuth(stage, "U-SCR-04-check-email");
             click(root, "authForgotContinue");
             assertEquals(UserViews.FORCE_CHANGE_PASSWORD, navigator.currentViewProperty().get());
-            capture(stage, "U-SCR-05-temporary-password");
+            captureAuth(stage, "U-SCR-05-temporary-password");
             click(root, "authForceContinue");
             assertShowing(requireNode(root, "authNewPassword"));
             assertPasswordRulesShown(root);
-            capture(stage, "U-SCR-05-new-password");
+            captureAuth(stage, "U-SCR-05-new-password");
             click(root, "authForceContinue");
             assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
         });
@@ -333,6 +337,50 @@ class UserApplicationTest {
         click(root, "authSignInSubmit");
     }
 
+    private static void assertReadableSignInInBothThemes(Stage stage, ViewNavigator navigator, String imageName)
+            throws Exception {
+        var themes = navigator.themes();
+        var original = themes.getMode();
+        try {
+            for (var mode : Mode.values()) {
+                themes.setMode(mode);
+                var button = assertInstanceOf(Button.class, requireNode(navigator.getRoot(), "authSignInSubmit"));
+                assertShowing(button);
+                assertFalse(button.isDisabled());
+                var background = button.getBackground();
+                assertNotNull(background, mode + ": the sign-in button must have a resolved background");
+                assertFalse(background.getFills().isEmpty(), mode + ": the sign-in button must have a background fill");
+                var fill = assertInstanceOf(Color.class, background.getFills().getLast().getFill());
+                var text = assertInstanceOf(Color.class, button.getTextFill());
+                assertEquals(1.0, fill.getOpacity(), mode + ": sign-in button fill must be opaque");
+                assertEquals(1.0, text.getOpacity(), mode + ": sign-in button text must be opaque");
+                double fillLuminance = luminance(fill);
+                double textLuminance = luminance(text);
+                double contrast = (Math.max(fillLuminance, textLuminance) + 0.05)
+                        / (Math.min(fillLuminance, textLuminance) + 0.05);
+                assertTrue(contrast >= 4.5, () -> mode + ": sign-in text contrast was " + contrast);
+                captureAuth(stage, mode == Mode.DARK ? imageName + "-dark" : imageName);
+            }
+        } finally {
+            themes.setMode(original);
+        }
+    }
+
+    private static double luminance(Color color) {
+        return 0.2126 * linearChannel(color.getRed()) + 0.7152 * linearChannel(color.getGreen())
+                + 0.0722 * linearChannel(color.getBlue());
+    }
+
+    private static double linearChannel(double channel) {
+        return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+    }
+
+    private static void assertPreviewResendDisabled(Parent root, String id) {
+        var button = assertInstanceOf(Button.class, requireNode(root, id));
+        assertShowing(button);
+        assertTrue(button.isDisabled(), id + " must not offer to resend in the offline preview");
+    }
+
     private static void click(Parent root, String id) {
         var button = assertInstanceOf(Button.class, requireNode(root, id), id);
         assertShowing(button);
@@ -399,13 +447,31 @@ class UserApplicationTest {
         void run(Stage stage, ViewNavigator navigator) throws Exception;
     }
 
+    private static void captureAuth(Stage stage, String name) throws Exception {
+        if (!Boolean.getBoolean("chatsystem.capture")) {
+            return;
+        }
+        // Auth steps share a route and mutate an attached ScrollPane in one test task.
+        // Wait for a new JavaFX frame so the screenshot includes the updated render tree.
+        var key = new Object();
+        stage.getScene().snapshot(result -> {
+            Platform.exitNestedEventLoop(key, result.getImage());
+            return null;
+        }, null);
+        var image = (WritableImage) Platform.enterNestedEventLoop(key);
+        writeCapture(image, name);
+    }
+
     private static void capture(Window stage, String name) throws Exception {
         if (!Boolean.getBoolean("chatsystem.capture")) {
             return;
         }
         stage.getScene().getRoot().applyCss();
         stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        writeCapture(stage.getScene().snapshot(null), name);
+    }
+
+    private static void writeCapture(WritableImage image, String name) throws Exception {
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {

@@ -76,8 +76,8 @@
     -fx-border-width: 2px;
 }
 .auth-primary {
-    -fx-background-color: -cs-accent-fill;
-    -fx-text-fill: white;
+    -fx-background-color: -cs-brand;
+    -fx-text-fill: -cs-on-brand;
     -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-border-width: 2px;
@@ -85,8 +85,12 @@
     -fx-min-height: 40px;
     -fx-font-weight: 600;
 }
-.auth-primary:hover { -fx-background-color: derive(-cs-accent-fill, -12%); }
-.auth-primary:focused { -fx-border-color: -cs-brand-text; }
+.auth-primary:hover { -fx-background-color: -cs-brand-hover; }
+.auth-primary:pressed { -fx-background-color: -cs-brand-pressed; }
+.auth-primary:focused {
+    -fx-border-color: -cs-focus;
+    -fx-border-insets: -3px;
+}
 .auth-primary:disabled {
     -fx-opacity: 1;
     -fx-background-color: -cs-border;

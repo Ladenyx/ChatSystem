@@ -13,8 +13,6 @@ public final class VerifyEmailController extends AuthFormController {
         maskedEmail.setText(at > 0 ? value.substring(0, 1) + "***" + value.substring(at) : "");
     }
     @FXML private void verify() { SignUpController.continueAfterVerification(navigator); go(UserViews.SIGN_UP); }
-    // No email is sent in the UI-only version.
-    @FXML private void resend() { }
     @FXML private void changeEmail() { SignUpController.changeEmail(navigator); go(UserViews.SIGN_UP); }
     @FXML private void cancel() { go(UserViews.SIGN_IN); }
 }

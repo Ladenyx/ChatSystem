@@ -21,7 +21,6 @@ public final class ForgotPasswordController extends AuthFormController {
         }
         render();
     }
-    @FXML private void resend() { }
     @FXML private void cancel() { go(UserViews.SIGN_IN); }
     private void render() {
         show(usernameStep, step == Step.USERNAME);
@@ -29,8 +28,16 @@ public final class ForgotPasswordController extends AuthFormController {
         show(checkEmailStep, step == Step.CHECK_EMAIL);
         switch (step) {
             case USERNAME -> { stepTitle.setText("Nhập tên đăng nhập"); stepHelp.setText("Nhập tên đăng nhập của tài khoản cần khôi phục."); authForgotContinue.setText("Tiếp tục"); }
-            case EMAIL -> { stepTitle.setText("Xác nhận email"); stepHelp.setText("Nhập đầy đủ email đã liên kết với tài khoản."); authForgotMaskedEmail.setText("Email gợi ý: a***@example.com"); authForgotContinue.setText("Gửi"); }
-            case CHECK_EMAIL -> { stepTitle.setText("Kiểm tra email"); stepHelp.setText("Tiếp tục khi bạn đã có mật khẩu tạm."); authForgotContinue.setText("Tiếp tục"); }
+            case EMAIL -> {
+                stepTitle.setText("Xác nhận email");
+                authForgotMaskedEmail.setText("Email mẫu: a***@example.test");
+                authForgotContinue.setText("Xem bước kiểm tra email");
+            }
+            case CHECK_EMAIL -> {
+                stepTitle.setText("Kiểm tra email");
+                stepHelp.setText("Không gửi email trong bản xem trước. Chọn Tiếp tục để xem màn đặt mật khẩu.");
+                authForgotContinue.setText("Tiếp tục");
+            }
         }
     }
 }

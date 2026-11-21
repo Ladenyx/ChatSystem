@@ -65,12 +65,17 @@ public final class SignUpController extends AuthFormController {
         show(usernameStep, step == Step.USERNAME);
         show(passwordStep, step == Step.PASSWORD);
         show(emailStep, step == Step.EMAIL);
+        show(stepHelp, step == Step.EMAIL);
         show(profileStep, step == Step.PROFILE);
         show(backButton, step != Step.USERNAME);
         switch (step) {
             case USERNAME -> { stepTitle.setText("Tạo tên đăng nhập"); stepHelp.setText("Chọn tên đăng nhập để bắt đầu tạo tài khoản."); authSignUpContinue.setText("Tiếp tục"); }
             case PASSWORD -> { stepTitle.setText("Tạo mật khẩu"); stepHelp.setText("Tạo mật khẩu đáp ứng các điều kiện bên dưới."); authSignUpContinue.setText("Tiếp tục"); }
-            case EMAIL -> { stepTitle.setText("Nhập email"); stepHelp.setText("Nhập email để tiếp tục với bước xác minh."); authSignUpContinue.setText("Gửi mã xác minh"); }
+            case EMAIL -> {
+                stepTitle.setText("Nhập email");
+                stepHelp.setText("Tiếp tục để xem màn xác minh. Bản xem trước không gửi mã.");
+                authSignUpContinue.setText("Tiếp tục xác minh");
+            }
             case PROFILE -> { stepTitle.setText("Thông tin cá nhân"); stepHelp.setText("Thêm thông tin để hoàn tất."); authSignUpContinue.setText("Hoàn tất đăng ký"); }
         }
     }
