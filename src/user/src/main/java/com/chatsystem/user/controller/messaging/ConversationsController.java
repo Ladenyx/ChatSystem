@@ -1,6 +1,5 @@
-package com.chatsystem.user.controller;
+package com.chatsystem.user.controller.messaging;
 
-import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
@@ -8,7 +7,8 @@ import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
 import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.ConversationCell;
-import com.chatsystem.user.controller.chat.ChatDemoFlow;
+import com.chatsystem.user.messaging.ConversationCatalog;
+import com.chatsystem.user.navigation.UserViewInputs;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -42,7 +42,8 @@ public final class ConversationsController implements ViewController {
     @FXML private ConversationAvatar conversationAvatar;
 
     private ViewNavigator navigator;
-    private ChatDemoFlow flow;
+    private final ConversationCatalog catalog = UserViews.CONVERSATIONS_DATA;
+    private MockConversation selected;
     private FilteredList<MockConversation> visibleConversations;
     private boolean updatingSelection;
 
@@ -56,7 +57,7 @@ public final class ConversationsController implements ViewController {
 
         conversationItems.getSelectionModel().selectedItemProperty().addListener((observable, previous, current) -> {
             if (!updatingSelection && current != null) {
-                flow.select(current);
+                selected = current;
                 navigator.closeDrawer();
                 showSelection(current);
             }
@@ -74,23 +75,19 @@ public final class ConversationsController implements ViewController {
     @Override
     public void onEnter(ViewNavigator navigator, View view) {
         this.navigator = navigator;
-        flow = ChatDemoFlow.get(navigator);
         if (visibleConversations == null) {
-            MockData data = flow.data();
-            visibleConversations = new FilteredList<>(FXCollections.observableArrayList(data.conversations()));
-            ChatDemoFlow session = flow;
-            conversationItems.setCellFactory(list -> new ConversationCell(session));
+            visibleConversations = new FilteredList<>(FXCollections.observableArrayList(catalog.conversations()));
+            conversationItems.setCellFactory(list -> new ConversationCell(catalog));
             conversationItems.setItems(visibleConversations);
             allFilter.setSelected(true);
         }
         applyFilter();
-        showSelection(flow.selectedProperty().get());
+        showSelection(selected);
     }
 
     @Override
     public void onLeave() {
         navigator = null;
-        flow = null;
     }
 
     @FXML
@@ -101,14 +98,14 @@ public final class ConversationsController implements ViewController {
     @FXML
     private void openInfo() {
         if (!navigator.isDrawerOpen()) {
-            navigator.showDrawer(UserViews.CONVERSATION_INFO);
+            navigator.showDrawer(UserViews.CONVERSATION_INFO, new UserViewInputs.Conversation(selected.id()));
         } else {
             navigator.closeDrawer();
         }
     }
 
     private void applyFilter() {
-        if (flow == null || visibleConversations == null) {
+        if (navigator == null || visibleConversations == null) {
             return;
         }
         String query = conversationFilter.getText().strip().toLowerCase(Locale.ROOT);
@@ -118,7 +115,7 @@ public final class ConversationsController implements ViewController {
                     && (!unreadFilter.isSelected() || chat.unreadCount() > 0)
                     && (!groupFilter.isSelected() || chat.kind() == MockConversation.Kind.GROUP));
             var selection = conversationItems.getSelectionModel();
-            int selectedIndex = visibleConversations.indexOf(flow.selectedProperty().get());
+            int selectedIndex = visibleConversations.indexOf(selected);
             if (selectedIndex < 0) {
                 selection.clearSelection();
             } else {
@@ -134,8 +131,8 @@ public final class ConversationsController implements ViewController {
         selectedWorkspace.setVisible(conversation != null);
         if (conversation != null) {
             conversationTitle.setText(conversation.title());
-            conversationStatus.setText(flow.statusText(conversation));
-            conversationAvatar.show(conversation, flow);
+            conversationStatus.setText(catalog.statusText(conversation));
+            conversationAvatar.show(conversation, catalog);
         }
     }
 }

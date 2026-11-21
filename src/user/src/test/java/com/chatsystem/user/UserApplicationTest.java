@@ -2,6 +2,7 @@ package com.chatsystem.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import atlantafx.base.controls.ToggleSwitch;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
@@ -20,10 +21,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.geometry.Orientation;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.ScrollBar;
@@ -92,8 +96,19 @@ class UserApplicationTest {
                 var settings = (MenuButton) root.lookup("#workspaceSettings");
                 settings.show();
                 assertTrue(settings.isShowing());
+                var themeSetting = (CustomMenuItem) settings.getItems().getFirst();
+                assertEquals("openProfile", settings.getItems().get(1).getId());
+                var darkModeSwitch = (ToggleSwitch) themeSetting.getContent();
+                assertFalse(darkModeSwitch.isSelected());
+                darkModeSwitch.fire();
+                assertTrue(settings.isShowing());
                 settings.hide();
-                fireSetting(root, "toggleTheme");
+                settings.show();
+                assertTrue(darkModeSwitch.isSelected());
+                darkModeSwitch.fire();
+                assertFalse(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
+                darkModeSwitch.fire();
+                settings.hide();
                 assertTrue(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
                 root.applyCss();
                 assertEquals(Color.web("#1f1f1f"), ((Region) root.lookup("#conversationSidebar"))
@@ -131,6 +146,21 @@ class UserApplicationTest {
                 capture(popup, "user-popover");
             } finally {
                 stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void eachRegisteredViewLoadsItsOwnFxml() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            assertEquals(14, UserViews.ALL.size());
+            for (var view : UserViews.ALL) {
+                var resource = view.resourceOwner().getResource(view.resource());
+                assertNotNull(resource, view.id());
+                assertInstanceOf(Parent.class, new FXMLLoader(resource).load(), view.id());
             }
             return null;
         });
