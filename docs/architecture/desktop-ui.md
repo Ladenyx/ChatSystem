@@ -57,13 +57,9 @@ Tất cả API điều hướng/theme phải gọi trên JavaFX Application Thre
 
 ## Gắn màn hình mới
 
-Tạo FXML và controller trong module phụ trách. Ví dụ thay màn hình khung Bạn bè bằng tài nguyên thật:
+`UserViews` đăng ký 14 route, `AdminViews` đăng ký 11 route. Mỗi route chỉ đến một FXML riêng trong cụm phụ trách. Ví dụ, `UserViews.CONTACTS` (`U-SCR-08`) nạp `/com/chatsystem/user/fxml/contacts/contacts.fxml`. Khi triển khai màn hình, thay nội dung FXML tại đường dẫn đã đăng ký và gắn controller trong package của cụm. Mã màn hình và đường dẫn ổn định giúp các nhánh cùng dùng một route.
 
-```java
-public static final View CONTACTS = new View(
-        "U-SCR-08", "Bạn bè & Kết nối", UserApplication.class,
-        "/com/chatsystem/user/fxml/contacts/contacts.fxml");
-```
+`UserViews.ALL` và `AdminViews.ALL` là danh sách route để kiểm tra tài nguyên, kể cả trang đăng nhập và overlay. `AdminViews.PAGES` chỉ gồm các mục trong sidebar. User Client hiện mở thẳng `U-SCR-07` và Admin App mở `A-SCR-02` để xem UI ngoại tuyến. Luồng mở ứng dụng qua trang đăng nhập được nối khi triển khai shell xác thực.
 
 Controller cần điều hướng sử dụng lifecycle thay vì truy cập biến toàn cục:
 
@@ -83,7 +79,22 @@ public final class ContactsController implements ViewController {
 }
 ```
 
-FXML khai báo `fx:controller` và các handler như bình thường. `initialize()` chỉ nên khởi tạo điều khiển; `navigator` được cung cấp sau khi FXMLLoader hoàn tất. Mỗi FXML root phải là `Parent`. Các route dùng `View.placeholder(...)` hiện tại phải được thay bằng tài nguyên thật khi làm giai đoạn 3–4.
+FXML khai báo `fx:controller` và các handler như bình thường. `initialize()` chỉ nên khởi tạo điều khiển; `navigator` được cung cấp sau khi FXMLLoader hoàn tất. Mỗi FXML root phải là `Parent`. Các test ứng dụng nạp trực tiếp FXML của mọi route để phát hiện tài nguyên thiếu hoặc lỗi khi khởi tạo.
+
+## Dữ liệu truyền giữa các cụm
+
+Bảng dưới mô tả dữ liệu UI cần có khi nối các luồng. Route chỉ định danh màn hình. Khi triển khai các điểm nối, dùng tham số theo lần mở hoặc trạng thái phiên của cửa sổ và tra dữ liệu mẫu bằng ID. Dữ liệu nhập trong form, như mật khẩu hoặc mã xác minh, thuộc luồng xử lý của form đó.
+
+| Luồng | Dữ liệu hoặc kết quả cần nối |
+| --- | --- |
+| Đăng nhập → khung chính User hoặc Admin | Giữ `userId` của tài khoản mẫu trong phiên UI của cửa sổ. Khi vào hoặc kết thúc phiên, dùng `reset(...)` đến route tương ứng để bỏ lịch sử điều hướng và controller đã cache. |
+| Hồ sơ → xác minh email hoặc khôi phục khóa (`U-SCR-03`, `U-SCR-06`) | Truyền mục đích mở màn hình, lấy tài khoản từ phiên UI. Đóng luồng quay lại nơi mở theo trường hợp sử dụng. |
+| Bạn bè → Nhắn tin (`U-SCR-07`) | Truyền `userId` của người nhận. Cụm `messaging` chọn hội thoại 1-1 hoặc mở trạng thái soạn tin mới. |
+| Bạn bè hoặc Hội thoại → Tạo nhóm (`U-DLG-02`) | Truyền danh sách `userId` được chọn trước. Mở từ Hội thoại dùng danh sách rỗng. |
+| Hội thoại → drawer và các overlay của chat | Truyền `conversationId`, thêm ID tin nhắn được chọn khi tác vụ cần. Hai nút AI mở cùng route `U-DLG-03` với chế độ `Refine` hoặc `Recommend` tương ứng. |
+| Quản lý Người dùng hoặc Kiểm duyệt Spam → Xác nhận (`A-DLG-02`) | Truyền thao tác và `userId` đích. Sau xác nhận, màn hình gọi thực hiện thay đổi demo. |
+
+Hồ sơ và trạng thái chặn có thể xuất hiện ở nhiều màn hình. Khi nối các thao tác cập nhật, đọc từ cùng trạng thái phiên UI để các trang đang cache hiển thị nhất quán. Các controller trao đổi qua dữ liệu điều hướng hoặc kết quả hộp thoại thay vì giữ tham chiếu đến control của cụm khác.
 
 ## Modal, drawer và popover
 
@@ -122,6 +133,13 @@ Từ repository root với JDK 25:
 ```
 
 Lệnh đầu build và biên dịch kiểm thử không cần màn hình; các lớp GUI được đánh dấu skipped. Lệnh thứ hai yêu cầu display, chạy kiểm thử điều hướng/cache, lỗi FXML, reset phiên, owner/modality, Esc/focus, đổi theme trong overlay và load/click route của hai ứng dụng.
+
+Để kiểm tra riêng ứng dụng đang làm cùng các module mà nó phụ thuộc, chọn một trong hai lệnh sau.
+
+```sh
+./mvnw -pl src/user -am -Pui-tests verify
+./mvnw -pl src/admin -am -Pui-tests verify
+```
 
 Trên Linux đã có Xvfb:
 

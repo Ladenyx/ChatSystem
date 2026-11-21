@@ -1,4 +1,4 @@
-package com.chatsystem.user.controller;
+package com.chatsystem.user.controller.messaging;
 
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;

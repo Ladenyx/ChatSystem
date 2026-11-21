@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
+      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
+      focusTraversable="true">
+    <Label fx:id="screenId" styleClass="eyebrow"/>
+    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
+    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
+    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
+</VBox>

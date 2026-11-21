@@ -20,6 +20,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
@@ -102,6 +104,21 @@ class UserApplicationTest {
                 capture(popup, "user-popover");
             } finally {
                 stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void eachRegisteredViewLoadsItsOwnFxml() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            assertEquals(14, UserViews.ALL.size());
+            for (var view : UserViews.ALL) {
+                var resource = view.resourceOwner().getResource(view.resource());
+                assertNotNull(resource, view.id());
+                assertInstanceOf(Parent.class, new FXMLLoader(resource).load(), view.id());
             }
             return null;
         });
