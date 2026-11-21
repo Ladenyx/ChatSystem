@@ -10,10 +10,12 @@ import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
+import com.chatsystem.desktop.navigation.ViewNavigator;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
@@ -21,16 +23,20 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.chart.BarChart;
 import javafx.scene.image.WritableImage;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -76,6 +82,7 @@ class UserApplicationTest {
                 var root = stage.getScene().getRoot();
                 root.applyCss();
                 root.layout();
+                enterPreviewWorkspace(root);
                 assertTrue(((ToggleButton) root.lookup("#navChats")).isSelected());
                 capture(stage, "user-light");
                 ((ToggleButton) root.lookup("#navContacts")).fire();
@@ -138,6 +145,10 @@ class UserApplicationTest {
                 navigator.getRoot().layout();
                 assertEquals(1024, stage.getScene().getWidth());
                 assertEquals(640, stage.getScene().getHeight());
+                var signIn = requireNode(navigator.getRoot(), "authSignIn");
+                assertTrue(signIn.getBoundsInLocal().getWidth() > 0);
+                capture(stage, "user-auth-small");
+                enterPreviewWorkspace(navigator.getRoot());
                 capture(stage, "user-small");
             } finally {
                 navigator.close();
@@ -150,6 +161,95 @@ class UserApplicationTest {
     }
 
     @Test
+    void signInPreviewTogglesPasswordAndNavigatesWithoutCredentials() throws Exception {
+        withAuthWindow((stage, navigator) -> {
+            var root = navigator.getRoot();
+            assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
+            var rail = requireNode(root, "workspaceRail");
+            assertFalse(rail.isVisible());
+            assertFalse(rail.isManaged());
+            capture(stage, "U-SCR-01-sign-in");
+
+            var toggle = assertInstanceOf(Button.class, requireNode(root, "authSignInShowPassword"));
+            var masked = assertInstanceOf(PasswordField.class, requireNode(root, "authSignInPassword"));
+            var plain = requireNode(root, "authSignInPasswordVisible");
+            var closedEye = toggle.getGraphic();
+            assertEquals("Hiện mật khẩu", toggle.getAccessibleText());
+            assertFalse(plain.isVisible());
+            toggle.fire();
+            assertEquals("Ẩn mật khẩu", toggle.getAccessibleText());
+            assertNotSame(closedEye, toggle.getGraphic());
+            assertTrue(plain.isVisible());
+            assertFalse(masked.isVisible());
+            toggle.fire();
+            assertSame(closedEye, toggle.getGraphic());
+            assertFalse(plain.isVisible());
+            assertTrue(masked.isVisible());
+
+            enterPreviewWorkspace(root);
+            assertEquals(UserViews.CONVERSATIONS, navigator.currentViewProperty().get());
+            click(root, "signOut");
+            assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
+            assertEquals("", authField(root, "authSignInUsername").getText());
+            assertEquals("", authField(root, "authSignInPassword").getText());
+        });
+    }
+
+    @Test
+    void signUpPreviewShowsEachScreenWithoutVerifyingAnAccount() throws Exception {
+        withAuthWindow((stage, navigator) -> {
+            var root = navigator.getRoot();
+            click(root, "authOpenSignUp");
+            assertEquals(UserViews.SIGN_UP, navigator.currentViewProperty().get());
+            capture(stage, "U-SCR-02-sign-up-username");
+            click(root, "authSignUpContinue");
+            assertPasswordRulesShown(root);
+            capture(stage, "U-SCR-02-sign-up-password");
+            click(root, "authSignUpContinue");
+            enterText(root, "authSignUpEmail", "preview@example.test");
+            capture(stage, "U-SCR-02-sign-up-email");
+            click(root, "authSignUpContinue");
+            assertEquals(UserViews.VERIFY_EMAIL, navigator.currentViewProperty().get());
+            assertEquals("p***@example.test", labelText(root, "maskedEmail"));
+            capture(stage, "U-SCR-03-verify-email");
+            click(root, "authVerifyChangeEmail");
+            assertEquals("preview@example.test", authField(root, "authSignUpEmail").getText());
+            click(root, "authSignUpContinue");
+            click(root, "authVerifySubmit");
+            assertEquals(UserViews.SIGN_UP, navigator.currentViewProperty().get());
+            assertShowing(requireNode(root, "authSignUpFullName"));
+            capture(stage, "U-SCR-02-sign-up-profile");
+            click(root, "authSignUpContinue");
+            assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
+        });
+    }
+
+    @Test
+    void passwordRecoveryPreviewShowsEachScreenWithoutResettingAPassword() throws Exception {
+        withAuthWindow((stage, navigator) -> {
+            var root = navigator.getRoot();
+            click(root, "authOpenForgotPassword");
+            assertEquals(UserViews.FORGOT_PASSWORD, navigator.currentViewProperty().get());
+            capture(stage, "U-SCR-04-forgot-username");
+            click(root, "authForgotContinue");
+            assertShowing(requireNode(root, "authForgotEmail"));
+            capture(stage, "U-SCR-04-forgot-email");
+            click(root, "authForgotContinue");
+            assertShowing(requireNode(root, "checkEmailStep"));
+            capture(stage, "U-SCR-04-check-email");
+            click(root, "authForgotContinue");
+            assertEquals(UserViews.FORCE_CHANGE_PASSWORD, navigator.currentViewProperty().get());
+            capture(stage, "U-SCR-05-temporary-password");
+            click(root, "authForceContinue");
+            assertShowing(requireNode(root, "authNewPassword"));
+            assertPasswordRulesShown(root);
+            capture(stage, "U-SCR-05-new-password");
+            click(root, "authForceContinue");
+            assertEquals(UserViews.SIGN_IN, navigator.currentViewProperty().get());
+        });
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void mockPreviewBindsRecordsAndUpdatesListsAndTwelveMonthChart() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
@@ -159,6 +259,7 @@ class UserApplicationTest {
                 stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
                 stage.show();
                 var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
                 ((Button) root.lookup("#openMockData")).fire();
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 root.applyCss();
@@ -226,6 +327,76 @@ class UserApplicationTest {
         });
         Platform.runLater(task);
         task.get(30, TimeUnit.SECONDS);
+    }
+
+    private static void enterPreviewWorkspace(Parent root) {
+        click(root, "authSignInSubmit");
+    }
+
+    private static void click(Parent root, String id) {
+        var button = assertInstanceOf(Button.class, requireNode(root, id), id);
+        assertShowing(button);
+        assertFalse(button.isDisabled(), id + " should be enabled");
+        button.fire();
+    }
+
+    private static void enterText(Parent root, String id, String value) {
+        authField(root, id).setText(value);
+    }
+
+    private static TextInputControl authField(Parent root, String id) {
+        var field = assertInstanceOf(TextInputControl.class, requireNode(root, id), id);
+        assertShowing(field);
+        return field;
+    }
+
+    private static void assertShowing(Node node) {
+        for (Node current = node; current != null; current = current.getParent()) {
+            assertTrue(current.isVisible(), node.getId() + " should be visible");
+        }
+    }
+
+    private static Node requireNode(Parent root, String id) {
+        root.applyCss();
+        root.layout();
+        var node = root.lookup("#" + id);
+        assertNotNull(node, id);
+        return node;
+    }
+
+    private static String labelText(Parent root, String id) {
+        return assertInstanceOf(Label.class, requireNode(root, id)).getText();
+    }
+
+    private static void assertPasswordRulesShown(Parent root) {
+        for (String id : List.of("ruleLength", "ruleUpper", "ruleLower", "ruleDigit", "ruleSymbol")) {
+            var label = assertInstanceOf(Label.class, requireNode(root, id));
+            assertShowing(label);
+            assertFalse(label.getText().isBlank(), id);
+        }
+    }
+
+    private static void withAuthWindow(AuthWindowAction action) throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            var navigator = UserApplication.createNavigator();
+            Stage stage = new Stage();
+            try {
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                action.run(stage, navigator);
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(30, TimeUnit.SECONDS);
+    }
+
+    @FunctionalInterface
+    private interface AuthWindowAction {
+        void run(Stage stage, ViewNavigator navigator) throws Exception;
     }
 
     private static void capture(Window stage, String name) throws Exception {
