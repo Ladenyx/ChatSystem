@@ -1,215 +1,220 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-
 <TabPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="com.chatsystem.user.controller.profile.ProfileController"
          id="profileDialog" styleClass="profile-pane" stylesheets="@../../css/profile.css"
-         tabClosingPolicy="UNAVAILABLE" minWidth="540" prefWidth="680" minHeight="0">
-  <tabs>
+         tabClosingPolicy="UNAVAILABLE" minWidth="480" prefWidth="640" minHeight="336" prefHeight="448">
     <Tab id="profileTab" text="Hồ sơ">
-      <ScrollPane styleClass="profile-scroll-body" fitToWidth="true" hbarPolicy="NEVER">
-        <content>
-          <VBox styleClass="profile-container" spacing="16">
-            <VBox spacing="4">
-              <Label text="Thông tin cá nhân" styleClass="profile-section-title"/>
-              <Label text="Các trường có dấu * là bắt buộc." styleClass="profile-section-desc"/>
-            </VBox>
-
-            <HBox spacing="16">
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Tên đăng nhập" styleClass="profile-field-label"/>
-                <TextField fx:id="username" editable="false" maxWidth="Infinity"/>
-              </VBox>
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Email" styleClass="profile-field-label"/>
-                <HBox spacing="8">
-                  <TextField fx:id="email" editable="false" HBox.hgrow="ALWAYS"/>
-                  <Button text="Đổi email" onAction="#changeEmail"/>
+        <ScrollPane styleClass="profile-scroll" fitToWidth="true" hbarPolicy="NEVER" focusTraversable="false">
+            <VBox spacing="16" styleClass="profile-body">
+                <HBox alignment="CENTER_LEFT" spacing="12" fillHeight="false" styleClass="profile-identity">
+                    <Label fx:id="accountInitials" styleClass="profile-avatar"/>
+                    <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
+                        <Label fx:id="accountName" styleClass="profile-name" wrapText="true"/>
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="\@" styleClass="profile-handle-mark"/>
+                            <TextField fx:id="username" editable="false" accessibleText="Tên đăng nhập"
+                                       prefColumnCount="16" minWidth="0" styleClass="profile-handle"/>
+                        </HBox>
+                    </VBox>
                 </HBox>
-              </VBox>
-            </HBox>
+                <VBox spacing="4">
+                    <Label text="Email" styleClass="profile-field-label"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="email" editable="false" accessibleText="Email hiện tại"
+                                   minWidth="0" HBox.hgrow="ALWAYS" styleClass="profile-read-only"/>
+                        <Button fx:id="changeEmailButton" text="Đổi email" onAction="#changeEmail"
+                                styleClass="profile-button"/>
+                    </HBox>
+                </VBox>
 
-            <HBox spacing="16">
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Họ tên *" styleClass="profile-field-label"/>
-                <TextField fx:id="fullName" promptText="Nhập họ và tên" maxWidth="Infinity"/>
-                <Label fx:id="nameError" wrapText="true" styleClass="profile-field-error"/>
-              </VBox>
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Địa chỉ" styleClass="profile-field-label"/>
-                <TextField fx:id="address" promptText="Nhập địa chỉ" maxWidth="Infinity"/>
-                <Label fx:id="addressError" wrapText="true" styleClass="profile-field-error"/>
-              </VBox>
-            </HBox>
+                <VBox fx:id="emailChangeForm" spacing="12" visible="false" managed="false" styleClass="profile-inset">
+                    <VBox spacing="4">
+                        <Label text="Email mới" styleClass="profile-field-label"/>
+                        <TextField fx:id="newEmail" accessibleText="Email mới" promptText="ten@example.test"/>
+                        <Label fx:id="emailError" wrapText="true" styleClass="profile-field-error"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Mật khẩu hiện tại" styleClass="profile-field-label"/>
+                        <PasswordField fx:id="emailPassword" accessibleText="Mật khẩu hiện tại"/>
+                        <Label fx:id="emailPasswordError" wrapText="true" styleClass="profile-field-error"/>
+                    </VBox>
+                    <HBox spacing="8" alignment="CENTER_RIGHT">
+                        <Button id="cancelEmailChange" text="Hủy" onAction="#cancelEmailChange"
+                                styleClass="profile-button"/>
+                        <Button id="updateEmail" text="Cập nhật email" onAction="#requestEmailVerification"
+                                styleClass="profile-button,accent"/>
+                    </HBox>
+                </VBox>
 
-            <HBox spacing="16">
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Ngày sinh" styleClass="profile-field-label"/>
-                <DatePicker fx:id="birthDate" promptText="DD/MM/YYYY" maxWidth="Infinity"/>
-                <Label fx:id="dateError" wrapText="true" styleClass="profile-field-error"/>
-              </VBox>
-              <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Giới tính" styleClass="profile-field-label"/>
-                <HBox spacing="12" alignment="CENTER_LEFT" minHeight="36">
-                  <RadioButton fx:id="genderMale" text="Nam"/>
-                  <RadioButton fx:id="genderFemale" text="Nữ"/>
-                  <RadioButton fx:id="genderOther" text="Khác"/>
-                  <Button text="Bỏ chọn" onAction="#clearGender"/>
+                <GridPane hgap="16" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+                    <VBox spacing="4">
+                        <Label text="Họ tên *" styleClass="profile-field-label"/>
+                        <TextField fx:id="fullName" accessibleText="Họ tên, bắt buộc" minWidth="0"/>
+                        <Label fx:id="nameError" wrapText="true" styleClass="profile-field-error"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.columnIndex="1">
+                        <Label text="Địa chỉ" styleClass="profile-field-label"/>
+                        <TextField fx:id="address" accessibleText="Địa chỉ" minWidth="0"/>
+                        <Label fx:id="addressError" wrapText="true" styleClass="profile-field-error"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.rowIndex="1">
+                        <Label text="Ngày sinh" styleClass="profile-field-label"/>
+                        <DatePicker fx:id="birthDate" accessibleText="Ngày sinh"
+                                    promptText="dd/mm/yyyy" minWidth="0" maxWidth="Infinity"/>
+                        <Label fx:id="dateError" wrapText="true" styleClass="profile-field-error"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <Label text="Giới tính" styleClass="profile-field-label"/>
+                        <FlowPane hgap="8" vgap="4" alignment="CENTER_LEFT" minHeight="36">
+                            <RadioButton fx:id="genderMale" text="Nam"/>
+                            <RadioButton fx:id="genderFemale" text="Nữ"/>
+                            <RadioButton fx:id="genderOther" text="Khác"/>
+                            <Button text="Bỏ chọn" onAction="#clearGender" styleClass="profile-quiet"/>
+                        </FlowPane>
+                    </VBox>
+                </GridPane>
+
+                <HBox spacing="12" alignment="CENTER_RIGHT" styleClass="profile-actions">
+                    <Label fx:id="profileNotice" wrapText="true" minWidth="0" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                           styleClass="profile-notice"/>
+                    <Button id="profileSave" text="Lưu thay đổi" onAction="#saveProfile"
+                            styleClass="profile-button,accent"/>
                 </HBox>
-              </VBox>
-            </HBox>
-
-            <VBox fx:id="emailChangeForm" spacing="12" visible="false" managed="false" styleClass="profile-sub-card">
-              <Label text="Cập nhật địa chỉ email" styleClass="profile-section-title"/>
-              <VBox spacing="4">
-                <Label text="Email mới" styleClass="profile-field-label"/>
-                <TextField fx:id="newEmail" promptText="nhap.email@example.com"/>
-                <Label fx:id="emailError" wrapText="true" styleClass="profile-field-error"/>
-              </VBox>
-              <VBox spacing="4">
-                <Label text="Mật khẩu hiện tại" styleClass="profile-field-label"/>
-                <PasswordField fx:id="emailPassword" promptText="Nhập mật khẩu để xác nhận"/>
-                <Label fx:id="emailPasswordError" wrapText="true" styleClass="profile-field-error"/>
-              </VBox>
-              <HBox spacing="8" alignment="CENTER_LEFT">
-                <Button text="Cập nhật email" onAction="#requestEmailVerification" styleClass="accent"/>
-                <Button text="Hủy" onAction="#cancelEmailChange"/>
-              </HBox>
             </VBox>
-
-            <Label fx:id="profileNotice" wrapText="true" styleClass="success"/>
-            <HBox alignment="CENTER_RIGHT" style="-fx-padding: 8px 0 0 0;">
-              <Button id="profileSave" text="Lưu thay đổi" onAction="#saveProfile" styleClass="accent" prefWidth="130"/>
-            </HBox>
-          </VBox>
-        </content>
-      </ScrollPane>
+        </ScrollPane>
     </Tab>
 
     <Tab id="passwordTab" text="Đổi mật khẩu">
-      <ScrollPane styleClass="profile-scroll-body" fitToWidth="true" hbarPolicy="NEVER">
-        <content>
-          <VBox styleClass="profile-container" spacing="14">
-            <VBox spacing="4">
-              <Label text="Đổi mật khẩu" styleClass="profile-section-title"/>
-              <Label text="Xác nhận mật khẩu hiện tại để tạo mật khẩu mới." styleClass="profile-section-desc"/>
+        <ScrollPane styleClass="profile-scroll" fitToWidth="true" hbarPolicy="NEVER" focusTraversable="false">
+            <VBox spacing="16" styleClass="profile-body">
+                <VBox spacing="4">
+                    <Label text="Mật khẩu hiện tại" styleClass="profile-field-label"/>
+                    <StackPane styleClass="profile-secret">
+                        <PasswordField fx:id="currentPassword" accessibleText="Mật khẩu hiện tại"/>
+                        <TextField fx:id="currentPasswordVisible" accessibleText="Mật khẩu hiện tại"
+                                   visible="false" managed="false"/>
+                        <Button fx:id="showCurrentPassword" text="Hiện" accessibleText="Hiện mật khẩu hiện tại"
+                                styleClass="profile-eye" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
+                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                            <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
+                        </Button>
+                    </StackPane>
+                    <Label fx:id="currentPasswordError" wrapText="true" styleClass="profile-field-error"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Mật khẩu mới" styleClass="profile-field-label"/>
+                    <StackPane styleClass="profile-secret">
+                        <PasswordField fx:id="newPassword" accessibleText="Mật khẩu mới"/>
+                        <TextField fx:id="newPasswordVisible" accessibleText="Mật khẩu mới"
+                                   visible="false" managed="false"/>
+                        <Button fx:id="showNewPassword" text="Hiện" accessibleText="Hiện mật khẩu mới"
+                                styleClass="profile-eye" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
+                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                            <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
+                        </Button>
+                    </StackPane>
+                    <Label fx:id="newPasswordError" wrapText="true" styleClass="profile-field-error"/>
+                    <FlowPane hgap="12" vgap="4" styleClass="profile-password-rules">
+                        <Label fx:id="passwordLength" styleClass="profile-rule-item"/>
+                        <Label fx:id="passwordUpper" styleClass="profile-rule-item"/>
+                        <Label fx:id="passwordLower" styleClass="profile-rule-item"/>
+                        <Label fx:id="passwordDigit" styleClass="profile-rule-item"/>
+                        <Label fx:id="passwordSymbol" styleClass="profile-rule-item"/>
+                    </FlowPane>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Nhập lại mật khẩu mới" styleClass="profile-field-label"/>
+                    <StackPane styleClass="profile-secret">
+                        <PasswordField fx:id="confirmPassword" accessibleText="Mật khẩu nhập lại"/>
+                        <TextField fx:id="confirmPasswordVisible" accessibleText="Mật khẩu nhập lại"
+                                   visible="false" managed="false"/>
+                        <Button fx:id="showConfirmPassword" text="Hiện" accessibleText="Hiện mật khẩu nhập lại"
+                                styleClass="profile-eye" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
+                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                            <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
+                        </Button>
+                    </StackPane>
+                    <Label fx:id="confirmPasswordError" wrapText="true" styleClass="profile-field-error"/>
+                </VBox>
+
+                <Label fx:id="passwordNotice" wrapText="true" styleClass="profile-notice"/>
+                <HBox spacing="12" alignment="CENTER_LEFT" styleClass="profile-actions">
+                    <Button text="Quên mật khẩu?" onAction="#forgotPassword" styleClass="profile-quiet"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button id="passwordSave" text="Đổi mật khẩu" onAction="#changePassword"
+                            styleClass="profile-button,accent"/>
+                </HBox>
             </VBox>
-
-            <VBox spacing="6">
-              <Label text="Mật khẩu hiện tại *" styleClass="profile-field-label"/>
-              <StackPane styleClass="auth-password-input">
-                <PasswordField fx:id="currentPassword" promptText="Nhập mật khẩu hiện tại"/>
-                <TextField fx:id="currentPasswordVisible" visible="false" managed="false" promptText="Nhập mật khẩu hiện tại"/>
-                <Button fx:id="showCurrentPassword" text="Hiện" accessibleText="Hiện mật khẩu" styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
-                  <StackPane.margin><Insets right="4"/></StackPane.margin>
-                  <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
-                </Button>
-              </StackPane>
-              <Label fx:id="currentPasswordError" wrapText="true" styleClass="profile-field-error"/>
-            </VBox>
-
-            <VBox spacing="6">
-              <Label text="Mật khẩu mới *" styleClass="profile-field-label"/>
-              <StackPane styleClass="auth-password-input">
-                <PasswordField fx:id="newPassword" promptText="Nhập mật khẩu mới"/>
-                <TextField fx:id="newPasswordVisible" visible="false" managed="false" promptText="Nhập mật khẩu mới"/>
-                <Button fx:id="showNewPassword" text="Hiện" accessibleText="Hiện mật khẩu" styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
-                  <StackPane.margin><Insets right="4"/></StackPane.margin>
-                  <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
-                </Button>
-              </StackPane>
-              <Label fx:id="newPasswordError" wrapText="true" styleClass="profile-field-error"/>
-            </VBox>
-
-            <FlowPane hgap="12" vgap="4">
-              <Label fx:id="passwordLength" styleClass="password-rule-item"/>
-              <Label fx:id="passwordUpper" styleClass="password-rule-item"/>
-              <Label fx:id="passwordLower" styleClass="password-rule-item"/>
-              <Label fx:id="passwordDigit" styleClass="password-rule-item"/>
-              <Label fx:id="passwordSymbol" styleClass="password-rule-item"/>
-            </FlowPane>
-
-            <VBox spacing="6">
-              <Label text="Nhập lại mật khẩu mới *" styleClass="profile-field-label"/>
-              <StackPane styleClass="auth-password-input">
-                <PasswordField fx:id="confirmPassword" promptText="Nhập lại mật khẩu mới"/>
-                <TextField fx:id="confirmPasswordVisible" visible="false" managed="false" promptText="Nhập lại mật khẩu mới"/>
-                <Button fx:id="showConfirmPassword" text="Hiện" accessibleText="Hiện mật khẩu" styleClass="auth-password-toggle" StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
-                  <StackPane.margin><Insets right="4"/></StackPane.margin>
-                  <graphic><FontIcon iconLiteral="fth-eye-off" iconSize="16" mouseTransparent="true"/></graphic>
-                </Button>
-              </StackPane>
-              <Label fx:id="confirmPasswordError" wrapText="true" styleClass="profile-field-error"/>
-            </VBox>
-
-            <Label fx:id="passwordNotice" wrapText="true" styleClass="success"/>
-            <HBox alignment="CENTER_LEFT">
-              <Button text="Quên mật khẩu?" onAction="#forgotPassword" styleClass="auth-link,auth-inline-link"/>
-            </HBox>
-            <Separator/>
-            <HBox alignment="CENTER_RIGHT">
-              <Button id="passwordSave" text="Đổi mật khẩu" onAction="#changePassword" styleClass="accent" prefWidth="130"/>
-            </HBox>
-          </VBox>
-        </content>
-      </ScrollPane>
+        </ScrollPane>
     </Tab>
 
     <Tab id="keysTab" text="Khóa E2EE">
-      <ScrollPane styleClass="profile-scroll-body" fitToWidth="true" hbarPolicy="NEVER">
-        <content>
-          <VBox styleClass="profile-container" spacing="16">
-            <VBox spacing="4">
-              <Label text="Mã hóa đầu cuối (E2EE)" styleClass="profile-section-title"/>
-              <Label text="Quản lý mã 6 số dùng để khôi phục khóa và bảo vệ hội thoại nhóm chat." styleClass="profile-section-desc"/>
-            </VBox>
-
-            <VBox fx:id="keyStatus" spacing="14" styleClass="profile-sub-card">
-              <HBox spacing="14" alignment="CENTER_LEFT">
-                <StackPane styleClass="profile-badge-icon">
-                  <FontIcon iconLiteral="fth-shield" iconSize="20"/>
-                </StackPane>
-                <VBox spacing="2" HBox.hgrow="ALWAYS">
-                  <Label text="TRẠNG THÁI THIẾT BỊ" styleClass="caption"/>
-                  <Label fx:id="deviceStatusLabel" text="Chưa thiết lập mã khóa" styleClass="profile-section-title"/>
-                  <Label text="Mã 6 số bảo vệ khóa giải mã và đồng bộ lịch sử tin nhắn khi đăng nhập trên thiết bị mới." styleClass="profile-section-desc" wrapText="true"/>
+        <ScrollPane styleClass="profile-scroll" fitToWidth="true" hbarPolicy="NEVER" focusTraversable="false">
+            <VBox spacing="16" styleClass="profile-body">
+                <VBox fx:id="keyStatus" spacing="16" styleClass="profile-inset">
+                    <HBox spacing="12" alignment="TOP_LEFT">
+                        <FontIcon iconLiteral="fth-shield" iconSize="16" styleClass="profile-security-icon"
+                                  mouseTransparent="true"/>
+                        <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="deviceStatusLabel" text="Chưa thiết lập mã khôi phục"
+                                   styleClass="profile-section-title" wrapText="true"/>
+                            <Label text="Dùng mã 6 số để khôi phục khóa khi đổi thiết bị"
+                                   styleClass="profile-note" wrapText="true"/>
+                        </VBox>
+                    </HBox>
+                    <FlowPane hgap="8" vgap="8" alignment="CENTER_LEFT">
+                        <Button id="openKeys" text="Thiết lập mã" onAction="#openKeys"
+                                styleClass="profile-button,accent"/>
+                        <Button id="openKeySetupScreen" text="Khôi phục khóa" onAction="#openKeySetupScreen"
+                                styleClass="profile-button"/>
+                    </FlowPane>
                 </VBox>
-              </HBox>
 
-              <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 4px 0 0 0;">
-                <Button id="openKeys" text="Thiết lập mã tại chỗ" onAction="#openKeys" styleClass="accent"/>
-                <Button id="openKeySetupScreen" text="Mở màn hình khôi phục (U-SCR-06)" onAction="#openKeySetupScreen"/>
-              </HBox>
-            </VBox>
+                <VBox fx:id="keyForm" spacing="16" visible="false" managed="false" styleClass="profile-inset">
+                    <Label text="Thiết lập mã khôi phục 6 số" styleClass="profile-section-title" wrapText="true"/>
+                    <VBox spacing="4">
+                        <Label text="Mã khôi phục" styleClass="profile-field-label"/>
+                        <HBox fx:id="keyDigits" spacing="8" alignment="CENTER_LEFT"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Nhập lại mã khôi phục" styleClass="profile-field-label"/>
+                        <HBox fx:id="keyConfirmDigits" spacing="8" alignment="CENTER_LEFT"/>
+                    </VBox>
+                    <Label fx:id="keyError" styleClass="profile-field-error" wrapText="true"/>
+                    <HBox spacing="8" alignment="CENTER_RIGHT">
+                        <Button id="cancelKey" text="Hủy" onAction="#cancelKey" styleClass="profile-button"/>
+                        <Button fx:id="keySubmit" text="Lưu mã khôi phục" onAction="#submitKey"
+                                styleClass="profile-button,accent"/>
+                    </HBox>
+                </VBox>
 
-            <VBox fx:id="keyForm" spacing="14" visible="false" managed="false" styleClass="profile-sub-card">
-              <Label text="Thiết lập mã khóa 6 số" styleClass="profile-section-title"/>
-              <VBox spacing="6">
-                <Label text="Mã khóa khôi phục" styleClass="profile-field-label"/>
-                <HBox fx:id="keyDigits" spacing="8" alignment="CENTER_LEFT"/>
-              </VBox>
-              <VBox spacing="6">
-                <Label text="Nhập lại mã khóa" styleClass="profile-field-label"/>
-                <HBox fx:id="keyConfirmDigits" spacing="8" alignment="CENTER_LEFT"/>
-              </VBox>
-              <Label fx:id="keyError" styleClass="profile-field-error" wrapText="true"/>
-              <HBox spacing="8" alignment="CENTER_LEFT">
-                <Button fx:id="keySubmit" text="Xác nhận thiết lập" onAction="#submitKey" styleClass="accent"/>
-                <Button text="Hủy" onAction="#cancelKey"/>
-              </HBox>
+                <Label text="Đổi mật khẩu tài khoản giữ nguyên khóa E2EE"
+                       styleClass="profile-note" wrapText="true"/>
             </VBox>
-
-            <VBox styleClass="profile-notes">
-              <Label text="• Mã khóa E2EE khác với mật khẩu tài khoản đăng nhập." styleClass="profile-notes-item" wrapText="true"/>
-              <Label text="• Đổi mật khẩu sẽ không tự khôi phục hoặc thay đổi khóa E2EE." styleClass="profile-notes-item" wrapText="true"/>
-              <Label text="• Hãy ghi nhớ mã khôi phục để đọc lại tin nhắn khi đổi thiết bị." styleClass="profile-notes-item" wrapText="true"/>
-            </VBox>
-          </VBox>
-        </content>
-      </ScrollPane>
+        </ScrollPane>
     </Tab>
-  </tabs>
 </TabPane>
