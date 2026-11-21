@@ -107,7 +107,13 @@ Build mặc định không cần màn hình và bỏ qua các lớp kiểm thử
 ./mvnw -Pui-tests verify
 ```
 
-Profile này kiểm tra điều hướng/quay lại, giữ trạng thái trang, reset phiên, lỗi FXML, theme, modal/drawer/popover và trang dữ liệu mẫu trong hai ứng dụng. Không bật profile thì 11 kiểm thử GUI được đánh dấu **skipped**; 7 kiểm thử dữ liệu/series vẫn chạy. Đặt class tên `<ClassName>Test` trong `src/test/java` của module tương ứng. Xem [hướng dẫn kiểm thử UI](docs/architecture/desktop-ui.md#kiểm-thử).
+Profile này kiểm tra điều hướng/quay lại, giữ trạng thái trang, reset phiên, lỗi FXML, theme, modal/drawer/popover, trang dữ liệu mẫu và các màn hình User Client. Không bật profile thì các kiểm thử GUI được bỏ qua; 7 kiểm thử dữ liệu/series vẫn chạy. Để chạy riêng phần User Client và xuất thêm ảnh giao diện vào `src/user/target/screenshots/`:
+
+```sh
+./mvnw -pl src/user -am -Pui-tests -Dchatsystem.capture=true verify
+```
+
+Đặt class tên `<ClassName>Test` trong `src/test/java` của module tương ứng. Xem [hướng dẫn kiểm thử UI](docs/architecture/desktop-ui.md#kiểm-thử).
 
 ## Chạy User Client và Admin App
 
@@ -126,11 +132,13 @@ Mở hai terminal riêng từ thư mục gốc:
 
 Windows PowerShell dùng `.\mvnw.cmd install`, `.\mvnw.cmd -pl src/user javafx:run` và `.\mvnw.cmd -pl src/admin javafx:run`. Các lệnh này cần JDK 25 và môi trường đồ họa. Chạy `javafx:run` trên module ứng dụng, không thêm `-am` vào lệnh launch.
 
-Hai ứng dụng mở thẳng **bản xem giao diện ngoại tuyến**. Dùng rail/sidebar để chuyển trang, nút Quay lại hoặc **Alt + ←**, nút đổi sáng/tối và **Hiển thị** để mở popover. User Client có **Hồ sơ**, **Tạo nhóm mới** (modal), **Thông tin** (drawer); dùng nút **Đóng** hoặc **Esc** để đóng. **Thoát** đóng ứng dụng; chưa có phiên đăng nhập ở bước 1.2.
+Cả hai ứng dụng chạy **ngoại tuyến với dữ liệu mẫu**. User Client mở màn đăng nhập trước; nút **Đăng nhập** chỉ chuyển sang giao diện hội thoại để xem trước, không xác thực tài khoản. Các nút chuyển bước trong màn đăng ký, xác minh email và khôi phục mật khẩu chỉ phục vụ xem giao diện: không gửi email, không tạo tài khoản và không đổi mật khẩu. Không nhập thông tin thật. Admin App vẫn mở thẳng khung xem trước.
+
+Trong workspace, dùng rail/sidebar để chuyển trang, nút Quay lại hoặc **Alt + ←**, nút đổi sáng/tối và **Hiển thị** để mở popover. User Client có các khung **Hồ sơ**, **Tạo nhóm mới** (modal), **Thông tin** (drawer); dùng nút **Đóng** hoặc **Esc** để đóng.
 
 Nút **hình cơ sở dữ liệu** trên toolbar (tooltip **Xem dữ liệu mẫu**) mở trang xem bộ mẫu của mục 1.3: 20 tài khoản, 9 hội thoại/126 tin nhắn, 4 nhóm, 6 báo cáo spam và biểu đồ đủ 12 tháng cho năm 2025/2026. Dữ liệu hư cấu cố định, dùng chung trong `desktop-ui`, có thêm nhật ký đăng nhập và chỉ số hoạt động. Xem [API, cách gắn TableView/ListView/BarChart và kiểm thử](docs/architecture/ui-mock-data.md), [ảnh trang dữ liệu mẫu trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md).
 
-Các trang và hộp thoại nghiệp vụ hiện là khung rỗng để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và [ảnh khung điều hướng trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md).
+User Client có năm màn xác thực `U-SCR-01`–`05`. Các trang và hộp thoại nghiệp vụ ngoài phạm vi này vẫn là khung để gắn FXML ở giai đoạn 3–4. Xem [kiến trúc UI và cách thêm màn hình](docs/architecture/desktop-ui.md), [tham chiếu Figma](docs/architecture/figma_links.md) và [ảnh khung điều hướng trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md).
 
 Figma hiện gồm wireframe và tài liệu tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Các lựa chọn trực quan của khung 1.2 chưa được coi là thiết kế cuối cùng đã chốt của nhóm.
 
