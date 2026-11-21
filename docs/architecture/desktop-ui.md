@@ -47,10 +47,10 @@ Thành viên 3 là đầu mối tích hợp User Client, gồm `UserApplication`
 
 - `View` định danh route bằng mã màn hình, tiêu đề, class sở hữu tài nguyên và đường dẫn FXML tuyệt đối. Route được khai báo trong `UserViews` hoặc `AdminViews`.
 - `navigate(view)` nạp FXML ở lần đầu, giữ trang trong cache của cửa sổ, lưu lịch sử và đổi nội dung của `viewHost`. Đi lại giữa các trang giữ trạng thái điều khiển.
-- `goBack()` dùng cùng cache; nút Quay lại và Alt + ← được nối sẵn. Chọn lại trang hiện tại không thêm một bước lịch sử.
+- `goBack()` dùng cùng cache và khôi phục tham số của lần mở trước. Nút Quay lại và Alt + ← được nối sẵn. Gọi lại route hiện tại với tham số vẫn kích hoạt controller nhưng không thêm bước lịch sử.
 - `reset(view)` nạp mới trang và bỏ toàn bộ cache/lịch sử. Dùng khi đổi tài khoản hoặc kết thúc phiên để không giữ nháp/dữ liệu của người trước.
 - FXML được nạp trước khi thay đổi trang/lịch sử; tài nguyên thiếu hoặc FXML sai gây `ViewLoadException` có đường dẫn và nguyên nhân, giữ trang cũ. Không dùng exception này như thông báo lỗi nghiệp vụ cho người dùng.
-- Controller có thể implement `ViewController`: `onEnter(navigator, view)` chạy mỗi lần mở; `onLeave()` chạy khi rời trang hoặc đóng overlay. Dừng timer, listener và tác vụ theo trang tại `onLeave()`.
+- Controller có thể implement `ViewController`. `onEnter(navigator, view, input)` nhận tham số mỗi lần kích hoạt, còn `onEnter(navigator, view)` tiếp tục dùng được với controller chỉ cần biết route. `onLeave()` chạy khi rời trang hoặc đóng overlay. Dừng timer, listener và tác vụ theo trang tại `onLeave()`.
 - Chuyển trang đóng modal/drawer/popover đang mở. Đóng cửa sổ gọi `navigator.close()` để dọn cache và vòng đời trang.
 
 Tất cả API điều hướng/theme phải gọi trên JavaFX Application Thread. Công việc I/O sau này chạy ngoài thread này và trả kết quả bằng `Platform.runLater`. Không đưa truy vấn DB, socket hoặc API vào controller điều hướng.
@@ -72,9 +72,8 @@ public final class ContactsController implements ViewController {
         this.navigator = navigator;
     }
 
-    @FXML
-    private void openConversation() {
-        navigator.navigate(UserViews.CONVERSATIONS);
+    private void openConversation(String selectedUserId) {
+        navigator.navigate(UserViews.CONVERSATIONS, new UserViewInputs.DirectChat(selectedUserId));
     }
 }
 ```
@@ -83,18 +82,18 @@ FXML khai báo `fx:controller` và các handler như bình thường. `initializ
 
 ## Dữ liệu truyền giữa các cụm
 
-Bảng dưới mô tả dữ liệu UI cần có khi nối các luồng. Route chỉ định danh màn hình. Khi triển khai các điểm nối, dùng tham số theo lần mở hoặc trạng thái phiên của cửa sổ và tra dữ liệu mẫu bằng ID. Dữ liệu nhập trong form, như mật khẩu hoặc mã xác minh, thuộc luồng xử lý của form đó.
+`navigate`, `reset`, `showModal`, `showDrawer` và `showPopover` có overload nhận `ViewInput` ở đối số cuối. Controller đích đọc tham số trong `onEnter(navigator, view, input)`, ví dụ `input instanceof UserViewInputs.DirectChat chat`. Route vẫn định danh màn hình. Một route có thể nhận những kiểu đầu vào khác nhau, hoặc `ViewInput.NONE` khi mở theo điều hướng mặc định.
 
-| Luồng | Dữ liệu hoặc kết quả cần nối |
-| --- | --- |
-| Đăng nhập → khung chính User hoặc Admin | Giữ `userId` của tài khoản mẫu trong phiên UI của cửa sổ. Khi vào hoặc kết thúc phiên, dùng `reset(...)` đến route tương ứng để bỏ lịch sử điều hướng và controller đã cache. |
-| Hồ sơ → xác minh email hoặc khôi phục khóa (`U-SCR-03`, `U-SCR-06`) | Truyền mục đích mở màn hình, lấy tài khoản từ phiên UI. Đóng luồng quay lại nơi mở theo trường hợp sử dụng. |
-| Bạn bè → Nhắn tin (`U-SCR-07`) | Truyền `userId` của người nhận. Cụm `messaging` chọn hội thoại 1-1 hoặc mở trạng thái soạn tin mới. |
-| Bạn bè hoặc Hội thoại → Tạo nhóm (`U-DLG-02`) | Truyền danh sách `userId` được chọn trước. Mở từ Hội thoại dùng danh sách rỗng. |
-| Hội thoại → drawer và các overlay của chat | Truyền `conversationId`, thêm ID tin nhắn được chọn khi tác vụ cần. Hai nút AI mở cùng route `U-DLG-03` với chế độ `Refine` hoặc `Recommend` tương ứng. |
-| Quản lý Người dùng hoặc Kiểm duyệt Spam → Xác nhận (`A-DLG-02`) | Truyền thao tác và `userId` đích. Sau xác nhận, màn hình gọi thực hiện thay đổi demo. |
+| Luồng | Kiểu tham số | Cách dùng |
+| --- | --- | --- |
+| Bạn bè → Nhắn tin (`U-SCR-07`) | `UserViewInputs.DirectChat` | Truyền `userId` của người nhận. Cụm `messaging` chọn hội thoại 1-1 hoặc mở trạng thái soạn tin mới. |
+| Kết quả tìm tin → Hội thoại (`U-SCR-07`) | `UserViewInputs.MessageLocation` | Truyền `conversationId` và `messageId` để cuộn đến tin đích, kể cả khi đang ở cùng màn hình. |
+| Bạn bè hoặc Hội thoại → Tạo nhóm (`U-DLG-02`) | `UserViewInputs.CreateGroup` | Truyền danh sách ID thành viên chọn trước. Mở từ Hội thoại dùng danh sách rỗng. |
+| Hội thoại → Drawer, báo cáo spam, chọn Admin kế nhiệm hoặc trợ lý AI | `UserViewInputs.Conversation`, `ReportSpam`, `AiAssistant` | Truyền `conversationId`. Báo cáo spam nhận thêm danh sách ID tin đã chọn. Hai nút AI truyền `REFINE` hoặc `RECOMMEND` khi mở cùng route `U-DLG-03`. |
+| Xác thực hoặc Hồ sơ → xác minh email, thiết lập hoặc khôi phục khóa (`U-SCR-03`, `U-SCR-06`) | `UserViewInputs.VerifyEmail`, `E2eeKeySetup` | Truyền mục đích mở. Dữ liệu nhập trong form, như mật khẩu hoặc mã xác minh, thuộc luồng xử lý của form đó. |
+| Quản lý Người dùng hoặc Kiểm duyệt Spam → Xác nhận (`A-DLG-02`) | `AdminViewInputs.ConfirmAction` | Truyền thao tác và `userId` đích. Sau xác nhận, màn hình gọi thực hiện thay đổi demo. |
 
-Hồ sơ và trạng thái chặn có thể xuất hiện ở nhiều màn hình. Khi nối các thao tác cập nhật, đọc từ cùng trạng thái phiên UI để các trang đang cache hiển thị nhất quán. Các controller trao đổi qua dữ liệu điều hướng hoặc kết quả hộp thoại thay vì giữ tham chiếu đến control của cụm khác.
+Mỗi mục lịch sử giữ tham số trang của lần mở tương ứng. Modal, drawer và popover nhận tham số riêng và đóng mà không đổi tham số của trang bên dưới. Khi tích hợp luồng đăng nhập hoặc đăng xuất, lưu danh tính và trạng thái UI dùng chung (như hồ sơ và chặn) trong phiên của cửa sổ. Dùng `reset(...)` khi đổi phiên để bỏ lịch sử, tham số cũ và controller đã cache.
 
 ## Modal, drawer và popover
 
@@ -115,11 +114,21 @@ Các route modal hiện dùng nội dung khung. Profile, tạo nhóm, thông tin
 
 `ThemeManager` mặc định Primer Light, đổi sang Primer Dark mà không nạp lại trang. Theme áp dụng cả root của cửa sổ, DialogPane và Popover. Font Inter 4.1 Regular/SemiBold/Bold được nạp từ tài nguyên cục bộ, kèm SIL Open Font License.
 
-CSS chung ở `src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css`. Dùng các màu ngữ nghĩa `-cs-canvas`, `-cs-surface`, `-cs-text`, `-cs-muted`, `-cs-border`, `-cs-brand`, … thay vì gán màu rải rác vào từng FXML. Màu xanh nút chính giữ độ tương phản với chữ trắng trong cả hai theme.
+Hai theme lấy màu ngữ nghĩa từ Light/Dark Foundations. Giá trị chạy thực tế nằm ở [desktop.css](../../src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css). CSS của từng cụm tham chiếu các tên màu sau để tự đổi theo theme.
 
-File Figma hiện gồm wireframe và các tài liệu/thành phần tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Đây chưa phải bộ giao diện trực quan cuối cùng đã chốt.
+| Mục đích | Màu trong JavaFX CSS |
+| --- | --- |
+| Nền cửa sổ, bề mặt nội dung, bề mặt phụ, hover | `-cs-canvas`, `-cs-surface`, `-cs-surface-subtle`, `-cs-hover` |
+| Chữ chính, chữ phụ, chữ nhấn | `-cs-text`, `-cs-muted`, `-cs-brand-text` |
+| Đường phân cách, viền cần nổi rõ, dấu focus bàn phím | `-cs-border`, `-cs-border-strong`, `-cs-focus` |
+| Nút chính và vùng đang chọn | `-cs-brand`, `-cs-brand-hover`, `-cs-brand-pressed`, `-cs-on-brand`, `-cs-brand-subtle` |
+| Chữ và nền trạng thái thành công, cảnh báo, lỗi | `-cs-success` / `-cs-success-bg`, `-cs-warning` / `-cs-warning-bg`, `-cs-danger` / `-cs-danger-bg` |
 
-Khung 1.2 tham khảo [các node đang có](figma_links.md): Foundations (`19:71`), User rail (`35:2`), Admin sidebar (`192:1076`). Các lựa chọn hiện tại gồm Inter, body 14 px, spacing theo lưới 4 px, radius 4 px, màu brand sáng `#0F6CBD`, rail 72 px và sidebar 224 px; không coi đây là xác nhận thiết kế cuối cùng của nhóm. Icon dùng **Ikonli Feather** và theme dùng Primer theo tech stack. Khi triển khai màn hình nghiệp vụ, bám wireframe Admin đã hoàn thành và cập nhật phần User theo tiến độ hoàn thiện wireframe.
+Ví dụ, một nhãn trạng thái có thể dùng `-fx-text-fill: -cs-success` và `-fx-background-color: -cs-success-bg`, kèm nhãn chữ để người dùng nhận ra trạng thái. Dùng `-cs-border` cho đường phân cách và `-cs-border-strong` khi người dùng cần nhìn rõ ranh giới điều khiển. AtlantaFX Primer tiếp tục cung cấp kiểu và trạng thái của các control chuẩn. Icon dùng Ikonli Feather.
+
+Dùng Inter 14 px cho nội dung. Các lớp chung `.page-title`, `.section-title` và `.caption` áp cỡ 28, 16 và 12 px tương ứng. Với padding và khoảng cách trong FXML/CSS, theo thang 4, 8, 12, 16, 24, 32, 48, 64 px của Foundations. Bán kính tham chiếu là 4 px cho điều khiển, 8 px cho thẻ và 12 px cho bong bóng tin nhắn.
+
+Tra [các frame Figma theo mã màn hình](figma_links.md) khi làm từng cụm. Dùng cùng mã để đối chiếu hành vi và trạng thái trong đặc tả.
 
 Nút Hiển thị cung cấp chọn sáng/tối và giảm chuyển động. Tùy chọn giảm chuyển động bỏ hiệu ứng drawer/popover; có thể đặt mặc định bằng JVM property `-Dchatsystem.reducedMotion=true`. Tùy chọn hiện giữ trong lần chạy, chưa lưu vào cấu hình tài khoản.
 
