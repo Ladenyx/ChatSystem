@@ -2,19 +2,24 @@ package com.chatsystem.user.controller.chat;
 
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
+import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockMessage.State;
+import com.chatsystem.user.controller.group.OfflineGroupDemoService;
+import com.chatsystem.user.controller.group.OfflineGroupDemoService.ExitAction;
 import java.time.Duration;
 import java.time.Instant;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /** Session-local chat demo. Each send attempt advances only through simulated acknowledgments. */
 public final class OfflineChatDemoService {
@@ -23,14 +28,19 @@ public final class OfflineChatDemoService {
     private static final Duration RECALL_WINDOW = Duration.ofHours(48);
 
     public enum Access {
-        AVAILABLE, BLOCKED_BY_SELF, BLOCKED_BY_PEER, MISSING_KEY
+        AVAILABLE, BLOCKED_BY_SELF, BLOCKED_BY_PEER, MISSING_KEY, GROUP_LEFT, GROUP_REMOVED;
+
+        public boolean readOnlyGroup() {
+            return this == GROUP_LEFT || this == GROUP_REMOVED;
+        }
     }
 
     public record HistoryPage(List<MockMessage> messages, boolean hasOlder) {}
     public record SearchResults(List<MockConversation> conversations, List<MockMessage> messages,
                                 boolean syncing, boolean missingKey) {}
 
-    private final List<MockConversation> conversations;
+    private final List<MockConversation> directConversations;
+    private final OfflineGroupDemoService groups;
     private final Map<String, List<MockMessage>> history = new HashMap<>();
     private final Map<String, Integer> unread = new HashMap<>();
     private final Set<String> activeAttempts = new HashSet<>();
@@ -40,11 +50,15 @@ public final class OfflineChatDemoService {
     private boolean nextDirectThreeSendFails = true;
 
     public OfflineChatDemoService(MockData data) {
-        conversations = data.conversations();
-        for (MockConversation conversation : conversations) {
+        directConversations = data.conversations().stream().filter(chat -> !chat.encrypted()).toList();
+        groups = new OfflineGroupDemoService(data, this::blockedPeer);
+        for (MockConversation conversation : data.conversations()) {
             String id = conversation.id();
-            history.put(id, new ArrayList<>(data.messagesFor(id)));
-            unread.put(id, conversation.unreadCount());
+            var messages = data.messagesFor(id);
+            // Only these messages were available on the preview device before removal.
+            boolean removed = access(id) == Access.GROUP_REMOVED;
+            history.put(id, new ArrayList<>(removed ? messages.stream().limit(2).toList() : messages));
+            unread.put(id, removed ? 0 : conversation.unreadCount());
         }
         history.get("direct-01").addFirst(new MockMessage("demo-expired-recall", "direct-01",
                 MockData.PREVIEW_USER_ID, "Mình gửi thông tin buổi họp lần trước.",
@@ -55,16 +69,62 @@ public final class OfflineChatDemoService {
     }
 
     public List<MockConversation> conversations() {
-        return conversations.stream()
+        return Stream.concat(directConversations.stream().map(chat -> new MockConversation(chat.id(), chat.title(),
+                                chat.kind(), chat.participantIds(), unread.get(chat.id()))),
+                        groups.all().stream().map(this::groupConversation))
                 .sorted(Comparator.comparing(this::latestTimestamp).reversed())
-                .map(chat -> new MockConversation(chat.id(), chat.title(), chat.kind(),
-                        chat.participantIds(), unread.get(chat.id())))
                 .toList();
+    }
+
+    private MockConversation groupConversation(MockGroup group) {
+        return new MockConversation(group.id(), group.name(), MockConversation.Kind.GROUP,
+                group.members().stream().map(MockGroup.Member::userId).toList(), unread.get(group.id()));
+    }
+
+    public MockConversation conversation(String id) {
+        return conversations().stream().filter(chat -> chat.id().equals(id)).findFirst().orElse(null);
+    }
+
+    public OfflineGroupDemoService groups() {
+        return groups;
+    }
+
+    public MockConversation createGroup(String name, Collection<String> invitees) {
+        var group = groups.create(name, invitees, DEMO_TIME.plusSeconds(++sequence));
+        history.put(group.id(), new ArrayList<>());
+        unread.put(group.id(), 0);
+        return groupConversation(group);
+    }
+
+    public void exitGroup(String id, ExitAction action, String successorId) {
+        boolean hadReadableHistory = access(id) != Access.MISSING_KEY;
+        groups.exit(id, action, successorId);
+        if (action == ExitAction.LEAVE) {
+            if (!hadReadableHistory) {
+                clearHistory(id);
+                return;
+            }
+            var messages = history.get(id);
+            for (int i = 0; i < messages.size(); i++) {
+                var message = messages.get(i);
+                activeAttempts.remove(message.id());
+                if (message.state() == State.PENDING) {
+                    replaceState(messages, i, State.FAILED);
+                }
+            }
+            markRead(id);
+        }
+    }
+
+    private boolean blockedPeer(String userId) {
+        return directConversations.stream().filter(chat -> chat.participantIds().contains(userId))
+                .map(chat -> access(chat.id())).anyMatch(access -> access == Access.BLOCKED_BY_SELF || access == Access.BLOCKED_BY_PEER);
     }
 
     private Instant latestTimestamp(MockConversation chat) {
         var messages = history.get(chat.id());
-        return messages.isEmpty() ? Instant.MIN : messages.getLast().sentAt();
+        var group = groups.group(chat.id());
+        return messages.isEmpty() ? group == null ? Instant.MIN : group.createdAt() : messages.getLast().sentAt();
     }
 
     public MockMessage latest(String conversationId) {
@@ -94,6 +154,11 @@ public final class OfflineChatDemoService {
         if (selfBlocked.contains(conversationId)) {
             return Access.BLOCKED_BY_SELF;
         }
+        switch (groups.membership(conversationId)) {
+            case LEFT: return Access.GROUP_LEFT;
+            case REMOVED: return Access.GROUP_REMOVED;
+            case ACTIVE: break;
+        }
         return switch (conversationId) {
             case "direct-05" -> Access.BLOCKED_BY_PEER;
             case "grp-03" -> Access.MISSING_KEY;
@@ -102,7 +167,7 @@ public final class OfflineChatDemoService {
     }
 
     public boolean setBlocked(String conversationId, boolean blocked) {
-        boolean direct = conversations.stream().anyMatch(chat -> chat.id().equals(conversationId) && !chat.encrypted());
+        boolean direct = directConversations.stream().anyMatch(chat -> chat.id().equals(conversationId));
         return direct && (blocked ? selfBlocked.add(conversationId) : selfBlocked.remove(conversationId));
     }
 
@@ -123,7 +188,7 @@ public final class OfflineChatDemoService {
             return new SearchResults(List.of(), List.of(), false, missingKey);
         }
         var scope = conversationId == null ? conversations()
-                : conversations.stream().filter(chat -> chat.id().equals(conversationId)).toList();
+                : conversations().stream().filter(chat -> chat.id().equals(conversationId)).toList();
         var names = conversationId == null ? scope.stream()
                 .filter(chat -> searchKey(chat.title()).contains(needle))
                 .toList() : List.<MockConversation>of();
@@ -213,6 +278,9 @@ public final class OfflineChatDemoService {
     }
 
     public boolean advanceReceipt(String conversationId, String messageId, State next) {
+        if (access(conversationId).readOnlyGroup()) {
+            return false;
+        }
         var messages = history.get(conversationId);
         int index = indexOf(messages, messageId);
         if (index < 0) {
@@ -240,7 +308,8 @@ public final class OfflineChatDemoService {
 
     public boolean canRecall(MockMessage message) {
         var age = Duration.between(message.sentAt(), DEMO_TIME.plusSeconds(sequence));
-        return access(message.conversationId()) != Access.MISSING_KEY
+        Access access = access(message.conversationId());
+        return !access.readOnlyGroup() && access != Access.MISSING_KEY
                 && message.senderId().equals(MockData.PREVIEW_USER_ID)
                 && message.acceptedByServer() && message.state() != State.RECALLED
                 && !age.isNegative() && age.compareTo(RECALL_WINDOW) < 0;
