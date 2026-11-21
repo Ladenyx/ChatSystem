@@ -114,11 +114,21 @@ Các route modal hiện dùng nội dung khung. Profile, tạo nhóm, thông tin
 
 `ThemeManager` mặc định Primer Light, đổi sang Primer Dark mà không nạp lại trang. Theme áp dụng cả root của cửa sổ, DialogPane và Popover. Font Inter 4.1 Regular/SemiBold/Bold được nạp từ tài nguyên cục bộ, kèm SIL Open Font License.
 
-CSS chung ở `src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css`. Dùng các màu ngữ nghĩa `-cs-canvas`, `-cs-surface`, `-cs-text`, `-cs-muted`, `-cs-border`, `-cs-brand`, … thay vì gán màu rải rác vào từng FXML. Màu xanh nút chính giữ độ tương phản với chữ trắng trong cả hai theme.
+Hai theme lấy màu ngữ nghĩa từ Light/Dark Foundations. Giá trị chạy thực tế nằm ở [desktop.css](../../src/desktop-ui/src/main/resources/com/chatsystem/desktop/css/desktop.css). CSS của từng cụm tham chiếu các tên màu sau để tự đổi theo theme.
 
-File Figma hiện gồm wireframe và các tài liệu/thành phần tham khảo: **wireframe Admin đã hoàn thành, wireframe User chưa hoàn thành**. Đây chưa phải bộ giao diện trực quan cuối cùng đã chốt.
+| Mục đích | Màu trong JavaFX CSS |
+| --- | --- |
+| Nền cửa sổ, bề mặt nội dung, bề mặt phụ, hover | `-cs-canvas`, `-cs-surface`, `-cs-surface-subtle`, `-cs-hover` |
+| Chữ chính, chữ phụ, chữ nhấn | `-cs-text`, `-cs-muted`, `-cs-brand-text` |
+| Đường phân cách, viền cần nổi rõ, dấu focus bàn phím | `-cs-border`, `-cs-border-strong`, `-cs-focus` |
+| Nút chính và vùng đang chọn | `-cs-brand`, `-cs-brand-hover`, `-cs-brand-pressed`, `-cs-on-brand`, `-cs-brand-subtle` |
+| Chữ và nền trạng thái thành công, cảnh báo, lỗi | `-cs-success` / `-cs-success-bg`, `-cs-warning` / `-cs-warning-bg`, `-cs-danger` / `-cs-danger-bg` |
 
-Khung 1.2 tham khảo [các node đang có](figma_links.md): Foundations (`19:71`), User rail (`35:2`), Admin sidebar (`192:1076`). Các lựa chọn hiện tại gồm Inter, body 14 px, spacing theo lưới 4 px, radius 4 px, màu brand sáng `#0F6CBD`, rail 72 px và sidebar 224 px; không coi đây là xác nhận thiết kế cuối cùng của nhóm. Icon dùng **Ikonli Feather** và theme dùng Primer theo tech stack. Khi triển khai màn hình nghiệp vụ, bám wireframe Admin đã hoàn thành và cập nhật phần User theo tiến độ hoàn thiện wireframe.
+Ví dụ, một nhãn trạng thái có thể dùng `-fx-text-fill: -cs-success` và `-fx-background-color: -cs-success-bg`, kèm nhãn chữ để người dùng nhận ra trạng thái. Dùng `-cs-border` cho đường phân cách và `-cs-border-strong` khi người dùng cần nhìn rõ ranh giới điều khiển. AtlantaFX Primer tiếp tục cung cấp kiểu và trạng thái của các control chuẩn. Icon dùng Ikonli Feather.
+
+Dùng Inter 14 px cho nội dung. Các lớp chung `.page-title`, `.section-title` và `.caption` áp cỡ 28, 16 và 12 px tương ứng. Với padding và khoảng cách trong FXML/CSS, theo thang 4, 8, 12, 16, 24, 32, 48, 64 px của Foundations. Bán kính tham chiếu là 4 px cho điều khiển, 8 px cho thẻ và 12 px cho bong bóng tin nhắn.
+
+Tra [các frame Figma theo mã màn hình](figma_links.md) khi làm từng cụm. Dùng cùng mã để đối chiếu hành vi và trạng thái trong đặc tả.
 
 Nút Hiển thị cung cấp chọn sáng/tối và giảm chuyển động. Tùy chọn giảm chuyển động bỏ hiệu ứng drawer/popover; có thể đặt mặc định bằng JVM property `-Dchatsystem.reducedMotion=true`. Tùy chọn hiện giữ trong lần chạy, chưa lưu vào cấu hình tài khoản.
 

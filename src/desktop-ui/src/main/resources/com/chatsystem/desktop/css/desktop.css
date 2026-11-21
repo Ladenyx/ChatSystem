@@ -1,18 +1,29 @@
-/* Figma CS semantic tokens. Primer supplies control skins, focus rings and states. */
+/* ChatSystem Figma color aliases. Primer supplies the standard control skins. */
 .root, .cs-root {
     -fx-font-family: "Inter";
     -fx-font-size: 14px;
     -cs-canvas: #f5f5f5;
     -cs-surface: #ffffff;
+    -cs-surface-subtle: #fafafa;
     -cs-hover: #f0f0f0;
     -cs-text: #1f1f1f;
     -cs-muted: #616161;
     -cs-border: #d1d1d1;
+    -cs-border-strong: #707070;
+    -cs-focus: #0f6cbd;
     -cs-brand: #0f6cbd;
+    -cs-brand-hover: #115ea3;
+    -cs-brand-pressed: #0f548c;
     -cs-brand-subtle: #ebf3fc;
     -cs-brand-text: #115ea3;
-    -cs-accent-fill: #0f6cbd;
-    -color-accent-emphasis: -cs-accent-fill;
+    -cs-on-brand: #ffffff;
+    -cs-success: #107c10;
+    -cs-success-bg: #f1faf1;
+    -cs-warning: #8a3707;
+    -cs-warning-bg: #fff9f5;
+    -cs-danger: #b10e1c;
+    -cs-danger-bg: #fdf3f4;
+    -color-accent-emphasis: -cs-brand;
     -color-accent-fg: -cs-brand-text;
     -fx-background-color: -cs-canvas;
 }
@@ -20,13 +31,21 @@
 .root:dark, .cs-root:dark {
     -cs-canvas: #141414;
     -cs-surface: #1f1f1f;
+    -cs-surface-subtle: #292929;
     -cs-hover: #333333;
     -cs-text: #ffffff;
     -cs-muted: #d1d1d1;
-    -cs-border: #525252;
-    -cs-brand: #479ef5;
-    -cs-brand-subtle: #0a2e4a;
-    -cs-brand-text: #96c6fa;
+    -cs-border: #424242;
+    -cs-border-strong: #9e9e9e;
+    -cs-focus: #479ef5;
+    -cs-brand-subtle: #0c3b5e;
+    -cs-brand-text: #77b7f7;
+    -cs-success: #54b054;
+    -cs-success-bg: #152c1c;
+    -cs-warning: #fce100;
+    -cs-warning-bg: #332717;
+    -cs-danger: #f1707b;
+    -cs-danger-bg: #361c24;
 }
 
 .label { -fx-text-fill: -cs-text; }
@@ -98,7 +117,7 @@
     -fx-text-fill: -cs-brand-text;
     -fx-font-weight: 600;
 }
-.nav-item:focused { -fx-border-color: -cs-brand; -fx-border-width: 2px; }
+.nav-item:focused { -fx-border-color: -cs-focus; -fx-border-width: 2px; }
 .nav-item .ikonli-font-icon { -fx-icon-color: -cs-text; }
 .nav-item:selected .ikonli-font-icon { -fx-icon-color: -cs-brand-text; }
 .sidebar {
