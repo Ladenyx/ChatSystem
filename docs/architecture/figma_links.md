@@ -15,7 +15,7 @@ Các frame dưới đây là điểm bắt đầu để tham chiếu bố cục 
 | Rail User Client | [WF / Rail — 35:2](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=35-2) |
 | Sidebar phân nhóm Admin App | [Sidebar — 192:1076](https://www.figma.com/design/4kSG28zCQIaiT5JpAoxAKb/Chat-System?node-id=192-1076) |
 
-Ánh xạ các màu sang CSS JavaFX và quy ước khoảng cách nằm trong [kiến trúc UI](desktop-ui.md#theme-và-liên-hệ-với-figma).
+Xem [design system ChatSystem](design-system.md) để tra token, kiểu chữ và component dùng chung hoặc tải [bản xuất token JSON](design-system.tokens.json). Ánh xạ các màu sang CSS JavaFX và quy ước khoảng cách nằm trong [kiến trúc UI](desktop-ui.md#theme-và-liên-hệ-với-figma).
 
 ## User Client
 
