@@ -9,19 +9,25 @@ import com.chatsystem.user.UserViews;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.stage.PopupWindow;
 
 public final class UserShellController {
+    private static final String SETTINGS_STYLESHEET = UserShellController.class.getResource(
+            "/com/chatsystem/user/css/rail-settings.css").toExternalForm();
+
     @FXML private StackPane viewHost;
     @FXML private VBox workspaceRail;
     @FXML private ToggleButton chatsButton;
     @FXML private ToggleButton contactsButton;
     @FXML private Button backButton;
-    @FXML private MenuButton settingsButton;
+    @FXML private Button settingsButton;
+    @FXML private VBox settingsContent;
+    private Popup settingsPopup;
     @FXML private ToggleSwitch darkModeSwitch;
     private ViewNavigator navigator;
 
@@ -40,6 +46,8 @@ public final class UserShellController {
             contactsButton.setSelected(UserViews.CONTACTS.equals(view));
         });
         var themes = navigator.themes();
+        themes.apply(settingsContent);
+        settingsContent.getStylesheets().add(SETTINGS_STYLESHEET);
         darkModeSwitch.setSelected(themes.getMode() == ThemeManager.Mode.DARK);
         themes.modeProperty().addListener((observable, old, mode) ->
                 darkModeSwitch.setSelected(mode == ThemeManager.Mode.DARK));
@@ -68,7 +76,26 @@ public final class UserShellController {
     }
 
     @FXML
+    private void openSettings() {
+        if (settingsPopup == null) {
+            settingsPopup = new Popup();
+            settingsPopup.setAutoHide(true);
+            settingsPopup.setHideOnEscape(true);
+            settingsPopup.setAnchorLocation(PopupWindow.AnchorLocation.WINDOW_BOTTOM_LEFT);
+            settingsPopup.getContent().add(settingsContent);
+        }
+        if (settingsPopup.isShowing()) {
+            settingsPopup.hide();
+            return;
+        }
+        var anchor = settingsButton.localToScreen(settingsButton.getBoundsInLocal());
+        settingsPopup.show(settingsButton, anchor.getMaxX() + 8, anchor.getMaxY());
+        darkModeSwitch.requestFocus();
+    }
+
+    @FXML
     private void openProfile() {
+        settingsPopup.hide();
         navigator.showModal(UserViews.PROFILE);
     }
 
@@ -79,11 +106,13 @@ public final class UserShellController {
 
     @FXML
     private void openDisplayOptions() {
+        settingsPopup.hide();
         navigator.showPopover(DisplayOptionsController.VIEW, settingsButton);
     }
 
     @FXML
     private void openMockData() {
+        settingsPopup.hide();
         navigator.navigate(MockDataPreviewController.VIEW);
     }
 
