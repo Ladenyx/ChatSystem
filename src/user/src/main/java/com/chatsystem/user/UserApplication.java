@@ -19,7 +19,7 @@ public final class UserApplication extends Application {
         UserShellController controller = loader.getController();
         ViewNavigator navigator = new ViewNavigator(shell, controller.getViewHost(), new ThemeManager());
         controller.connect(navigator);
-        navigator.reset(UserViews.CONVERSATIONS);
+        navigator.reset(UserViews.SIGN_IN);
         return navigator;
     }
 
