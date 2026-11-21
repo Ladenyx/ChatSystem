@@ -112,6 +112,10 @@ class UserApplicationTest {
                 ((Button) root.lookup("#conversationInfo")).fire();
                 assertNotNull(root.lookup("#drawer"));
                 capture(stage, "user-drawer");
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertNull(root.lookup("#drawer"));
+                ((Button) root.lookup("#conversationInfo")).fire();
+                assertNotNull(root.lookup("#drawer"));
                 ((Button) root.lookup("#drawerClose")).fire();
                 assertNull(root.lookup("#drawer"));
                 fireSetting(root, "openProfile");
