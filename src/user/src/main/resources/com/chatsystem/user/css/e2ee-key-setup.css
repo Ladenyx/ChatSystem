@@ -1,0 +1,52 @@
+.key-view, .key-view > .viewport, .key-content {
+    -fx-background-color: -cs-canvas;
+}
+
+.key-content {
+    -fx-padding: 24px;
+}
+
+.key-card {
+    -fx-background-color: -cs-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 12px;
+    -fx-padding: 24px;
+}
+
+.key-icon {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-background-radius: 22px;
+    -fx-pref-width: 44px;
+    -fx-pref-height: 44px;
+}
+
+.key-icon > .ikonli-font-icon {
+    -fx-icon-color: -cs-brand-text;
+}
+
+.key-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+}
+
+.key-label {
+    -fx-font-weight: 600;
+}
+
+.key-digit {
+    -fx-pref-width: 56px;
+    -fx-max-width: 56px;
+    -fx-min-width: 32px;
+    -fx-pref-height: 48px;
+    -fx-alignment: center;
+    -fx-font-size: 18px;
+}
+
+.key-notice {
+    -fx-text-fill: -cs-muted;
+}
+
+.key-notice:error {
+    -fx-text-fill: -cs-danger;
+}

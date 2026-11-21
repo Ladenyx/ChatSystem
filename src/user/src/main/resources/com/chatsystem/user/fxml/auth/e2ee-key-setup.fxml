@@ -1,12 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
-</VBox>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.chatsystem.user.controller.auth.KeySetupController"
+            id="keySetupView" styleClass="key-view" stylesheets="@../../css/e2ee-key-setup.css"
+            fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" minWidth="0">
+    <content>
+        <StackPane styleClass="key-content">
+            <VBox alignment="CENTER" spacing="18" maxWidth="480" maxHeight="-Infinity" styleClass="key-card">
+                <StackPane styleClass="key-icon" maxWidth="44" maxHeight="44">
+                    <FontIcon iconLiteral="fth-lock" iconSize="22"/>
+                </StackPane>
+                <Label text="Xem trước ngoại tuyến" styleClass="eyebrow"/>
+                <Label text="Thiết lập và khôi phục khóa E2EE" styleClass="key-title"
+                       wrapText="true" textAlignment="CENTER"/>
+                <Label text="Chỉ dùng mã mẫu. Bản xem trước không tạo khóa hoặc mở lịch sử tin nhắn."
+                       styleClass="secondary-text" wrapText="true" textAlignment="CENTER"/>
+
+                <VBox fx:id="choices" alignment="CENTER" spacing="12">
+                    <Button id="keyCreate" text="Thiết lập mã" onAction="#setup"
+                            styleClass="accent" prefWidth="260"/>
+                    <Button id="keyRestore" text="Khôi phục bằng mã" onAction="#restore" prefWidth="260"/>
+                    <Button id="keySkip" text="Bỏ qua" onAction="#cancel" prefWidth="260"/>
+                </VBox>
+
+                <VBox fx:id="codeForm" alignment="CENTER" spacing="14" visible="false" managed="false">
+                    <Label fx:id="formTitle" styleClass="section-title" wrapText="true" textAlignment="CENTER"/>
+                    <Label fx:id="formHelp" styleClass="secondary-text" wrapText="true" textAlignment="CENTER"/>
+                    <VBox spacing="8" maxWidth="376">
+                        <Label text="Mã khôi phục mẫu" styleClass="key-label"/>
+                        <HBox fx:id="digitRow" spacing="8" alignment="CENTER_LEFT"/>
+                    </VBox>
+                    <VBox fx:id="confirmationGroup" spacing="8" maxWidth="376">
+                        <Label text="Nhập lại mã mẫu" styleClass="key-label"/>
+                        <HBox fx:id="confirmRow" spacing="8" alignment="CENTER_LEFT"/>
+                    </VBox>
+                    <Label fx:id="notice" styleClass="key-notice" wrapText="true" textAlignment="CENTER"/>
+                    <Button fx:id="keySubmit" onAction="#submit" styleClass="accent" prefWidth="260"/>
+                    <Button id="keyCancel" text="Hủy" onAction="#cancel" prefWidth="260"/>
+                </VBox>
+            </VBox>
+        </StackPane>
+    </content>
+</ScrollPane>
