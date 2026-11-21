@@ -6,11 +6,13 @@ import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockMessage.State;
 import java.time.Duration;
 import java.time.Instant;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,11 +27,15 @@ public final class OfflineChatDemoService {
     }
 
     public record HistoryPage(List<MockMessage> messages, boolean hasOlder) {}
+    public record SearchResults(List<MockConversation> conversations, List<MockMessage> messages,
+                                boolean syncing, boolean missingKey) {}
 
     private final List<MockConversation> conversations;
     private final Map<String, List<MockMessage>> history = new HashMap<>();
     private final Map<String, Integer> unread = new HashMap<>();
     private final Set<String> activeAttempts = new HashSet<>();
+    private final Set<String> selfBlocked = new HashSet<>(Set.of("direct-04"));
+    private final Set<String> unsynced = new HashSet<>();
     private long sequence;
     private boolean nextDirectThreeSendFails = true;
 
@@ -43,6 +49,9 @@ public final class OfflineChatDemoService {
         history.get("direct-01").addFirst(new MockMessage("demo-expired-recall", "direct-01",
                 MockData.PREVIEW_USER_ID, "Mình gửi thông tin buổi họp lần trước.",
                 DEMO_TIME.minus(RECALL_WINDOW).minusSeconds(1), State.READ));
+        var groupHistory = history.get("grp-01");
+        groupHistory.stream().limit(Math.max(0, groupHistory.size() - PAGE_SIZE))
+                .map(MockMessage::id).forEach(unsynced::add);
     }
 
     public List<MockConversation> conversations() {
@@ -82,12 +91,73 @@ public final class OfflineChatDemoService {
     }
 
     public Access access(String conversationId) {
+        if (selfBlocked.contains(conversationId)) {
+            return Access.BLOCKED_BY_SELF;
+        }
         return switch (conversationId) {
-            case "direct-04" -> Access.BLOCKED_BY_SELF;
             case "direct-05" -> Access.BLOCKED_BY_PEER;
             case "grp-03" -> Access.MISSING_KEY;
             default -> Access.AVAILABLE;
         };
+    }
+
+    public boolean setBlocked(String conversationId, boolean blocked) {
+        boolean direct = conversations.stream().anyMatch(chat -> chat.id().equals(conversationId) && !chat.encrypted());
+        return direct && (blocked ? selfBlocked.add(conversationId) : selfBlocked.remove(conversationId));
+    }
+
+    public void clearHistory(String conversationId) {
+        var messages = history.get(conversationId);
+        for (var message : messages) {
+            activeAttempts.remove(message.id());
+            unsynced.remove(message.id());
+        }
+        messages.clear();
+        markRead(conversationId);
+    }
+
+    public SearchResults search(String conversationId, String query) {
+        String needle = searchKey(query);
+        boolean missingKey = conversationId != null && access(conversationId) == Access.MISSING_KEY;
+        if (needle.isBlank()) {
+            return new SearchResults(List.of(), List.of(), false, missingKey);
+        }
+        var scope = conversationId == null ? conversations()
+                : conversations.stream().filter(chat -> chat.id().equals(conversationId)).toList();
+        var names = conversationId == null ? scope.stream()
+                .filter(chat -> searchKey(chat.title()).contains(needle))
+                .toList() : List.<MockConversation>of();
+        var available = scope.stream().filter(chat -> access(chat.id()) != Access.MISSING_KEY)
+                .flatMap(chat -> history.get(chat.id()).stream()).toList();
+        var order = Comparator.comparing(MockMessage::sentAt).thenComparing(MockMessage::id);
+        var matches = available.stream().filter(message -> canFind(message) && !unsynced.contains(message.id()))
+                .filter(message -> searchKey(message.text()).contains(needle))
+                .sorted(conversationId == null ? order.reversed() : order).toList();
+        return new SearchResults(names, matches, available.stream().anyMatch(m -> unsynced.contains(m.id())), missingKey);
+    }
+
+    public void finishHistorySync() {
+        unsynced.clear();
+    }
+
+    /** Returns the window size needed to display a still-searchable hit, or zero for a stale hit. */
+    public int historyLimitFor(String conversationId, String messageId) {
+        var messages = history.getOrDefault(conversationId, List.of());
+        int index = indexOf(messages, messageId);
+        if (index < 0 || !canFind(messages.get(index))) {
+            return 0;
+        }
+        return Math.ceilDiv(messages.size() - index, PAGE_SIZE) * PAGE_SIZE;
+    }
+
+    private boolean canFind(MockMessage message) {
+        return message.state() != State.RECALLED && access(message.conversationId()) != Access.MISSING_KEY
+                && !message.text().isBlank();
+    }
+
+    private static String searchKey(String text) {
+        return Normalizer.normalize(text.strip().toLowerCase(Locale.ROOT), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").replace('đ', 'd');
     }
 
     public MockMessage send(String conversationId, String draft) {
@@ -163,6 +233,7 @@ public final class OfflineChatDemoService {
                 return false;
             }
             activeAttempts.remove(message.id());
+            unsynced.remove(message.id());
             return true;
         });
     }

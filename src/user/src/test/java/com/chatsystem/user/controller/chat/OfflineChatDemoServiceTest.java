@@ -102,4 +102,57 @@ class OfflineChatDemoServiceTest {
         chat.markRead("grp-01");
         assertTrue(chat.conversations().stream().anyMatch(thread -> thread.id().equals("grp-01") && thread.unreadCount() == 0));
     }
+
+    @Test
+    void searchReturnsSeparateNameAndBodyMatchesAndReportsIncompleteHistory() {
+        var global = chat.search(null, "giao dien");
+        assertTrue(global.conversations().stream().anyMatch(thread -> thread.id().equals("grp-02")));
+        assertTrue(global.messages().stream().anyMatch(message -> message.text().contains("giao diện")));
+        assertTrue(global.syncing());
+        assertTrue(global.messages().stream().noneMatch(message -> message.conversationId().equals("grp-03")));
+
+        var scoped = chat.search("grp-01", "chào mọi người");
+        assertTrue(scoped.syncing());
+        assertTrue(scoped.conversations().isEmpty());
+        assertTrue(scoped.messages().stream().allMatch(message -> message.conversationId().equals("grp-01")));
+        assertFalse(scoped.messages().stream().anyMatch(message -> message.id().equals("msg-grp-01-1")));
+        chat.finishHistorySync();
+        var complete = chat.search("grp-01", "chào mọi người");
+        assertFalse(complete.syncing());
+        assertEquals("msg-grp-01-1", complete.messages().getFirst().id());
+        assertEquals(100, chat.historyLimitFor("grp-01", "msg-grp-01-1"));
+        assertTrue(chat.search("grp-03", "giao diện").missingKey());
+    }
+
+    @Test
+    void mutationsInvalidateSearchHitsAndClearDoesNotRemoveConversation() {
+        var original = chat.search("direct-01", "lần trước").messages().getFirst();
+        assertEquals("demo-expired-recall", original.id());
+        chat.deleteForSelf("direct-01", Set.of(original.id()));
+        assertTrue(chat.search("direct-01", "lần trước").messages().isEmpty());
+        assertEquals(0, chat.historyLimitFor("direct-01", original.id()));
+        var recalled = chat.page("direct-01", 50).messages().stream().filter(chat::canRecall).findFirst().orElseThrow();
+        assertTrue(chat.recall("direct-01", recalled.id()));
+        assertEquals(0, chat.historyLimitFor("direct-01", recalled.id()));
+        assertFalse(chat.search("direct-01", recalled.text()).messages().stream().anyMatch(m -> m.id().equals(recalled.id())));
+        var pending = chat.send("direct-01", "Tin trước khi xóa lịch sử");
+        chat.clearHistory("direct-01");
+        assertNull(chat.latest("direct-01"));
+        assertTrue(chat.search("direct-01", "lịch sử").messages().isEmpty());
+        assertFalse(chat.acknowledge("direct-01", pending.id(), false));
+        assertNotNull(chat.send("direct-01", "Tin sau khi xóa lịch sử"));
+    }
+
+    @Test
+    void blockingChangesLocalAccessAndKeepsExistingHistory() {
+        assertTrue(chat.setBlocked("direct-01", true));
+        assertNull(chat.send("direct-01", "đang chặn"));
+        assertFalse(chat.search("direct-01", "lần trước").messages().isEmpty());
+        assertTrue(chat.setBlocked("direct-01", false));
+        assertNotNull(chat.send("direct-01", "đã bỏ chặn"));
+        assertTrue(chat.setBlocked("direct-05", true));
+        assertTrue(chat.setBlocked("direct-05", false));
+        assertEquals(OfflineChatDemoService.Access.BLOCKED_BY_PEER, chat.access("direct-05"));
+        assertFalse(chat.setBlocked("grp-01", true));
+    }
 }
