@@ -25,8 +25,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
@@ -351,6 +354,9 @@ class UserApplicationTest {
                 root.applyCss();
                 root.layout();
                 assertEquals(8, root.lookupAll(".chat-info-member").size());
+                assertNotNull(root.lookup("#addConversationMember"));
+                assertNotNull(root.lookup("#renameConversationGroup"));
+                assertNotNull(root.lookup("#resignConversationAdmin"));
                 assertNull(root.lookup("#blockConversationPeer"));
                 capture(stage, "drawer-group-dark");
             } finally {
@@ -361,6 +367,89 @@ class UserApplicationTest {
         });
         Platform.runLater(task);
         task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void groupManagementModalsValidateAndCaptureInBothThemes() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = UserApplication.createNavigator();
+            try {
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                ((Button) root.lookup("#createGroup")).fire();
+                Window createModal = modalWindow(stage);
+                var createRoot = createModal.getScene().getRoot();
+                createRoot.applyCss();
+                createRoot.layout();
+                assertTrue(createRoot.lookup("#groupFormSubmit").isDisabled());
+                ((TextField) createRoot.lookup("#groupNameField")).setText("Nhóm Ôn tập Java");
+                assertTrue(createRoot.lookup("#groupFormSubmit").isDisabled());
+                ((CheckBox) createRoot.lookup("#group-candidate-usr-02")).fire();
+                assertFalse(createRoot.lookup("#groupFormSubmit").isDisabled());
+                assertEquals("Chọn thành viên (1 đã chọn)",
+                        ((Label) createRoot.lookup("#groupSelectionSummary")).getText());
+                createRoot.applyCss();
+                createRoot.layout();
+                capture(createModal, "group-create-light");
+                createModal.hide();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+
+                ((Button) root.lookup("#addConversationMember")).fire();
+                Window addModal = modalWindow(stage);
+                assertTrue(addModal.getScene().getRoot().lookup("#groupFormSubmit").isDisabled());
+                addModal.hide();
+
+                ((Button) root.lookup("#renameConversationGroup")).fire();
+                Window renameModal = modalWindow(stage);
+                var renameRoot = renameModal.getScene().getRoot();
+                assertFalse(renameRoot.lookup("#groupFormSubmit").isDisabled());
+                ((TextField) renameRoot.lookup("#groupNameField")).clear();
+                assertTrue(renameRoot.lookup("#groupFormSubmit").isDisabled());
+                renameModal.hide();
+
+                navigator.themes().toggle();
+                ((Button) root.lookup("#resignConversationAdmin")).fire();
+                Window successorModal = modalWindow(stage);
+                var successorRoot = successorModal.getScene().getRoot();
+                successorRoot.applyCss();
+                successorRoot.layout();
+                assertTrue(successorRoot.lookup("#groupFormSubmit").isDisabled());
+                ((RadioButton) successorRoot.lookup("#group-candidate-usr-03")).fire();
+                assertFalse(successorRoot.lookup("#groupFormSubmit").isDisabled());
+                assertTrue(((Label) successorRoot.lookup("#groupSelectionSummary")).getText().startsWith("Đã chọn:"));
+                successorRoot.applyCss();
+                successorRoot.layout();
+                capture(successorModal, "group-successor-leave-dark");
+                successorModal.hide();
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static Window modalWindow(Window owner) {
+        return Window.getWindows().stream()
+                .filter(window -> window != owner && window.isShowing()
+                        && window.getScene().getRoot().lookup("#groupFormSubmit") != null)
+                .findFirst().orElseThrow();
     }
 
     private static void enterPreviewWorkspace(Parent root) {

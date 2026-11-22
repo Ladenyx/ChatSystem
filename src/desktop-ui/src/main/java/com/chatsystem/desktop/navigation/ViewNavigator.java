@@ -124,11 +124,18 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public Dialog<ButtonType> showModal(View view, ViewInput input) {
+        return showModal(view, input, false);
+    }
+
+    public Dialog<ButtonType> showModal(View view, ViewInput input, boolean keepDrawer) {
         ThemeManager.requireFxThread();
         Objects.requireNonNull(input, "input");
         requireWindow();
         LoadedView loaded = load(view);
-        closeTransientUi();
+        closePopupAndModal();
+        if (!keepDrawer) {
+            closeDrawer();
+        }
         Node trigger = root.getScene().getFocusOwner();
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(root.getScene().getWindow());
@@ -147,6 +154,9 @@ public final class ViewNavigator implements AutoCloseable {
             restoreFocus(trigger);
         });
         enter(loaded, view, input);
+        if (loaded.controller() instanceof DialogViewController controller) {
+            controller.configureDialog(dialog);
+        }
         modal = dialog;
         dialog.show();
         return dialog;
@@ -331,13 +341,17 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     private void closeTransientUi() {
+        closePopupAndModal();
+        closeDrawer();
+    }
+
+    private void closePopupAndModal() {
         if (popover != null) {
             popover.hide(Duration.ZERO);
         }
         if (modal != null) {
             modal.close();
         }
-        closeDrawer();
     }
 
     private void restoreFocus(Node node) {

@@ -10,6 +10,7 @@ import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
 import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.SearchResultCard;
+import com.chatsystem.user.controller.group.GroupFormController;
 import com.chatsystem.user.messaging.ConversationCatalog;
 import com.chatsystem.user.navigation.UserViewInputs;
 import java.util.ArrayList;
@@ -101,23 +102,39 @@ public final class ConversationInfoController implements ViewController {
                 memberRows.getChildren().add(memberRow(catalog.user(participantId), catalog.currentUserId()));
             }
             var members = new VBox(8, sectionLabel("Thành viên"),
-                    action("addConversationMember", "fth-user-plus", "Thêm thành viên", false, null),
+                    action("addConversationMember", "fth-user-plus", "Thêm thành viên", false,
+                            () -> openGroupForm(chat, GroupFormController.Mode.ADD)),
                     memberRows);
             members.getStyleClass().add("chat-drawer-section");
             infoContent.getChildren().add(members);
-        }
 
-        var optionButtons = new VBox(4);
-        if (!chat.encrypted()) {
-            optionButtons.getChildren().add(
-                    action("blockConversationPeer", "fth-slash", "Chặn người dùng", true, null));
+            var groupButtons = new VBox(4,
+                    action("renameConversationGroup", "fth-edit-2", "Đổi tên nhóm", false,
+                            () -> openGroupForm(chat, GroupFormController.Mode.RENAME)),
+                    action("resignConversationAdmin", "fth-shield", "Chọn Admin kế nhiệm", false,
+                            () -> openGroupForm(chat, GroupFormController.Mode.SUCCESSOR)),
+                    action("clearConversationHistory", "fth-trash-2", "Xóa lịch sử phía mình", false, null),
+                    action("reportConversation", "fth-flag", "Báo cáo spam", true, null),
+                    action("leaveConversationGroup", "fth-log-out", "Rời nhóm", true, null));
+            var groupOptions = new VBox(8, sectionLabel("Quản lý nhóm"), groupButtons);
+            groupOptions.getStyleClass().add("chat-drawer-section");
+            infoContent.getChildren().add(groupOptions);
+        } else {
+            var optionButtons = new VBox(4,
+                    action("blockConversationPeer", "fth-slash", "Chặn người dùng", true, null),
+                    action("clearConversationHistory", "fth-trash-2", "Xóa lịch sử phía mình", false, null),
+                    action("reportConversation", "fth-flag", "Báo cáo spam", true, null));
+            var options = new VBox(8, sectionLabel("Tùy chọn hội thoại"), optionButtons);
+            options.getStyleClass().add("chat-drawer-section");
+            infoContent.getChildren().add(options);
         }
-        optionButtons.getChildren().addAll(
-                action("clearConversationHistory", "fth-trash-2", "Xóa lịch sử phía mình", false, null),
-                action("reportConversation", "fth-flag", "Báo cáo spam", true, null));
-        var options = new VBox(8, sectionLabel("Tùy chọn hội thoại"), optionButtons);
-        options.getStyleClass().add("chat-drawer-section");
-        infoContent.getChildren().add(options);
+    }
+
+    private void openGroupForm(MockConversation chat, GroupFormController.Mode mode) {
+        var route = mode == GroupFormController.Mode.SUCCESSOR
+                ? UserViews.ASSIGN_SUCCESSOR_ADMIN
+                : UserViews.CREATE_GROUP;
+        navigator.showModal(route, new GroupFormController.Input(mode, chat.id()), true);
     }
 
     private static Label sectionLabel(String text) {
