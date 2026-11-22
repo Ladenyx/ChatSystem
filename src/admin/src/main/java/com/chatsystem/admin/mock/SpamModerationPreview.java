@@ -1,12 +1,14 @@
 package com.chatsystem.admin.mock;
 
 import com.chatsystem.desktop.mock.MockData;
+import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /** In-memory changes for the offline spam preview, not server moderation or account state. */
 public final class SpamModerationPreview {
@@ -32,6 +34,12 @@ public final class SpamModerationPreview {
 
     public MockUser user(String id) {
         return data.user(id);
+    }
+
+    public Optional<MockConversation> conversation(String id) {
+        return data.conversations().stream()
+                .filter(conversation -> conversation.id().equals(id))
+                .findFirst();
     }
 
     public Review review(MockSpamReport report) {

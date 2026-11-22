@@ -774,15 +774,42 @@ class AdminApplicationTest {
                 assertFalse(lockButton.isDisable());
 
                 var previewList = (VBox) root.lookup("#chatPreviewList");
-                assertEquals(selectedReport.evidence().size(), previewList.getChildren().size());
-                int dualIndex = IntStream.range(0, selectedReport.evidence().size())
-                        .filter(i -> selectedReport.evidence().get(i).selected()
-                                && selectedReport.evidence().get(i).context())
-                        .findFirst().orElseThrow();
-                var dualEvidence = previewList.getChildren().get(dualIndex);
-                assertNotNull(dualEvidence.lookup(".tag-selected"), "The selected message tag is shown");
-                assertNotNull(dualEvidence.lookup(".tag-context"), "The same evidence row also shows its context tag");
+                var selectedEvidence = selectedReport.evidence().stream()
+                        .filter(MockSpamReport.Evidence::selected).toList();
+                assertFalse(selectedEvidence.isEmpty());
+                assertEquals(selectedEvidence.size(), previewList.getChildren().size());
+                for (int i = 0; i < selectedEvidence.size(); i++) {
+                    var evidence = selectedEvidence.get(i);
+                    var card = previewList.getChildren().get(i);
+                    assertEquals(evidence.message().text(), ((Label) card.lookup(".admin-bubble-text")).getText());
+                    assertTrue(card.getStyleClass().contains("bubble-selected"));
+                    assertNotNull(card.lookup(".tag-selected"));
+                }
+                var openEvidenceBtn = (Button) root.lookup("#openEvidenceConversation");
+                assertTrue(openEvidenceBtn.isVisible());
+                assertFalse(openEvidenceBtn.isDisable());
                 capture(stage, "admin-spam-pending-light");
+
+                openEvidenceBtn.fire();
+                var evidencePane = ownedDialogPane(stage);
+                assertEquals("evidenceConversationDialog", evidencePane.getId());
+                var conversationList = (VBox) evidencePane.lookup("#evidenceConversationList");
+                var evidenceRows = conversationList.getChildren().stream()
+                        .filter(node -> node.getStyleClass().contains("evidence-message-row"))
+                        .toList();
+                assertEquals(selectedReport.evidence().size(), evidenceRows.size());
+                for (int i = 0; i < selectedReport.evidence().size(); i++) {
+                    var evidence = selectedReport.evidence().get(i);
+                    var row = evidenceRows.get(i);
+                    assertEquals(evidence.message().text(), ((Label) row.lookup(".admin-bubble-text")).getText());
+                    assertEquals(evidence.selected(), row.lookup(".bubble-selected") != null);
+                    assertEquals(evidence.selected(), row.lookup(".tag-selected") != null);
+                }
+                capture(evidencePane.getScene(), "admin-spam-evidence-dialog-light");
+                navigator.themes().toggle();
+                capture(evidencePane.getScene(), "admin-spam-evidence-dialog-dark");
+                navigator.themes().toggle();
+                ((Button) evidencePane.lookup("#closeEvidenceDialog")).fire();
 
                 // Cancel leaves the reported account and the report unchanged.
                 lockButton.fire();

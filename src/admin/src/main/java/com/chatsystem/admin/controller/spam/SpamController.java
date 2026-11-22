@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -45,17 +46,22 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class SpamController implements ViewController {
+    private static final int MAX_INLINE_REPORTED = 3;
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/uuuu", Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm", Locale.ROOT)
+            .withZone(MockData.DISPLAY_ZONE);
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT)
             .withZone(MockData.DISPLAY_ZONE);
     private static final DateTimeFormatter TABLE_DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu'\n'HH:mm", Locale.ROOT)
             .withZone(MockData.DISPLAY_ZONE);
@@ -88,16 +94,15 @@ public final class SpamController implements ViewController {
     @FXML private Label reportTimestamp;
 
     @FXML private Label reporterName;
-    @FXML private Label reporterUsername;
-    @FXML private Label reporterId;
+    @FXML private Label reporterIdentity;
 
     @FXML private Label reportedName;
-    @FXML private Label reportedUsername;
-    @FXML private Label reportedId;
+    @FXML private Label reportedIdentity;
     @FXML private Label reportedUserStatus;
 
     @FXML private Label reportReason;
     @FXML private Label evidenceCountLabel;
+    @FXML private Button openEvidenceButton;
     @FXML private VBox chatPreviewList;
 
     @FXML private Button lockAccountButton;
@@ -118,6 +123,7 @@ public final class SpamController implements ViewController {
     private DateRange appliedDates = new DateRange(null, null);
 
     private ViewNavigator navigator;
+    private Dialog<ButtonType> evidenceDialog;
 
     @FXML
     private void initialize() {
@@ -165,6 +171,15 @@ public final class SpamController implements ViewController {
     @Override
     public void onEnter(ViewNavigator navigator, View view) {
         this.navigator = navigator;
+    }
+
+    @Override
+    public void onLeave() {
+        navigator = null;
+        if (evidenceDialog != null) {
+            evidenceDialog.close();
+            evidenceDialog = null;
+        }
     }
 
     private void configureSortOptions() {
@@ -338,6 +353,10 @@ public final class SpamController implements ViewController {
     }
 
     private void showReportDetails(MockSpamReport report) {
+        if (evidenceDialog != null) {
+            evidenceDialog.close();
+            evidenceDialog = null;
+        }
         boolean hasSelection = report != null;
         unselectedReport.setVisible(!hasSelection);
         unselectedReport.setManaged(!hasSelection);
@@ -350,17 +369,16 @@ public final class SpamController implements ViewController {
 
         reportIdTitle.setText("Báo cáo #" + report.id());
         updateStatusBadge(reportStatusBadge, preview.status(report));
-        reportTimestamp.setText("Thời điểm gửi: " + DATE_TIME.format(report.createdAt()));
+        var submitted = report.createdAt().atZone(MockData.DISPLAY_ZONE);
+        reportTimestamp.setText("Gửi lúc " + TIME.format(submitted) + " ngày " + DATE.format(submitted));
 
         MockUser reporter = preview.user(report.reporterId());
         reporterName.setText(reporter.fullName());
-        reporterUsername.setText("@" + reporter.username());
-        reporterId.setText("ID: " + reporter.id());
+        reporterIdentity.setText("@" + reporter.username() + " · ID " + reporter.id());
 
         MockUser reported = preview.user(report.reportedUserId());
         reportedName.setText(reported.fullName());
-        reportedUsername.setText("@" + reported.username());
-        reportedId.setText("ID: " + reported.id());
+        reportedIdentity.setText("@" + reported.username() + " · ID " + reported.id());
 
         reportReason.setText(report.reason());
         updateLockAction(report);
@@ -382,7 +400,13 @@ public final class SpamController implements ViewController {
             reviewedNoteText.setText("Ghi chú: " + review.note());
         }
 
-        renderChatPreview(report);
+        long selectedCount = report.evidence().stream().filter(MockSpamReport.Evidence::selected).count();
+        evidenceCountLabel.setText(report.evidence().isEmpty() ? "Chưa có tin nhắn đính kèm"
+                : selectedCount + " tin bị báo cáo · " + report.evidence().size() + " tin đính kèm");
+        openEvidenceButton.setDisable(report.evidence().isEmpty());
+        openEvidenceButton.setText(report.evidence().isEmpty() ? "Xem hội thoại"
+                : "Xem hội thoại (" + report.evidence().size() + ")");
+        renderReportedPreview(report);
         reportInspector.setVvalue(0);
     }
 
@@ -400,36 +424,86 @@ public final class SpamController implements ViewController {
         lockAccountNotice.setVisible(!notice.isEmpty());
     }
 
-    private void renderChatPreview(MockSpamReport report) {
+    private void renderReportedPreview(MockSpamReport report) {
         chatPreviewList.getChildren().clear();
-        evidenceCountLabel.setText("Bằng chứng đính kèm · " + report.evidence().size() + " tin nhắn");
-        for (MockSpamReport.Evidence item : report.evidence()) {
-            MockMessage msg = item.message();
-            MockUser sender = preview.user(msg.senderId());
-
-            Label senderLabel = wrappingLabel(sender.fullName() + " · @" + sender.username(),
-                    "admin-bubble-sender");
-            Label timeLabel = new Label(DATE_TIME.format(msg.sentAt()));
-            timeLabel.getStyleClass().add("admin-bubble-time");
-            FlowPane header = new FlowPane(8, 4, senderLabel, timeLabel);
-            header.setAlignment(Pos.CENTER_LEFT);
-            header.setMinWidth(0);
-            header.setMinHeight(Region.USE_PREF_SIZE);
-
-            if (item.selected()) {
-                header.getChildren().add(evidenceTag("Bị báo cáo", "tag-selected"));
-            }
-            if (item.context()) {
-                header.getChildren().add(evidenceTag("Ngữ cảnh", "tag-context"));
-            }
-
-            VBox bubbleCard = new VBox(6, header, wrappingLabel(msg.text(), "admin-bubble-text"));
-            bubbleCard.setMinWidth(0);
-            bubbleCard.setMinHeight(Region.USE_PREF_SIZE);
-            bubbleCard.getStyleClass().addAll("admin-chat-bubble-card",
-                    item.selected() ? "bubble-selected" : "bubble-context");
-            chatPreviewList.getChildren().add(bubbleCard);
+        List<MockSpamReport.Evidence> selected = report.evidence().stream()
+                .filter(MockSpamReport.Evidence::selected)
+                .toList();
+        int shown = Math.min(MAX_INLINE_REPORTED, selected.size());
+        for (int index = 0; index < shown; index++) {
+            chatPreviewList.getChildren().add(reportedCard(selected.get(index)));
         }
+        if (selected.size() > MAX_INLINE_REPORTED) {
+            int remaining = selected.size() - MAX_INLINE_REPORTED;
+            Hyperlink more = new Hyperlink("+ " + remaining + " tin bị báo cáo khác — Xem trong hội thoại");
+            more.setOnAction(event -> openEvidenceConversation());
+            chatPreviewList.getChildren().add(more);
+        }
+    }
+
+    private VBox reportedCard(MockSpamReport.Evidence item) {
+        MockMessage message = item.message();
+        MockUser sender = preview.user(message.senderId());
+
+        Label flagged = new Label("Tin bị báo cáo", FontIcon.of(Feather.FLAG, 12));
+        flagged.getStyleClass().add("tag-selected");
+        flagged.setMinWidth(Region.USE_PREF_SIZE);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label time = new Label(DATE_TIME.format(message.sentAt()));
+        time.getStyleClass().add("admin-bubble-time");
+        time.setMinWidth(Region.USE_PREF_SIZE);
+
+        HBox topRow = new HBox(8, flagged, spacer, time);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label author = wrappingLabel(sender.fullName() + " · @" + sender.username(), "admin-bubble-sender");
+        Label body = wrappingLabel(message.text(), "admin-bubble-text");
+
+        Label cue = new Label("Nhấn để xem đầy đủ mạch hội thoại →");
+        cue.getStyleClass().add("admin-reported-cue");
+
+        VBox card = new VBox(6, topRow, author, body, cue);
+        card.setMinWidth(0);
+        card.getStyleClass().addAll("admin-reported-card", "bubble-selected");
+        card.setFocusTraversable(true);
+        card.setAccessibleText("Tin bị báo cáo từ " + sender.fullName() + ": " + message.text());
+        card.setOnMouseClicked(event -> openEvidenceConversationFor(message.id()));
+        card.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+                openEvidenceConversationFor(message.id());
+                event.consume();
+            }
+        });
+        return card;
+    }
+
+    @FXML
+    private void openEvidenceConversation() {
+        openEvidenceConversationFor(null);
+    }
+
+    private void openEvidenceConversationFor(String focusMessageId) {
+        MockSpamReport report = reportsTable.getSelectionModel().getSelectedItem();
+        if (report == null || navigator == null || report.evidence().isEmpty()) {
+            return;
+        }
+        if (evidenceDialog != null) {
+            evidenceDialog.close();
+            evidenceDialog = null;
+        }
+        Window owner = reportsTable.getScene() == null ? null : reportsTable.getScene().getWindow();
+        Dialog<ButtonType> dialog = EvidenceConversationDialog.create(
+                owner, navigator.themes(), preview, report, focusMessageId);
+        dialog.addEventHandler(DialogEvent.DIALOG_HIDDEN, event -> {
+            if (evidenceDialog == dialog) {
+                evidenceDialog = null;
+            }
+        });
+        evidenceDialog = dialog;
+        dialog.show();
     }
 
     private static Label wrappingLabel(String text, String style) {
@@ -438,12 +512,6 @@ public final class SpamController implements ViewController {
         label.setMinWidth(0);
         label.setMinHeight(Region.USE_PREF_SIZE);
         label.getStyleClass().add(style);
-        return label;
-    }
-
-    private static Label evidenceTag(String text, String kind) {
-        Label label = new Label(text);
-        label.getStyleClass().addAll("admin-evidence-tag", kind);
         return label;
     }
 

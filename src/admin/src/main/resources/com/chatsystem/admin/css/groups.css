@@ -50,8 +50,13 @@
 }
 
 .admin-groups-directory .table-cell.admin-group-size-column {
-    -fx-font-family: "Monospaced";
     -fx-font-size: 12px;
+}
+
+.admin-groups-page .table-cell.admin-date-column,
+.admin-groups-page .admin-account-meta,
+.admin-groups-page .admin-profile-handle {
+    -fx-font-family: "Inter";
 }
 
 .admin-groups-directory .table-cell.admin-group-size-column,
