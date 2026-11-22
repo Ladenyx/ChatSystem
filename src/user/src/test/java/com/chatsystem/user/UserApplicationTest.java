@@ -12,6 +12,7 @@ import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.user.control.ChatMessageRow;
+import com.chatsystem.user.mock.MockConversationCatalog;
 import com.chatsystem.user.service.model.TargetUserOption;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
@@ -28,8 +29,9 @@ import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -80,6 +82,9 @@ class UserApplicationTest {
 
     @AfterEach
     void noUnhandledJavaFxErrors() {
+        if (UserViews.CONVERSATIONS_DATA instanceof MockConversationCatalog mockCatalog) {
+            mockCatalog.reset();
+        }
         var errors = new java.util.ArrayList<>(FX_ERRORS);
         FX_ERRORS.clear();
         assertTrue(errors.isEmpty(), () -> "Unhandled JavaFX errors: " + errors);
@@ -693,10 +698,15 @@ class UserApplicationTest {
                         .allMatch(row -> row.lookup(".chat-message-more") == null),
                         "Recalled messages must not offer message actions");
                 assertTrue(directRows.stream()
-                        .filter(row -> directMessagesById.get(row.messageId()).senderId().equals(currentUserId))
-                        .allMatch(row -> row.lookup(".chat-message-more") == null
+                        .filter(row -> {
+                            MockMessage m = directMessagesById.get(row.messageId());
+                            return m.senderId().equals(currentUserId)
+                                    && m.acceptedByServer()
+                                    && m.state() != MockMessage.State.RECALLED;
+                        })
+                        .allMatch(row -> row.lookup(".chat-message-more") != null
                                 && row.lookup(".chat-message-avatar") == null),
-                        "Outgoing own messages must not offer Báo cáo or avatar");
+                        "Confirmed own messages offer hover menu for recall/multi-select and no avatar");
                 assertTrue(directRows.stream()
                         .filter(row -> !directMessagesById.get(row.messageId()).senderId().equals(currentUserId)
                                 && directMessagesById.get(row.messageId()).acceptedByServer()
@@ -762,9 +772,15 @@ class UserApplicationTest {
                 assertTrue(cardBounds.getMinY() >= historyBounds.getMinY()
                         && cardBounds.getMaxY() <= historyBounds.getMaxY(),
                         "Message action menu stays inside history viewport and does not overlap composer");
+                Button removeAction = (Button) menuRoot.lookup("#messageActionRemoveForSelf");
+                Button selectAction = (Button) menuRoot.lookup("#messageActionSelect");
                 Button reportAction = (Button) menuRoot.lookup("#messageActionReport");
+                assertNotNull(removeAction);
+                assertNotNull(selectAction);
                 assertNotNull(reportAction);
                 assertFalse(reportAction.isFocused());
+                assertEquals("Gỡ", removeAction.getText());
+                assertEquals("Chọn nhiều tin", selectAction.getText());
                 assertEquals("Báo cáo", reportAction.getText());
                 captureWithPopover(stage, popup, "user-message-menu-light");
 
@@ -805,6 +821,350 @@ class UserApplicationTest {
                 return null;
             });
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void ownMessageRecallModalEnforces48HourWindowAndUpdatesHistoryAndSearch() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                root.applyCss();
+                root.layout();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                ((ScrollPane) root.lookup("#historyScroll")).setVvalue(1);
+                root.applyCss();
+                root.layout();
+                var recentOwnRow = rowById(root, "msg-direct-01-7");
+                Button moreBtn = (Button) recentOwnRow.lookup(".chat-message-more");
+                assertNotNull(moreBtn);
+                moreBtn.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                var menuRoot = popup.getScene().getRoot();
+                Button recallAction = (Button) menuRoot.lookup("#messageActionRecall");
+                Button selectAction = (Button) menuRoot.lookup("#messageActionSelect");
+                assertNotNull(recallAction);
+                assertNotNull(selectAction);
+                assertNull(menuRoot.lookup("#messageActionReport"));
+                assertEquals("Thu hồi", recallAction.getText());
+                assertEquals("Chọn nhiều tin", selectAction.getText());
+                captureWithPopover(stageRef.get(), popup, "user-own-message-menu-light");
+                recallAction.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window dialog = messageDialogWindow(stageRef.get(), "recallMessageDialog");
+                var dialogRoot = dialog.getScene().getRoot();
+                assertEquals("Bạn muốn thu hồi tin nhắn này ở phía ai?",
+                        ((Label) dialogRoot.lookup("#recallDialogTitle")).getText());
+                var everyoneRadio = (RadioButton) dialogRoot.lookup("#recallForEveryoneRadio");
+                var selfRadio = (RadioButton) dialogRoot.lookup("#recallForSelfRadio");
+                assertFalse(everyoneRadio.isDisabled());
+                assertTrue(everyoneRadio.isSelected());
+                assertFalse(selfRadio.isDisabled());
+                assertFalse(selfRadio.isSelected());
+                capture(dialog, "message-recall-modal-light");
+
+                navRef.get().themes().toggle();
+                capture(dialog, "message-recall-modal-dark");
+                navRef.get().themes().toggle();
+
+                ((Button) dialogRoot.lookup("#recallDialogConfirm")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                var recalledRow = rowById(root, "msg-direct-01-7");
+                assertNull(recalledRow.lookup(".chat-message-more"));
+                assertEquals("Tin nhắn đã được thu hồi",
+                        ((Label) recalledRow.lookup(".chat-bubble-unavailable")).getText());
+
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#searchInConversation")).fire();
+                root.applyCss();
+                root.layout();
+                var localSearch = (TextField) root.lookup("#conversationSearchField");
+                localSearch.setText("Thống nhất");
+                root.applyCss();
+                root.layout();
+                assertEquals("0 kết quả", ((Label) root.lookup("#localResultCount")).getText());
+                navRef.get().closeDrawer();
+
+                navRef.get().themes().toggle();
+                ((ScrollPane) root.lookup("#historyScroll")).setVvalue(0);
+                root.applyCss();
+                root.layout();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                var expiredOwnRow = rowById(root, "msg-direct-01-1");
+                Button moreBtn = (Button) expiredOwnRow.lookup(".chat-message-more");
+                assertNotNull(moreBtn);
+                moreBtn.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                ((Button) popup.getScene().getRoot().lookup("#messageActionRecall")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window dialog = messageDialogWindow(stageRef.get(), "recallMessageDialog");
+                var dialogRoot = dialog.getScene().getRoot();
+                var everyoneRadio = (RadioButton) dialogRoot.lookup("#recallForEveryoneRadio");
+                var selfRadio = (RadioButton) dialogRoot.lookup("#recallForSelfRadio");
+                assertTrue(everyoneRadio.isDisabled());
+                assertFalse(everyoneRadio.isSelected());
+                assertFalse(selfRadio.isDisabled());
+                assertTrue(selfRadio.isSelected());
+                capture(dialog, "message-recall-expired-dark");
+                ((Button) dialogRoot.lookup("#recallDialogConfirm")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertEquals(7, root.lookupAll(".chat-message-row").size());
+                assertFalse(root.lookupAll(".chat-message-row").stream()
+                        .map(ChatMessageRow.class::cast)
+                        .anyMatch(row -> row.messageId().equals("msg-direct-01-1")));
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void incomingRemoveForSelfMultiSelectDeleteAndBottomAlignment() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var directFour = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-04")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(directFour);
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                ((ScrollPane) root.lookup("#historyScroll")).setVvalue(0);
+                root.applyCss();
+                root.layout();
+                assertEquals(8, root.lookupAll(".chat-message-row").size());
+                ((Button) rowById(root, "msg-direct-04-2").lookup(".chat-message-more")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                ((Button) popup.getScene().getRoot().lookup("#messageActionRemoveForSelf")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window dialog = messageDialogWindow(stageRef.get(), "removeForSelfDialog");
+                var dialogRoot = dialog.getScene().getRoot();
+                assertEquals("Gỡ đối với bạn", ((Label) dialogRoot.lookup("#removeForSelfTitle")).getText());
+                capture(dialog, "message-remove-self-dark");
+                ((Button) dialogRoot.lookup("#removeForSelfConfirm")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertEquals(7, root.lookupAll(".chat-message-row").size());
+                navRef.get().themes().toggle();
+                ((ScrollPane) root.lookup("#historyScroll")).setVvalue(0);
+                root.applyCss();
+                root.layout();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                ((Button) rowById(root, "msg-direct-04-1").lookup(".chat-message-more")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                ((Button) popup.getScene().getRoot().lookup("#messageActionSelect")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertTrue(root.lookup("#selectionHeader").isVisible());
+                assertTrue(root.lookup("#selectionActionBar").isVisible());
+                assertFalse(root.lookup("#composer").isVisible());
+                assertEquals("Đã chọn 1 tin nhắn", ((Label) root.lookup("#selectionCountLabel")).getText());
+
+                for (String id : List.of("msg-direct-04-3", "msg-direct-04-4", "msg-direct-04-5",
+                        "msg-direct-04-6", "msg-direct-04-7")) {
+                    ((CheckBox) root.lookup("#select-" + id)).fire();
+                }
+                assertEquals("Đã chọn 6 tin nhắn", ((Label) root.lookup("#selectionCountLabel")).getText());
+                Button bulkBtn = (Button) root.lookup("#deleteSelectedButton");
+                assertFalse(bulkBtn.isDisabled());
+                assertEquals("Xóa phía mình (6)", bulkBtn.getText());
+                root.applyCss();
+                root.layout();
+                capture(stageRef.get(), "user-message-multiselect-light");
+
+                navRef.get().themes().toggle();
+                bulkBtn.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window dialog = messageDialogWindow(stageRef.get(), "bulkDeleteConfirmDialog");
+                var dialogRoot = dialog.getScene().getRoot();
+                assertEquals("Xóa 6 tin nhắn ở phía bạn?",
+                        ((Label) dialogRoot.lookup("#bulkDeleteTitle")).getText());
+                capture(dialog, "message-bulk-delete-dark");
+                navRef.get().themes().toggle();
+                ((Button) dialogRoot.lookup("#bulkDeleteConfirm")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertFalse(root.lookup("#selectionHeader").isVisible());
+                assertTrue(root.lookup("#composer").isVisible());
+                assertEquals(1, root.lookupAll(".chat-message-row").size());
+
+                ScrollPane historyScroll = (ScrollPane) root.lookup("#historyScroll");
+                VBox messageRows = (VBox) root.lookup("#messageRows");
+                assertTrue(historyScroll.isFitToHeight());
+                assertEquals(Pos.BOTTOM_LEFT, messageRows.getAlignment());
+                ChatMessageRow remaining = rowById(root, "msg-direct-04-8");
+                assertTrue(remaining.getLayoutY() > historyScroll.getViewportBounds().getHeight() * 0.5,
+                        "Remaining message should align near bottom of history viewport");
+                capture(stageRef.get(), "user-chat-bottom-aligned-light");
+
+                ((Button) remaining.lookup(".chat-message-more")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                ((Button) popup.getScene().getRoot().lookup("#messageActionRemoveForSelf")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window dialog = messageDialogWindow(stageRef.get(), "removeForSelfDialog");
+                ((Button) dialog.getScene().getRoot().lookup("#removeForSelfConfirm")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertTrue(root.lookup("#emptyHistory").isVisible());
+                assertFalse(root.lookup("#historyScroll").isVisible());
+                capture(stageRef.get(), "user-chat-empty-history-light");
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    private static ChatMessageRow rowById(Parent root, String messageId) {
+        return root.lookupAll(".chat-message-row").stream()
+                .map(ChatMessageRow.class::cast)
+                .filter(row -> row.messageId().equals(messageId))
+                .findFirst().orElseThrow();
+    }
+
+    private static Window messageDialogWindow(Window owner, String paneId) {
+        return Window.getWindows().stream()
+                .filter(window -> window != owner && window.isShowing()
+                        && window.getScene() != null
+                        && window.getScene().getRoot().lookup("#" + paneId) != null)
+                .findFirst().orElseThrow();
     }
 
     private static Window messageMenuPopup() {

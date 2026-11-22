@@ -44,6 +44,7 @@ public final class ConversationInfoController implements ViewController {
     @FXML private VBox localResults;
 
     private final ConversationCatalog catalog = UserViews.CONVERSATIONS_DATA;
+    private final Runnable catalogListener = this::onCatalogChanged;
     private final List<SearchResultCard> cards = new ArrayList<>();
     private ViewNavigator navigator;
     private UserViewInputs.MessageSearch search;
@@ -64,12 +65,28 @@ public final class ConversationInfoController implements ViewController {
     @Override
     public void onEnter(ViewNavigator navigator, View view, ViewInput input) {
         this.navigator = navigator;
+        catalog.addChangeListener(catalogListener);
         if (input instanceof UserViewInputs.MessageSearch details) {
             search = details;
             catalog.conversations().stream().filter(chat -> chat.id().equals(details.conversationId()))
                     .findFirst().ifPresent(this::renderInfo);
         }
         showInfo();
+    }
+
+    @Override
+    public void onLeave() {
+        catalog.removeChangeListener(catalogListener);
+        navigator = null;
+    }
+
+    private void onCatalogChanged() {
+        if (navigator == null) {
+            return;
+        }
+        if (drawerLayout.getCenter() == searchPane && search != null) {
+            renderResults(conversationSearchField.getText());
+        }
     }
 
     private void renderInfo(MockConversation chat) {

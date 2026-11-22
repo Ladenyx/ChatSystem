@@ -53,6 +53,7 @@ public final class ConversationsController implements ViewController {
 
     private ViewNavigator navigator;
     private final ConversationCatalog catalog = UserViews.CONVERSATIONS_DATA;
+    private final Runnable catalogListener = this::onCatalogChanged;
     private MockConversation selected;
     private FilteredList<MockConversation> visibleConversations;
     private boolean updatingSelection;
@@ -88,11 +89,14 @@ public final class ConversationsController implements ViewController {
     @Override
     public void onEnter(ViewNavigator navigator, View view) {
         this.navigator = navigator;
+        catalog.addChangeListener(catalogListener);
         if (visibleConversations == null) {
             visibleConversations = new FilteredList<>(FXCollections.observableArrayList(catalog.conversations()));
             conversationItems.setCellFactory(list -> new ConversationCell(catalog));
             conversationItems.setItems(visibleConversations);
             allFilter.setSelected(true);
+        } else {
+            conversationItems.refresh();
         }
         applyFilter();
         showSelection(selected);
@@ -100,7 +104,20 @@ public final class ConversationsController implements ViewController {
 
     @Override
     public void onLeave() {
+        catalog.removeChangeListener(catalogListener);
+        selectedWorkspaceController.onLeave();
         navigator = null;
+    }
+
+    private void onCatalogChanged() {
+        if (navigator == null) {
+            return;
+        }
+        conversationItems.refresh();
+        String query = conversationFilter.getText().strip().toLowerCase(Locale.ROOT);
+        if (!query.isBlank()) {
+            showSearchResults(query);
+        }
     }
 
     @FXML
