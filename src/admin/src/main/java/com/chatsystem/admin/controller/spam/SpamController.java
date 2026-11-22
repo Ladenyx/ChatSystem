@@ -1,6 +1,7 @@
 package com.chatsystem.admin.controller.spam;
 
 import com.chatsystem.admin.AdminViews;
+import com.chatsystem.admin.mock.SpamModerationPreview;
 import com.chatsystem.admin.navigation.AdminViewInputs;
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockMessage;
@@ -13,17 +14,16 @@ import java.text.Collator;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -32,6 +32,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -42,20 +43,29 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class SpamController implements ViewController {
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm")
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/uuuu", Locale.ROOT)
+            .withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm", Locale.ROOT)
+            .withZone(MockData.DISPLAY_ZONE);
+    private static final DateTimeFormatter TABLE_DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/uuuu'\n'HH:mm", Locale.ROOT)
             .withZone(MockData.DISPLAY_ZONE);
     private static final Collator VIETNAMESE_COLLATOR = Collator.getInstance(Locale.of("vi", "VN"));
+    private static final PseudoClass INVALID = PseudoClass.getPseudoClass("invalid");
+    private static final String DATE_ERROR = "Nhập ngày hợp lệ theo định dạng dd/mm/yyyy";
 
     @FXML private DatePicker startDateFilter;
     @FXML private DatePicker endDateFilter;
+    @FXML private Label spamDateError;
     @FXML private TextField reportedUserFilter;
     @FXML private ToggleGroup statusFilters;
     @FXML private ToggleButton allReports;
@@ -92,45 +102,34 @@ public final class SpamController implements ViewController {
 
     @FXML private Button lockAccountButton;
     @FXML private FontIcon lockIcon;
+    @FXML private Label lockAccountNotice;
     @FXML private VBox pendingReviewBox;
     @FXML private TextField reviewNoteField;
     @FXML private Label reviewNoteError;
-    @FXML private Button markReviewedButton;
 
     @FXML private VBox reviewedBox;
     @FXML private Label reviewedHeader;
     @FXML private Label reviewedNoteText;
 
-    private final MockData data = MockData.create();
-    private final ObservableList<MockSpamReport> allReportsList = FXCollections.observableArrayList();
-    private final FilteredList<MockSpamReport> filteredReports = new FilteredList<>(allReportsList);
-    private final Map<String, MockSpamReport.Status> reportStatuses = new HashMap<>();
-    private final Map<String, String> reviewNotes = new HashMap<>();
-    private final Map<String, Instant> reviewedAtMap = new HashMap<>();
-    private final Map<String, MockUser.Status> userStatuses = new HashMap<>();
+    private final SpamModerationPreview preview = new SpamModerationPreview();
+    private final FilteredList<MockSpamReport> filteredReports =
+            new FilteredList<>(FXCollections.observableArrayList(preview.reports()));
+    private final SortedList<MockSpamReport> sortedReports = new SortedList<>(filteredReports);
+    private DateRange appliedDates = new DateRange(null, null);
 
     private ViewNavigator navigator;
 
     @FXML
     private void initialize() {
-        for (MockSpamReport r : data.spamReports()) {
-            reportStatuses.put(r.id(), r.status());
-            if (r.status() == MockSpamReport.Status.REVIEWED) {
-                reviewNotes.put(r.id(), "Đã đối chiếu với bằng chứng người báo cáo cung cấp và xác minh vi phạm.");
-                reviewedAtMap.put(r.id(), r.createdAt().plusSeconds(3600));
-            }
-        }
-        allReportsList.setAll(data.spamReports());
-
         configureTables();
         configureSortOptions();
+        configureDatePicker(startDateFilter);
+        configureDatePicker(endDateFilter);
 
         pendingReports.setUserData(MockSpamReport.Status.PENDING);
         reviewedReports.setUserData(MockSpamReport.Status.REVIEWED);
 
         reportedUserFilter.textProperty().addListener((obs, oldVal, newVal) -> applyFilter());
-        startDateFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilter());
-        endDateFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilter());
         sortOrder.valueProperty().addListener((obs, oldVal, newVal) -> applyFilter());
         statusFilters.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) {
@@ -142,11 +141,13 @@ public final class SpamController implements ViewController {
 
         reportCount.textProperty().bind(Bindings.size(filteredReports).asString("%d báo cáo"));
         clearFilters.visibleProperty().bind(reportedUserFilter.textProperty().isNotEmpty()
-                .or(startDateFilter.valueProperty().isNotNull())
-                .or(endDateFilter.valueProperty().isNotNull())
+                .or(startDateFilter.getEditor().textProperty().isNotEmpty())
+                .or(endDateFilter.getEditor().textProperty().isNotEmpty())
                 .or(allReports.selectedProperty().not())
                 .or(sortOrder.getSelectionModel().selectedIndexProperty().isNotEqualTo(0)));
         clearFilters.managedProperty().bind(clearFilters.visibleProperty());
+        spamDateError.managedProperty().bind(spamDateError.visibleProperty());
+        lockAccountNotice.managedProperty().bind(lockAccountNotice.visibleProperty());
 
         reportsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, selected) -> showReportDetails(selected));
@@ -161,19 +162,23 @@ public final class SpamController implements ViewController {
 
     private void configureSortOptions() {
         sortOrder.getItems().setAll(
-                "Thời gian gửi (Mới nhất)",
-                "Thời gian gửi (Cũ nhất)",
-                "Tên bị báo cáo (A → Z)"
+                "Mới nhất",
+                "Cũ nhất",
+                "Username A–Z",
+                "Username Z–A"
         );
         sortOrder.getSelectionModel().select(0);
     }
 
     private void configureTables() {
         reportedUserColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
-        reportedUserColumn.setCellFactory(col -> new UserDisplayCell(report -> data.user(report.reportedUserId())));
+        reportedUserColumn.setCellFactory(col -> new ReportIdentityCell(preview));
 
         reporterColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
-        reporterColumn.setCellFactory(col -> new UserDisplayCell(report -> data.user(report.reporterId())));
+        reporterColumn.setCellFactory(col -> new UserDisplayCell(report -> preview.user(report.reporterId())));
+        // The inspector still shows the reporter when the directory does not have room for all four columns.
+        double allColumnsWidth = reportsTable.getColumns().stream().mapToDouble(TableColumn::getMinWidth).sum();
+        reporterColumn.visibleProperty().bind(reportsTable.widthProperty().greaterThanOrEqualTo(allColumnsWidth + 16));
 
         reportedAtColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().createdAt()));
         reportedAtColumn.setCellFactory(col -> new TableCell<>() {
@@ -182,65 +187,135 @@ public final class SpamController implements ViewController {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
+                    setAccessibleText(null);
                 } else {
-                    setText(DATE_TIME.format(item));
+                    setText(TABLE_DATE_TIME.format(item));
+                    setAccessibleText(DATE_TIME.format(item));
                 }
             }
         });
 
         statusColumn.setCellValueFactory(cell ->
-                new ReadOnlyObjectWrapper<>(reportStatuses.getOrDefault(cell.getValue().id(), cell.getValue().status())));
+                new ReadOnlyObjectWrapper<>(preview.status(cell.getValue())));
         statusColumn.setCellFactory(col -> new StatusBadgeCell());
+        reportsTable.setItems(sortedReports);
+    }
+
+    private void configureDatePicker(DatePicker picker) {
+        picker.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date == null ? "" : DATE.format(date);
+            }
+
+            @Override
+            public LocalDate fromString(String text) {
+                try {
+                    return parseDate(text);
+                } catch (DateTimeParseException invalid) {
+                    // Keep the committed value when JavaFX commits on blur; the editor retains the invalid draft.
+                    return picker.getValue();
+                }
+            }
+        });
+
+        picker.addEventFilter(KeyEvent.ANY, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                try {
+                    parseDate(picker.getEditor().getText());
+                } catch (DateTimeParseException invalid) {
+                    // Don't let the skin replace an invalid draft with the last committed value on Enter.
+                    event.consume();
+                }
+            }
+        });
+        picker.getEditor().textProperty().addListener((obs, previous, current) -> applyDateRange());
+        picker.valueProperty().addListener((obs, previous, current) -> {
+            // Calendar choices and setValue need the same text-driven validation as typed dates.
+            picker.getEditor().setText(picker.getConverter().toString(current));
+        });
+    }
+
+    private static LocalDate parseDate(String text) {
+        if (text == null || text.isBlank()) {
+            return null;
+        }
+        String date = text.strip();
+        if (!date.matches("[0-9]{2}/[0-9]{2}/[0-9]{4}")) {
+            throw new DateTimeParseException(DATE_ERROR, date, 0);
+        }
+        LocalDate parsed = LocalDate.parse(date, DATE);
+        if (parsed.getYear() == 0) {
+            throw new DateTimeParseException(DATE_ERROR, date, 6);
+        }
+        return parsed;
+    }
+
+    private void applyDateRange() {
+        LocalDate start;
+        LocalDate end;
+        try {
+            start = parseDate(startDateFilter.getEditor().getText());
+        } catch (DateTimeParseException invalid) {
+            showDateError(DATE_ERROR, true, false);
+            return;
+        }
+        try {
+            end = parseDate(endDateFilter.getEditor().getText());
+        } catch (DateTimeParseException invalid) {
+            showDateError(DATE_ERROR, false, true);
+            return;
+        }
+        if (start != null && end != null && start.isAfter(end)) {
+            showDateError("Từ ngày phải trước hoặc bằng Đến ngày", true, true);
+            return;
+        }
+        showDateError("", false, false);
+        appliedDates = new DateRange(start, end);
+        applyFilter();
+    }
+
+    private void showDateError(String message, boolean invalidStart, boolean invalidEnd) {
+        spamDateError.setText(message);
+        spamDateError.setVisible(invalidStart || invalidEnd);
+        startDateFilter.pseudoClassStateChanged(INVALID, invalidStart);
+        endDateFilter.pseudoClassStateChanged(INVALID, invalidEnd);
     }
 
     private void applyFilter() {
-        String usernameQuery = reportedUserFilter.getText() == null ? ""
-                : reportedUserFilter.getText().trim().toLowerCase(Locale.ROOT);
-        LocalDate start = startDateFilter.getValue();
-        LocalDate end = endDateFilter.getValue();
+        String query = reportedUserFilter.getText() == null ? ""
+                : reportedUserFilter.getText().strip().toLowerCase(Locale.ROOT);
+        String usernameQuery = query.startsWith("@") ? query.substring(1) : query;
         var selectedToggle = statusFilters.getSelectedToggle();
         MockSpamReport.Status targetStatus = selectedToggle == null ? null
                 : (MockSpamReport.Status) selectedToggle.getUserData();
+        var selection = reportsTable.getSelectionModel();
+        MockSpamReport selected = selection.getSelectedItem();
 
-        filteredReports.setPredicate(report -> {
-            MockSpamReport.Status currentStatus = reportStatuses.getOrDefault(report.id(), report.status());
-            if (targetStatus != null && currentStatus != targetStatus) {
-                return false;
-            }
+        filteredReports.setPredicate(report ->
+                (targetStatus == null || preview.status(report) == targetStatus)
+                && preview.user(report.reportedUserId()).username().toLowerCase(Locale.ROOT).contains(usernameQuery)
+                && appliedDates.includes(report.createdAt().atZone(MockData.DISPLAY_ZONE).toLocalDate()));
 
-            MockUser reportedUser = data.user(report.reportedUserId());
-            if (!usernameQuery.isEmpty()) {
-                boolean matchesUsername = reportedUser.username().toLowerCase(Locale.ROOT).contains(usernameQuery);
-                boolean matchesName = reportedUser.fullName().toLowerCase(Locale.ROOT).contains(usernameQuery);
-                if (!matchesUsername && !matchesName) {
-                    return false;
-                }
-            }
-
-            LocalDate reportDate = report.createdAt().atZone(MockData.DISPLAY_ZONE).toLocalDate();
-            if (start != null && reportDate.isBefore(start)) {
-                return false;
-            }
-            if (end != null && reportDate.isAfter(end)) {
-                return false;
-            }
-
-            return true;
+        Comparator<MockSpamReport> byUsername = Comparator.comparing(
+                report -> preview.user(report.reportedUserId()).username(), VIETNAMESE_COLLATOR);
+        sortedReports.setComparator(switch (sortOrder.getSelectionModel().getSelectedIndex()) {
+            case 1 -> Comparator.comparing(MockSpamReport::createdAt);
+            case 2 -> byUsername;
+            case 3 -> byUsername.reversed();
+            default -> Comparator.comparing(MockSpamReport::createdAt).reversed();
         });
 
-        Comparator<MockSpamReport> comparator = switch (sortOrder.getSelectionModel().getSelectedIndex()) {
-            case 1 -> Comparator.comparing(MockSpamReport::createdAt);
-            case 2 -> (a, b) -> VIETNAMESE_COLLATOR.compare(
-                    data.user(a.reportedUserId()).username(), data.user(b.reportedUserId()).username());
-            default -> Comparator.comparing(MockSpamReport::createdAt).reversed();
-        };
+        if (selected != null && sortedReports.contains(selected)) {
+            selection.select(selected);
+        } else {
+            selection.clearSelection();
+        }
+    }
 
-        SortedList<MockSpamReport> sorted = new SortedList<>(filteredReports, comparator);
-        reportsTable.setItems(sorted);
-
-        MockSpamReport selected = reportsTable.getSelectionModel().getSelectedItem();
-        if (selected != null && !sorted.contains(selected)) {
-            reportsTable.getSelectionModel().clearSelection();
+    private record DateRange(LocalDate start, LocalDate end) {
+        boolean includes(LocalDate date) {
+            return (start == null || !date.isBefore(start)) && (end == null || !date.isAfter(end));
         }
     }
 
@@ -249,6 +324,8 @@ public final class SpamController implements ViewController {
         reportedUserFilter.clear();
         startDateFilter.setValue(null);
         endDateFilter.setValue(null);
+        startDateFilter.getEditor().clear();
+        endDateFilter.getEditor().clear();
         allReports.setSelected(true);
         sortOrder.getSelectionModel().select(0);
     }
@@ -264,34 +341,25 @@ public final class SpamController implements ViewController {
             return;
         }
 
-        MockSpamReport.Status currentStatus = reportStatuses.getOrDefault(report.id(), report.status());
         reportIdTitle.setText("Báo cáo #" + report.id());
-        updateStatusBadge(reportStatusBadge, currentStatus);
+        updateStatusBadge(reportStatusBadge, preview.status(report));
         reportTimestamp.setText("Thời điểm gửi: " + DATE_TIME.format(report.createdAt()));
 
-        MockUser reporter = data.user(report.reporterId());
+        MockUser reporter = preview.user(report.reporterId());
         reporterName.setText(reporter.fullName());
         reporterUsername.setText("@" + reporter.username());
         reporterId.setText("ID: " + reporter.id());
 
-        MockUser reported = data.user(report.reportedUserId());
+        MockUser reported = preview.user(report.reportedUserId());
         reportedName.setText(reported.fullName());
         reportedUsername.setText("@" + reported.username());
         reportedId.setText("ID: " + reported.id());
 
-        MockUser.Status userStatus = userStatuses.getOrDefault(reported.id(), reported.status());
-        updateUserStatusBadge(reportedUserStatus, userStatus);
-
         reportReason.setText(report.reason());
+        updateLockAction(report);
 
-        // Update Lock button state (A-11)
-        boolean isLocked = userStatus == MockUser.Status.LOCKED;
-        lockAccountButton.setDisable(isLocked);
-        lockAccountButton.setText(isLocked ? "Tài khoản đã bị khóa" : "Khóa tài khoản bị báo cáo");
-        lockIcon.setIconCode(isLocked ? Feather.CHECK : Feather.LOCK);
-
-        // Update Review section (DEC-10)
-        boolean isReviewed = currentStatus == MockSpamReport.Status.REVIEWED;
+        var review = preview.review(report);
+        boolean isReviewed = review != null;
         pendingReviewBox.setVisible(!isReviewed);
         pendingReviewBox.setManaged(!isReviewed);
         reviewedBox.setVisible(isReviewed);
@@ -302,87 +370,93 @@ public final class SpamController implements ViewController {
         reviewNoteError.setManaged(false);
 
         if (isReviewed) {
-            Instant reviewedAt = reviewedAtMap.getOrDefault(report.id(), report.createdAt().plusSeconds(3600));
-            reviewedHeader.setText("Đã xử lý bởi Admin hệ thống lúc " + DATE_TIME.format(reviewedAt));
-            reviewedNoteText.setText("Ghi chú: " + reviewNotes.getOrDefault(report.id(), "Đã xem xét và xử lý."));
+            reviewedHeader.setText("Admin hệ thống đã xử lý lúc " + DATE_TIME.format(review.reviewedAt()));
+            reviewedNoteText.setText("Ghi chú: " + review.note());
         }
 
-        // Render chat preview evidence
         renderChatPreview(report);
-
         reportInspector.setVvalue(0);
+    }
+
+    private void updateLockAction(MockSpamReport report) {
+        MockUser target = preview.user(report.reportedUserId());
+        MockUser.Status status = preview.accountStatus(target);
+        boolean locked = status == MockUser.Status.LOCKED;
+        updateUserStatusBadge(reportedUserStatus, status);
+        lockAccountButton.setDisable(!preview.canLockReportedAccount(report));
+        lockAccountButton.setText(locked ? "Tài khoản đã bị khóa" : "Khóa tài khoản bị báo cáo");
+        lockIcon.setIconCode(locked ? Feather.CHECK : Feather.LOCK);
+        String notice = target.role() == MockUser.Role.ADMIN ? "Không khóa tài khoản Admin hệ thống từ báo cáo."
+                : status == MockUser.Status.DELETED ? "Không khóa tài khoản đã xóa mềm." : "";
+        lockAccountNotice.setText(notice);
+        lockAccountNotice.setVisible(!notice.isEmpty());
     }
 
     private void renderChatPreview(MockSpamReport report) {
         chatPreviewList.getChildren().clear();
-        List<MockSpamReport.Evidence> evidenceList = report.evidence();
-        evidenceCountLabel.setText("Bằng chứng đính kèm (" + evidenceList.size() + " tin nhắn)");
-
-        for (MockSpamReport.Evidence item : evidenceList) {
+        evidenceCountLabel.setText("Bằng chứng đính kèm · " + report.evidence().size() + " tin nhắn");
+        for (MockSpamReport.Evidence item : report.evidence()) {
             MockMessage msg = item.message();
-            MockUser sender = data.user(msg.senderId());
-            boolean isReportedUser = sender.id().equals(report.reportedUserId());
+            MockUser sender = preview.user(msg.senderId());
 
-            VBox bubbleCard = new VBox(4);
-            bubbleCard.getStyleClass().add("admin-chat-bubble-card");
-            if (item.selected()) {
-                bubbleCard.getStyleClass().add("bubble-selected");
-            } else {
-                bubbleCard.getStyleClass().add("bubble-context");
-            }
-
-            // Top row: Sender Name + Timestamp + Badge
-            HBox header = new HBox(8);
-            header.setAlignment(Pos.CENTER_LEFT);
-
-            Label senderLabel = new Label(sender.fullName() + " (@" + sender.username() + ")");
-            senderLabel.getStyleClass().add("admin-bubble-sender");
-            if (isReportedUser) {
-                senderLabel.getStyleClass().add("sender-reported");
-            }
+            Label senderLabel = wrappingLabel(sender.fullName() + " (@" + sender.username() + ")",
+                    "admin-bubble-sender");
 
             Label timeLabel = new Label(DATE_TIME.format(msg.sentAt()));
             timeLabel.getStyleClass().add("admin-bubble-time");
+            FlowPane metadata = new FlowPane(8, 4, timeLabel);
+            metadata.setAlignment(Pos.CENTER_LEFT);
+            metadata.setMinWidth(0);
+            metadata.setMinHeight(Region.USE_PREF_SIZE);
 
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-
-            Label tag = new Label();
             if (item.selected()) {
-                tag.setText("Bị báo cáo");
-                tag.getStyleClass().setAll("label", "admin-evidence-tag", "tag-selected");
-            } else {
-                tag.setText("Ngữ cảnh");
-                tag.getStyleClass().setAll("label", "admin-evidence-tag", "tag-context");
+                metadata.getChildren().add(evidenceTag("Bị báo cáo", "tag-selected"));
+            }
+            if (item.context()) {
+                metadata.getChildren().add(evidenceTag("Ngữ cảnh", "tag-context"));
             }
 
-            header.getChildren().addAll(senderLabel, timeLabel, spacer, tag);
-
-            // Message text
-            Label content = new Label(msg.text());
-            content.setWrapText(true);
-            content.getStyleClass().add("admin-bubble-text");
-
-            bubbleCard.getChildren().addAll(header, content);
+            VBox bubbleCard = new VBox(4, senderLabel, metadata, wrappingLabel(msg.text(), "admin-bubble-text"));
+            bubbleCard.setMinWidth(0);
+            bubbleCard.setMinHeight(Region.USE_PREF_SIZE);
+            bubbleCard.getStyleClass().addAll("admin-chat-bubble-card",
+                    item.selected() ? "bubble-selected" : "bubble-context");
             chatPreviewList.getChildren().add(bubbleCard);
         }
+    }
+
+    private static Label wrappingLabel(String text, String style) {
+        Label label = new Label(text);
+        label.setWrapText(true);
+        label.setMinWidth(0);
+        label.setMinHeight(Region.USE_PREF_SIZE);
+        label.getStyleClass().add(style);
+        return label;
+    }
+
+    private static Label evidenceTag(String text, String kind) {
+        Label label = new Label(text);
+        label.getStyleClass().addAll("admin-evidence-tag", kind);
+        return label;
     }
 
     @FXML
     private void openLockConfirmation() {
         MockSpamReport report = reportsTable.getSelectionModel().getSelectedItem();
-        if (report == null || navigator == null) {
+        if (report == null || navigator == null || !preview.canLockReportedAccount(report)) {
             return;
         }
-        MockUser user = data.user(report.reportedUserId());
         Dialog<ButtonType> dialog = navigator.showModal(AdminViews.CONFIRM_ACTION,
-                new AdminViewInputs.ConfirmAction(AdminViewInputs.Action.LOCK_USER, user.id()));
+                new AdminViewInputs.ConfirmAction(AdminViewInputs.Action.LOCK_REPORTED_USER, report.reportedUserId()));
 
-        dialog.setOnHidden(event -> {
+        dialog.addEventHandler(DialogEvent.DIALOG_HIDDEN, event -> {
             ButtonType result = dialog.getResult();
-            if (result != null && result.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                userStatuses.put(user.id(), MockUser.Status.LOCKED);
-                showReportDetails(reportsTable.getSelectionModel().getSelectedItem());
+            if (result != null && result.getButtonData() == ButtonBar.ButtonData.OK_DONE
+                    && preview.lockReportedAccount(report)) {
+                MockSpamReport selected = reportsTable.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    updateLockAction(selected);
+                }
             }
         });
     }
@@ -390,23 +464,21 @@ public final class SpamController implements ViewController {
     @FXML
     private void markReviewed() {
         MockSpamReport report = reportsTable.getSelectionModel().getSelectedItem();
-        if (report == null) {
+        if (report == null || preview.status(report) != MockSpamReport.Status.PENDING) {
             return;
         }
-        String note = reviewNoteField.getText() == null ? "" : reviewNoteField.getText().trim();
+        String note = reviewNoteField.getText() == null ? "" : reviewNoteField.getText().strip();
         if (note.isEmpty()) {
-            reviewNoteError.setText("Vui lòng nhập ghi chú xử lý (bắt buộc theo DEC-10)");
+            reviewNoteError.setText("Nhập ghi chú trước khi đánh dấu đã xử lý");
             reviewNoteError.setVisible(true);
             reviewNoteError.setManaged(true);
             return;
         }
 
-        reportStatuses.put(report.id(), MockSpamReport.Status.REVIEWED);
-        reviewNotes.put(report.id(), note);
-        reviewedAtMap.put(report.id(), Instant.now());
-
+        preview.markReviewed(report, note);
+        applyFilter();
         reportsTable.refresh();
-        showReportDetails(report);
+        showReportDetails(reportsTable.getSelectionModel().getSelectedItem());
     }
 
     private static void updateStatusBadge(Label badge, MockSpamReport.Status status) {
@@ -434,6 +506,40 @@ public final class SpamController implements ViewController {
             var dot = new Region();
             dot.getStyleClass().add("admin-status-dot");
             badge.setGraphic(dot);
+        }
+    }
+
+    private static final class ReportIdentityCell extends TableCell<MockSpamReport, MockSpamReport> {
+        private final SpamModerationPreview preview;
+        private final Label handle = new Label();
+        private final Label reportId = new Label();
+        private final VBox layout = new VBox(2, handle, reportId);
+        private final Tooltip tooltip = new Tooltip();
+
+        private ReportIdentityCell(SpamModerationPreview preview) {
+            this.preview = preview;
+            handle.getStyleClass().add("admin-user-name");
+            reportId.getStyleClass().add("caption");
+            layout.setMinWidth(0);
+        }
+
+        @Override
+        protected void updateItem(MockSpamReport report, boolean empty) {
+            super.updateItem(report, empty);
+            if (empty || report == null) {
+                setGraphic(null);
+                setTooltip(null);
+                setAccessibleText(null);
+            } else {
+                MockUser target = preview.user(report.reportedUserId());
+                handle.setText("@" + target.username());
+                reportId.setText(report.id());
+                String identity = target.fullName() + " (@" + target.username() + ") · " + report.id();
+                tooltip.setText(identity);
+                setTooltip(tooltip);
+                setAccessibleText(identity);
+                setGraphic(layout);
+            }
         }
     }
 

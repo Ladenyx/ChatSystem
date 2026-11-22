@@ -19,6 +19,7 @@ public final class ConfirmActionController implements ViewController {
     @FXML private Label accountId;
     @FXML private Label consequences;
     @FXML private Label recipient;
+    @FXML private Label preservationNotice;
 
     @Override
     public void onEnter(ViewNavigator navigator, View view, ViewInput input) {
@@ -31,6 +32,9 @@ public final class ConfirmActionController implements ViewController {
         account.setText(user == null ? "Tài khoản chưa có trong dữ liệu mẫu" : "@" + user.username());
         accountId.setText("ID " + action.userId());
         consequences.setText(prompt.consequences());
+        boolean reportedAccount = action.action() == Action.LOCK_REPORTED_USER;
+        preservationNotice.setManaged(reportedAccount);
+        preservationNotice.setVisible(reportedAccount);
         if (action.action() == Action.RESET_PASSWORD && user != null) {
             recipient.setText("Email nhận · " + user.email());
             recipient.setManaged(true);
@@ -45,6 +49,8 @@ public final class ConfirmActionController implements ViewController {
         return switch (action) {
             case LOCK_USER -> new Prompt("Khóa tài khoản?", "Xác nhận khóa",
                     "Các phiên đang hoạt động sẽ bị thu hồi ngay khi khóa", true);
+            case LOCK_REPORTED_USER -> new Prompt("Xác nhận khóa tài khoản", "Xác nhận khóa",
+                    "Khóa tài khoản sẽ thu hồi ngay toàn bộ phiên đang hoạt động của tài khoản này.", true);
             case UNLOCK_USER -> new Prompt("Mở khóa tài khoản?", "Xác nhận mở khóa",
                     "Người dùng có thể đăng nhập lại khi đủ điều kiện xác thực", false);
             case SOFT_DELETE_USER -> new Prompt("Xóa mềm tài khoản?", "Xóa mềm 30 ngày",

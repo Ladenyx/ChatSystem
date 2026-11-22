@@ -21,6 +21,6 @@ public final class AdminViewInputs {
     }
 
     public enum Action {
-        LOCK_USER, UNLOCK_USER, SOFT_DELETE_USER, RESET_PASSWORD, RESTORE_USER
+        LOCK_USER, LOCK_REPORTED_USER, UNLOCK_USER, SOFT_DELETE_USER, RESET_PASSWORD, RESTORE_USER
     }
 }

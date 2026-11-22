@@ -31,12 +31,10 @@
     </fx:define>
 
     <VBox spacing="12" minWidth="360" styleClass="admin-user-directory,admin-spam-directory">
-        <HBox spacing="8" alignment="CENTER_LEFT">
-            <VBox spacing="2">
-                <Label text="Kiểm duyệt báo cáo spam" styleClass="section-title" wrapText="true"/>
-                <Label text="Hồ sơ gốc trong hạn lưu 180 ngày (DEC-10)" styleClass="caption"/>
-            </VBox>
-        </HBox>
+        <VBox spacing="4">
+            <Label text="Danh sách báo cáo" styleClass="section-title"/>
+            <Label text="Dữ liệu mẫu · Múi giờ Việt Nam" styleClass="caption"/>
+        </VBox>
 
         <GridPane hgap="8" vgap="4">
             <columnConstraints>
@@ -45,18 +43,24 @@
             </columnConstraints>
             <VBox spacing="2" GridPane.rowIndex="0" GridPane.columnIndex="0">
                 <Label text="Từ ngày" styleClass="caption"/>
-                <DatePicker fx:id="startDateFilter" id="startDateFilter" promptText="DD/MM/YYYY" maxWidth="Infinity"/>
+                <DatePicker fx:id="startDateFilter" id="startDateFilter" promptText="dd/mm/yyyy"
+                            accessibleText="Từ ngày, định dạng dd/mm/yyyy" maxWidth="Infinity"/>
             </VBox>
             <VBox spacing="2" GridPane.rowIndex="0" GridPane.columnIndex="1">
                 <Label text="Đến ngày" styleClass="caption"/>
-                <DatePicker fx:id="endDateFilter" id="endDateFilter" promptText="DD/MM/YYYY" maxWidth="Infinity"/>
+                <DatePicker fx:id="endDateFilter" id="endDateFilter" promptText="dd/mm/yyyy"
+                            accessibleText="Đến ngày, định dạng dd/mm/yyyy" maxWidth="Infinity"/>
             </VBox>
         </GridPane>
+        <Label fx:id="spamDateError" id="spamDateError" visible="false" minHeight="-Infinity"
+               wrapText="true" styleClass="caption,admin-error-text"/>
 
         <HBox spacing="8" alignment="CENTER_LEFT">
-            <TextField fx:id="reportedUserFilter" id="reportedUserFilter" promptText="Tìm theo tài khoản bị báo cáo..."
-                       minWidth="0" HBox.hgrow="ALWAYS" styleClass="admin-search-input"/>
-            <ComboBox fx:id="sortOrder" id="spamSortOrder" minWidth="160" prefWidth="180"/>
+            <TextField fx:id="reportedUserFilter" id="reportedUserFilter" promptText="Tìm theo username"
+                       accessibleText="Username của tài khoản bị báo cáo" minWidth="0" HBox.hgrow="ALWAYS"
+                       styleClass="admin-search-input"/>
+            <ComboBox fx:id="sortOrder" id="spamSortOrder" minWidth="128" prefWidth="136"
+                      accessibleText="Sắp xếp báo cáo"/>
         </HBox>
 
         <FlowPane hgap="4" vgap="4" prefWrapLength="332" maxWidth="-Infinity"
@@ -70,13 +74,13 @@
                    styleClass="admin-users-table,admin-directory-table" accessibleText="Danh sách báo cáo spam"
                    VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="reportedUserColumn" text="Tài khoản bị báo cáo" minWidth="140" prefWidth="180"
-                             reorderable="false"/>
-                <TableColumn fx:id="reporterColumn" text="Người báo cáo" minWidth="120" prefWidth="150"
+                <TableColumn fx:id="reportedUserColumn" text="Bị báo cáo" minWidth="128" prefWidth="164"
                              sortable="false" reorderable="false"/>
-                <TableColumn fx:id="reportedAtColumn" text="Thời gian" minWidth="135" prefWidth="140"
-                             styleClass="admin-date-column" reorderable="false"/>
-                <TableColumn fx:id="statusColumn" text="Trạng thái" minWidth="90" prefWidth="100"
+                <TableColumn fx:id="reporterColumn" text="Người báo cáo" minWidth="120" prefWidth="144"
+                             sortable="false" reorderable="false"/>
+                <TableColumn fx:id="reportedAtColumn" text="Thời gian" minWidth="92" prefWidth="108"
+                             styleClass="admin-date-column" sortable="false" reorderable="false"/>
+                <TableColumn fx:id="statusColumn" text="Trạng thái" minWidth="96" prefWidth="100"
                              sortable="false" reorderable="false"/>
             </columns>
             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
@@ -101,97 +105,106 @@
                    wrapText="true" textAlignment="CENTER"/>
         </VBox>
 
-        <ScrollPane fx:id="reportInspector" id="reportInspector" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+        <ScrollPane fx:id="reportInspector" id="reportInspector" fitToWidth="true" hbarPolicy="NEVER"
                     minWidth="0" visible="false" managed="false" focusTraversable="false"
                     styleClass="admin-user-inspector">
             <VBox spacing="16" minWidth="0" styleClass="admin-profile-content">
                 <VBox spacing="12" minWidth="0" styleClass="admin-profile-summary">
-                    <HBox alignment="CENTER_LEFT" spacing="12">
-                        <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
-                            <HBox alignment="CENTER_LEFT" spacing="8">
-                                <Label fx:id="reportIdTitle" id="reportIdTitle" styleClass="admin-profile-name" wrapText="true"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="reportStatusBadge" id="reportStatusBadge"/>
-                            </HBox>
-                            <Label fx:id="reportTimestamp" id="reportTimestamp" styleClass="caption,admin-account-meta" wrapText="true"/>
-                        </VBox>
-                    </HBox>
+                    <VBox spacing="4" minWidth="0">
+                        <Label fx:id="reportIdTitle" id="reportIdTitle" styleClass="admin-profile-name"
+                               minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                        <FlowPane hgap="8" vgap="4" alignment="CENTER_LEFT" minWidth="0">
+                            <Label fx:id="reportTimestamp" id="reportTimestamp"
+                                   styleClass="caption,admin-account-meta" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reportStatusBadge" id="reportStatusBadge"/>
+                        </FlowPane>
+                    </VBox>
 
-                    <GridPane hgap="12" vgap="8" minWidth="0" styleClass="admin-parties-grid">
+                    <GridPane hgap="8" minWidth="0">
                         <columnConstraints>
                             <ColumnConstraints percentWidth="50"/>
                             <ColumnConstraints percentWidth="50"/>
                         </columnConstraints>
-                        <VBox spacing="4" styleClass="admin-party-box">
-                            <Label text="Người gửi báo cáo" styleClass="caption,admin-party-label"/>
-                            <Label fx:id="reporterName" id="reporterName" styleClass="admin-party-name" wrapText="true"/>
-                            <Label fx:id="reporterUsername" id="reporterUsername" styleClass="caption"/>
-                            <Label fx:id="reporterId" id="reporterId" styleClass="caption,admin-account-meta"/>
+                        <VBox spacing="4" minWidth="0" styleClass="admin-party-box">
+                            <Label text="Người gửi báo cáo" styleClass="caption,admin-party-label"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reporterName" id="reporterName" styleClass="admin-party-name"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reporterUsername" id="reporterUsername" styleClass="caption"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reporterId" id="reporterId" styleClass="caption,admin-account-meta"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
                         </VBox>
-                        <VBox spacing="4" GridPane.columnIndex="1" styleClass="admin-party-box,party-reported">
-                            <HBox alignment="CENTER_LEFT" spacing="6">
-                                <Label text="Tài khoản bị báo cáo" styleClass="caption,admin-party-label"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="reportedUserStatus" id="reportedUserStatus"/>
-                            </HBox>
-                            <Label fx:id="reportedName" id="reportedName" styleClass="admin-party-name" wrapText="true"/>
-                            <Label fx:id="reportedUsername" id="reportedUsername" styleClass="caption"/>
-                            <Label fx:id="reportedId" id="reportedId" styleClass="caption,admin-account-meta"/>
+                        <VBox spacing="4" minWidth="0" GridPane.columnIndex="1" styleClass="admin-party-box">
+                            <Label text="Tài khoản bị báo cáo" styleClass="caption,admin-party-label"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reportedName" id="reportedName" styleClass="admin-party-name"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reportedUsername" id="reportedUsername" styleClass="caption"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reportedId" id="reportedId" styleClass="caption,admin-account-meta"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <Label fx:id="reportedUserStatus" id="reportedUserStatus"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
                         </VBox>
                     </GridPane>
 
                     <VBox spacing="4" styleClass="admin-reason-box">
-                        <Label text="Lý do báo cáo:" styleClass="caption,admin-party-label"/>
-                        <Label fx:id="reportReason" id="reportReason" wrapText="true" styleClass="admin-reason-text"/>
+                        <Label text="Lý do báo cáo" styleClass="caption,admin-party-label"/>
+                        <Label fx:id="reportReason" id="reportReason" minWidth="0" minHeight="-Infinity"
+                               wrapText="true" styleClass="admin-reason-text"/>
                     </VBox>
                 </VBox>
 
-                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="admin-notice-banner,admin-e2ee-banner">
-                    <FontIcon iconLiteral="fth-info" iconSize="16" styleClass="admin-notice-icon"/>
-                    <Label text="Lưu ý kiểm duyệt: Bản rõ bằng chứng do người báo cáo gửi kèm từ thiết bị cá nhân (tối đa 20 tin vi phạm &amp; 30 tin ngữ cảnh). Hệ thống không lưu khóa giải mã E2EE gốc (DEC-05, DEC-10)."
+                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="admin-spam-notice">
+                    <FontIcon iconLiteral="fth-info" iconSize="16"/>
+                    <Label text="Người báo cáo cung cấp bản rõ bằng chứng. Hệ thống không xác minh bản rõ bằng mật mã E2EE."
                            minWidth="0" maxWidth="Infinity" minHeight="-Infinity" wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
                 </HBox>
 
-                <VBox spacing="10" minWidth="0">
+                <VBox spacing="8" minWidth="0">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <FontIcon iconLiteral="fth-message-circle" iconSize="14" styleClass="admin-section-icon"/>
-                        <Label fx:id="evidenceCountLabel" id="evidenceCountLabel" text="Bằng chứng đính kèm" styleClass="admin-subsection-title"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <HBox spacing="6" alignment="CENTER_RIGHT">
-                            <Label text="Bị báo cáo" styleClass="admin-evidence-tag,tag-selected"/>
-                            <Label text="Ngữ cảnh" styleClass="admin-evidence-tag,tag-context"/>
-                        </HBox>
+                        <Label fx:id="evidenceCountLabel" id="evidenceCountLabel" text="Bằng chứng đính kèm"
+                               minWidth="0" minHeight="-Infinity" wrapText="true" styleClass="admin-subsection-title"/>
                     </HBox>
 
-                    <VBox fx:id="chatPreviewList" id="chatPreviewList" spacing="8" minWidth="0" styleClass="admin-chat-preview-container"/>
+                    <VBox fx:id="chatPreviewList" id="chatPreviewList" spacing="8" minWidth="0"/>
                 </VBox>
 
                 <VBox spacing="12" minWidth="0" styleClass="admin-moderation-actions">
                     <Label text="Thao tác kiểm duyệt" styleClass="admin-subsection-title"/>
-                    <Label text="Khóa tài khoản và đánh dấu đã xử lý là hai thao tác độc lập (DEC-10, BR-04)."
-                           styleClass="caption" wrapText="true"/>
+                    <Label text="Thao tác trên dữ liệu mẫu. Khóa tài khoản không đánh dấu báo cáo đã xử lý."
+                           styleClass="caption" minWidth="0" minHeight="-Infinity" wrapText="true"/>
 
                     <Button fx:id="lockAccountButton" id="lockReportedUser" text="Khóa tài khoản bị báo cáo"
-                            onAction="#openLockConfirmation" maxWidth="Infinity" styleClass="admin-profile-destructive">
+                            onAction="#openLockConfirmation" maxWidth="Infinity" styleClass="admin-spam-lock"
+                            wrapText="true" minWidth="0">
                         <graphic><FontIcon fx:id="lockIcon" iconLiteral="fth-lock" iconSize="16"/></graphic>
                     </Button>
+                    <Label fx:id="lockAccountNotice" id="lockAccountNotice" visible="false"
+                           styleClass="caption" minWidth="0" minHeight="-Infinity" wrapText="true"/>
 
                     <VBox fx:id="pendingReviewBox" spacing="8">
-                        <Label text="Đánh dấu đã xử lý (DEC-10):" styleClass="caption"/>
-                        <TextField fx:id="reviewNoteField" id="reviewNoteField" promptText="Ghi chú xử lý (bắt buộc)..."/>
-                        <Label fx:id="reviewNoteError" styleClass="caption,admin-error-text" visible="false" managed="false"/>
-                        <Button fx:id="markReviewedButton" id="markReviewed" text="Đánh dấu đã xử lý"
+                        <Label text="Ghi chú xử lý (bắt buộc)" styleClass="caption"/>
+                        <TextField fx:id="reviewNoteField" id="reviewNoteField" promptText="Nhập ghi chú"
+                                   accessibleText="Ghi chú xử lý bắt buộc" minWidth="0"/>
+                        <Label fx:id="reviewNoteError" styleClass="caption,admin-error-text" visible="false"
+                               managed="false" minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                        <Button id="markReviewed" text="Đánh dấu đã xử lý"
                                 onAction="#markReviewed" maxWidth="Infinity" styleClass="admin-user-primary">
                             <graphic><FontIcon iconLiteral="fth-check" iconSize="16"/></graphic>
                         </Button>
                     </VBox>
 
-                    <VBox fx:id="reviewedBox" spacing="6" styleClass="admin-reviewed-banner" visible="false" managed="false">
+                    <VBox fx:id="reviewedBox" spacing="4" styleClass="admin-reviewed-banner" visible="false" managed="false">
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="fth-check-circle" iconSize="16" styleClass="admin-reviewed-icon"/>
-                            <Label fx:id="reviewedHeader" id="reviewedHeader" styleClass="admin-reviewed-header" wrapText="true"/>
+                            <Label fx:id="reviewedHeader" id="reviewedHeader" styleClass="admin-reviewed-header"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
                         </HBox>
-                        <Label fx:id="reviewedNoteText" id="reviewedNoteText" styleClass="caption,admin-reviewed-note" wrapText="true"/>
+                        <Label fx:id="reviewedNoteText" id="reviewedNoteText" styleClass="caption"
+                               minWidth="0" minHeight="-Infinity" wrapText="true"/>
                     </VBox>
                 </VBox>
             </VBox>
