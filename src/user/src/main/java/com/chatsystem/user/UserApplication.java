@@ -4,6 +4,8 @@ import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
 import com.chatsystem.user.controller.UserShellController;
+import com.chatsystem.user.service.SpamReportService;
+import com.chatsystem.user.service.mock.MockSpamReportService;
 import java.io.IOException;
 import java.util.Objects;
 import javafx.application.Application;
@@ -12,6 +14,15 @@ import javafx.scene.Parent;
 import javafx.stage.Stage;
 
 public final class UserApplication extends Application {
+    private static SpamReportService spamReportService = new MockSpamReportService();
+
+    public static SpamReportService getSpamReportService() {
+        return spamReportService;
+    }
+
+    public static void setSpamReportService(SpamReportService service) {
+        spamReportService = Objects.requireNonNull(service);
+    }
     public static ViewNavigator createNavigator() throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(UserApplication.class.getResource(
                 "/com/chatsystem/user/fxml/shell.fxml")));
