@@ -7,6 +7,7 @@ import com.chatsystem.admin.navigation.AdminViewInputs;
 import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.mock.MockData;
+import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockLoginLog;
 import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
@@ -610,6 +611,197 @@ class AdminApplicationTest {
                 assertFalse(confirm.isDefaultButton());
                 confirm.fire();
                 assertEquals(ButtonBar.ButtonData.OK_DONE, dialog.getResult().getButtonData());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void groupsExplorerFiltersAndShowsMembers() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                ((Button) root.lookup("#totalGroupsCard")).fire();
+                root.applyCss();
+                root.layout();
+                assertEquals(AdminViews.GROUPS, navigator.currentViewProperty().get());
+
+                var data = MockData.create();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockGroup>) root.lookup("#groupsTable");
+                var inspector = (ScrollPane) root.lookup("#groupInspector");
+                var emptyInspector = (Node) root.lookup("#unselectedGroup");
+                var countLabel = (Label) root.lookup("#groupCount");
+                var nameFilter = (TextField) root.lookup("#groupNameFilter");
+                var clearFilter = (Hyperlink) root.lookup("#clearGroupFilter");
+
+                assertEquals(data.groups().size(), directory.getItems().size());
+                assertEquals(data.groups().size() + " nhóm chat", countLabel.getText());
+                assertFalse(inspector.isVisible());
+                assertTrue(emptyInspector.isVisible());
+
+                // Filter by name
+                nameFilter.setText("Java");
+                root.applyCss();
+                root.layout();
+                assertEquals(1, directory.getItems().size());
+                assertEquals("Nhóm đồ án Java", directory.getItems().getFirst().name());
+                assertEquals("1 nhóm chat", countLabel.getText());
+                assertTrue(clearFilter.isVisible());
+
+                // Clear filter
+                clearFilter.fire();
+                root.applyCss();
+                root.layout();
+                assertEquals(data.groups().size(), directory.getItems().size());
+
+                // Select first group
+                directory.getSelectionModel().select(0);
+                root.applyCss();
+                root.layout();
+                assertTrue(inspector.isVisible());
+                assertFalse(emptyInspector.isVisible());
+
+                var selectedGroup = directory.getSelectionModel().getSelectedItem();
+                assertEquals("Nhóm đồ án Java", ((Label) root.lookup("#groupTitle")).getText());
+                assertEquals("Mã nhóm: " + selectedGroup.id(), ((Label) root.lookup("#groupId")).getText());
+                assertEquals(selectedGroup.members().size() + " thành viên",
+                        ((Label) root.lookup("#groupMemberCountBadge")).getText());
+
+                var adminTable = (TableView<?>) root.lookup("#adminTable");
+                var membersTable = (TableView<?>) root.lookup("#membersTable");
+                assertEquals(2, adminTable.getItems().size());
+                assertEquals(6, membersTable.getItems().size());
+                assertEquals("2 quản trị viên", ((Label) root.lookup("#adminCount")).getText());
+                assertEquals("6 thành viên thường", ((Label) root.lookup("#memberCount")).getText());
+
+                capture(stage, "admin-groups-explorer-light");
+                navigator.themes().toggle();
+                capture(stage, "admin-groups-explorer-dark");
+                navigator.themes().toggle();
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void spamModerationInspectsEvidenceAndExecutesActions() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                ((Button) root.lookup("#pendingSpamCard")).fire();
+                root.applyCss();
+                root.layout();
+                assertEquals(AdminViews.SPAM, navigator.currentViewProperty().get());
+
+                var data = MockData.create();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockSpamReport>) root.lookup("#reportsTable");
+                var inspector = (ScrollPane) root.lookup("#reportInspector");
+                var emptyInspector = (Node) root.lookup("#unselectedReport");
+                var countLabel = (Label) root.lookup("#reportCount");
+                var clearFilters = (Hyperlink) root.lookup("#clearSpamFilters");
+
+                assertEquals(data.spamReports().size(), directory.getItems().size());
+                assertEquals(data.spamReports().size() + " báo cáo", countLabel.getText());
+                assertFalse(inspector.isVisible());
+                assertTrue(emptyInspector.isVisible());
+
+                // Filter by pending
+                var pendingToggle = (ToggleButton) root.lookup("#pendingReports");
+                pendingToggle.fire();
+                root.applyCss();
+                root.layout();
+                long expectedPending = data.spamReports().stream()
+                        .filter(r -> r.status() == MockSpamReport.Status.PENDING).count();
+                assertEquals(expectedPending, directory.getItems().size());
+
+                // Clear filter
+                clearFilters.fire();
+                root.applyCss();
+                root.layout();
+                assertEquals(data.spamReports().size(), directory.getItems().size());
+
+                // Select a pending report
+                int pendingIdx = IntStream.range(0, directory.getItems().size())
+                        .filter(i -> directory.getItems().get(i).status() == MockSpamReport.Status.PENDING)
+                        .findFirst().orElseThrow();
+                directory.getSelectionModel().select(pendingIdx);
+                root.applyCss();
+                root.layout();
+                assertTrue(inspector.isVisible());
+                assertFalse(emptyInspector.isVisible());
+
+                var selectedReport = directory.getSelectionModel().getSelectedItem();
+                assertEquals("Báo cáo #" + selectedReport.id(), ((Label) root.lookup("#reportIdTitle")).getText());
+                assertEquals("Chờ xử lý", ((Label) root.lookup("#reportStatusBadge")).getText());
+
+                var lockButton = (Button) root.lookup("#lockReportedUser");
+                assertTrue(lockButton.isVisible());
+                assertFalse(lockButton.isDisable());
+
+                var previewList = (javafx.scene.layout.VBox) root.lookup("#chatPreviewList");
+                assertEquals(selectedReport.evidence().size(), previewList.getChildren().size());
+
+                // Test lock reported user action
+                lockButton.fire();
+                var confirmDialog = ownedDialogPane(stage);
+                assertNotNull(confirmDialog);
+                var confirmSubmit = (Button) confirmDialog.lookup("#submitUserDialog");
+                confirmSubmit.fire();
+
+                root.applyCss();
+                root.layout();
+                assertEquals("Bị khóa", ((Label) root.lookup("#reportedUserStatus")).getText());
+                assertTrue(lockButton.isDisable());
+                assertEquals("Tài khoản đã bị khóa", lockButton.getText());
+
+                // Test mark reviewed action (DEC-10)
+                var markReviewedBtn = (Button) root.lookup("#markReviewed");
+                var noteInput = (TextField) root.lookup("#reviewNoteField");
+                var noteError = (Label) root.lookup("#reviewNoteError");
+
+                // Empty note validation
+                markReviewedBtn.fire();
+                root.applyCss();
+                root.layout();
+                assertTrue(noteError.isVisible());
+
+                // Non-empty note
+                noteInput.setText("Đã xác minh vi phạm theo bằng chứng đính kèm và khóa tài khoản.");
+                markReviewedBtn.fire();
+                root.applyCss();
+                root.layout();
+
+                assertEquals("Đã xử lý", ((Label) root.lookup("#reportStatusBadge")).getText());
+                var reviewedBanner = (Node) root.lookup(".admin-reviewed-banner");
+                assertNotNull(reviewedBanner);
+                assertTrue(reviewedBanner.isVisible());
+
+                capture(stage, "admin-spam-moderation-light");
+                navigator.themes().toggle();
+                capture(stage, "admin-spam-moderation-dark");
+                navigator.themes().toggle();
             } finally {
                 navigator.close();
                 stage.close();
