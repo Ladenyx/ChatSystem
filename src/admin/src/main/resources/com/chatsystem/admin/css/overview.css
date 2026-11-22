@@ -1,0 +1,217 @@
+.admin-overview {
+    -fx-background-color: -cs-canvas;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.admin-overview > .viewport {
+    -fx-background-color: -cs-canvas;
+}
+
+.admin-overview-content {
+    -fx-padding: 16px 24px;
+}
+
+.admin-kpi-strip,
+.admin-overview-panel {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12px;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 12px;
+    -fx-padding: 12px 16px;
+}
+
+.admin-kpi-strip {
+    -fx-padding: 4px;
+}
+
+.admin-kpi {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2px;
+    -fx-content-display: graphic-only;
+    -fx-cursor: hand;
+    -fx-min-height: 88px;
+    -fx-pref-height: 88px;
+    -fx-padding: 8px 16px;
+}
+
+.admin-kpi:hover,
+.admin-kpi:pressed {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-kpi:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-kpi-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-kpi .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-kpi:hover .ikonli-font-icon {
+    -fx-icon-color: -cs-brand-text;
+}
+
+.admin-kpi-value {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 28px;
+}
+
+.admin-online-indicator {
+    -fx-min-width: 8px;
+    -fx-max-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-height: 8px;
+    -fx-background-color: -cs-success;
+    -fx-background-radius: 4px;
+}
+
+.admin-overview-panel .hyperlink {
+    -fx-text-fill: -cs-muted;
+    -fx-font-size: 12px;
+    -fx-underline: false;
+    -fx-min-height: 28px;
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+}
+
+.admin-overview-panel .hyperlink:hover {
+    -fx-background-color: -cs-hover;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-overview-panel .hyperlink:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-overview .chart {
+    -fx-padding: 0;
+}
+
+.admin-overview .chart-content {
+    -fx-padding: 0;
+}
+
+.admin-overview .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.admin-trend-legend .label {
+    -fx-graphic-text-gap: 8px;
+}
+
+.admin-overview .chart-horizontal-grid-lines,
+.admin-overview .chart-horizontal-zero-line {
+    -fx-stroke: -cs-border;
+}
+
+.admin-overview .chart-horizontal-grid-lines {
+    -fx-opacity: 0.65;
+}
+
+.admin-overview .axis {
+    -fx-tick-label-fill: -cs-muted;
+    -fx-tick-label-font-size: 12px;
+}
+
+.admin-overview .chart-series-line {
+    -fx-stroke-width: 2.5px;
+    -fx-stroke-line-cap: round;
+}
+
+.admin-overview .default-color0.chart-series-line {
+    -fx-stroke: -cs-border-strong;
+    -fx-stroke-dash-array: 7 5;
+}
+
+.admin-overview .default-color1.chart-series-line {
+    -fx-stroke: -cs-focus;
+}
+
+.admin-overview .chart-line-symbol {
+    -fx-padding: 4px;
+    -fx-background-insets: 0, 2px;
+    -fx-background-radius: 8px;
+}
+
+.admin-overview .default-color0.chart-line-symbol {
+    -fx-background-color: -cs-border-strong, -cs-surface;
+    -fx-background-radius: 2px;
+}
+
+.admin-overview .default-color1.chart-line-symbol {
+    -fx-background-color: -cs-focus, -cs-surface;
+}
+
+.admin-summary-table {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-font-size: 12px;
+    -fx-padding: 0;
+}
+
+.admin-summary-table:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-summary-table .column-header-background {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.admin-summary-table .column-header,
+.admin-summary-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 32px;
+}
+
+.admin-summary-table .column-header .label {
+    -fx-alignment: center-left;
+    -fx-padding: 0 8px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-summary-table .table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 0 8px;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-summary-table .table-row-cell {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+}
+
+.admin-summary-table .table-row-cell:filled {
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 0 1px;
+}
+
+.admin-summary-table .table-row-cell:filled:hover {
+    -fx-background-color: -cs-surface-subtle;
+}
+
+.admin-summary-table .table-row-cell:filled:selected {
+    -fx-background-color: -cs-brand-subtle;
+}
+
+.admin-summary-table:focused .table-row-cell:filled:focused {
+    -fx-border-color: -cs-focus;
+    -fx-border-width: 1px;
+}

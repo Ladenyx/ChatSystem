@@ -29,8 +29,9 @@ public final class SearchResultCard extends Button {
         name.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(name, Priority.ALWAYS);
         var date = new Label(time == null ? "" : STAMP.format(time));
-        date.getStyleClass().add("chat-caption");
-        var header = new HBox(6, name, date);
+        date.getStyleClass().addAll("chat-caption", "chat-result-date");
+        date.setMinWidth(USE_PREF_SIZE);
+        var header = new HBox(8, name, date);
         header.setAlignment(Pos.TOP_LEFT);
         var body = new Label(excerpt.replaceAll("\\s+", " "));
         body.getStyleClass().add("chat-result-excerpt");

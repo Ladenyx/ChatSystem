@@ -2,20 +2,23 @@ package com.chatsystem.user.controller.messaging;
 
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.mock.model.MockMessage;
-import com.chatsystem.user.control.SearchResultCard;
-import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
-import com.chatsystem.user.controller.chat.ChatHistoryController;
+import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.ConversationCell;
+import com.chatsystem.user.control.SearchResultCard;
+import com.chatsystem.user.controller.chat.ChatHistoryController;
 import com.chatsystem.user.messaging.ConversationCatalog;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -61,7 +64,7 @@ public final class ConversationsController implements ViewController {
                 workspace.widthProperty()));
         emptyWorkspace.managedProperty().bind(emptyWorkspace.visibleProperty());
         selectedWorkspace.managedProperty().bind(selectedWorkspace.visibleProperty());
-        for (var node : java.util.List.of(createGroupButton, filterBar, conversationItems, globalSearch)) {
+        for (var node : List.of(createGroupButton, filterBar, conversationItems, globalSearch)) {
             node.managedProperty().bind(node.visibleProperty());
         }
 
@@ -138,23 +141,43 @@ public final class ConversationsController implements ViewController {
         if (!searching) {
             return;
         }
+        var conversationCards = new ArrayList<Node>();
+        var messageCards = new ArrayList<Node>();
         for (var conversation : catalog.conversations()) {
             if (conversation.title().toLowerCase(Locale.ROOT).contains(query)) {
                 var avatar = new ConversationAvatar();
                 avatar.show(conversation, catalog);
-                globalResults.getChildren().add(new SearchResultCard(conversation.title(),
+                conversationCards.add(new SearchResultCard(conversation.title(),
                         catalog.statusText(conversation), null, avatar, () -> openResult(conversation, null)));
             }
             catalog.messagesFor(conversation.id()).stream()
                     .filter(message -> message.state() != MockMessage.State.RECALLED)
                     .filter(message -> message.text().toLowerCase(Locale.ROOT).contains(query))
                     .limit(5)
-                    .forEach(message -> globalResults.getChildren().add(new SearchResultCard(conversation.title(),
+                    .forEach(message -> messageCards.add(new SearchResultCard(conversation.title(),
                             message.text(), message.sentAt(), null, () -> openResult(conversation, message.id()))));
         }
-        if (globalResults.getChildren().isEmpty()) {
-            globalResults.getChildren().add(new Label("Không có kết quả"));
+        if (!conversationCards.isEmpty()) {
+            globalResults.getChildren().add(resultHeading("Hội thoại", "globalConversationHeading"));
+            globalResults.getChildren().addAll(conversationCards);
         }
+        if (!messageCards.isEmpty()) {
+            globalResults.getChildren().add(resultHeading("Tin nhắn", "globalMessageHeading"));
+            globalResults.getChildren().addAll(messageCards);
+        }
+        if (globalResults.getChildren().isEmpty()) {
+            var empty = new Label("Không có kết quả");
+            empty.setId("globalSearchEmpty");
+            empty.getStyleClass().add("chat-caption");
+            globalResults.getChildren().add(empty);
+        }
+    }
+
+    private static Label resultHeading(String text, String id) {
+        var label = new Label(text);
+        label.setId(id);
+        label.getStyleClass().add("chat-section-label");
+        return label;
     }
 
     private void openResult(MockConversation conversation, String messageId) {

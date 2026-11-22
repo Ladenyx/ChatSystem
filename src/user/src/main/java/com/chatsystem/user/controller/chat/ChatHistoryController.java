@@ -31,6 +31,7 @@ public final class ChatHistoryController {
         this.conversation = conversation;
         conversationTitle.setText(conversation.title());
         conversationStatus.setText(catalog.statusText(conversation));
+        conversationStatus.setGraphic(ConversationAvatar.statusGraphic(conversation, catalog));
         conversationAvatar.show(conversation, catalog);
         if (changed) {
             draftField.clear();

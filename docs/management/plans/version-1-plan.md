@@ -90,8 +90,8 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
   - `A-DLG-02`: Modal Xác nhận Thao tác Quản trị.
 - [ ] **4.2. Cụm 2 — 3 Trang Dashboard Thống kê & Biểu đồ (`A-SCR-07` → `A-SCR-09`)**
   - `A-SCR-07`: Dashboard Đăng ký mới (`BarChart` 12 tháng theo năm chọn `A-13` ở trên + bảng lọc theo khoảng ngày/họ tên `A-12` ở dưới).
-  - `A-SCR-08`: Dashboard Hoạt động Người dùng (`BarChart` 12 tháng `A-16` ở trên + bảng chi tiết 3 chỉ số *Lượt mở app / Số người đã chat / Số nhóm đã chat* kèm bộ lọc toán tử `=`, `<`, `>` `A-15` ở dưới).
-  - `A-SCR-09`: Phân tích Mạng lưới Bạn bè (`A-14`: bảng hiển thị *Bạn trực tiếp* và *Tổng bạn mở rộng (tính cả bạn của bạn)* kèm bộ lọc toán tử `=`, `<`, `>`).
+  - `A-SCR-08`: Dashboard Hoạt động Người dùng (`LineChart` 12 tháng `A-16` ở trên + bảng chi tiết 3 chỉ số *Lượt mở app / Số người đã chat / Số nhóm đã chat* kèm bộ lọc toán tử `=`, `<`, `>` `A-15` ở dưới).
+  - `A-SCR-09`: Phân tích Mạng lưới Bạn bè (`BarChart` 12 tháng đếm lượt chấp nhận kết bạn theo năm + bảng mạng lưới hiện tại `A-14` so sánh *Bạn trực tiếp* với *Tổng bạn mở rộng*, kèm bộ lọc toán tử `=`, `<`, `>`).
 
 ---
 
