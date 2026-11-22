@@ -82,15 +82,15 @@ public final class MockSpamReportService implements SpamReportService {
                                            String reason, Set<String> selectedMessageIds) {
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException(
-                    "Cần ít nhất một tin hợp lệ của tài khoản đích và lý do có nội dung.");
+                    "Cần ít nhất một tin hợp lệ của tài khoản đích và lý do có nội dung");
         }
         if (selectedMessageIds == null || selectedMessageIds.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Cần ít nhất một tin hợp lệ của tài khoản đích và lý do có nội dung.");
+                    "Cần ít nhất một tin hợp lệ của tài khoản đích và lý do có nội dung");
         }
         if (selectedMessageIds.size() > MAX_SELECTED_MESSAGES) {
             throw new IllegalArgumentException(
-                    "Bạn đã chọn hơn 20 tin. Giảm số tin được báo cáo xuống tối đa 20 để tiếp tục.");
+                    "Bạn đã chọn hơn 20 tin — hãy giảm xuống tối đa 20 để tiếp tục");
         }
 
         List<ReportMessageItem> eligible = getEligibleMessages(conversationId, targetUserId);

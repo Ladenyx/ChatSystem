@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
@@ -21,13 +22,28 @@
             <Label fx:id="pickHeading" styleClass="chat-heading" wrapText="true" minWidth="0"
                    maxWidth="Infinity" HBox.hgrow="ALWAYS" text="Báo cáo spam"/>
             <Button fx:id="pickCloseButton" styleClass="chat-drawer-icon" accessibleText="Đóng hộp thoại">
-                <graphic><FontIcon iconLiteral="fth-x" iconSize="16"/></graphic>
+                <graphic><FontIcon iconLiteral="fth-x" iconSize="16" mouseTransparent="true"/></graphic>
                 <tooltip><Tooltip text="Đóng (Esc)"/></tooltip>
             </Button>
         </HBox>
 
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="chat-report-stepper">
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-active">
+                <Label text="01" styleClass="chat-report-step-num"/>
+                <Label text="Chọn tin" styleClass="chat-report-step-label"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-upcoming">
+                <Label text="02" styleClass="chat-report-step-num"/>
+                <Label text="Xem trước" styleClass="chat-report-step-label"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-upcoming">
+                <Label text="03" styleClass="chat-report-step-num"/>
+                <Label text="Tiếp nhận" styleClass="chat-report-step-label"/>
+            </HBox>
+        </HBox>
+
         <Label fx:id="pickDescription" styleClass="chat-caption" wrapText="true"
-               text="Chọn tài khoản vi phạm, lý do và các tin nhắn làm bằng chứng."/>
+               text="Chọn tài khoản, lý do và các tin nhắn làm bằng chứng"/>
 
         <VBox spacing="8" styleClass="chat-report-section">
             <Label text="Tài khoản bị báo cáo" styleClass="chat-report-field-title"/>
@@ -36,27 +52,43 @@
         </VBox>
 
         <VBox spacing="8" styleClass="chat-report-section">
-            <Label text="Lý do báo cáo" styleClass="chat-report-field-title"/>
-            <TextField fx:id="reasonField" id="reportReasonField" promptText="Nhập lý do báo cáo"
-                       styleClass="chat-report-text-field" text="Nội dung quảng bá lặp lại, gây làm phiền."
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Lý do báo cáo" styleClass="chat-report-field-title"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <Label text="Bắt buộc" styleClass="chat-report-field-meta"/>
+            </HBox>
+            <TextField fx:id="reasonField" id="reportReasonField"
+                       promptText="Mô tả ngắn hành vi spam hoặc làm phiền"
+                       styleClass="chat-report-text-field"
+                       text="Nội dung quảng bá lặp lại, gây làm phiền"
                        accessibleText="Lý do báo cáo"/>
         </VBox>
 
         <VBox spacing="8" styleClass="chat-report-section">
-            <Label fx:id="messagesSectionTitle" text="Tin nhắn trong đoạn chat" styleClass="chat-report-field-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label fx:id="messagesSectionTitle" text="Tin nhắn của tài khoản này"
+                       styleClass="chat-report-field-title" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="selectionCountLabel" id="reportSelectionCount"
+                       text="0 / 20 đã chọn" styleClass="chat-report-count-meta"/>
+            </HBox>
             <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-report-scroll">
                 <VBox fx:id="messagesList" minWidth="0" spacing="8"/>
             </ScrollPane>
         </VBox>
 
-        <Label fx:id="pickFeedback" id="reportPickFeedback" visible="false" managed="false"
-               styleClass="chat-warning-text" wrapText="true"/>
+        <HBox fx:id="pickFeedbackBox" visible="false" managed="false" minHeight="-Infinity"
+              alignment="CENTER_LEFT" spacing="8" styleClass="chat-report-error-banner">
+            <FontIcon iconLiteral="fth-alert-circle" iconSize="15"
+                      styleClass="chat-report-error-icon" mouseTransparent="true"/>
+            <Label fx:id="pickFeedback" id="reportPickFeedback" visible="false" managed="false"
+                   styleClass="chat-report-error-text" wrapText="true"
+                   minWidth="0" minHeight="-Infinity" prefWidth="420" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
 
-        <HBox spacing="8" styleClass="chat-report-actions">
-            <Button fx:id="pickCancelButton" id="reportPickCancel" text="Hủy"
-                    styleClass="chat-outline" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        <HBox alignment="CENTER_RIGHT" spacing="8" styleClass="chat-report-actions">
+            <Button fx:id="pickCancelButton" id="reportPickCancel" text="Hủy" styleClass="chat-outline"/>
             <Button fx:id="previewButton" id="reportPreviewSubmit" text="Xem trước bằng chứng"
-                    styleClass="chat-primary" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    styleClass="chat-primary"/>
         </HBox>
     </VBox>
 
@@ -64,60 +96,164 @@
     <VBox fx:id="previewPane" styleClass="chat-report-form" minWidth="0" spacing="16" visible="false" managed="false">
         <HBox alignment="CENTER_LEFT" spacing="8" styleClass="chat-report-header">
             <Label fx:id="previewHeading" styleClass="chat-heading" wrapText="true" minWidth="0"
-                   maxWidth="Infinity" HBox.hgrow="ALWAYS" text="Xem trước báo cáo"/>
+                   maxWidth="Infinity" HBox.hgrow="ALWAYS" text="Xem trước bằng chứng"/>
             <Button fx:id="previewCloseButton" styleClass="chat-drawer-icon" accessibleText="Đóng hộp thoại">
-                <graphic><FontIcon iconLiteral="fth-x" iconSize="16"/></graphic>
+                <graphic><FontIcon iconLiteral="fth-x" iconSize="16" mouseTransparent="true"/></graphic>
                 <tooltip><Tooltip text="Đóng (Esc)"/></tooltip>
             </Button>
         </HBox>
 
-        <VBox spacing="8" styleClass="chat-report-summary-box">
-            <Label fx:id="previewAccountAndReason" styleClass="chat-report-summary-text" wrapText="true"/>
-            <Label fx:id="previewStats" styleClass="chat-report-stats" wrapText="true"/>
-            <Label fx:id="previewConsentNotice" styleClass="chat-caption" wrapText="true"/>
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="chat-report-stepper">
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-done">
+                <Label text="01" styleClass="chat-report-step-num"/>
+                <Label text="Chọn tin" styleClass="chat-report-step-label"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-active">
+                <Label text="02" styleClass="chat-report-step-num"/>
+                <Label text="Xem trước" styleClass="chat-report-step-label"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-upcoming">
+                <Label text="03" styleClass="chat-report-step-num"/>
+                <Label text="Tiếp nhận" styleClass="chat-report-step-label"/>
+            </HBox>
+        </HBox>
+
+        <VBox spacing="12" styleClass="chat-report-summary-box">
+            <VBox spacing="6">
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Tài khoản" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="previewTargetValue" styleClass="chat-report-meta-value"
+                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Lý do" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="previewReasonValue" styleClass="chat-report-meta-value"
+                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
+            <Region styleClass="chat-report-divider"/>
+            <HBox spacing="8" styleClass="chat-report-metrics">
+                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label fx:id="metricSelectedValue" text="0" styleClass="chat-report-metric-value,is-accent"/>
+                    <Label text="Đã chọn" styleClass="chat-report-metric-label"/>
+                </VBox>
+                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label fx:id="metricContextValue" text="0" styleClass="chat-report-metric-value"/>
+                    <Label text="Ngữ cảnh" styleClass="chat-report-metric-label"/>
+                </VBox>
+                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label fx:id="metricIntersectionValue" text="0" styleClass="chat-report-metric-value"/>
+                    <Label text="Giao nhau" styleClass="chat-report-metric-label"/>
+                </VBox>
+                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                    <Label fx:id="metricTotalValue" text="0" styleClass="chat-report-metric-value"/>
+                    <Label text="Tổng gửi" styleClass="chat-report-metric-label"/>
+                </VBox>
+            </HBox>
         </VBox>
 
+        <HBox alignment="TOP_LEFT" spacing="8" minHeight="-Infinity" styleClass="chat-report-consent-banner">
+            <FontIcon iconLiteral="fth-shield" iconSize="15"
+                      styleClass="chat-report-consent-icon" mouseTransparent="true"/>
+            <Label fx:id="previewConsentNotice" styleClass="chat-report-consent-text"
+                   wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="420"
+                   maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+
         <VBox spacing="8" styleClass="chat-report-section">
-            <Label text="Bằng chứng gửi kèm (Selected ∪ Context)" styleClass="chat-report-field-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Bằng chứng gửi kèm" styleClass="chat-report-field-title"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="evidenceUnionMeta" text="Selected ∪ Context" styleClass="chat-report-count-meta"/>
+            </HBox>
             <ScrollPane fx:id="evidenceScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-report-scroll">
                 <VBox fx:id="evidenceList" minWidth="0" spacing="8"/>
             </ScrollPane>
         </VBox>
 
-        <HBox spacing="8" styleClass="chat-report-actions">
-            <Button fx:id="editPickButton" id="reportEditPick" text="Sửa lựa chọn"
-                    styleClass="chat-outline" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        <HBox alignment="CENTER_RIGHT" spacing="8" styleClass="chat-report-actions">
+            <Button fx:id="editPickButton" id="reportEditPick" text="Sửa lựa chọn" styleClass="chat-outline"/>
             <Button fx:id="submitReportButton" id="reportSubmitConfirmed" text="Chia sẻ và gửi báo cáo"
-                    styleClass="chat-primary" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    styleClass="chat-primary"/>
         </HBox>
     </VBox>
 
     <!-- STEP 3: ACCEPTED CONFIRMATION (U-DLG-04 / ACCEPTED) -->
     <VBox fx:id="acceptedPane" styleClass="chat-report-form" minWidth="0" spacing="16" visible="false" managed="false">
         <HBox alignment="CENTER_LEFT" spacing="8" styleClass="chat-report-header">
-            <FontIcon iconLiteral="fth-check-circle" iconSize="20" styleClass="chat-report-success-icon"/>
+            <FontIcon iconLiteral="fth-check-circle" iconSize="18"
+                      styleClass="chat-report-success-icon" mouseTransparent="true"/>
             <Label styleClass="chat-heading" wrapText="true" minWidth="0" maxWidth="Infinity"
                    HBox.hgrow="ALWAYS" text="Báo cáo đã được tiếp nhận"/>
             <Button fx:id="acceptedCloseTopButton" styleClass="chat-drawer-icon" accessibleText="Đóng hộp thoại">
-                <graphic><FontIcon iconLiteral="fth-x" iconSize="16"/></graphic>
+                <graphic><FontIcon iconLiteral="fth-x" iconSize="16" mouseTransparent="true"/></graphic>
                 <tooltip><Tooltip text="Đóng (Esc)"/></tooltip>
             </Button>
         </HBox>
 
-        <VBox spacing="8" styleClass="chat-report-summary-box">
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <Label fx:id="receiptIdLabel" styleClass="chat-report-field-title" maxWidth="Infinity"
-                       HBox.hgrow="ALWAYS" text="Mã hồ sơ: RPT-20261118-001"/>
-                <Label fx:id="receiptStatusLabel" text="PENDING" styleClass="chat-report-status-badge"/>
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="chat-report-stepper">
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-done">
+                <Label text="01" styleClass="chat-report-step-num"/>
+                <Label text="Chọn tin" styleClass="chat-report-step-label"/>
             </HBox>
-            <Label fx:id="receiptTimestampLabel" styleClass="chat-report-receipt-time" text="Tiếp nhận: 18/11/2026, 14:40"/>
-            <Label styleClass="chat-caption" wrapText="true"
-                   text="Hồ sơ đã được chuyển tới quản trị viên hệ thống để kiểm duyệt. Bằng chứng được bảo mật và chỉ phục vụ quá trình xử lý vi phạm."/>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-done">
+                <Label text="02" styleClass="chat-report-step-num"/>
+                <Label text="Xem trước" styleClass="chat-report-step-label"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="chat-report-step,is-active">
+                <Label text="03" styleClass="chat-report-step-num"/>
+                <Label text="Tiếp nhận" styleClass="chat-report-step-label"/>
+            </HBox>
+        </HBox>
+
+        <VBox spacing="12" styleClass="chat-report-summary-box">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="Mã hồ sơ kiểm duyệt" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptIdLabel" styleClass="chat-report-receipt-id" text="RPT-20261118-001"/>
+                </VBox>
+                <HBox alignment="CENTER" spacing="6" styleClass="chat-report-status-pill">
+                    <Region styleClass="chat-report-status-dot"/>
+                    <Label fx:id="receiptStatusLabel" text="PENDING" styleClass="chat-report-status-text"/>
+                </HBox>
+            </HBox>
+            <Region styleClass="chat-report-divider"/>
+            <VBox spacing="8">
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Hội thoại" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptConversationLabel" styleClass="chat-report-meta-value"
+                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="300"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Tài khoản bị báo cáo" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptTargetLabel" styleClass="chat-report-meta-value"
+                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="300"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Gói bằng chứng" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptEvidenceLabel" styleClass="chat-report-receipt-mono"
+                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="300"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="12" alignment="BASELINE_LEFT">
+                    <Label text="Thời điểm tiếp nhận" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptTimestampLabel" styleClass="chat-report-receipt-mono"
+                           text="18/11/2026, 14:40" minWidth="0" minHeight="-Infinity" prefWidth="300"
+                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
         </VBox>
 
-        <HBox spacing="8" styleClass="chat-report-actions">
+        <Label styleClass="chat-caption" wrapText="true"
+               text="Hồ sơ đã được chuyển tới quản trị viên hệ thống để kiểm duyệt. Hệ thống không tự khóa tài khoản hoặc xóa tin nhắn trước khi quản trị viên xử lý."/>
+
+        <HBox alignment="CENTER_RIGHT" spacing="8" styleClass="chat-report-actions">
             <Button fx:id="acceptedDoneButton" id="reportAcceptedDone" text="Hoàn tất"
-                    styleClass="chat-primary" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    styleClass="chat-primary"/>
         </HBox>
     </VBox>
 

@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.geometry.Orientation;
@@ -565,18 +566,36 @@ class UserApplicationTest {
                 Window modal = reportModalWindow(stageRef.get());
                 var modalRoot = modal.getScene().getRoot();
                 assertFalse(modalRoot.lookupAll(".chat-report-excerpt-card").isEmpty());
+                assertEquals("1 / 20 đã chọn", ((Label) modalRoot.lookup("#reportSelectionCount")).getText());
                 capture(modal, "spam-report-pick-light");
 
                 var reason = (TextField) modalRoot.lookup("#reportReasonField");
                 reason.clear();
                 ((Button) modalRoot.lookup("#reportPreviewSubmit")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                var modalRoot = modal.getScene().getRoot();
+                var reason = (TextField) modalRoot.lookup("#reportReasonField");
+                PseudoClass invalid = PseudoClass.getPseudoClass("invalid");
                 assertTrue(modalRoot.lookup("#reportPickFeedback").isVisible());
+                assertTrue(reason.getPseudoClassStates().contains(invalid));
+                capture(modal, "spam-report-pick-error-light");
 
                 reason.setText("Nội dung quảng bá lặp lại trong nhóm.");
+                assertFalse(reason.getPseudoClassStates().contains(invalid));
                 ((Button) modalRoot.lookup("#reportPreviewSubmit")).fire();
                 navRef.get().themes().toggle();
                 modalRoot.applyCss();
                 modalRoot.layout();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                var modalRoot = modal.getScene().getRoot();
                 assertTrue(modalRoot.lookup("#reportSubmitConfirmed").isVisible());
                 capture(modal, "spam-report-preview-dark");
 
