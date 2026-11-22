@@ -3,9 +3,7 @@ package com.chatsystem.admin.controller.groups;
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockUser;
-import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
-import com.chatsystem.desktop.navigation.ViewNavigator;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +14,6 @@ import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -43,7 +40,7 @@ public final class GroupsController implements ViewController {
     @FXML private ComboBox<String> sortOrder;
     @FXML private TableView<MockGroup> groupsTable;
     @FXML private TableColumn<MockGroup, MockGroup> groupNameColumn;
-    @FXML private TableColumn<MockGroup, String> memberCountColumn;
+    @FXML private TableColumn<MockGroup, Integer> memberCountColumn;
     @FXML private TableColumn<MockGroup, Instant> groupCreatedColumn;
     @FXML private Label groupCount;
     @FXML private Hyperlink clearFilter;
@@ -67,13 +64,12 @@ public final class GroupsController implements ViewController {
     @FXML private TableColumn<GroupMemberRow, String> memberRoleColumn;
 
     private final MockData data = MockData.create();
-    private final ObservableList<MockGroup> allGroups = FXCollections.observableArrayList();
-    private final FilteredList<MockGroup> filteredGroups = new FilteredList<>(allGroups);
-    private ViewNavigator navigator;
+    private final FilteredList<MockGroup> filteredGroups =
+            new FilteredList<>(FXCollections.observableArrayList(data.groups()));
+    private final SortedList<MockGroup> sortedGroups = new SortedList<>(filteredGroups);
 
     @FXML
     private void initialize() {
-        allGroups.setAll(data.groups());
         configureTables();
         configureSortOptions();
 
@@ -91,28 +87,23 @@ public final class GroupsController implements ViewController {
         applyFilter();
     }
 
-    @Override
-    public void onEnter(ViewNavigator navigator, View view) {
-        this.navigator = navigator;
-    }
-
     private void configureSortOptions() {
         sortOrder.getItems().setAll(
-                "Ngày tạo (Mới nhất)",
-                "Ngày tạo (Cũ nhất)",
-                "Tên nhóm (A → Z)",
-                "Tên nhóm (Z → A)"
+                "Mới tạo trước",
+                "Cũ nhất trước",
+                "Tên nhóm A–Z",
+                "Tên nhóm Z–A"
         );
         sortOrder.getSelectionModel().select(0);
     }
 
     private void configureTables() {
-        // Master groups table
+        groupsTable.setItems(sortedGroups);
         groupNameColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
         groupNameColumn.setCellFactory(col -> new GroupNameCell());
 
         memberCountColumn.setCellValueFactory(cell ->
-                new ReadOnlyObjectWrapper<>(cell.getValue().members().size() + " thành viên"));
+                new ReadOnlyObjectWrapper<>(cell.getValue().members().size()));
 
         groupCreatedColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().createdAt()));
         groupCreatedColumn.setCellFactory(col -> new TableCell<>() {
@@ -127,27 +118,21 @@ public final class GroupsController implements ViewController {
             }
         });
 
-        // Admin members table
         adminIdentityColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
         adminIdentityColumn.setCellFactory(col -> new MemberIdentityCell());
-        adminRoleColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>("Trưởng nhóm"));
-        adminRoleColumn.setCellFactory(col -> new RoleBadgeCell("Admin nhóm"));
+        adminRoleColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>("Admin nhóm"));
+        adminRoleColumn.setCellFactory(col -> new RoleBadgeCell("badge-admin"));
 
-        // Regular members table
         memberIdentityColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue()));
         memberIdentityColumn.setCellFactory(col -> new MemberIdentityCell());
         memberRoleColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>("Thành viên"));
-        memberRoleColumn.setCellFactory(col -> new RoleBadgeCell("Thành viên"));
+        memberRoleColumn.setCellFactory(col -> new RoleBadgeCell("badge-member"));
     }
 
     private void applyFilter() {
+        MockGroup selected = groupsTable.getSelectionModel().getSelectedItem();
         String query = nameFilter.getText() == null ? "" : nameFilter.getText().trim().toLowerCase(Locale.ROOT);
-        filteredGroups.setPredicate(group -> {
-            if (query.isEmpty()) {
-                return true;
-            }
-            return group.name().toLowerCase(Locale.ROOT).contains(query);
-        });
+        filteredGroups.setPredicate(group -> group.name().toLowerCase(Locale.ROOT).contains(query));
 
         Comparator<MockGroup> comparator = switch (sortOrder.getSelectionModel().getSelectedIndex()) {
             case 1 -> Comparator.comparing(MockGroup::createdAt);
@@ -156,12 +141,12 @@ public final class GroupsController implements ViewController {
             default -> Comparator.comparing(MockGroup::createdAt).reversed();
         };
 
-        SortedList<MockGroup> sorted = new SortedList<>(filteredGroups, comparator);
-        groupsTable.setItems(sorted);
+        sortedGroups.setComparator(comparator.thenComparing(MockGroup::id));
 
-        MockGroup selected = groupsTable.getSelectionModel().getSelectedItem();
-        if (selected != null && !sorted.contains(selected)) {
+        if (selected == null || !sortedGroups.contains(selected)) {
             groupsTable.getSelectionModel().clearSelection();
+        } else {
+            groupsTable.getSelectionModel().select(selected);
         }
     }
 
@@ -205,15 +190,23 @@ public final class GroupsController implements ViewController {
         admins.sort((a, b) -> VIETNAMESE_COLLATOR.compare(a.fullName(), b.fullName()));
         regulars.sort((a, b) -> VIETNAMESE_COLLATOR.compare(a.fullName(), b.fullName()));
 
-        adminTable.getItems().setAll(admins);
-        adminTable.setPrefHeight(36 + adminTable.getFixedCellSize() * Math.max(1, admins.size()));
+        setRoleRows(adminTable, admins);
         adminCount.setText(admins.size() + " quản trị viên");
 
-        membersTable.getItems().setAll(regulars);
-        membersTable.setPrefHeight(36 + membersTable.getFixedCellSize() * Math.max(1, regulars.size()));
+        setRoleRows(membersTable, regulars);
         memberCount.setText(regulars.size() + " thành viên thường");
 
         groupInspector.setVvalue(0);
+    }
+
+    private static void setRoleRows(TableView<GroupMemberRow> table, List<GroupMemberRow> rows) {
+        table.getItems().setAll(rows);
+        // Size for all mock rows and let the inspector, not the two tables, scroll.
+        double height = 36 + table.getFixedCellSize() * Math.max(1, rows.size());
+        table.setMinHeight(height);
+        table.setPrefHeight(height);
+        table.setMaxHeight(height);
+        table.getSelectionModel().clearSelection();
     }
 
     private static String extractInitials(String name) {
@@ -289,11 +282,8 @@ public final class GroupsController implements ViewController {
 
     private static final class RoleBadgeCell extends TableCell<GroupMemberRow, String> {
         private final Label badge = new Label();
-        private final String defaultText;
-
-        private RoleBadgeCell(String defaultText) {
-            this.defaultText = defaultText;
-            badge.getStyleClass().add("admin-role-badge");
+        private RoleBadgeCell(String roleStyle) {
+            badge.getStyleClass().addAll("admin-role-badge", roleStyle);
         }
 
         @Override
@@ -303,9 +293,6 @@ public final class GroupsController implements ViewController {
                 setGraphic(null);
             } else {
                 badge.setText(roleText);
-                boolean isAdmin = "Admin nhóm".equals(defaultText) || "Trưởng nhóm".equals(roleText);
-                badge.getStyleClass().removeAll("badge-admin", "badge-member");
-                badge.getStyleClass().add(isAdmin ? "badge-admin" : "badge-member");
                 setGraphic(badge);
             }
         }

@@ -15,22 +15,16 @@
 }
 
 .admin-group-avatar {
-    -fx-background-color: ladder(-cs-surface, rgba(59, 130, 246, 0.2) 49%, rgba(59, 130, 246, 0.12) 50%);
+    -fx-background-color: -cs-brand-subtle;
     -fx-text-fill: -cs-brand-text;
-    -fx-font-weight: 700;
-    -fx-font-size: 15px;
-    -fx-background-radius: 10px;
+    -fx-font-weight: 600;
+    -fx-font-size: 16px;
+    -fx-background-radius: 8px;
 }
 
-.admin-count-badge {
-    -fx-background-color: -cs-surface;
-    -fx-border-color: -cs-border;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
-    -fx-padding: 2px 8px;
-    -fx-font-size: 11px;
-    -fx-text-fill: -cs-text;
-    -fx-font-weight: 600;
+.admin-groups-directory .table-cell.admin-group-size-column,
+.admin-groups-directory .column-header.admin-group-size-column .label {
+    -fx-alignment: CENTER_RIGHT;
 }
 
 .admin-notice-banner {
@@ -38,16 +32,11 @@
     -fx-border-color: -cs-border;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-    -fx-padding: 10px 12px;
-}
-
-.admin-e2ee-banner {
-    -fx-background-color: ladder(-cs-surface, rgba(59, 130, 246, 0.08) 49%, rgba(59, 130, 246, 0.05) 50%);
-    -fx-border-color: ladder(-cs-surface, rgba(59, 130, 246, 0.25) 49%, rgba(59, 130, 246, 0.18) 50%);
+    -fx-padding: 8px 12px;
 }
 
 .admin-notice-icon {
-    -fx-icon-color: -cs-brand-text;
+    -fx-icon-color: -cs-muted;
 }
 
 .admin-subsection-title {
@@ -74,7 +63,7 @@
 }
 
 .admin-role-badge.badge-admin {
-    -fx-background-color: ladder(-cs-surface, rgba(59, 130, 246, 0.2) 49%, rgba(59, 130, 246, 0.12) 50%);
+    -fx-background-color: -cs-brand-subtle;
     -fx-text-fill: -cs-brand-text;
 }
 
