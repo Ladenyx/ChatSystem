@@ -2,26 +2,57 @@ package com.chatsystem.admin;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import atlantafx.base.controls.Popover;
+import com.chatsystem.admin.navigation.AdminViewInputs;
 import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
+import com.chatsystem.desktop.mock.MockData;
+import com.chatsystem.desktop.mock.model.MockLoginLog;
+import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
+import com.chatsystem.desktop.mock.model.MockSpamReport;
+import com.chatsystem.desktop.mock.model.MockUser;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
-import javafx.scene.Scene;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,11 +87,65 @@ class AdminApplicationTest {
     }
 
     @Test
+    void signInOpensOverviewWithoutKeepingThePreviewPassword() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                assertEquals(AdminViews.SIGN_IN, navigator.currentViewProperty().get());
+                var sidebar = root.lookup("#workspaceSidebar");
+                var toolbar = root.lookup("#workspaceToolbar");
+                assertFalse(sidebar.isVisible() || sidebar.isManaged());
+                assertFalse(toolbar.isVisible() || toolbar.isManaged());
+
+                var username = (TextField) root.lookup("#signInUsername");
+                var password = (PasswordField) root.lookup("#signInPassword");
+                var submit = (Button) root.lookup("#signInSubmit");
+                assertTrue(submit.isDefaultButton());
+                assertTrue(submit.isDisabled());
+                root.applyCss();
+                root.layout();
+                var form = root.lookup("#signInForm");
+                var bounds = form.localToScene(form.getBoundsInLocal());
+                assertEquals(512, (bounds.getMinX() + bounds.getMaxX()) / 2, 1);
+                assertTrue(bounds.getMaxY() < stage.getScene().getHeight());
+                username.requestFocus();
+                capture(stage, "admin-sign-in-light");
+
+                password.setText("example");
+                assertTrue(submit.isDisabled());
+                username.setText("quantri");
+                assertFalse(submit.isDisabled());
+                navigator.themes().toggle();
+                submit.requestFocus();
+                capture(stage, "admin-sign-in-dark");
+
+                submit.fire();
+                assertEquals(AdminViews.OVERVIEW, navigator.currentViewProperty().get());
+                assertTrue(sidebar.isVisible() && sidebar.isManaged());
+                assertTrue(toolbar.isVisible() && toolbar.isManaged());
+                assertTrue(password.getText().isEmpty());
+                assertFalse(navigator.goBack());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
     void sidebarOpensEveryRouteAndKeepsItsSelectionWhenGoingBack() throws Exception {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
-            DesktopWindow.show(stage, "ChatSystem · Admin App", navigator);
+            navigator.reset(AdminViews.OVERVIEW);
+            DesktopWindow.show(stage, AdminApplication.WINDOW_TITLE, navigator);
             try {
                 var root = stage.getScene().getRoot();
                 capture(stage, "admin-light");
@@ -72,14 +157,170 @@ class AdminApplicationTest {
                 }
                 ((Button) root.lookup("#goBack")).fire();
                 assertTrue(((ToggleButton) root.lookup("#nav-A-SCR-08")).isSelected());
-                ((Button) root.lookup("#toggleTheme")).fire();
+                ((Button) root.lookup("#displayOptions")).fire();
+                Popover display = Window.getWindows().stream()
+                        .filter(Popover.class::isInstance).map(Popover.class::cast)
+                        .findFirst().orElseThrow();
+                ((ToggleButton) display.getContentNode().lookup("#darkTheme")).fire();
                 assertTrue(root.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("dark")));
+                ((CheckBox) display.getContentNode().lookup("#reducedMotion")).fire();
+                assertTrue(navigator.themes().reducedMotionProperty().get());
+                display.hide();
+                navigator.reset(AdminViews.OVERVIEW);
                 capture(stage, "admin-dark");
-                ((Button) root.lookup("#openUserDialog")).fire();
-                assertTrue(javafx.stage.Window.getWindows().size() > 1);
-                ((ToggleButton) root.lookup("#nav-A-SCR-02")).fire();
-                assertEquals(1, javafx.stage.Window.getWindows().size());
+                navigator.showModal(AdminViews.EDIT_USER);
+                assertTrue(Window.getWindows().size() > 1);
+                ((ToggleButton) root.lookup("#nav-A-SCR-03")).fire();
+                assertEquals(1, Window.getWindows().size());
             } finally {
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void overviewShowsTheFixtureSnapshotAndOpensDetailRoutes() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
+            stage.setScene(new Scene(navigator.getRoot(), 1728, 1000));
+            stage.show();
+            try {
+                var root = navigator.getRoot();
+                root.applyCss();
+                root.layout();
+
+                MockData data = MockData.create();
+                var online = data.users().stream().filter(user -> user.presence() == MockUser.Presence.ONLINE).count();
+                var pending = data.spamReports().stream()
+                        .filter(report -> report.status() == MockSpamReport.Status.PENDING).count();
+                assertTrue(((Button) root.lookup("#totalUsersCard")).getHeight() <= 120,
+                        "KPI cards fit in the first row");
+                assertEquals(Integer.toString(data.users().size()), ((Label) root.lookup("#totalUsersValue")).getText());
+                assertEquals(Long.toString(online), ((Label) root.lookup("#onlineUsersValue")).getText());
+                assertEquals(Integer.toString(data.groups().size()), ((Label) root.lookup("#totalGroupsValue")).getText());
+                assertEquals(Long.toString(pending), ((Label) root.lookup("#pendingSpamValue")).getText());
+
+                var trend = (LineChart<?, ?>) root.lookup("#monthlyTrend");
+                assertTrue(trend.getHeight() >= 280, "The trend uses the extra height of a larger window");
+                assertEquals(2, trend.getData().size());
+                for (var series : trend.getData()) {
+                    assertEquals(12, series.getData().size());
+                    assertEquals("T1", series.getData().getFirst().getXValue());
+                    assertEquals("T12", series.getData().getLast().getXValue());
+                }
+                var monthly = data.monthlyStatistics(data.snapshotDate().getYear());
+                assertEquals(monthly.stream().map(MockMonthlyStatistics::registrations).toList(),
+                        trend.getData().get(0).getData().stream().map(XYChart.Data::getYValue).toList());
+                assertEquals(monthly.stream().map(MockMonthlyStatistics::activeUsers).toList(),
+                        trend.getData().get(1).getData().stream().map(XYChart.Data::getYValue).toList());
+
+                var expectedReports = data.spamReports().stream()
+                        .sorted(Comparator.comparing(MockSpamReport::createdAt).reversed()).limit(3).toList();
+                var expectedLogins = data.loginLogs().stream()
+                        .sorted(Comparator.comparing(MockLoginLog::loggedInAt).reversed()).limit(3).toList();
+                assertEquals(expectedReports, ((TableView<?>) root.lookup("#recentReports")).getItems());
+                assertEquals(expectedLogins, ((TableView<?>) root.lookup("#recentLogins")).getItems());
+
+                navigator.themes().toggle();
+                capture(stage, "admin-wide-dark");
+
+                var shortcuts = Map.of(
+                        "#totalUsersCard", AdminViews.USERS, "#onlineUsersCard", AdminViews.USERS,
+                        "#totalGroupsCard", AdminViews.GROUPS, "#pendingSpamCard", AdminViews.SPAM,
+                        "#registrationsLink", AdminViews.REGISTRATIONS, "#activityLink", AdminViews.ACTIVITY,
+                        "#allReportsLink", AdminViews.SPAM, "#allLoginsLink", AdminViews.LOGIN_LOGS);
+                for (var shortcut : shortcuts.entrySet()) {
+                    ((ButtonBase) root.lookup(shortcut.getKey())).fire();
+                    assertEquals(shortcut.getValue(), navigator.currentViewProperty().get(), shortcut.getKey());
+                    navigator.goBack();
+                    assertEquals(AdminViews.OVERVIEW, navigator.currentViewProperty().get());
+                }
+            } finally {
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void analyticsSelectMonthsAndFilterTheirOwnTables() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                var data = MockData.create();
+                navigator.navigate(AdminViews.REGISTRATIONS);
+                root.applyCss();
+                root.layout();
+                var registrations = (TableView<?>) root.lookup("#registrationRows");
+                assertEquals(12, ((BarChart<?, ?>) root.lookup("#monthlyChart")).getData().getFirst().getData().size());
+                capture(stage, "admin-analytics-registrations-light");
+                var year = (ComboBox<?>) root.lookup("#chartYear");
+                year.getSelectionModel().select(year.getItems().indexOf(2025));
+                ((Button) root.lookup("#month-5")).fire();
+                var from = (DatePicker) root.lookup("#fromDate");
+                var to = (DatePicker) root.lookup("#toDate");
+                assertEquals(LocalDate.of(2025, 5, 1), from.getValue());
+                assertEquals(LocalDate.of(2025, 5, 31), to.getValue());
+                assertEquals(data.monthlyStatistics(2025).get(4).registrations(), registrations.getItems().size());
+                assertEquals("Bảng đang lọc tháng 5/2025", ((Label) root.lookup("#monthHint")).getText());
+                ((Button) root.lookup("#month-5")).fire();
+                assertEquals(data.activityFrom(), from.getValue());
+                assertEquals("Chọn tháng để lọc bảng", ((Label) root.lookup("#monthHint")).getText());
+                from.setValue(to.getValue().plusDays(1));
+                assertTrue(root.lookup("#filterError").isVisible());
+                assertTrue(registrations.getItems().isEmpty());
+                ((Button) root.lookup("#clearAnalyticsFilters")).fire();
+                assertFalse(root.lookup("#filterError").isVisible());
+
+                navigator.navigate(AdminViews.ACTIVITY);
+                root.applyCss();
+                root.layout();
+                var trend = (LineChart<?, ?>) root.lookup("#monthlyChart");
+                assertEquals(12, trend.getData().stream().mapToInt(series -> series.getData().size()).sum());
+                assertEquals(0, trend.getData().getLast().getData().getLast().getYValue());
+                ((Button) root.lookup("#month-11")).fire();
+                var activity = (TableView<?>) root.lookup("#activityRows");
+                assertEquals(data.monthlyStatistics(2026).get(10).activeUsers(), IntStream.range(0, activity.getItems().size())
+                        .filter(index -> (Integer) activity.getColumns().get(3).getCellData(index) > 0).count());
+                ((ComboBox<?>) root.lookup("#activityMetric")).getSelectionModel().select(2);
+                ((ToggleButton) root.lookup("#greaterThan")).fire();
+                ((TextField) root.lookup("#threshold")).setText("0");
+                assertFalse(activity.getItems().isEmpty());
+                assertTrue(IntStream.range(0, activity.getItems().size())
+                        .allMatch(index -> (Integer) activity.getColumns().get(5).getCellData(index) > 0));
+                navigator.themes().toggle();
+                capture(stage, "admin-analytics-activity-dark");
+
+                navigator.navigate(AdminViews.FRIEND_NETWORK);
+                root.applyCss();
+                root.layout();
+                var network = (TableView<?>) root.lookup("#networkRows");
+                var snapshot = List.copyOf(network.getItems());
+                assertEquals(18, snapshot.size());
+                var networkYear = (ComboBox<?>) root.lookup("#chartYear");
+                networkYear.getSelectionModel().select(networkYear.getItems().indexOf(2025));
+                assertEquals(snapshot, network.getItems(), "Changing the chart year leaves the current network intact");
+                ((TextField) root.lookup("#threshold")).setText("0");
+                assertTrue(network.getItems().size() > 0 && network.getItems().size() < snapshot.size());
+                assertTrue(IntStream.range(0, network.getItems().size())
+                        .allMatch(index -> (Integer) network.getColumns().get(3).getCellData(index) == 0));
+                ((Button) root.lookup("#clearAnalyticsFilters")).fire();
+                networkYear.getSelectionModel().select(networkYear.getItems().indexOf(2026));
+                navigator.themes().toggle();
+                capture(stage, "admin-analytics-friends-light");
+            } finally {
+                navigator.close();
                 stage.close();
             }
             return null;
@@ -108,6 +349,7 @@ class AdminApplicationTest {
         FutureTask<Void> task = new FutureTask<>(() -> {
             Stage stage = new Stage();
             var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
             try {
                 stage.setScene(new Scene(navigator.getRoot(), 1024, 640));
                 stage.show();
@@ -117,8 +359,25 @@ class AdminApplicationTest {
                 assertEquals(640, stage.getScene().getHeight());
                 var lastNavigation = navigator.getRoot().lookup("#nav-A-SCR-09");
                 assertTrue(lastNavigation.localToScene(lastNavigation.getBoundsInLocal()).getMaxY() < 640);
+                var overview = (ScrollPane) navigator.getRoot().lookup(".admin-overview");
+                assertTrue(overview.getContent().getLayoutBounds().getWidth()
+                        <= overview.getViewportBounds().getWidth() + 1);
+                var activityLegend = overview.lookup("#activityLegend");
+                assertTrue(activityLegend.isVisible() && activityLegend.getBoundsInParent().getWidth() > 0);
                 capture(stage, "admin-small");
-                ((Button) navigator.getRoot().lookup("#openMockData")).fire();
+
+                ((ToggleButton) navigator.getRoot().lookup("#nav-A-SCR-06")).fire();
+                navigator.getRoot().applyCss();
+                navigator.getRoot().layout();
+                var timeline = (TableView<?>) navigator.getRoot().lookup("#loginEvents");
+                var bounds = timeline.localToScene(timeline.getBoundsInLocal());
+                assertTrue(bounds.getMaxX() <= 1024 && bounds.getMaxY() <= 640);
+                assertTrue(timeline.getVisibleLeafColumns().stream().mapToDouble(TableColumn::getWidth).sum()
+                        <= timeline.getWidth());
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-compact");
+
+                navigator.navigate(MockDataPreviewController.VIEW);
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 navigator.getRoot().applyCss();
                 navigator.getRoot().layout();
@@ -137,6 +396,19 @@ class AdminApplicationTest {
                 capture(stage, "admin-mock-chart-small-dark");
                 var months = navigator.getRoot().lookup("#mockMonths");
                 assertTrue(months.localToScene(months.getBoundsInLocal()).getMaxY() < 640);
+
+                navigator.navigate(AdminViews.ACTIVITY);
+                navigator.getRoot().applyCss();
+                navigator.getRoot().layout();
+                var analytics = (ScrollPane) navigator.getRoot().lookup(".admin-analytics-view");
+                assertTrue(analytics.getContent().getLayoutBounds().getWidth()
+                        <= analytics.getViewportBounds().getWidth() + 1);
+                var activity = (TableView<?>) analytics.lookup("#activityRows");
+                var headers = activity.lookup(".column-header-background");
+                double firstRowBottom = headers.localToScene(headers.getBoundsInLocal()).getMaxY()
+                        + activity.getFixedCellSize();
+                assertTrue(firstRowBottom <= stage.getScene().getHeight(), "The first activity row is visible");
+                capture(stage, "admin-analytics-activity-compact");
             } finally {
                 navigator.close();
                 stage.close();
@@ -147,13 +419,242 @@ class AdminApplicationTest {
         task.get(20, TimeUnit.SECONDS);
     }
 
+    @Test
+    void systemLoginTimelineShowsAllEventsInVietnamTime() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                navigator.navigate(AdminViews.USERS);
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var directory = (TableView<?>) root.lookup("#userTable");
+                directory.getSelectionModel().select(directory.getItems().indexOf(data.previewUser()));
+                root.applyCss();
+                root.layout();
+                ((Hyperlink) root.lookup("#systemLoginLogs")).fire();
+                assertEquals(AdminViews.LOGIN_LOGS, navigator.currentViewProperty().get());
+
+                var timeline = (TableView<?>) root.lookup("#loginEvents");
+                var events = data.loginLogs().stream()
+                        .sorted(Comparator.comparing(MockLoginLog::loggedInAt).reversed()).toList();
+                assertEquals(events, timeline.getItems());
+                assertEquals(events.size() + " lượt đăng nhập", ((Label) root.lookup("#loginCount")).getText());
+                var columns = timeline.getColumns();
+                assertEquals(3, columns.size());
+                assertFalse(timeline.isEditable());
+                assertTrue(columns.stream().noneMatch(TableColumn::isSortable));
+                var latestAccount = data.user(events.getFirst().userId());
+                assertEquals("15/11/2026 09:00", columns.get(0).getCellData(0));
+                assertEquals(latestAccount.username(), columns.get(1).getCellData(0));
+                assertEquals(latestAccount.fullName(), columns.get(2).getCellData(0));
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-light");
+                navigator.themes().toggle();
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-dark");
+
+                timeline.getSelectionModel().selectFirst();
+                timeline.getFocusModel().focus(0);
+                timeline.requestFocus();
+                assertLoginTextAlignment(timeline, 0);
+                capture(stage, "admin-login-logs-focus-dark");
+
+                navigator.goBack();
+                assertEquals(AdminViews.USERS, navigator.currentViewProperty().get());
+                assertEquals(data.previewUser(), directory.getSelectionModel().getSelectedItem());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void userFiltersKeepTheInspectorOnTheSelectedAccount() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            navigator.reset(AdminViews.OVERVIEW);
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1366, 768));
+            stage.show();
+            try {
+                ((Button) root.lookup("#totalUsersCard")).fire();
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var selected = data.previewUser();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockUser>) root.lookup("#userTable");
+                var inspector = (ScrollPane) root.lookup("#userInspector");
+                assertFalse(inspector.isVisible());
+                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                assertTrue(inspector.isVisible());
+                assertEquals(selected.fullName(), ((Label) root.lookup("#profileName")).getText());
+                root.applyCss();
+                root.layout();
+                directory.scrollTo(Math.max(0, directory.getSelectionModel().getSelectedIndex() - 3));
+                capture(stage, "admin-users-light");
+                assertEquals(data.loginLogs().stream().filter(login -> login.userId().equals(selected.id())).toList(),
+                        ((TableView<?>) root.lookup("#loginHistory")).getItems());
+
+                ((TextField) root.lookup("#nameFilter")).setText("  NGUYỄN  ");
+                ((TextField) root.lookup("#usernameFilter")).setText("MINHAN");
+                assertEquals(List.of(selected), directory.getItems());
+                assertEquals(selected, directory.getSelectionModel().getSelectedItem());
+                ((ToggleButton) root.lookup("#lockedUsers")).fire();
+                assertTrue(directory.getItems().isEmpty());
+                assertFalse(inspector.isVisible());
+                ((Hyperlink) root.lookup("#clearFilters")).fire();
+                assertEquals(data.users().size(), directory.getItems().size());
+                directory.getSelectionModel().select(selected);
+                directory.scrollTo(Math.max(0, directory.getSelectionModel().getSelectedIndex() - 3));
+                ((TabPane) root.lookup("#userDetails")).getSelectionModel().select(1);
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                capture(stage, "admin-users-dark");
+                var friends = (TableView<?>) root.lookup("#friends");
+                assertFalse(friends.getItems().isEmpty());
+                assertFalse(friends.getItems().contains(selected));
+                var created = directory.getColumns().getLast();
+                created.setSortType(TableColumn.SortType.DESCENDING);
+                directory.getSortOrder().setAll(List.of(created));
+                assertEquals(data.users().stream().map(MockUser::createdAt).sorted(Comparator.reverseOrder()).toList(),
+                        directory.getItems().stream().map(MockUser::createdAt).toList());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void userDialogsUseTheAccountFromTheirRouteInput() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                navigator.navigate(AdminViews.USERS);
+                root.applyCss();
+                root.layout();
+                var data = MockData.create();
+                var selected = data.previewUser();
+                var directory = (TableView<?>) root.lookup("#userTable");
+                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                directory.scrollTo(directory.getSelectionModel().getSelectedIndex());
+                root.applyCss();
+                root.layout();
+                capture(stage, "admin-users-compact");
+                assertTrue(root.lookup("#userInspector").localToScene(
+                        root.lookup("#userInspector").getBoundsInLocal()).getMaxX() <= 1024);
+                var actions = (FlowPane) root.lookup(".admin-profile-actions");
+                assertTrue(actions.getChildren().stream().allMatch(
+                        action -> action.getBoundsInParent().getMaxX() <= actions.getWidth() + 1));
+
+                ((Button) root.lookup("#createUser")).fire();
+                var form = ownedDialogPane(stage);
+                assertTrue(((TextField) form.lookup("#username")).isEditable());
+                assertTrue(form.lookup("#submitUserDialog").isDisabled());
+                capture(form.getScene(), "admin-user-create");
+                ((Button) form.lookup("#cancelUserDialog")).fire();
+
+                ((Button) root.lookup("#editUser")).fire();
+                form = ownedDialogPane(stage);
+                var username = (TextField) form.lookup("#username");
+                assertFalse(username.isEditable());
+                assertEquals(selected.username(), username.getText());
+                assertFalse(form.lookup("#submitUserDialog").isDisabled());
+                capture(form.getScene(), "admin-user-edit");
+                ((Button) form.lookup("#cancelUserDialog")).fire();
+
+                ((ToggleButton) root.lookup("#deletedUsers")).fire();
+                directory.getSelectionModel().selectFirst();
+                assertTrue(root.lookup("#editUser").isDisabled());
+                var notice = (Label) root.lookup("#deletionNotice");
+                assertTrue(notice.isVisible());
+                root.applyCss();
+                root.layout();
+                assertTrue(notice.getHeight() + 1 >= notice.prefHeight(notice.getWidth()),
+                        "The deletion notice fits both timestamps");
+                capture(stage, "admin-users-deleted-compact");
+                ((Button) root.lookup("#deleteOrRestore")).fire();
+                var restore = ownedDialogPane(stage);
+                assertEquals("Khôi phục tài khoản?", ((Label) restore.lookup("#confirmationTitle")).getText());
+                ((Button) restore.lookup("#cancelUserDialog")).fire();
+
+                navigator.navigate(AdminViews.SPAM);
+                navigator.themes().toggle();
+                var reported = data.user(data.spamReports().getFirst().reportedUserId());
+                var dialog = navigator.showModal(AdminViews.CONFIRM_ACTION,
+                        new AdminViewInputs.ConfirmAction(AdminViewInputs.Action.LOCK_USER, reported.id()));
+                var pane = dialog.getDialogPane();
+                assertEquals("@" + reported.username(), ((Label) pane.lookup("#account")).getText());
+                assertTrue(((Label) pane.lookup("#accountId")).getText().endsWith(reported.id()));
+                capture(pane.getScene(), "admin-user-confirm-lock");
+                var confirm = (Button) pane.lookup("#submitUserDialog");
+                assertFalse(confirm.isDefaultButton());
+                confirm.fire();
+                assertEquals(ButtonBar.ButtonData.OK_DONE, dialog.getResult().getButtonData());
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static void assertLoginTextAlignment(TableView<?> timeline, int rowIndex) {
+        var root = timeline.getScene().getRoot();
+        root.applyCss();
+        root.layout();
+        var row = timeline.lookupAll(".table-row-cell").stream()
+                .filter(node -> node instanceof TableRow<?> candidate && candidate.getIndex() == rowIndex)
+                .findFirst().orElseThrow();
+        var headers = textLeftEdges(timeline, ".column-header .label .text");
+        assertEquals(timeline.getVisibleLeafColumns().size(), headers.size());
+        assertEquals(headers, textLeftEdges(row, ".table-cell .text"), "Headers and cells share their text origins");
+    }
+
+    private static List<Double> textLeftEdges(Node parent, String selector) {
+        return parent.lookupAll(selector).stream()
+                .map(text -> text.localToScene(text.getLayoutBounds()).getMinX())
+                .sorted().toList();
+    }
+
+    private static DialogPane ownedDialogPane(Stage owner) {
+        return Window.getWindows().stream().filter(Stage.class::isInstance).map(Stage.class::cast)
+                .filter(stage -> stage.getOwner() == owner).map(stage -> (DialogPane) stage.getScene().getRoot())
+                .findFirst().orElseThrow();
+    }
+
     private static void capture(Stage stage, String name) throws Exception {
+        capture(stage.getScene(), name);
+    }
+
+    private static void capture(Scene scene, String name) throws Exception {
         if (!Boolean.getBoolean("chatsystem.capture")) {
             return;
         }
-        stage.getScene().getRoot().applyCss();
-        stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        scene.getRoot().applyCss();
+        scene.getRoot().layout();
+        WritableImage image = scene.snapshot(null);
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {

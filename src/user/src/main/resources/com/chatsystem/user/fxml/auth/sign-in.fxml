@@ -1,12 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
-</VBox>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<ScrollPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.chatsystem.user.controller.auth.SignInController"
+            id="authSignIn" styleClass="auth-view" stylesheets="@../../css/auth.css" fitToWidth="true"
+            fitToHeight="true" hbarPolicy="NEVER" focusTraversable="false">
+    <content>
+        <BorderPane styleClass="auth-layout">
+            <top><fx:include source="auth-header.fxml"/></top>
+            <center>
+                <HBox alignment="CENTER" styleClass="auth-columns">
+                    <fx:include source="auth-illustration.fxml" HBox.hgrow="ALWAYS"/>
+                    <VBox alignment="CENTER" minWidth="360" prefWidth="440" maxWidth="440" fillWidth="true"
+                          styleClass="auth-card-column">
+                        <VBox fillWidth="true" styleClass="auth-card">
+                            <Label text="Đăng nhập" styleClass="auth-heading" wrapText="true"/>
+                            <Label id="authOfflinePreview" text="Bản xem trước ngoại tuyến. Không nhập thông tin thật."
+                                   styleClass="auth-muted" wrapText="true"/>
+                            <VBox spacing="12">
+                                <VBox spacing="4">
+                                    <Label text="Tên đăng nhập" styleClass="auth-field-label"/>
+                                    <TextField fx:id="authSignInUsername" promptText="Nhập tên đăng nhập"
+                                               accessibleText="Tên đăng nhập" onAction="#submit"/>
+                                    <Label fx:id="authSignInUsernameError" labelFor="$authSignInUsername"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="Mật khẩu" styleClass="auth-field-label"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Button fx:id="authOpenForgotPassword" text="Quên mật khẩu?"
+                                                onAction="#openForgotPassword"
+                                                styleClass="auth-link,auth-inline-link"/>
+                                    </HBox>
+                                    <StackPane styleClass="auth-password-input">
+                                        <PasswordField fx:id="authSignInPassword" promptText="Nhập mật khẩu"
+                                                       accessibleText="Mật khẩu" onAction="#submit"/>
+                                        <TextField fx:id="authSignInPasswordVisible" promptText="Nhập mật khẩu"
+                                                   accessibleText="Mật khẩu" onAction="#submit"
+                                                   visible="false" managed="false"/>
+                                        <Button fx:id="authSignInShowPassword" text="Hiện"
+                                                accessibleText="Hiện mật khẩu" styleClass="auth-password-toggle"
+                                                StackPane.alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY">
+                                            <StackPane.margin><Insets right="4"/></StackPane.margin>
+                                            <graphic>
+                                                <FontIcon iconLiteral="fth-eye-off" iconSize="16"
+                                                          mouseTransparent="true"/>
+                                            </graphic>
+                                        </Button>
+                                    </StackPane>
+                                    <Label fx:id="authSignInPasswordError" labelFor="$authSignInPassword"
+                                           visible="false" managed="false" wrapText="true"
+                                           styleClass="auth-error,auth-inline-error"/>
+                                </VBox>
+                            </VBox>
+                            <Label fx:id="authSignInFeedback" visible="false" managed="false" wrapText="true"
+                                   focusTraversable="false" styleClass="auth-error"/>
+                            <Button fx:id="authSignInSubmit" text="Đăng nhập" onAction="#submit" defaultButton="true"
+                                    maxWidth="Infinity" styleClass="auth-primary"/>
+                            <HBox alignment="CENTER" spacing="4">
+                                <Label text="Chưa có tài khoản?" styleClass="auth-muted"/>
+                                <Button fx:id="authOpenSignUp" text="Tạo tài khoản" onAction="#openSignUp"
+                                        styleClass="auth-link,auth-neutral-link"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </HBox>
+            </center>
+        </BorderPane>
+    </content>
+</ScrollPane>

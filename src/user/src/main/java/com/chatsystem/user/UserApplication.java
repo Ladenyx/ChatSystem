@@ -19,13 +19,13 @@ public final class UserApplication extends Application {
         UserShellController controller = loader.getController();
         ViewNavigator navigator = new ViewNavigator(shell, controller.getViewHost(), new ThemeManager());
         controller.connect(navigator);
-        navigator.reset(UserViews.CONVERSATIONS);
+        navigator.reset(UserViews.SIGN_IN);
         return navigator;
     }
 
     @Override
     public void start(Stage stage) throws IOException {
-        DesktopWindow.show(stage, "ChatSystem · User Client", createNavigator());
+        DesktopWindow.show(stage, "WhatsUp · User Client", createNavigator());
     }
 
     public static void main(String[] args) {

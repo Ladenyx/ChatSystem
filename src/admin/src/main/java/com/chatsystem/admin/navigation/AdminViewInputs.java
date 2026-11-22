@@ -7,6 +7,12 @@ public final class AdminViewInputs {
     private AdminViewInputs() {
     }
 
+    public record EditUser(String userId) implements ViewInput {
+        public EditUser {
+            Objects.requireNonNull(userId, "userId");
+        }
+    }
+
     public record ConfirmAction(Action action, String userId) implements ViewInput {
         public ConfirmAction {
             Objects.requireNonNull(action, "action");
@@ -15,6 +21,6 @@ public final class AdminViewInputs {
     }
 
     public enum Action {
-        LOCK_USER, UNLOCK_USER, SOFT_DELETE_USER, RESET_PASSWORD
+        LOCK_USER, UNLOCK_USER, SOFT_DELETE_USER, RESET_PASSWORD, RESTORE_USER
     }
 }
