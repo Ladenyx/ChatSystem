@@ -137,13 +137,36 @@
                         </Button>
                     </StackPane>
                     <Label fx:id="newPasswordError" wrapText="true" styleClass="profile-field-error"/>
-                    <FlowPane hgap="12" vgap="4" styleClass="profile-password-rules">
-                        <Label fx:id="passwordLength" styleClass="profile-rule-item"/>
-                        <Label fx:id="passwordUpper" styleClass="profile-rule-item"/>
-                        <Label fx:id="passwordLower" styleClass="profile-rule-item"/>
-                        <Label fx:id="passwordDigit" styleClass="profile-rule-item"/>
-                        <Label fx:id="passwordSymbol" styleClass="profile-rule-item"/>
-                    </FlowPane>
+                    <VBox id="passwordRules" spacing="4" styleClass="profile-password-rules">
+                        <HBox fx:id="passwordRulesProgress" spacing="4" mouseTransparent="true">
+                            <Region styleClass="profile-rule-segment" HBox.hgrow="ALWAYS"/>
+                            <Region styleClass="profile-rule-segment" HBox.hgrow="ALWAYS"/>
+                            <Region styleClass="profile-rule-segment" HBox.hgrow="ALWAYS"/>
+                            <Region styleClass="profile-rule-segment" HBox.hgrow="ALWAYS"/>
+                            <Region styleClass="profile-rule-segment" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="Yêu cầu mật khẩu" styleClass="profile-rules-title"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="passwordRulesCount" styleClass="profile-rules-count"/>
+                        </HBox>
+                        <GridPane hgap="12" vgap="4">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+                            <Label fx:id="passwordLength" styleClass="profile-rule-item" minWidth="0" wrapText="true"
+                                   GridPane.columnSpan="2"/>
+                            <Label fx:id="passwordUpper" styleClass="profile-rule-item" minWidth="0" wrapText="true"
+                                   GridPane.rowIndex="1"/>
+                            <Label fx:id="passwordLower" styleClass="profile-rule-item" minWidth="0" wrapText="true"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <Label fx:id="passwordDigit" styleClass="profile-rule-item" minWidth="0" wrapText="true"
+                                   GridPane.rowIndex="2"/>
+                            <Label fx:id="passwordSymbol" styleClass="profile-rule-item" minWidth="0" wrapText="true"
+                                   GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
                 </VBox>
 
                 <VBox spacing="4">

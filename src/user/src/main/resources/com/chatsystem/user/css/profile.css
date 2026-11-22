@@ -301,10 +301,44 @@
     -fx-padding: 4px 0 0;
 }
 
+.profile-rule-segment {
+    -fx-min-height: 4px;
+    -fx-pref-height: 4px;
+    -fx-max-height: 4px;
+    -fx-background-color: -cs-border;
+    -fx-background-radius: 2px;
+}
+
+.profile-rule-segment:filled {
+    -fx-background-color: -cs-warning;
+}
+
+.profile-rule-segment:complete {
+    -fx-background-color: -cs-success;
+}
+
+.profile-rules-title,
+.profile-rules-count {
+    -fx-font-size: 12px;
+}
+
+.profile-rules-title {
+    -fx-text-fill: -cs-muted;
+}
+
+.profile-rules-count {
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
 .profile-rule-item {
     -fx-font-size: 12px;
     -fx-text-fill: -cs-muted;
-    -fx-graphic-text-gap: 4px;
+    -fx-graphic-text-gap: 8px;
+}
+
+.profile-rule-item:met {
+    -fx-text-fill: -cs-text;
 }
 
 .profile-rule-item:met .ikonli-font-icon {

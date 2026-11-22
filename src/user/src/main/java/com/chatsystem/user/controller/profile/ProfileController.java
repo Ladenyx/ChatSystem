@@ -37,6 +37,8 @@ public final class ProfileController implements ViewController {
     private static final String PROFILE_DRAFT = ProfileController.class.getName() + ".draft";
     private static final String CURRENT_EMAIL = ProfileController.class.getName() + ".email";
     private static final PseudoClass RULE_MET = PseudoClass.getPseudoClass("met");
+    private static final PseudoClass RULE_PROGRESS_FILLED = PseudoClass.getPseudoClass("filled");
+    private static final PseudoClass RULE_PROGRESS_COMPLETE = PseudoClass.getPseudoClass("complete");
     private record Draft(String name, String address, String date, String gender) { }
 
     private static final String EMAIL_ATOM = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+";
@@ -80,6 +82,8 @@ public final class ProfileController implements ViewController {
     @FXML private Button showCurrentPassword;
     @FXML private Button showNewPassword;
     @FXML private Button showConfirmPassword;
+    @FXML private HBox passwordRulesProgress;
+    @FXML private Label passwordRulesCount;
     @FXML private Label passwordLength;
     @FXML private Label passwordUpper;
     @FXML private Label passwordLower;
@@ -124,8 +128,8 @@ public final class ProfileController implements ViewController {
         bridge(newPassword, newPasswordVisible, showNewPassword);
         bridge(confirmPassword, confirmPasswordVisible, showConfirmPassword);
         for (Label rule : List.of(passwordLength, passwordUpper, passwordLower, passwordDigit, passwordSymbol)) {
-            FontIcon icon = new FontIcon("fth-minus");
-            icon.setIconSize(16);
+            FontIcon icon = new FontIcon("fth-circle");
+            icon.setIconSize(12);
             icon.setMouseTransparent(true);
             rule.setGraphic(icon);
         }
@@ -186,14 +190,31 @@ public final class ProfileController implements ViewController {
 
     @FXML
     private void saveProfile() {
-        if (validateProfile()) {
-            showIdentity(fullName.getText().trim());
+        String name = stripNameWhitespace(fullName.getText());
+        if (validateProfile(name)) {
+            fullName.setText(name);
+            showIdentity(name);
             profileNotice.setText("Đã lưu hồ sơ trong bản xem trước");
         }
     }
 
-    private boolean validateProfile() {
-        String name = fullName.getText().trim();
+    private static String stripNameWhitespace(String name) {
+        int start = 0;
+        int end = name.length();
+        while (start < end && isNameWhitespace(name.charAt(start))) {
+            start++;
+        }
+        while (end > start && isNameWhitespace(name.charAt(end - 1))) {
+            end--;
+        }
+        return name.substring(start, end);
+    }
+
+    private static boolean isNameWhitespace(char value) {
+        return Character.isWhitespace(value) || Character.isSpaceChar(value) || value == '\u0085';
+    }
+
+    private boolean validateProfile(String name) {
         String addr = address.getText().trim();
         nameError.setText(name.isEmpty() ? "Nhập họ tên"
                 : name.codePointCount(0, name.length()) > 100 ? "Họ tên tối đa 100 ký tự" : "");
@@ -429,19 +450,29 @@ public final class ProfileController implements ViewController {
 
     private void updatePasswordRules() {
         String value = newPassword.getText() == null ? "" : newPassword.getText();
-        showRule(passwordLength, value.length() >= 8 && value.length() <= 128, "8–128 ký tự");
-        showRule(passwordUpper, value.chars().anyMatch(c -> c >= 'A' && c <= 'Z'), "Chữ hoa");
-        showRule(passwordLower, value.chars().anyMatch(c -> c >= 'a' && c <= 'z'), "Chữ thường");
-        showRule(passwordDigit, value.chars().anyMatch(c -> c >= '0' && c <= '9'), "Chữ số");
-        showRule(passwordSymbol, value.chars().anyMatch(c -> c >= '!' && c <= '~'
-                && !Character.isLetterOrDigit(c)), "Ký tự đặc biệt");
+        int met = showRule(passwordLength, value.length() >= 8 && value.length() <= 128, "8–128 ký tự");
+        met += showRule(passwordUpper, value.chars().anyMatch(c -> c >= 'A' && c <= 'Z'), "Ít nhất 1 chữ hoa");
+        met += showRule(passwordLower, value.chars().anyMatch(c -> c >= 'a' && c <= 'z'), "Ít nhất 1 chữ thường");
+        met += showRule(passwordDigit, value.chars().anyMatch(c -> c >= '0' && c <= '9'), "Ít nhất 1 chữ số");
+        met += showRule(passwordSymbol, value.chars().anyMatch(c -> c >= '!' && c <= '~'
+                && !Character.isLetterOrDigit(c)), "Ít nhất 1 ký tự đặc biệt");
+        var segments = passwordRulesProgress.getChildren();
+        int total = segments.size();
+        for (int i = 0; i < total; i++) {
+            var segment = segments.get(i);
+            segment.pseudoClassStateChanged(RULE_PROGRESS_FILLED, i < met);
+            segment.pseudoClassStateChanged(RULE_PROGRESS_COMPLETE, met == total);
+        }
+        passwordRulesCount.setText(met + "/" + total);
+        passwordRulesCount.setAccessibleText("Đáp ứng " + met + " trên " + total + " yêu cầu mật khẩu");
     }
 
-    private static void showRule(Label label, boolean matches, String text) {
+    private static int showRule(Label label, boolean matches, String text) {
         label.setText(text);
         label.setAccessibleText(text + (matches ? ", đã đạt" : ", chưa đạt"));
-        ((FontIcon) label.getGraphic()).setIconLiteral(matches ? "fth-check" : "fth-minus");
+        ((FontIcon) label.getGraphic()).setIconLiteral(matches ? "fth-check-circle" : "fth-circle");
         label.pseudoClassStateChanged(RULE_MET, matches);
+        return matches ? 1 : 0;
     }
 
     private static void bridge(PasswordField masked, TextField visible, Button button) {
