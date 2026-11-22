@@ -1,86 +1,136 @@
-/* Spam reporting dialog styles (P1 / REPORT-GROUP) */
-.chat-report-dialog {
+/* Spam reporting dialog styles (U-DLG-04) aligned with WhatsUp graphite design system */
+
+.chat-report-dialog,
+.chat-report-dialog > .content,
+.chat-report-form {
     -fx-background-color: -chat-surface;
 }
 
-.chat-report-dialog > .dialog-pane {
-    -fx-background-color: -chat-surface;
+.chat-report-dialog > .content {
     -fx-padding: 0;
 }
 
-.chat-report-dialog > .dialog-pane > .button-bar {
+.chat-report-dialog > .button-bar {
     -fx-padding: 0;
     -fx-min-height: 0;
     -fx-pref-height: 0;
     -fx-max-height: 0;
+    -fx-opacity: 0;
 }
 
 .chat-report-form {
-    -fx-background-color: -chat-surface;
-    -fx-padding: 24;
-    -fx-pref-width: 600;
-    -fx-max-width: 600;
+    -fx-padding: 20 24;
+    -fx-pref-width: 500;
+    -fx-max-width: 500;
     -fx-spacing: 16;
 }
 
 .chat-report-header {
     -fx-alignment: center-left;
-    -fx-spacing: 16;
+    -fx-spacing: 8;
 }
 
 .chat-report-header .chat-heading {
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
     -fx-text-fill: -chat-text;
 }
 
-.chat-report-close-btn {
-    -fx-min-width: 80;
-    -fx-pref-width: 80;
-    -fx-min-height: 32;
-    -fx-pref-height: 32;
-    -fx-border-color: -chat-border;
-    -fx-border-radius: 4;
-    -fx-background-color: transparent;
-    -fx-text-fill: -chat-text;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-}
-
-.chat-report-close-btn:hover {
-    -fx-background-color: -chat-hover;
+.chat-report-success-icon {
+    -fx-icon-color: -chat-online;
 }
 
 .chat-report-section {
-    -fx-spacing: 4;
+    -fx-spacing: 8;
 }
 
 .chat-report-field-title {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
     -fx-text-fill: -chat-text;
+}
+
+.chat-report-text-field,
+.chat-report-combo {
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-background-color: -chat-surface-subtle;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: -chat-text;
+    -fx-prompt-text-fill: -chat-muted;
+    -fx-font-size: 13px;
 }
 
 .chat-report-text-field {
-    -fx-min-height: 40;
-    -fx-pref-height: 40;
-    -fx-border-color: -chat-control-border;
-    -fx-border-radius: 4;
-    -fx-background-color: -chat-surface;
-    -fx-text-fill: -chat-text;
-    -fx-padding: 8 12;
+    -fx-padding: 0 12;
 }
 
-.chat-report-text-field:focused {
+.chat-report-combo .list-cell {
+    -fx-text-fill: -chat-text;
+    -fx-background-color: transparent;
+    -fx-padding: 4 12;
+    -fx-font-size: 13px;
+}
+
+.chat-report-text-field:focused,
+.chat-report-combo:focused {
+    -fx-background-color: -chat-surface;
     -fx-border-color: -chat-focus;
 }
 
+.chat-report-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+    -fx-max-height: 224;
+    -fx-pref-height: 196;
+}
+
+.chat-report-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.chat-report-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+    -fx-padding: 4 2;
+}
+
+.chat-report-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.chat-report-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -chat-scroll-thumb;
+    -fx-background-radius: 4;
+}
+
+.chat-report-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -chat-scroll-thumb-hover;
+}
+
+.chat-report-scroll .scroll-bar:vertical .increment-button,
+.chat-report-scroll .scroll-bar:vertical .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
+
 .chat-report-excerpt-card {
-    -fx-background-color: -chat-surface;
-    -fx-border-color: -chat-border;
+    -fx-background-color: -chat-surface-subtle;
+    -fx-background-insets: 0;
+    -fx-border-color: -chat-rule;
+    -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-padding: 12;
+    -fx-padding: 10 12;
     -fx-spacing: 12;
     -fx-alignment: center-left;
 }
@@ -89,81 +139,79 @@
     -fx-background-color: -chat-hover;
 }
 
-.chat-report-classification {
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+.chat-report-excerpt-card:selected {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.label.chat-report-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-text-fill: -chat-muted;
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-rule;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 2 6;
+}
+
+.label.chat-report-badge.is-reported {
+    -fx-text-fill: -chat-brand-text;
+    -fx-border-color: -chat-brand-subtle;
 }
 
 .chat-report-content {
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-text-fill: -chat-text;
+}
+
+.chat-report-summary-box {
+    -fx-background-color: -chat-surface-subtle;
+    -fx-background-radius: 8;
+    -fx-padding: 12 16;
+    -fx-spacing: 8;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.chat-report-summary-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-report-stats {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-brand-text;
+}
+
+.chat-report-receipt-time {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-text-fill: -chat-secondary;
+}
+
+.label.chat-report-status-badge {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-warning;
+    -fx-background-color: -chat-warning-bg;
+    -fx-padding: 2 8;
+    -fx-background-radius: 4;
 }
 
 .chat-report-actions {
     -fx-spacing: 8;
     -fx-alignment: center;
-    -fx-pref-height: 32;
 }
 
 .chat-report-actions .button {
-    -fx-min-height: 32;
-    -fx-pref-height: 32;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-    -fx-border-radius: 4;
-    -fx-background-radius: 4;
-}
-
-.chat-report-btn-outline {
-    -fx-border-color: -chat-border;
-    -fx-background-color: transparent;
-    -fx-text-fill: -chat-text;
-}
-
-.chat-report-btn-outline:hover {
-    -fx-background-color: -chat-hover;
-}
-
-.chat-report-btn-primary {
-    -fx-background-color: -chat-brand;
-    -fx-text-fill: -chat-on-brand;
-    -fx-border-color: -chat-brand;
-}
-
-.chat-report-btn-primary:hover {
-    -fx-background-color: -chat-brand-hover;
-}
-
-.chat-report-summary-box {
-    -fx-background-color: -chat-incoming;
-    -fx-background-radius: 6;
-    -fx-padding: 12;
-    -fx-spacing: 6;
-    -fx-border-color: -chat-border;
-    -fx-border-radius: 6;
-}
-
-.chat-report-summary-text {
-    -fx-font-size: 14px;
-    -fx-text-fill: -chat-text;
-    -fx-line-spacing: 4;
-}
-
-.chat-report-scroll {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-max-height: 240;
-    -fx-pref-height: 180;
-}
-
-.chat-report-scroll > .viewport {
-    -fx-background-color: transparent;
-}
-
-.chat-report-accepted-box {
-    -fx-padding: 24;
-    -fx-spacing: 16;
-    -fx-alignment: center-left;
-    -fx-background-color: -chat-surface;
+    -fx-min-height: 36;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
 }

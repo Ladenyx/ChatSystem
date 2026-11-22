@@ -530,6 +530,89 @@ class UserApplicationTest {
         }
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void spamReportDialogFlowsThroughPickPreviewAndAcceptedInBothThemes() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#reportConversation")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                var modalRoot = modal.getScene().getRoot();
+                assertFalse(modalRoot.lookupAll(".chat-report-excerpt-card").isEmpty());
+                capture(modal, "spam-report-pick-light");
+
+                var reason = (TextField) modalRoot.lookup("#reportReasonField");
+                reason.clear();
+                ((Button) modalRoot.lookup("#reportPreviewSubmit")).fire();
+                assertTrue(modalRoot.lookup("#reportPickFeedback").isVisible());
+
+                reason.setText("Nội dung quảng bá lặp lại trong nhóm.");
+                ((Button) modalRoot.lookup("#reportPreviewSubmit")).fire();
+                navRef.get().themes().toggle();
+                modalRoot.applyCss();
+                modalRoot.layout();
+                assertTrue(modalRoot.lookup("#reportSubmitConfirmed").isVisible());
+                capture(modal, "spam-report-preview-dark");
+
+                ((Button) modalRoot.lookup("#reportSubmitConfirmed")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                var modalRoot = modal.getScene().getRoot();
+                assertTrue(modalRoot.lookup("#reportAcceptedDone").isVisible());
+                capture(modal, "spam-report-accepted-dark");
+                ((Button) modalRoot.lookup("#reportAcceptedDone")).fire();
+                assertFalse(modal.isShowing());
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    private static Window reportModalWindow(Window owner) {
+        return Window.getWindows().stream()
+                .filter(window -> window != owner && window.isShowing()
+                        && window.getScene().getRoot().lookup("#reportPreviewSubmit") != null)
+                .findFirst().orElseThrow();
+    }
+
     private static Window aiPopupWindow() {
         return Window.getWindows().stream()
                 .filter(window -> window.isShowing() && window.getScene().getRoot().lookup("#aiAssistant") != null)
