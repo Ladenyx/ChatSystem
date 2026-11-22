@@ -21,6 +21,9 @@
     -chat-online: #16a34a;
     -chat-offline: #737373;
     -chat-icon-color: -chat-muted;
+    -chat-incoming: #ffffff;
+    -chat-warning: #8a3707;
+    -chat-warning-bg: #fff9f5;
     -chat-scroll-thumb: rgba(0, 0, 0, 0.16);
     -chat-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
 }
@@ -46,6 +49,9 @@
     -chat-on-brand: #ffffff;
     -chat-online: #4cc38a;
     -chat-offline: #8a8a91;
+    -chat-incoming: #232326;
+    -chat-warning: #fce100;
+    -chat-warning-bg: #332717;
     -chat-scroll-thumb: rgba(255, 255, 255, 0.16);
     -chat-scroll-thumb-hover: rgba(255, 255, 255, 0.28);
 }

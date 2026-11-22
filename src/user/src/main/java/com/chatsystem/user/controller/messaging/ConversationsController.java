@@ -5,16 +5,14 @@ import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
-import com.chatsystem.user.control.ConversationAvatar;
+import com.chatsystem.user.controller.chat.ChatHistoryController;
 import com.chatsystem.user.control.ConversationCell;
 import com.chatsystem.user.messaging.ConversationCatalog;
-import com.chatsystem.user.navigation.UserViewInputs;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -37,9 +35,7 @@ public final class ConversationsController implements ViewController {
     @FXML private ToggleButton groupFilter;
     @FXML private VBox emptyWorkspace;
     @FXML private BorderPane selectedWorkspace;
-    @FXML private Label conversationTitle;
-    @FXML private Label conversationStatus;
-    @FXML private ConversationAvatar conversationAvatar;
+    @FXML private ChatHistoryController selectedWorkspaceController;
 
     private ViewNavigator navigator;
     private final ConversationCatalog catalog = UserViews.CONVERSATIONS_DATA;
@@ -95,15 +91,6 @@ public final class ConversationsController implements ViewController {
         navigator.showModal(UserViews.CREATE_GROUP);
     }
 
-    @FXML
-    private void openInfo() {
-        if (!navigator.isDrawerOpen()) {
-            navigator.showDrawer(UserViews.CONVERSATION_INFO, new UserViewInputs.Conversation(selected.id()));
-        } else {
-            navigator.closeDrawer();
-        }
-    }
-
     private void applyFilter() {
         if (navigator == null || visibleConversations == null) {
             return;
@@ -130,10 +117,7 @@ public final class ConversationsController implements ViewController {
         emptyWorkspace.setVisible(conversation == null);
         selectedWorkspace.setVisible(conversation != null);
         if (conversation != null) {
-            conversationTitle.setText(conversation.title());
-            conversationStatus.setText(catalog.statusText(conversation));
-            conversationStatus.setGraphic(ConversationAvatar.statusGraphic(conversation, catalog));
-            conversationAvatar.show(conversation, catalog);
+            selectedWorkspaceController.show(navigator, catalog, conversation);
         }
     }
 }

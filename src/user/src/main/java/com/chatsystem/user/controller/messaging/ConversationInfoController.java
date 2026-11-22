@@ -25,6 +25,7 @@ public final class ConversationInfoController implements ViewController {
     @FXML private Label kindValue;
     @FXML private Label securityValue;
     @FXML private Label memberCountValue;
+    @FXML private VBox participantsSection;
     @FXML private VBox participantsList;
 
     @Override
@@ -47,9 +48,13 @@ public final class ConversationInfoController implements ViewController {
         securityValue.setText(chat.encrypted() ? "Mã hóa đầu cuối" : "Tiêu chuẩn");
         memberCountValue.setText(chat.participantIds().size() + " người");
 
+        participantsSection.setVisible(isGroup);
+        participantsSection.setManaged(isGroup);
         participantsList.getChildren().clear();
-        for (String participantId : chat.participantIds()) {
-            participantsList.getChildren().add(memberRow(catalog.user(participantId), catalog.currentUserId()));
+        if (isGroup) {
+            for (String participantId : chat.participantIds()) {
+                participantsList.getChildren().add(memberRow(catalog.user(participantId), catalog.currentUserId()));
+            }
         }
     }
 

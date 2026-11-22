@@ -233,28 +233,34 @@
     -fx-border-color: -chat-focus;
 }
 
-.chat-list .scroll-bar:vertical {
+.chat-list .scroll-bar:vertical,
+.chat-history .scroll-bar:vertical {
     -fx-background-color: transparent;
     -fx-pref-width: 8;
     -fx-padding: 4 2;
 }
 
-.chat-list .scroll-bar:vertical .track {
+.chat-list .scroll-bar:vertical .track,
+.chat-history .scroll-bar:vertical .track {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-.chat-list .scroll-bar:vertical .thumb {
+.chat-list .scroll-bar:vertical .thumb,
+.chat-history .scroll-bar:vertical .thumb {
     -fx-background-color: -chat-scroll-thumb;
     -fx-background-radius: 4;
 }
 
-.chat-list .scroll-bar:vertical .thumb:hover {
+.chat-list .scroll-bar:vertical .thumb:hover,
+.chat-history .scroll-bar:vertical .thumb:hover {
     -fx-background-color: -chat-scroll-thumb-hover;
 }
 
 .chat-list .scroll-bar:vertical .increment-button,
-.chat-list .scroll-bar:vertical .decrement-button {
+.chat-list .scroll-bar:vertical .decrement-button,
+.chat-history .scroll-bar:vertical .increment-button,
+.chat-history .scroll-bar:vertical .decrement-button {
     -fx-padding: 0;
     -fx-pref-height: 0;
     -fx-opacity: 0;
@@ -610,4 +616,206 @@
 .label.chat-info-member-handle {
     -fx-font-size: 11px;
     -fx-text-fill: -chat-muted;
+}
+
+/* --- Chat History & Composer --- */
+
+.chat-history,
+.chat-history > .viewport,
+.chat-history-content {
+    -fx-background-color: -chat-workspace-bg;
+    -fx-background-insets: 0;
+}
+
+.chat-history {
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.chat-history-content {
+    -fx-padding: 20;
+}
+
+.label.chat-message-author {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-secondary;
+    -fx-padding: 0 0 0 4;
+}
+
+.chat-bubble {
+    -fx-padding: 8 12;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-font-size: 13px;
+}
+
+.chat-bubble-incoming {
+    -fx-background-color: -chat-incoming;
+    -fx-border-color: -chat-rule;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-bubble-outgoing {
+    -fx-background-color: -chat-brand;
+    -fx-border-color: transparent;
+    -fx-text-fill: -chat-on-brand;
+}
+
+.chat-bubble-unavailable {
+    -fx-background-color: -chat-surface-subtle;
+    -fx-border-color: -chat-rule;
+    -fx-text-fill: -chat-muted;
+}
+
+.label.chat-message-meta {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 11px;
+    -fx-text-fill: -chat-muted;
+    -fx-padding: 0 4;
+}
+
+.label.chat-message-meta.chat-receipt-read {
+    -fx-text-fill: -chat-brand-text;
+    -fx-font-weight: 600;
+}
+
+.chat-message-more {
+    -fx-background-color: transparent;
+    -fx-padding: 4;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: transparent;
+    -fx-opacity: 0;
+}
+
+.chat-message-row:hover .chat-message-more,
+.chat-message-more:focused {
+    -fx-opacity: 1;
+}
+
+.chat-message-more:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-composer {
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-rule;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 12 20 16 20;
+}
+
+.chat-composer .text-area,
+.chat-composer .text-area .content {
+    -fx-background-color: -chat-surface-subtle;
+    -fx-text-fill: -chat-text;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+}
+
+.chat-composer .text-area {
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-prompt-text-fill: -chat-muted;
+    -fx-font-size: 13px;
+}
+
+.chat-composer .text-area:focused {
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-focus;
+}
+
+.chat-composer .text-area:focused .content {
+    -fx-background-color: -chat-surface;
+}
+
+.chat-composer .text-area:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -chat-muted;
+}
+
+.chat-outline {
+    -fx-background-color: -chat-surface-subtle;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: -chat-text;
+}
+
+.chat-outline .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
+}
+
+.chat-outline:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-outline:hover .ikonli-font-icon {
+    -fx-icon-color: -chat-text;
+}
+
+.chat-outline:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-primary {
+    -fx-background-color: -chat-brand;
+    -fx-background-insets: 0;
+    -fx-text-fill: -chat-on-brand;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-min-height: 32;
+}
+
+.chat-primary .ikonli-font-icon {
+    -fx-icon-color: -chat-on-brand;
+}
+
+.chat-primary:hover {
+    -fx-background-color: -chat-brand-hover;
+}
+
+.chat-primary:focused,
+.chat-message-more:focused {
+    -fx-border-color: -chat-focus;
+    -fx-border-radius: 8;
+}
+
+.chat-composer-icon {
+    -fx-padding: 4 8;
+    -fx-min-width: 36;
+    -fx-min-height: 32;
+}
+
+.chat-send {
+    -fx-min-width: 36;
+    -fx-min-height: 32;
+    -chat-icon-color: -chat-on-brand;
+}
+
+.chat-composer-icon:disabled {
+    -fx-opacity: 0.5;
+}
+
+.chat-warning {
+    -fx-background-color: -chat-warning-bg;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -chat-icon-color: -chat-warning;
+}
+
+.chat-warning-text {
+    -fx-text-fill: -chat-warning;
+}
+
+.chat-history-notice {
+    -fx-padding: 12 20 0;
+    -fx-spacing: 8;
 }

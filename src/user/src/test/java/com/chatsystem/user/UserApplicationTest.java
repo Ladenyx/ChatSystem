@@ -24,7 +24,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.geometry.Orientation;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
@@ -130,6 +129,8 @@ class UserApplicationTest {
                 filter.clear();
                 conversations.getSelectionModel().selectFirst();
                 assertFalse(root.lookup("#emptyWorkspace").isVisible());
+                assertFalse(root.lookupAll(".chat-message-row").isEmpty());
+                assertTrue(root.lookup("#sendMessage").isDisabled());
                 ((Button) root.lookup("#conversationInfo")).fire();
                 assertNotNull(root.lookup("#drawer"));
                 capture(stage, "user-drawer");
