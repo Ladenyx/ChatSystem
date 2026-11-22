@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
+      fx:controller="com.chatsystem.user.controller.group.GroupFormController" styleClass="chat-group-form"
+      minWidth="320" prefWidth="460" spacing="16">
+    <HBox alignment="CENTER_LEFT" spacing="8">
+        <Label fx:id="heading" styleClass="chat-heading" wrapText="true" minWidth="0" maxWidth="Infinity"
+               HBox.hgrow="ALWAYS"/>
+        <Button fx:id="closeButton" styleClass="chat-drawer-icon" accessibleText="Đóng hộp thoại">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="16"/></graphic>
+            <tooltip><Tooltip text="Đóng (Esc)"/></tooltip>
+        </Button>
+    </HBox>
+    <Label fx:id="description" styleClass="chat-caption" wrapText="true"/>
+    <VBox fx:id="nameSection" spacing="8">
+        <Label text="Tên nhóm" styleClass="chat-result-title"/>
+        <TextField fx:id="groupNameField" id="groupNameField" promptText="Nhập tên nhóm" accessibleText="Tên nhóm"/>
+    </VBox>
+    <VBox fx:id="picker" spacing="8">
+        <Label fx:id="selectionSummary" id="groupSelectionSummary" styleClass="chat-result-title" wrapText="true"/>
+        <StackPane fx:id="searchSection" alignment="CENTER_LEFT" styleClass="chat-search">
+            <TextField fx:id="memberSearchField" id="memberSearchField" promptText="Tìm theo tên hoặc @username"
+                       accessibleText="Tìm thành viên"/>
+            <FontIcon iconLiteral="fth-search" iconSize="15" styleClass="chat-search-icon" mouseTransparent="true">
+                <StackPane.margin><Insets left="12"/></StackPane.margin>
+            </FontIcon>
+        </StackPane>
+        <ScrollPane fx:id="candidateScroll" fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="184"
+                    maxHeight="200" styleClass="chat-search-scroll">
+            <VBox fx:id="candidates" minWidth="0" spacing="8"/>
+        </ScrollPane>
+    </VBox>
+    <Label fx:id="footnote" styleClass="chat-caption" wrapText="true"/>
 </VBox>

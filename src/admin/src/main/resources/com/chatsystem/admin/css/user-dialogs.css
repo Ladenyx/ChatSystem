@@ -1,0 +1,125 @@
+.admin-user-dialog {
+    -ad-danger-solid: #b10e1c;
+    -ad-danger-solid-hover: #960b17;
+    -fx-background-color: -cs-surface;
+    -fx-padding: 0;
+}
+
+.admin-user-dialog:dark,
+.cs-root:dark .admin-user-dialog {
+    -ad-danger-solid: #c42b38;
+    -ad-danger-solid-hover: #dc3545;
+}
+
+.admin-user-dialog > .admin-user-dialog-content {
+    -fx-padding: 24px 24px 16px;
+}
+
+.admin-user-dialog > .button-bar {
+    -fx-border-color: -cs-border;
+    -fx-border-width: 1px 0 0;
+}
+
+.admin-user-dialog > .button-bar > .container {
+    -fx-padding: 12px 24px;
+}
+
+.admin-user-dialog .button,
+.admin-user-dialog .text-field,
+.admin-user-dialog .combo-box {
+    -fx-min-height: 36px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.admin-user-dialog > .button-bar .button {
+    -fx-padding: 6px 16px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.admin-user-dialog .date-picker {
+    -fx-background-radius: 8px, 7px;
+}
+
+.admin-user-dialog .date-picker > .text-field {
+    -fx-background-color: transparent;
+}
+
+.admin-user-dialog .admin-dialog-primary {
+    -fx-background-color: -cs-text;
+    -fx-text-fill: -cs-surface;
+}
+
+.admin-user-dialog .admin-dialog-primary:hover {
+    -fx-opacity: 0.86;
+}
+
+.admin-user-dialog .button:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-user-dialog .button.admin-dialog-cancel {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-text-fill: -cs-focus;
+    -fx-font-weight: bold;
+}
+
+.admin-user-dialog .button.admin-dialog-cancel:hover,
+.admin-user-dialog .button.admin-dialog-cancel:focused {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.admin-user-dialog .button.admin-dialog-danger {
+    -fx-background-color: -ad-danger-solid;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.admin-user-dialog .button.admin-dialog-danger:hover {
+    -fx-background-color: -ad-danger-solid-hover;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+}
+
+.admin-user-dialog .button.admin-dialog-danger:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-user-dialog-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.admin-field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.admin-dialog-username:readonly {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-dialog-account {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.admin-dialog-account-name,
+.admin-dialog-account-id {
+    -fx-font-family: "Monospaced";
+}
+
+.admin-dialog-account-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: -cs-brand-text;
+}

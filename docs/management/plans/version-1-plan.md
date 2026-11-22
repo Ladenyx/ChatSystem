@@ -69,7 +69,7 @@ Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thà
   - `U-SCR-08`: 5 phân mục (sub-tab): *Tất cả bạn bè*, *Đang Online*, *Lời mời kết bạn*, *Tìm người dùng*, *Đã chặn*.
   - `U-DLG-01`: Hồ sơ & Bảo mật Tài khoản (Hồ sơ, Đổi mật khẩu, Quản lý khóa E2EE).
   - `U-DLG-02`: Tạo nhóm chat mới.
-  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend` theo [llm-assistant.md](../../decisions/llm-assistant.md)): chọn tối đa **5 tin nhắn** ngữ cảnh cho `Recommend`, hiển thị **3 phương án** trả về cho mỗi yêu cầu, và có bước xem trước/xác nhận nêu rõ bản rõ gửi tới Server & Meta Model API (kèm lưu ý dữ liệu có thể được dùng huấn luyện mô hình tương lai khi dùng `muse-spark-1.3-contributor`).
+  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend` theo [llm-assistant.md](../../decisions/llm-assistant.md)): tự động lấy tối đa **50 tin nhắn** hợp lệ gần nhất từ local client để AI hiểu ngữ cảnh và văn phong cuộc trò chuyện, hiển thị ngay **3 phương án** (`Refine` bản nháp hoặc `Recommend` câu trả lời) để chọn điền vào ô nháp (bản rõ ngữ cảnh cục bộ và bản nháp được gửi qua Server tới Meta Model API).
   - `U-DLG-04`: Báo cáo Spam (chọn tin vi phạm, lý do và xem trước gói bằng chứng).
   - `U-DLG-05`: Chọn Admin kế nhiệm.
 
@@ -90,8 +90,8 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
   - `A-DLG-02`: Modal Xác nhận Thao tác Quản trị.
 - [ ] **4.2. Cụm 2 — 3 Trang Dashboard Thống kê & Biểu đồ (`A-SCR-07` → `A-SCR-09`)**
   - `A-SCR-07`: Dashboard Đăng ký mới (`BarChart` 12 tháng theo năm chọn `A-13` ở trên + bảng lọc theo khoảng ngày/họ tên `A-12` ở dưới).
-  - `A-SCR-08`: Dashboard Hoạt động Người dùng (`BarChart` 12 tháng `A-16` ở trên + bảng chi tiết 3 chỉ số *Lượt mở app / Số người đã chat / Số nhóm đã chat* kèm bộ lọc toán tử `=`, `<`, `>` `A-15` ở dưới).
-  - `A-SCR-09`: Phân tích Mạng lưới Bạn bè (`A-14`: bảng hiển thị *Bạn trực tiếp* và *Tổng bạn mở rộng (tính cả bạn của bạn)* kèm bộ lọc toán tử `=`, `<`, `>`).
+  - `A-SCR-08`: Dashboard Hoạt động Người dùng (`LineChart` 12 tháng `A-16` ở trên + bảng chi tiết 3 chỉ số *Lượt mở app / Số người đã chat / Số nhóm đã chat* kèm bộ lọc toán tử `=`, `<`, `>` `A-15` ở dưới).
+  - `A-SCR-09`: Phân tích Mạng lưới Bạn bè (`BarChart` 12 tháng đếm lượt chấp nhận kết bạn theo năm + bảng mạng lưới hiện tại `A-14` so sánh *Bạn trực tiếp* với *Tổng bạn mở rộng*, kèm bộ lọc toán tử `=`, `<`, `>`).
 
 ---
 

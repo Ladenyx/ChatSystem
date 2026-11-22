@@ -3,6 +3,7 @@ package com.chatsystem.user.navigation;
 import com.chatsystem.desktop.navigation.ViewInput;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class UserViewInputs {
     private UserViewInputs() {
@@ -33,6 +34,13 @@ public final class UserViewInputs {
         }
     }
 
+    public record MessageSearch(String conversationId, Consumer<String> revealMessage) implements ViewInput {
+        public MessageSearch {
+            Objects.requireNonNull(conversationId, "conversationId");
+            Objects.requireNonNull(revealMessage, "revealMessage");
+        }
+    }
+
     public record ReportSpam(String conversationId, List<String> selectedMessageIds) implements ViewInput {
         public ReportSpam {
             Objects.requireNonNull(conversationId, "conversationId");
@@ -40,10 +48,21 @@ public final class UserViewInputs {
         }
     }
 
-    public record AiAssistant(String conversationId, AiMode mode) implements ViewInput {
+    public record AiAssistant(String conversationId, AiMode mode, String draft,
+                              Consumer<String> useSuggestion) implements ViewInput {
+        public AiAssistant(String conversationId, AiMode mode) {
+            this(conversationId, mode, "");
+        }
+
+        public AiAssistant(String conversationId, AiMode mode, String draft) {
+            this(conversationId, mode, draft, suggestion -> {});
+        }
+
         public AiAssistant {
             Objects.requireNonNull(conversationId, "conversationId");
             Objects.requireNonNull(mode, "mode");
+            Objects.requireNonNull(draft, "draft");
+            Objects.requireNonNull(useSuggestion, "useSuggestion");
         }
     }
 
