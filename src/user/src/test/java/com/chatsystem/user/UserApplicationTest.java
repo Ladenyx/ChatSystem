@@ -80,6 +80,7 @@ class UserApplicationTest {
             UserApplication app = new UserApplication();
             app.start(stage);
             try {
+                assertEquals("WhatsUp", stage.getTitle());
                 var root = stage.getScene().getRoot();
                 enterPreviewWorkspace(root);
                 root.applyCss();

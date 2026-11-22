@@ -25,7 +25,7 @@ public final class UserApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        DesktopWindow.show(stage, "WhatsUp · User Client", createNavigator());
+        DesktopWindow.show(stage, "WhatsUp", createNavigator());
     }
 
     public static void main(String[] args) {
