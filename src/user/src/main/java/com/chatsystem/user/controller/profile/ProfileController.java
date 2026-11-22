@@ -12,13 +12,15 @@ import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
@@ -29,17 +31,17 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 /** Offline profile & security preview controller; manages profile, password change and E2EE keys. */
 public final class ProfileController implements ViewController {
-    private static final String PROFILE_DRAFT = ProfileController.class.getName() + ".draft";
     private static final String CURRENT_EMAIL = ProfileController.class.getName() + ".email";
     private static final PseudoClass RULE_MET = PseudoClass.getPseudoClass("met");
     private static final PseudoClass RULE_PROGRESS_FILLED = PseudoClass.getPseudoClass("filled");
     private static final PseudoClass RULE_PROGRESS_COMPLETE = PseudoClass.getPseudoClass("complete");
-    private record Draft(String name, String address, String date, String gender) { }
 
     private static final String EMAIL_ATOM = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+";
     private static final String DOMAIN_LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?";
@@ -175,16 +177,9 @@ public final class ProfileController implements ViewController {
     @Override
     public void onEnter(ViewNavigator navigator, View view) {
         this.navigator = navigator;
-        Object current = navigator.getRoot().getProperties().get(CURRENT_EMAIL);
-        if (current instanceof String value) {
+        if (navigator != null
+                && navigator.getRoot().getProperties().get(CURRENT_EMAIL) instanceof String value) {
             email.setText(value);
-        }
-        Object saved = navigator.getRoot().getProperties().remove(PROFILE_DRAFT);
-        if (saved instanceof Draft draft) {
-            fullName.setText(draft.name());
-            address.setText(draft.address());
-            birthDate.getEditor().setText(draft.date());
-            setGender(draft.gender());
         }
     }
 
@@ -265,7 +260,9 @@ public final class ProfileController implements ViewController {
             return;
         }
         email.setText(proposed);
-        navigator.getRoot().getProperties().put(CURRENT_EMAIL, proposed);
+        if (navigator != null) {
+            navigator.getRoot().getProperties().put(CURRENT_EMAIL, proposed);
+        }
         cancelEmailChange();
         profileNotice.setText("Đã cập nhật email trong bản xem trước");
     }
@@ -276,21 +273,6 @@ public final class ProfileController implements ViewController {
                 : proposed.codePointCount(0, proposed.length()) > 254 ? "Email tối đa 254 ký tự"
                 : !proposed.matches(EMAIL_PATTERN) ? "Nhập email hợp lệ"
                 : proposed.equalsIgnoreCase(email.getText()) ? "Dùng email khác với email hiện tại" : "");
-    }
-
-    private String selectedGender() {
-        return gender.getSelectedToggle() instanceof RadioButton selected ? selected.getText() : null;
-    }
-
-    private void setGender(String value) {
-        gender.selectToggle(null);
-        if ("Nam".equals(value)) {
-            gender.selectToggle(genderMale);
-        } else if ("Nữ".equals(value)) {
-            gender.selectToggle(genderFemale);
-        } else if ("Khác".equals(value)) {
-            gender.selectToggle(genderOther);
-        }
     }
 
     @FXML
@@ -428,13 +410,55 @@ public final class ProfileController implements ViewController {
 
     @FXML
     private void forgotPassword() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "Bạn sẽ rời bản xem trước và quay về luồng khôi phục mật khẩu. Tiếp tục?",
-                ButtonType.CANCEL, ButtonType.OK);
+        Dialog<ButtonType> confirm = new Dialog<>();
         if (currentPassword.getScene() != null && currentPassword.getScene().getWindow() != null) {
             confirm.initOwner(currentPassword.getScene().getWindow());
         }
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+        confirm.initModality(Modality.WINDOW_MODAL);
+        confirm.initStyle(StageStyle.UNDECORATED);
+        confirm.setTitle("Quên mật khẩu?");
+
+        var pane = confirm.getDialogPane();
+        pane.getStyleClass().add("profile-confirm-dialog");
+        pane.setPrefWidth(400);
+
+        Label title = new Label("Quên mật khẩu?");
+        title.getStyleClass().add("profile-confirm-title");
+        title.setWrapText(true);
+        Label description = new Label(
+                "Bạn sẽ rời bản xem trước và quay về luồng khôi phục mật khẩu. Tiếp tục?");
+        description.getStyleClass().add("profile-confirm-detail");
+        description.setWrapText(true);
+        pane.setContent(new VBox(8, title, description));
+
+        ButtonType cancel = new ButtonType("Quay lại", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType proceed = new ButtonType("Tiếp tục", ButtonBar.ButtonData.OK_DONE);
+        pane.getButtonTypes().setAll(cancel, proceed);
+
+        Button cancelButton = (Button) pane.lookupButton(cancel);
+        cancelButton.getStyleClass().add("profile-dialog-cancel");
+        cancelButton.setDefaultButton(true);
+        ButtonBar.setButtonUniformSize(cancelButton, false);
+
+        Button proceedButton = (Button) pane.lookupButton(proceed);
+        proceedButton.getStyleClass().addAll("profile-button", "accent");
+        proceedButton.setDefaultButton(false);
+        ButtonBar.setButtonUniformSize(proceedButton, false);
+
+        if (navigator != null) {
+            navigator.themes().apply(pane);
+        }
+        pane.getStylesheets().add(Objects.requireNonNull(
+                ProfileController.class.getResource("/com/chatsystem/user/css/profile.css")).toExternalForm());
+
+        Platform.runLater(cancelButton::requestFocus);
+        cancelButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                cancelButton.requestFocus();
+            }
+        });
+
+        if (confirm.showAndWait().orElse(cancel) == proceed) {
             closeDialog();
             if (navigator != null) {
                 navigator.reset(UserViews.FORGOT_PASSWORD);

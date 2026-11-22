@@ -58,7 +58,7 @@
                     </VBox>
                     <HBox spacing="8" alignment="CENTER_RIGHT">
                         <Button id="cancelEmailChange" text="Hủy" onAction="#cancelEmailChange"
-                                styleClass="profile-button"/>
+                                styleClass="profile-dialog-cancel"/>
                         <Button id="updateEmail" text="Cập nhật email" onAction="#requestEmailVerification"
                                 styleClass="profile-button,accent"/>
                     </HBox>
@@ -229,7 +229,7 @@
                     </VBox>
                     <Label fx:id="keyError" styleClass="profile-field-error" wrapText="true"/>
                     <HBox spacing="8" alignment="CENTER_RIGHT">
-                        <Button id="cancelKey" text="Hủy" onAction="#cancelKey" styleClass="profile-button"/>
+                        <Button id="cancelKey" text="Hủy" onAction="#cancelKey" styleClass="profile-dialog-cancel"/>
                         <Button fx:id="keySubmit" text="Lưu mã khôi phục" onAction="#submitKey"
                                 styleClass="profile-button,accent"/>
                     </HBox>

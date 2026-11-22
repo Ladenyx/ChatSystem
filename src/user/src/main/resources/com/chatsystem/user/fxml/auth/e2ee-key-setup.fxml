@@ -15,7 +15,7 @@
         <StackPane styleClass="key-content">
             <VBox alignment="CENTER" spacing="18" maxWidth="480" maxHeight="-Infinity" styleClass="key-card">
                 <StackPane styleClass="key-icon" maxWidth="44" maxHeight="44">
-                    <FontIcon iconLiteral="fth-lock" iconSize="22"/>
+                    <FontIcon iconLiteral="fth-lock" iconSize="22" mouseTransparent="true"/>
                 </StackPane>
                 <Label text="Xem trước ngoại tuyến" styleClass="eyebrow"/>
                 <Label text="Thiết lập và khôi phục khóa E2EE" styleClass="key-title"
@@ -25,9 +25,11 @@
 
                 <VBox fx:id="choices" alignment="CENTER" spacing="12">
                     <Button id="keyCreate" text="Thiết lập mã" onAction="#setup"
-                            styleClass="accent" prefWidth="260"/>
-                    <Button id="keyRestore" text="Khôi phục bằng mã" onAction="#restore" prefWidth="260"/>
-                    <Button id="keySkip" text="Bỏ qua" onAction="#cancel" prefWidth="260"/>
+                            styleClass="key-primary,accent" prefWidth="260"/>
+                    <Button id="keyRestore" text="Khôi phục bằng mã" onAction="#restore"
+                            styleClass="key-secondary" prefWidth="260"/>
+                    <Button id="keySkip" text="Bỏ qua" onAction="#cancel"
+                            styleClass="key-escape" prefWidth="260"/>
                 </VBox>
 
                 <VBox fx:id="codeForm" alignment="CENTER" spacing="14" visible="false" managed="false">
@@ -42,8 +44,8 @@
                         <HBox fx:id="confirmRow" spacing="8" alignment="CENTER_LEFT"/>
                     </VBox>
                     <Label fx:id="notice" styleClass="key-notice" wrapText="true" textAlignment="CENTER"/>
-                    <Button fx:id="keySubmit" onAction="#submit" styleClass="accent" prefWidth="260"/>
-                    <Button id="keyCancel" text="Hủy" onAction="#cancel" prefWidth="260"/>
+                    <Button fx:id="keySubmit" onAction="#submit" styleClass="key-primary,accent" prefWidth="260"/>
+                    <Button id="keyCancel" text="Hủy" onAction="#cancel" styleClass="key-escape" prefWidth="260"/>
                 </VBox>
             </VBox>
         </StackPane>

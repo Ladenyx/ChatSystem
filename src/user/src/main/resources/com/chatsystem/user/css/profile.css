@@ -354,3 +354,53 @@
     -fx-alignment: center;
     -fx-font-size: 18px;
 }
+
+.profile-dialog-cancel {
+    -fx-min-height: 36px;
+    -fx-padding: 6px 16px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -cs-focus;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.profile-dialog-cancel:hover,
+.profile-dialog-cancel:focused {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.dialog-pane.profile-confirm-dialog {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: ladder(-cs-surface, rgba(255, 255, 255, 0.14) 49%, rgba(0, 0, 0, 0.14) 50%);
+    -fx-border-width: 1px;
+    -fx-padding: 24px;
+}
+
+.dialog-pane.profile-confirm-dialog > .content {
+    -fx-padding: 0;
+}
+
+.dialog-pane.profile-confirm-dialog > .button-bar > .container {
+    -fx-padding: 20px 0 0;
+}
+
+.dialog-pane.profile-confirm-dialog .profile-button {
+    -fx-padding: 6px 16px;
+}
+
+.profile-confirm-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.profile-confirm-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: -cs-muted;
+}
