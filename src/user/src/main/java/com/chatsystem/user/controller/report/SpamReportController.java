@@ -401,9 +401,7 @@ public final class SpamReportController implements DialogViewController {
             previewTargetValue.setText(currentPreparation.targetUserName());
             previewReasonValue.setText(currentPreparation.reason());
             previewCountMeta.setText(currentPreparation.selectedCount() + " tin nhắn");
-            previewConsentNotice.setText(currentPreparation.selectedCount()
-                    + " tin nhắn đã chọn và lý do báo cáo sẽ được gửi dạng bản rõ để quản trị viên"
-                    + " hệ thống xem xét, kể cả trong nhóm mã hóa đầu cuối (E2EE).");
+            previewConsentNotice.setText(currentPreparation.consentNotice());
 
             renderSelectedEvidenceList(currentPreparation.selectedMessages());
             showStep(previewPane);
@@ -489,8 +487,7 @@ public final class SpamReportController implements DialogViewController {
 
         Label detail = new Label("Gửi báo cáo spam đối với " + currentPreparation.targetUserName()
                 + " kèm " + currentPreparation.selectedCount()
-                + " tin nhắn đã chọn để quản trị viên xem xét? Nội dung đã chọn và lý do sẽ được gửi"
-                + " dạng bản rõ, kể cả trong nhóm E2EE.");
+                + " tin nhắn đã chọn để quản trị viên hệ thống xem xét?");
         detail.getStyleClass().add("chat-report-confirm-detail");
         detail.setWrapText(true);
         pane.setContent(new VBox(8, title, detail));

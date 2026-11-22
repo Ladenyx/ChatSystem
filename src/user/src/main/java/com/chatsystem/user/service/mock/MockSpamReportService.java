@@ -193,8 +193,8 @@ public final class MockSpamReportService implements SpamReportService {
         }
 
         int totalUnique = evidenceList.size();
-        String consentNotice = "Toàn bộ " + totalUnique
-                + " tin và lý do sẽ được gửi dạng bản rõ tới server để Admin hệ thống xem xét, kể cả trong nhóm E2EE.";
+        String consentNotice = selected.size()
+                + " tin nhắn đã chọn và lý do báo cáo sẽ được gửi tới quản trị viên hệ thống để xem xét.";
 
         String resolvedTitle = conversationTitle != null && !conversationTitle.isBlank()
                 ? conversationTitle
