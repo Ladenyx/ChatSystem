@@ -74,7 +74,7 @@
                              reorderable="false"/>
                 <TableColumn fx:id="reporterColumn" text="Người báo cáo" minWidth="120" prefWidth="150"
                              sortable="false" reorderable="false"/>
-                <TableColumn fx:id="reportedAtColumn" text="Thời gian" minWidth="110" prefWidth="130"
+                <TableColumn fx:id="reportedAtColumn" text="Thời gian" minWidth="135" prefWidth="140"
                              styleClass="admin-date-column" reorderable="false"/>
                 <TableColumn fx:id="statusColumn" text="Trạng thái" minWidth="90" prefWidth="100"
                              sortable="false" reorderable="false"/>
@@ -149,7 +149,7 @@
                 <HBox spacing="8" alignment="CENTER_LEFT" styleClass="admin-notice-banner,admin-e2ee-banner">
                     <FontIcon iconLiteral="fth-info" iconSize="16" styleClass="admin-notice-icon"/>
                     <Label text="Lưu ý kiểm duyệt: Bản rõ bằng chứng do người báo cáo gửi kèm từ thiết bị cá nhân (tối đa 20 tin vi phạm &amp; 30 tin ngữ cảnh). Hệ thống không lưu khóa giải mã E2EE gốc (DEC-05, DEC-10)."
-                           wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
+                           minWidth="0" maxWidth="Infinity" minHeight="-Infinity" wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
                 </HBox>
 
                 <VBox spacing="10" minWidth="0">

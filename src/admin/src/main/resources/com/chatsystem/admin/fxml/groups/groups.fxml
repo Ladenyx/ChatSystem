@@ -42,7 +42,7 @@
                              reorderable="false"/>
                 <TableColumn fx:id="memberCountColumn" text="Quy mô" minWidth="100" prefWidth="120"
                              sortable="false" reorderable="false"/>
-                <TableColumn fx:id="groupCreatedColumn" text="Ngày tạo" minWidth="110" prefWidth="130"
+                <TableColumn fx:id="groupCreatedColumn" text="Ngày tạo" minWidth="135" prefWidth="140"
                              styleClass="admin-date-column" reorderable="false"/>
             </columns>
             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
@@ -91,7 +91,7 @@
                 <HBox spacing="8" alignment="CENTER_LEFT" styleClass="admin-notice-banner,admin-e2ee-banner">
                     <FontIcon iconLiteral="fth-lock" iconSize="16" styleClass="admin-notice-icon"/>
                     <Label text="Hội thoại nhóm áp dụng mã hóa đầu cuối (E2EE). Theo chính sách quyền riêng tư quản trị (DEC-05, DEC-07), hệ thống không lưu khóa giải mã và Admin không có quyền đọc tin nhắn nhóm."
-                           wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
+                           minWidth="0" maxWidth="Infinity" minHeight="-Infinity" wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
                 </HBox>
 
                 <VBox spacing="8" minWidth="0">
