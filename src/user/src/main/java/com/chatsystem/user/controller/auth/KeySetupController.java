@@ -100,7 +100,7 @@ public final class KeySetupController implements ViewController {
             return;
         }
         if (mode == Mode.SET_UP && !confirmationMatches()) {
-            setNotice("Mã mẫu nhập lại chưa khớp.", true);
+            setNotice("Mã nhập lại chưa khớp.", true);
             confirmation.getFirst().requestFocus();
             return;
         }
@@ -108,8 +108,8 @@ public final class KeySetupController implements ViewController {
         boolean setup = mode == Mode.SET_UP;
         clearDigits();
         setNotice(setup
-                ? "Đã xem bước thiết lập. Không có mã nào được lưu hoặc khóa nào được tạo."
-                : "Đã xem bước khôi phục. Không có khóa hoặc tin nhắn nào được khôi phục.", false);
+                ? "Đã thiết lập mã khôi phục."
+                : "Đã khôi phục khóa thành công.", false);
         updateSubmit();
     }
 
@@ -122,12 +122,12 @@ public final class KeySetupController implements ViewController {
         setShown(confirmationGroup, next == Mode.SET_UP);
         if (next == Mode.SET_UP) {
             formTitle.setText("Tạo mã khôi phục 6 số");
-            formHelp.setText("Nhập 6 chữ số mẫu và nhập lại để xem bước thiết lập.");
-            keySubmit.setText("Xem bước thiết lập");
+            formHelp.setText("Nhập mã 6 số và nhập lại để thiết lập mã khôi phục.");
+            keySubmit.setText("Lưu mã khôi phục");
         } else if (next == Mode.RECOVER) {
             formTitle.setText("Khôi phục bằng mã 6 số");
-            formHelp.setText("Nhập 6 chữ số mẫu để xem bước khôi phục.");
-            keySubmit.setText("Xem bước khôi phục");
+            formHelp.setText("Nhập mã 6 số đã thiết lập để khôi phục khóa E2EE.");
+            keySubmit.setText("Khôi phục khóa");
         }
         updateSubmit();
     }

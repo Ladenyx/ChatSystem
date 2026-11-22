@@ -17,10 +17,9 @@
                 <StackPane styleClass="key-icon" maxWidth="44" maxHeight="44">
                     <FontIcon iconLiteral="fth-lock" iconSize="22" mouseTransparent="true"/>
                 </StackPane>
-                <Label text="Xem trước ngoại tuyến" styleClass="eyebrow"/>
                 <Label text="Thiết lập và khôi phục khóa E2EE" styleClass="key-title"
                        wrapText="true" textAlignment="CENTER"/>
-                <Label text="Chỉ dùng mã mẫu. Bản xem trước không tạo khóa hoặc mở lịch sử tin nhắn."
+                <Label text="Dùng mã 6 số để sao lưu hoặc khôi phục khóa trò chuyện khi đổi thiết bị."
                        styleClass="secondary-text" wrapText="true" textAlignment="CENTER"/>
 
                 <VBox fx:id="choices" alignment="CENTER" spacing="12">
@@ -36,11 +35,11 @@
                     <Label fx:id="formTitle" styleClass="section-title" wrapText="true" textAlignment="CENTER"/>
                     <Label fx:id="formHelp" styleClass="secondary-text" wrapText="true" textAlignment="CENTER"/>
                     <VBox spacing="8" maxWidth="376">
-                        <Label text="Mã khôi phục mẫu" styleClass="key-label"/>
+                        <Label text="Mã khôi phục" styleClass="key-label"/>
                         <HBox fx:id="digitRow" spacing="8" alignment="CENTER_LEFT"/>
                     </VBox>
                     <VBox fx:id="confirmationGroup" spacing="8" maxWidth="376">
-                        <Label text="Nhập lại mã mẫu" styleClass="key-label"/>
+                        <Label text="Nhập lại mã khôi phục" styleClass="key-label"/>
                         <HBox fx:id="confirmRow" spacing="8" alignment="CENTER_LEFT"/>
                     </VBox>
                     <Label fx:id="notice" styleClass="key-notice" wrapText="true" textAlignment="CENTER"/>

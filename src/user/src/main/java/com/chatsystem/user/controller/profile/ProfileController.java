@@ -189,7 +189,7 @@ public final class ProfileController implements ViewController {
         if (validateProfile(name)) {
             fullName.setText(name);
             showIdentity(name);
-            profileNotice.setText("Đã lưu hồ sơ trong bản xem trước");
+            profileNotice.setText("Đã lưu thay đổi hồ sơ");
         }
     }
 
@@ -264,7 +264,7 @@ public final class ProfileController implements ViewController {
             navigator.getRoot().getProperties().put(CURRENT_EMAIL, proposed);
         }
         cancelEmailChange();
-        profileNotice.setText("Đã cập nhật email trong bản xem trước");
+        profileNotice.setText("Đã cập nhật email");
     }
 
     private void validateNewEmail() {
@@ -280,7 +280,7 @@ public final class ProfileController implements ViewController {
         if (!validatePassword()) {
             return;
         }
-        passwordNotice.setText("Đã đổi mật khẩu trong bản xem trước");
+        passwordNotice.setText("Đã đổi mật khẩu");
         currentPassword.clear();
         newPassword.clear();
         confirmPassword.clear();
@@ -426,7 +426,7 @@ public final class ProfileController implements ViewController {
         title.getStyleClass().add("profile-confirm-title");
         title.setWrapText(true);
         Label description = new Label(
-                "Bạn sẽ rời bản xem trước và quay về luồng khôi phục mật khẩu. Tiếp tục?");
+                "Bạn sẽ chuyển sang màn hình khôi phục mật khẩu. Tiếp tục?");
         description.getStyleClass().add("profile-confirm-detail");
         description.setWrapText(true);
         pane.setContent(new VBox(8, title, description));

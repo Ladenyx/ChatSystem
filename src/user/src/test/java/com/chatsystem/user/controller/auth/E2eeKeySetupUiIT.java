@@ -113,7 +113,7 @@ class E2eeKeySetupUiIT {
                 last.replaceText(0, last.getLength(), "5");
                 submit.fire();
                 assertEquals(UserViews.E2EE_KEY_SETUP, navigator.currentViewProperty().get());
-                assertOfflineNotice(root, mismatch);
+                assertSuccessNotice(root, mismatch, "Đã thiết lập mã khôi phục.");
                 assertCleared(root);
                 assertTrue(submit.isDisabled());
                 return null;
@@ -137,7 +137,7 @@ class E2eeKeySetupUiIT {
                 fill(root, "keyDigit", "654321");
                 assertFalse(submit.isDisabled());
                 submit.fire();
-                assertOfflineNotice(root, "");
+                assertSuccessNotice(root, "", "Đã khôi phục khóa thành công.");
                 assertCleared(root);
                 assertTrue(submit.isDisabled());
                 button(root, "keyCancel").fire();
@@ -236,10 +236,10 @@ class E2eeKeySetupUiIT {
         }
     }
 
-    private static void assertOfflineNotice(Parent root, String previous) {
+    private static void assertSuccessNotice(Parent root, String previous, String expected) {
         String notice = notice(root);
         assertNotEquals(previous, notice);
-        assertTrue(notice.contains("Không có"), "Feedback must deny performing the real operation: " + notice);
+        assertEquals(expected, notice);
         assertShowing(root, "notice");
     }
 
