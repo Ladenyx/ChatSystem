@@ -15,9 +15,12 @@ import com.chatsystem.desktop.mock.model.MockUser;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -51,7 +54,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.AfterAll;
@@ -684,6 +690,9 @@ class AdminApplicationTest {
                 assertEquals(6, membersTable.getItems().size());
                 assertEquals("2 quản trị viên", ((Label) root.lookup("#adminCount")).getText());
                 assertEquals("6 thành viên thường", ((Label) root.lookup("#memberCount")).getText());
+                assertTrue(adminTable.lookupAll(".admin-role-badge").stream()
+                        .filter(Label.class::isInstance).map(Label.class::cast)
+                        .anyMatch(role -> role.getText().equals("Admin nhóm")));
 
                 capture(stage, "admin-groups-explorer-light");
                 navigator.themes().toggle();
@@ -741,10 +750,14 @@ class AdminApplicationTest {
                 root.applyCss();
                 root.layout();
                 assertEquals(data.spamReports().size(), directory.getItems().size());
+                pendingToggle.fire();
 
-                // Select a pending report
+                // Choose an ordinary active account, not the system Admin reported in another fixture.
                 int pendingIdx = IntStream.range(0, directory.getItems().size())
-                        .filter(i -> directory.getItems().get(i).status() == MockSpamReport.Status.PENDING)
+                        .filter(i -> {
+                            var user = data.user(directory.getItems().get(i).reportedUserId());
+                            return user.role() == MockUser.Role.USER && user.status() == MockUser.Status.ACTIVE;
+                        })
                         .findFirst().orElseThrow();
                 directory.getSelectionModel().select(pendingIdx);
                 root.applyCss();
@@ -760,21 +773,38 @@ class AdminApplicationTest {
                 assertTrue(lockButton.isVisible());
                 assertFalse(lockButton.isDisable());
 
-                var previewList = (javafx.scene.layout.VBox) root.lookup("#chatPreviewList");
+                var previewList = (VBox) root.lookup("#chatPreviewList");
                 assertEquals(selectedReport.evidence().size(), previewList.getChildren().size());
+                int dualIndex = IntStream.range(0, selectedReport.evidence().size())
+                        .filter(i -> selectedReport.evidence().get(i).selected()
+                                && selectedReport.evidence().get(i).context())
+                        .findFirst().orElseThrow();
+                var dualEvidence = previewList.getChildren().get(dualIndex);
+                assertNotNull(dualEvidence.lookup(".tag-selected"), "The selected message tag is shown");
+                assertNotNull(dualEvidence.lookup(".tag-context"), "The same evidence row also shows its context tag");
+                capture(stage, "admin-spam-pending-light");
 
-                // Test lock reported user action
+                // Cancel leaves the reported account and the report unchanged.
                 lockButton.fire();
                 var confirmDialog = ownedDialogPane(stage);
-                assertNotNull(confirmDialog);
-                var confirmSubmit = (Button) confirmDialog.lookup("#submitUserDialog");
-                confirmSubmit.fire();
+                var preservation = (Label) confirmDialog.lookup("#preservationNotice");
+                assertTrue(preservation.isVisible());
+                assertTrue(preservation.getText().contains("bằng chứng"));
+                capture(confirmDialog.getScene(), "admin-spam-confirm-lock");
+                ((Button) confirmDialog.lookup("#cancelUserDialog")).fire();
+                assertEquals("Hoạt động", ((Label) root.lookup("#reportedUserStatus")).getText());
+                assertEquals("Chờ xử lý", ((Label) root.lookup("#reportStatusBadge")).getText());
+
+                lockButton.fire();
+                ((Button) ownedDialogPane(stage).lookup("#submitUserDialog")).fire();
 
                 root.applyCss();
                 root.layout();
                 assertEquals("Bị khóa", ((Label) root.lookup("#reportedUserStatus")).getText());
                 assertTrue(lockButton.isDisable());
                 assertEquals("Tài khoản đã bị khóa", lockButton.getText());
+                assertEquals("Chờ xử lý", ((Label) root.lookup("#reportStatusBadge")).getText());
+                assertEquals(expectedPending, directory.getItems().size());
 
                 // Test mark reviewed action (DEC-10)
                 var markReviewedBtn = (Button) root.lookup("#markReviewed");
@@ -788,8 +818,21 @@ class AdminApplicationTest {
                 assertTrue(noteError.isVisible());
 
                 // Non-empty note
-                noteInput.setText("Đã xác minh vi phạm theo bằng chứng đính kèm và khóa tài khoản.");
+                String note = "Đã xem bằng chứng đính kèm và khóa tài khoản mẫu.";
+                noteInput.setText(note);
                 markReviewedBtn.fire();
+                root.applyCss();
+                root.layout();
+
+                assertEquals(expectedPending - 1, directory.getItems().size());
+                assertEquals((expectedPending - 1) + " báo cáo", countLabel.getText());
+                assertTrue(directory.getItems().stream().noneMatch(report -> report.id().equals(selectedReport.id())));
+                assertTrue(emptyInspector.isVisible());
+
+                ((ToggleButton) root.lookup("#reviewedReports")).fire();
+                var reviewed = directory.getItems().stream()
+                        .filter(report -> report.id().equals(selectedReport.id())).findFirst().orElseThrow();
+                directory.getSelectionModel().select(reviewed);
                 root.applyCss();
                 root.layout();
 
@@ -797,6 +840,7 @@ class AdminApplicationTest {
                 var reviewedBanner = (Node) root.lookup(".admin-reviewed-banner");
                 assertNotNull(reviewedBanner);
                 assertTrue(reviewedBanner.isVisible());
+                assertTrue(((Label) root.lookup("#reviewedNoteText")).getText().contains(note));
 
                 capture(stage, "admin-spam-moderation-light");
                 navigator.themes().toggle();
@@ -810,6 +854,164 @@ class AdminApplicationTest {
         });
         Platform.runLater(task);
         task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void spamFiltersByUsernameAndValidatesTypedVietnameseDates() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            var locale = Locale.getDefault(Locale.Category.FORMAT);
+            Locale.setDefault(Locale.Category.FORMAT, Locale.of("en", "VN"));
+            Stage stage = new Stage();
+            try (var navigator = AdminApplication.createNavigator()) {
+                navigator.reset(AdminViews.OVERVIEW);
+                navigator.navigate(AdminViews.SPAM);
+                var root = navigator.getRoot();
+                stage.setScene(new Scene(root, 1024, 640));
+                stage.show();
+                root.applyCss();
+                root.layout();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockSpamReport>) root.lookup("#reportsTable");
+                var search = (TextField) root.lookup("#reportedUserFilter");
+                var start = (DatePicker) root.lookup("#startDateFilter");
+                var end = (DatePicker) root.lookup("#endDateFilter");
+                var error = (Label) root.lookup("#spamDateError");
+                var data = MockData.create();
+                var account = data.user(data.spamReports().getFirst().reportedUserId());
+
+                search.setText(account.fullName());
+                assertTrue(directory.getItems().isEmpty(), "The filter does not search full names");
+                search.setText(" " + account.username().toUpperCase(Locale.ROOT) + " ");
+                var byUsername = data.spamReports().stream()
+                        .filter(report -> data.user(report.reportedUserId()).username().contains(account.username()))
+                        .toList();
+                assertEquals(byUsername, directory.getItems());
+                search.clear();
+
+                var date = data.spamReports().getFirst().createdAt().atZone(MockData.DISPLAY_ZONE).toLocalDate();
+                var formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu", Locale.ROOT);
+                start.getEditor().setText(formatter.format(date));
+                start.commitValue();
+                end.getEditor().setText(formatter.format(date));
+                end.commitValue();
+                assertEquals(date, start.getValue());
+                assertEquals(date, end.getValue());
+                assertEquals(formatter.format(date), start.getEditor().getText());
+                assertFalse(error.isVisible());
+                var sameDate = data.spamReports().stream()
+                        .filter(report -> report.createdAt().atZone(MockData.DISPLAY_ZONE).toLocalDate().equals(date))
+                        .toList();
+                assertEquals(sameDate, directory.getItems(), "The end date includes the entire selected local day");
+
+                start.getEditor().setText(formatter.format(date.plusDays(1)));
+                assertTrue(error.isVisible(), "A reversed range reports an error instead of an empty result");
+                assertEquals(sameDate, directory.getItems(), "Invalid dates do not replace the last valid results");
+
+                var editor = start.getEditor();
+                editor.requestFocus();
+                editor.setText("29/02/2026");
+                assertTrue(error.isVisible(), "A non-existent day is not normalized to another date");
+                editor.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ENTER,
+                        false, false, false, false));
+                editor.fireEvent(new KeyEvent(KeyEvent.KEY_RELEASED, "", "", KeyCode.ENTER,
+                        false, false, false, false));
+                search.requestFocus();
+                assertSame(search, stage.getScene().getFocusOwner());
+                assertTrue(error.isVisible(), "Invalid text remains visible after Enter and moving focus");
+                assertEquals("29/02/2026", editor.getText());
+                assertEquals(date, start.getValue(), "Neither entering nor leaving invalid text changes the date");
+                assertEquals(sameDate, directory.getItems());
+
+                ((Hyperlink) root.lookup("#clearSpamFilters")).fire();
+                assertFalse(error.isVisible());
+                assertEquals(data.spamReports(), directory.getItems());
+            } finally {
+                stage.close();
+                Locale.setDefault(Locale.Category.FORMAT, locale);
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void moderationFitsCompactWindowAndProtectsSystemAdmin() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = AdminApplication.createNavigator();
+            var root = navigator.getRoot();
+            stage.setScene(new Scene(root, 1024, 640));
+            stage.show();
+            try {
+                navigator.reset(AdminViews.OVERVIEW);
+                navigator.navigate(AdminViews.GROUPS);
+                root.applyCss();
+                root.layout();
+                @SuppressWarnings("unchecked")
+                var groups = (TableView<MockGroup>) root.lookup("#groupsTable");
+                groups.getSelectionModel().selectFirst();
+                var selectedGroup = groups.getSelectionModel().getSelectedItem();
+                assertTrue(groups.getColumns().stream().noneMatch(TableColumn::isSortable));
+                @SuppressWarnings("unchecked")
+                var sort = (ComboBox<String>) root.lookup("#groupSortOrder");
+                sort.getSelectionModel().select("Tên nhóm A–Z");
+                var alphabetical = Comparator.comparing(MockGroup::name, Collator.getInstance(Locale.of("vi", "VN")));
+                var data = MockData.create();
+                assertEquals(data.groups().stream().sorted(alphabetical).toList(), groups.getItems());
+                assertEquals(selectedGroup, groups.getSelectionModel().getSelectedItem());
+                root.applyCss();
+                root.layout();
+                assertVisibleColumnsFit(groups);
+                capture(stage, "admin-groups-explorer-compact");
+
+                navigator.navigate(AdminViews.SPAM);
+                root.applyCss();
+                root.layout();
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<MockSpamReport>) root.lookup("#reportsTable");
+                directory.getSelectionModel().select(directory.getItems().stream()
+                        .filter(report -> data.user(report.reportedUserId()).role() == MockUser.Role.ADMIN)
+                        .findFirst().orElseThrow());
+                root.applyCss();
+                root.layout();
+                assertVisibleColumnsFit(directory);
+                assertTrue(directory.getVisibleLeafColumns().stream()
+                        .anyMatch(column -> column.getText().equals("Trạng thái")), "Report status remains visible");
+
+                var lock = (Button) root.lookup("#lockReportedUser");
+                assertTrue(lock.isDisabled(), "A system Admin cannot be locked via a report");
+                assertEquals("Hoạt động", ((Label) root.lookup("#reportedUserStatus")).getText());
+                lock.fire();
+                assertTrue(Window.getWindows().stream().noneMatch(window -> window instanceof Stage dialog
+                        && dialog.getOwner() == stage && dialog.getScene().getRoot() instanceof DialogPane));
+
+                var inspector = (ScrollPane) root.lookup("#reportInspector");
+                assertTrue(inspector.getContent().getLayoutBounds().getWidth()
+                        <= inspector.getViewportBounds().getWidth() + 1);
+                assertWrappedTextFits((Label) root.lookup("#reportReason"));
+                var selectedBubble = root.lookup(".bubble-selected");
+                assertWrappedTextFits((Label) selectedBubble.lookup(".admin-bubble-text"));
+                capture(stage, "admin-spam-moderation-compact");
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static void assertVisibleColumnsFit(TableView<?> table) {
+        double width = table.getVisibleLeafColumns().stream().mapToDouble(TableColumn::getWidth).sum();
+        assertTrue(width <= table.getWidth() + 1, () -> "Columns need " + width + " px, table has " + table.getWidth());
+    }
+
+    private static void assertWrappedTextFits(Label label) {
+        assertTrue(label.isWrapText() && label.getWidth() > 0 && label.getHeight() > 0);
+        assertTrue(label.getHeight() >= label.prefHeight(label.getWidth()) - 1,
+                () -> "Not enough room for the full text: " + label.getText());
     }
 
     private static void assertLoginTextAlignment(TableView<?> timeline, int rowIndex) {
