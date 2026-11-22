@@ -95,7 +95,7 @@ final class EvidenceConversationDialog {
                 chatList.getChildren().add(dateDivider(day));
                 previousDay = day;
             }
-            HBox row = messageRow(preview, report, item);
+            HBox row = messageRow(preview, report, item, isGroup);
             chatList.getChildren().add(row);
             rowsByMessageId.put(msg.id(), row);
             if (item.selected()) {
@@ -117,20 +117,12 @@ final class EvidenceConversationDialog {
         title.setWrapText(true);
         title.setMinWidth(0);
 
-        Label kindPill = new Label(isGroup ? "Nhóm chat" : "Trò chuyện 1–1");
-        kindPill.getStyleClass().add("evidence-dialog-kind");
-        kindPill.setMinWidth(Region.USE_PREF_SIZE);
-
-        HBox titleRow = new HBox(8, title, kindPill);
-        titleRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(title, Priority.SOMETIMES);
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox headerTop = new HBox(12, titleRow, spacer);
+        HBox headerTop = new HBox(12, title, spacer);
         headerTop.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(titleRow, Priority.SOMETIMES);
+        HBox.setHgrow(title, Priority.SOMETIMES);
 
         int[] activeIndex = {0};
         if (focusMessageId != null) {
@@ -146,22 +138,24 @@ final class EvidenceConversationDialog {
             headerTop.getChildren().add(jumpBar);
         }
 
-        Label subtitle = new Label("Bản chụp chỉ đọc gồm " + report.evidence().size()
-                + " tin nhắn do " + reporter.fullName() + " (@" + reporter.username()
-                + ") gửi · Góc nhìn từ người báo cáo");
+        String kindText = isGroup ? "Nhóm chat" : "Trò chuyện 1–1";
+        String selectedSummary = selectedRows.isEmpty() ? ""
+                : " · " + selectedRows.size() + " tin bị báo cáo";
+        Label subtitle = new Label(kindText + " · " + report.evidence().size()
+                + " tin nhắn · Bản chụp từ " + reporter.fullName() + " (@" + reporter.username() + ")"
+                + selectedSummary);
         subtitle.getStyleClass().add("caption");
         subtitle.setWrapText(true);
         subtitle.setMinWidth(0);
 
-        VBox header = new VBox(8, headerTop, subtitle);
+        VBox header = new VBox(4, headerTop, subtitle);
         header.getStyleClass().add("evidence-dialog-header");
         header.setMinWidth(0);
 
         FontIcon lockIcon = new FontIcon(Feather.LOCK);
         lockIcon.setIconSize(14);
         Label noticeText = new Label(
-                "Bản chụp chỉ đọc — hệ thống không xác minh bản rõ bằng mật mã E2EE"
-                        + " và không cấp quyền truy cập hội thoại trực tiếp");
+                "Bản rõ do người báo cáo cung cấp, hệ thống không xác minh bằng mật mã E2EE");
         noticeText.getStyleClass().add("caption");
         noticeText.setWrapText(true);
         noticeText.setMinWidth(0);
@@ -197,24 +191,26 @@ final class EvidenceConversationDialog {
 
     private static HBox buildJumpBar(ScrollPane scroll, VBox chatList, List<Node> selectedRows, int[] activeIndex) {
         int count = selectedRows.size();
-        Label counter = new Label();
-        counter.setId("evidenceJumpCounter");
-        counter.getStyleClass().add("evidence-jump-counter");
-        counter.setMinWidth(Region.USE_PREF_SIZE);
-        updateCounter(counter, activeIndex[0], count);
-
-        HBox jumpBar = new HBox(6, counter);
+        HBox jumpBar = new HBox(6);
         jumpBar.setAlignment(Pos.CENTER_LEFT);
         jumpBar.setMinWidth(Region.USE_PREF_SIZE);
 
+        Label counter = null;
         if (count > 1) {
+            counter = new Label();
+            counter.setId("evidenceJumpCounter");
+            counter.getStyleClass().add("evidence-jump-counter");
+            counter.setMinWidth(Region.USE_PREF_SIZE);
+            updateCounter(counter, activeIndex[0], count);
+
+            Label counterRef = counter;
             Button prev = new Button("", FontIcon.of(Feather.CHEVRON_UP, 14));
             prev.setId("prevReported");
             prev.setAccessibleText("Tin bị báo cáo trước");
             prev.getStyleClass().add("evidence-jump-btn");
             prev.setOnAction(event -> {
                 activeIndex[0] = (activeIndex[0] - 1 + count) % count;
-                updateCounter(counter, activeIndex[0], count);
+                updateCounter(counterRef, activeIndex[0], count);
                 scrollToNode(scroll, chatList, selectedRows.get(activeIndex[0]));
             });
 
@@ -224,17 +220,20 @@ final class EvidenceConversationDialog {
             next.getStyleClass().add("evidence-jump-btn");
             next.setOnAction(event -> {
                 activeIndex[0] = (activeIndex[0] + 1) % count;
-                updateCounter(counter, activeIndex[0], count);
+                updateCounter(counterRef, activeIndex[0], count);
                 scrollToNode(scroll, chatList, selectedRows.get(activeIndex[0]));
             });
-            jumpBar.getChildren().addAll(prev, next);
+            jumpBar.getChildren().addAll(counter, prev, next);
         }
 
+        Label counterForJump = counter;
         Button jump = new Button("Tới tin bị báo cáo", FontIcon.of(Feather.FLAG, 12));
         jump.setId("jumpToReported");
         jump.getStyleClass().add("evidence-jump-btn");
         jump.setOnAction(event -> {
-            updateCounter(counter, activeIndex[0], count);
+            if (counterForJump != null) {
+                updateCounter(counterForJump, activeIndex[0], count);
+            }
             scrollToNode(scroll, chatList, selectedRows.get(activeIndex[0]));
         });
         jumpBar.getChildren().add(jump);
@@ -242,7 +241,7 @@ final class EvidenceConversationDialog {
     }
 
     private static void updateCounter(Label counter, int index, int total) {
-        counter.setText(total == 1 ? "1 tin bị báo cáo" : "Tin bị báo cáo " + (index + 1) + " / " + total);
+        counter.setText((index + 1) + " / " + total);
     }
 
     private static HBox dateDivider(LocalDate day) {
@@ -264,7 +263,8 @@ final class EvidenceConversationDialog {
         return divider;
     }
 
-    private static HBox messageRow(SpamModerationPreview preview, MockSpamReport report, MockSpamReport.Evidence item) {
+    private static HBox messageRow(SpamModerationPreview preview, MockSpamReport report,
+                                   MockSpamReport.Evidence item, boolean isGroup) {
         MockMessage msg = item.message();
         MockUser sender = preview.user(msg.senderId());
         boolean reporterOwn = msg.senderId().equals(report.reporterId()) && !item.selected();
@@ -285,7 +285,7 @@ final class EvidenceConversationDialog {
 
         if (reporterOwn) {
             content.setAlignment(Pos.TOP_RIGHT);
-            Label author = new Label("Người báo cáo · " + sender.fullName());
+            Label author = new Label(sender.fullName());
             author.getStyleClass().add("evidence-msg-author");
             Label time = new Label(TIME.format(msg.sentAt()));
             time.setAccessibleText(DATE_TIME.format(msg.sentAt()));
@@ -304,20 +304,24 @@ final class EvidenceConversationDialog {
             content.setAlignment(Pos.TOP_LEFT);
             Label avatar = new Label(initials(sender.fullName()));
             avatar.getStyleClass().add("evidence-msg-avatar");
-            if (sender.id().equals(report.reportedUserId())) {
-                avatar.getStyleClass().add("avatar-reported");
-            }
 
             Label author = new Label(sender.fullName());
             author.getStyleClass().add("evidence-msg-author");
-            Label handle = new Label("@" + sender.username());
-            handle.getStyleClass().add("evidence-msg-handle");
+            author.setAccessibleText(sender.fullName() + " @" + sender.username());
             Label time = new Label(TIME.format(msg.sentAt()));
             time.setAccessibleText(DATE_TIME.format(msg.sentAt()));
             time.getStyleClass().add("evidence-msg-time");
-            FlowPane meta = new FlowPane(6, 2, author, handle, time);
+
+            FlowPane meta = new FlowPane(6, 2);
             meta.setAlignment(Pos.CENTER_LEFT);
             meta.setMinWidth(0);
+            meta.getChildren().add(author);
+            if (isGroup) {
+                Label handle = new Label("@" + sender.username());
+                handle.getStyleClass().add("evidence-msg-handle");
+                meta.getChildren().add(handle);
+            }
+            meta.getChildren().add(time);
 
             if (item.selected()) {
                 Label flag = new Label("Tin bị báo cáo", FontIcon.of(Feather.FLAG, 12));

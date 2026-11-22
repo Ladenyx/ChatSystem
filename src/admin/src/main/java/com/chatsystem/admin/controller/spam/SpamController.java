@@ -462,14 +462,12 @@ public final class SpamController implements ViewController {
         Label author = wrappingLabel(sender.fullName() + " · @" + sender.username(), "admin-bubble-sender");
         Label body = wrappingLabel(message.text(), "admin-bubble-text");
 
-        Label cue = new Label("Nhấn để xem đầy đủ mạch hội thoại →");
-        cue.getStyleClass().add("admin-reported-cue");
-
-        VBox card = new VBox(6, topRow, author, body, cue);
+        VBox card = new VBox(4, topRow, author, body);
         card.setMinWidth(0);
         card.getStyleClass().addAll("admin-reported-card", "bubble-selected");
         card.setFocusTraversable(true);
         card.setAccessibleText("Tin bị báo cáo từ " + sender.fullName() + ": " + message.text());
+        Tooltip.install(card, new Tooltip("Nhấn để xem đầy đủ hội thoại"));
         card.setOnMouseClicked(event -> openEvidenceConversationFor(message.id()));
         card.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
