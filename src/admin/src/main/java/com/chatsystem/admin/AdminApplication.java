@@ -12,6 +12,8 @@ import javafx.scene.Parent;
 import javafx.stage.Stage;
 
 public final class AdminApplication extends Application {
+    static final String WINDOW_TITLE = "WhatsUp · Admin App";
+
     public static ViewNavigator createNavigator() throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(AdminApplication.class.getResource(
                 "/com/chatsystem/admin/fxml/shell.fxml")));
@@ -19,13 +21,13 @@ public final class AdminApplication extends Application {
         AdminShellController controller = loader.getController();
         ViewNavigator navigator = new ViewNavigator(shell, controller.getViewHost(), new ThemeManager());
         controller.connect(navigator);
-        navigator.reset(AdminViews.OVERVIEW);
+        navigator.reset(AdminViews.SIGN_IN);
         return navigator;
     }
 
     @Override
     public void start(Stage stage) throws IOException {
-        DesktopWindow.show(stage, "ChatSystem · Admin App", createNavigator());
+        DesktopWindow.show(stage, WINDOW_TITLE, createNavigator());
     }
 
     public static void main(String[] args) {

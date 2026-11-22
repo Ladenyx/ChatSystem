@@ -1,12 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
+      fx:controller="com.chatsystem.admin.controller.logs.LoginLogsController"
+      stylesheets="@../../css/login-logs.css" styleClass="admin-login-logs-page" minWidth="0">
+    <VBox spacing="8" styleClass="admin-login-logs-panel" minWidth="0" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" spacing="12" minHeight="28" styleClass="admin-login-log-meta">
+            <Label fx:id="loginCount" styleClass="admin-login-log-count"/>
+            <Label text="Mới nhất trước" styleClass="caption"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Giờ Việt Nam · UTC+7" styleClass="caption"/>
+        </HBox>
+        <TableView fx:id="loginEvents" fixedCellSize="40" minWidth="0" minHeight="120" editable="false"
+                   styleClass="admin-login-events" accessibleText="Nhật ký đăng nhập toàn hệ thống"
+                   VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="loggedInAt" text="Đăng nhập lúc" minWidth="176" prefWidth="216" maxWidth="280"
+                             styleClass="admin-login-time" sortable="false" reorderable="false"/>
+                <TableColumn fx:id="username" text="Tên đăng nhập" minWidth="128" prefWidth="192" maxWidth="256"
+                             styleClass="admin-login-username" sortable="false" reorderable="false"/>
+                <TableColumn fx:id="fullName" text="Họ tên" minWidth="176" prefWidth="360"
+                             sortable="false" reorderable="false"/>
+            </columns>
+            <placeholder>
+                <Label text="Chưa có lượt đăng nhập" styleClass="secondary-text"/>
+            </placeholder>
+        </TableView>
+        <Label text="Chỉ đọc" minHeight="24" styleClass="caption,admin-login-log-meta"/>
+    </VBox>
 </VBox>

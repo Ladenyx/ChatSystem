@@ -41,10 +41,10 @@ public final class ChatMessageRow extends HBox {
         bubble.getStyleClass().add("chat-bubble");
         bubble.getStyleClass().add(recalled ? "chat-bubble-unavailable"
                 : outgoing ? "chat-bubble-outgoing" : "chat-bubble-incoming");
-        String status = outgoing && !recalled ? "  " + deliveryLabel(message.state()) : "";
+        String status = outgoing && !recalled ? " · " + deliveryLabel(message.state()) : "";
         Label metadata = new Label(TIME.format(message.sentAt()) + status);
         metadata.setWrapText(true);
-        metadata.getStyleClass().add("chat-caption");
+        metadata.getStyleClass().addAll("chat-caption", "chat-message-meta");
         if (outgoing && message.state() == State.READ) {
             metadata.getStyleClass().add("chat-receipt-read");
         }

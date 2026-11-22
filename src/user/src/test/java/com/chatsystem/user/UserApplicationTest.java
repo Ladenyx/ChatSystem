@@ -24,7 +24,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.geometry.Orientation;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
@@ -81,6 +80,7 @@ class UserApplicationTest {
             app.start(stage);
             try {
                 var root = stage.getScene().getRoot();
+                enterPreviewWorkspace(root);
                 root.applyCss();
                 root.layout();
                 assertTrue(((ToggleButton) root.lookup("#navChats")).isSelected());
@@ -185,6 +185,7 @@ class UserApplicationTest {
                 var scene = new Scene(root, 1024, 640);
                 stage.setScene(scene);
                 root.resize(1024, 640);
+                enterPreviewWorkspace(root);
                 root.applyCss();
                 root.layout();
                 assertEquals(280, ((Region) root.lookup("#conversationSidebar")).getWidth());
@@ -227,6 +228,9 @@ class UserApplicationTest {
                 stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
                 stage.show();
                 var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
                 fireSetting(root, "openMockData");
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 root.applyCss();
@@ -294,6 +298,12 @@ class UserApplicationTest {
         });
         Platform.runLater(task);
         task.get(30, TimeUnit.SECONDS);
+    }
+
+    private static void enterPreviewWorkspace(Parent root) {
+        root.applyCss();
+        root.layout();
+        assertInstanceOf(Button.class, root.lookup("#authSignInSubmit")).fire();
     }
 
     private static void fireSetting(Parent root, String id) {

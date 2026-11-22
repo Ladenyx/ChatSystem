@@ -59,7 +59,9 @@ Tất cả API điều hướng/theme phải gọi trên JavaFX Application Thre
 
 `UserViews` đăng ký 14 route, `AdminViews` đăng ký 11 route. Mỗi route chỉ đến một FXML riêng trong cụm phụ trách. Ví dụ, `UserViews.CONTACTS` (`U-SCR-08`) nạp `/com/chatsystem/user/fxml/contacts/contacts.fxml`. Khi triển khai màn hình, thay nội dung FXML tại đường dẫn đã đăng ký và gắn controller trong package của cụm. Mã màn hình và đường dẫn ổn định giúp các nhánh cùng dùng một route.
 
-`UserViews.ALL` và `AdminViews.ALL` là danh sách route để kiểm tra tài nguyên, kể cả trang đăng nhập và overlay. `AdminViews.PAGES` chỉ gồm các mục trong sidebar. User Client hiện mở thẳng `U-SCR-07` và Admin App mở `A-SCR-02` để xem UI ngoại tuyến. Luồng mở ứng dụng qua trang đăng nhập được nối khi triển khai shell xác thực.
+`UserViews.ALL` và `AdminViews.ALL` là danh sách route để kiểm tra tài nguyên, kể cả trang đăng nhập và overlay. `AdminViews.PAGES` chỉ gồm các mục trong sidebar.
+
+Admin App mở `A-SCR-01` trước khi hiện sidebar. Trong bản xem trước Version 1, nhập tên đăng nhập và mật khẩu mẫu rồi chọn **Đăng nhập** để mở Tổng quan (`A-SCR-02`). Luồng trình diễn dùng `reset` để bắt đầu lịch sử điều hướng tại Tổng quan.
 
 Controller cần điều hướng sử dụng lifecycle thay vì truy cập biến toàn cục:
 
@@ -91,7 +93,8 @@ FXML khai báo `fx:controller` và các handler như bình thường. `initializ
 | Bạn bè hoặc Hội thoại → Tạo nhóm (`U-DLG-02`) | `UserViewInputs.CreateGroup` | Truyền danh sách ID thành viên chọn trước. Mở từ Hội thoại dùng danh sách rỗng. |
 | Hội thoại → Drawer, báo cáo spam, chọn Admin kế nhiệm hoặc trợ lý AI | `UserViewInputs.Conversation`, `ReportSpam`, `AiAssistant` | Truyền `conversationId`. Báo cáo spam nhận thêm danh sách ID tin đã chọn. Hai nút AI truyền `REFINE` hoặc `RECOMMEND` khi mở cùng route `U-DLG-03`. |
 | Xác thực hoặc Hồ sơ → xác minh email, thiết lập hoặc khôi phục khóa (`U-SCR-03`, `U-SCR-06`) | `UserViewInputs.VerifyEmail`, `E2eeKeySetup` | Truyền mục đích mở. Dữ liệu nhập trong form, như mật khẩu hoặc mã xác minh, thuộc luồng xử lý của form đó. |
-| Quản lý Người dùng hoặc Kiểm duyệt Spam → Xác nhận (`A-DLG-02`) | `AdminViewInputs.ConfirmAction` | Truyền thao tác và `userId` đích. Sau xác nhận, màn hình gọi thực hiện thay đổi demo. |
+| Quản lý người dùng → Biểu mẫu (`A-DLG-01`) | `ViewInput.NONE` hoặc `AdminViewInputs.EditUser` | Mở form trống để thêm hoặc truyền `userId` để điền hồ sơ khi sửa. |
+| Quản lý người dùng hoặc Kiểm duyệt spam → Xác nhận (`A-DLG-02`) | `AdminViewInputs.ConfirmAction` | Truyền thao tác và `userId` đích. Hộp thoại trả về nút có `ButtonData.OK_DONE` khi xác nhận. Version 1 dùng kết quả này để trình diễn luồng giao diện. |
 
 Mỗi mục lịch sử giữ tham số trang của lần mở tương ứng. Modal, drawer và popover nhận tham số riêng và đóng mà không đổi tham số của trang bên dưới. Khi tích hợp luồng đăng nhập hoặc đăng xuất, lưu danh tính và trạng thái UI dùng chung (như hồ sơ và chặn) trong phiên của cửa sổ. Dùng `reset(...)` khi đổi phiên để bỏ lịch sử, tham số cũ và controller đã cache.
 
@@ -103,12 +106,12 @@ navigator.showDrawer(UserViews.CONVERSATION_INFO);
 navigator.showPopover(DisplayOptionsController.VIEW, anchorButton);
 ```
 
-- Modal dùng JavaFX `Dialog<ButtonType>`, có owner là cửa sổ đang mở, `WINDOW_MODAL` và nút Đóng/Cancel; trả về `Dialog` để màn hình sau này gắn xử lý kết quả.
+- Modal dùng JavaFX `Dialog<ButtonType>` và `WINDOW_MODAL`, có owner là cửa sổ đang mở. `showModal(...)` trả về `Dialog` để màn hình gọi đọc kết quả. Hộp thoại biểu mẫu và xác nhận của Admin App có nút Hủy và nút xác nhận theo thao tác.
 - Drawer rộng 320 px ở bên phải, co vùng nội dung còn lại, có nút Đóng và Esc. Drawer không khóa phần còn lại của ứng dụng.
 - Popover dùng AtlantaFX, bám vào control đang hiển thị, đóng bằng nút, Esc hoặc bấm ra ngoài. Không cho detach thành cửa sổ khác.
 - Đóng overlay trả focus về control mở nó nếu control vẫn nằm trong cửa sổ. Chỉ một overlay được mở cùng lúc; mở overlay mới sẽ đóng overlay cũ.
 
-Các route modal hiện dùng nội dung khung. Profile, tạo nhóm, thông tin hội thoại và thêm user chưa có biểu mẫu nghiệp vụ. Không đánh dấu các tính năng tương ứng hoàn tất chỉ vì đã có route.
+Các route modal của User Client cung cấp nơi gắn biểu mẫu theo từng cụm. Admin App dùng biểu mẫu Thêm / Sửa hồ sơ và hộp thoại xác nhận để trình diễn thao tác trên dữ liệu mẫu.
 
 ## Theme và liên hệ với Figma
 
