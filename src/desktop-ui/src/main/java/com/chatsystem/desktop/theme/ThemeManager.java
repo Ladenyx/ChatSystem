@@ -2,6 +2,7 @@ package com.chatsystem.desktop.theme;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -32,10 +33,13 @@ public final class ThemeManager {
         requireFxThread();
         for (String weight : new String[]{"Regular", "SemiBold", "Bold"}) {
             String resource = "/com/chatsystem/desktop/fonts/Inter-" + weight + ".ttf";
-            Font font = Font.loadFont(Objects.requireNonNull(
-                    ThemeManager.class.getResource(resource)).toExternalForm(), 14);
-            if (font == null) {
-                throw new IllegalStateException("Cannot load bundled font: " + resource);
+            // The native font loader cannot read URL-escaped paths such as "Java%20Programming".
+            try (var stream = Objects.requireNonNull(ThemeManager.class.getResourceAsStream(resource), resource)) {
+                if (Font.loadFont(stream, 14) == null) {
+                    throw new IllegalStateException("Cannot load bundled font: " + resource);
+                }
+            } catch (IOException exception) {
+                throw new IllegalStateException("Cannot read bundled font: " + resource, exception);
             }
         }
         setMode(Mode.LIGHT);

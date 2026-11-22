@@ -11,7 +11,6 @@
         <Label fx:id="recipient" styleClass="caption" wrapText="true" managed="false" visible="false"/>
     </VBox>
     <Label fx:id="consequences" wrapText="true"/>
-    <Label fx:id="preservationNotice" text="Báo cáo và bằng chứng vẫn được giữ nguyên."
-           wrapText="true" managed="false" visible="false"/>
-    <Label text="Dữ liệu mẫu · Xem trước thao tác" styleClass="caption" wrapText="true"/>
+    <Label fx:id="preservationNotice" text="Báo cáo và bằng chứng vẫn được giữ nguyên"
+           styleClass="secondary-text" wrapText="true" managed="false" visible="false"/>
 </VBox>

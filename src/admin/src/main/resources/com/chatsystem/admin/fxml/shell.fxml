@@ -47,7 +47,6 @@
                     </Button>
                     <Label fx:id="pageTitle" styleClass="admin-page-title" wrapText="true"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="overviewDataNote" text="Dữ liệu mẫu" styleClass="caption"/>
                 </HBox>
             </top>
             <center><StackPane fx:id="viewHost" id="viewHost" minWidth="0"/></center>

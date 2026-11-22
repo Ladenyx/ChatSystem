@@ -29,7 +29,7 @@ public final class ConfirmActionController implements ViewController {
         var user = UserManagementFixtures.findUser(action.userId()).orElse(null);
         Prompt prompt = promptFor(action.action());
         confirmationTitle.setText(prompt.title());
-        account.setText(user == null ? "Tài khoản chưa có trong dữ liệu mẫu" : "@" + user.username());
+        account.setText(user == null ? "Không tìm thấy thông tin tài khoản" : "@" + user.username());
         accountId.setText("ID " + action.userId());
         consequences.setText(prompt.consequences());
         boolean reportedAccount = action.action() == Action.LOCK_REPORTED_USER;
@@ -49,8 +49,8 @@ public final class ConfirmActionController implements ViewController {
         return switch (action) {
             case LOCK_USER -> new Prompt("Khóa tài khoản?", "Xác nhận khóa",
                     "Các phiên đang hoạt động sẽ bị thu hồi ngay khi khóa", true);
-            case LOCK_REPORTED_USER -> new Prompt("Xác nhận khóa tài khoản", "Xác nhận khóa",
-                    "Khóa tài khoản sẽ thu hồi ngay toàn bộ phiên đang hoạt động của tài khoản này.", true);
+            case LOCK_REPORTED_USER -> new Prompt("Khóa tài khoản bị báo cáo?", "Xác nhận khóa",
+                    "Các phiên đang hoạt động sẽ bị thu hồi ngay khi khóa", true);
             case UNLOCK_USER -> new Prompt("Mở khóa tài khoản?", "Xác nhận mở khóa",
                     "Người dùng có thể đăng nhập lại khi đủ điều kiện xác thực", false);
             case SOFT_DELETE_USER -> new Prompt("Xóa mềm tài khoản?", "Xóa mềm 30 ngày",

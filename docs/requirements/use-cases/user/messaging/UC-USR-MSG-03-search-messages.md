@@ -6,7 +6,7 @@
 - **Use Case Name**: Tìm tin nhắn
 - **Author / Create by**: tkiet24
 - **Date Create**: 04/11/2026
-- **Last Updated by / Date**: tkiet24 / 09/11/2026
+- **Last Updated by / Date**: tkiet24 / 22/11/2026
 - **Primary Actor**: Người dùng
 - **Secondary Actor(s)**: Không có.
 
@@ -51,4 +51,5 @@
 - **Non-Functional Requirements (NFR)**:
   - **NFR-01**: Không gửi bản rõ nhóm hoặc khóa bí mật cho server để tìm kiếm.
   - **NFR-02**: Kết quả cũ không ghi đè truy vấn mới; chưa tìm hết dữ liệu không được coi là không có kết quả.
-  - **NFR-03**: Mục tiêu đề xuất: tìm kiếm ≤2 giây khi lịch sử/chỉ mục đã sẵn sàng
+  - **NFR-03**: Mục tiêu đề xuất: tìm kiếm ≤2 giây khi lịch sử/chỉ mục đã sẵn sàng.
+  - **NFR-04**: Với tìm kiếm tổng hợp ở cột trái (`U-18`), ưu tiên lọc tên người/nhóm tức thời tại client; phần tìm nội dung tin nhắn sử dụng `debounce` (hoặc kích hoạt khi dừng gõ/nhấn `Enter`) và giới hạn số lượng kết quả trả về (`LIMIT`) trên lịch sử đã đồng bộ.

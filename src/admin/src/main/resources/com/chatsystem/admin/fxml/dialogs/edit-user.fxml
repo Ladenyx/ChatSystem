@@ -41,5 +41,5 @@
                GridPane.columnIndex="1" GridPane.rowIndex="6"/>
     </GridPane>
 
-    <Label text="* Bắt buộc · Chỉ trình diễn biểu mẫu" styleClass="caption" wrapText="true"/>
+    <Label text="* Thông tin bắt buộc" styleClass="caption" wrapText="true"/>
 </VBox>

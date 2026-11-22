@@ -15,27 +15,33 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.YearMonth;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.geometry.Orientation;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.chart.BarChart;
 import javafx.scene.image.WritableImage;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -80,6 +86,7 @@ class UserApplicationTest {
             UserApplication app = new UserApplication();
             app.start(stage);
             try {
+                assertEquals("WhatsUp", stage.getTitle());
                 var root = stage.getScene().getRoot();
                 enterPreviewWorkspace(root);
                 root.applyCss();
@@ -130,6 +137,8 @@ class UserApplicationTest {
                 filter.clear();
                 conversations.getSelectionModel().selectFirst();
                 assertFalse(root.lookup("#emptyWorkspace").isVisible());
+                assertFalse(root.lookupAll(".chat-message-row").isEmpty());
+                assertTrue(root.lookup("#sendMessage").isDisabled());
                 ((Button) root.lookup("#conversationInfo")).fire();
                 assertNotNull(root.lookup("#drawer"));
                 capture(stage, "user-drawer");
@@ -145,11 +154,6 @@ class UserApplicationTest {
                         "user-modal");
                 ((ToggleButton) root.lookup("#navContacts")).fire();
                 assertEquals(1, javafx.stage.Window.getWindows().size());
-                fireSetting(root, "displayOptions");
-                Window popup = Window.getWindows().stream()
-                        .filter(window -> window.getScene().getRoot().lookup("#lightTheme") != null)
-                        .findFirst().orElseThrow();
-                capture(popup, "user-popover");
             } finally {
                 stage.close();
             }
@@ -230,7 +234,7 @@ class UserApplicationTest {
                 enterPreviewWorkspace(root);
                 root.applyCss();
                 root.layout();
-                fireSetting(root, "openMockData");
+                navigator.navigate(MockDataPreviewController.VIEW);
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 root.applyCss();
                 root.layout();
@@ -286,7 +290,7 @@ class UserApplicationTest {
                 capture(stage, "user-mock-chart-dark");
                 ((Button) root.lookup("#goBack")).fire();
                 assertEquals(UserViews.CONVERSATIONS, navigator.currentViewProperty().get());
-                fireSetting(root, "openMockData");
+                navigator.navigate(MockDataPreviewController.VIEW);
                 assertSame(tabs, root.lookup("#mockTabs"));
                 assertEquals(4, tabs.getSelectionModel().getSelectedIndex());
             } finally {
@@ -297,6 +301,248 @@ class UserApplicationTest {
         });
         Platform.runLater(task);
         task.get(30, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void conversationSearchAndGroupDrawerRenderInBothThemes() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = UserApplication.createNavigator();
+            try {
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var filter = (TextField) root.lookup("#conversationFilter");
+                filter.setText("giao diện");
+                root.applyCss();
+                root.layout();
+                assertTrue(root.lookup("#globalSearch").isVisible());
+                assertNotNull(root.lookup("#globalConversationHeading"));
+                assertNotNull(root.lookup("#globalMessageHeading"));
+                capture(stage, "drawer-global-search-light");
+
+                filter.clear();
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                assertNotNull(root.lookup("#drawer"));
+                ((Button) root.lookup("#searchInConversation")).fire();
+                var localSearch = (TextField) root.lookup("#conversationSearchField");
+                localSearch.setText("mình");
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#nextSearchResult")).fire();
+                ((Button) root.lookup("#nextSearchResult")).fire();
+                root.applyCss();
+                root.layout();
+                capture(stage, "drawer-local-search-light");
+
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                assertEquals(8, root.lookupAll(".chat-info-member").size());
+                assertNotNull(root.lookup("#addConversationMember"));
+                assertNotNull(root.lookup("#renameConversationGroup"));
+                assertNotNull(root.lookup("#resignConversationAdmin"));
+                assertNull(root.lookup("#blockConversationPeer"));
+                capture(stage, "drawer-group-dark");
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void groupManagementModalsValidateAndCaptureInBothThemes() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = UserApplication.createNavigator();
+            try {
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                ((Button) root.lookup("#createGroup")).fire();
+                Window createModal = modalWindow(stage);
+                var createRoot = createModal.getScene().getRoot();
+                createRoot.applyCss();
+                createRoot.layout();
+                assertTrue(createRoot.lookup("#groupFormSubmit").isDisabled());
+                ((TextField) createRoot.lookup("#groupNameField")).setText("Nhóm Ôn tập Java");
+                assertTrue(createRoot.lookup("#groupFormSubmit").isDisabled());
+                ((CheckBox) createRoot.lookup("#group-candidate-usr-02")).fire();
+                assertFalse(createRoot.lookup("#groupFormSubmit").isDisabled());
+                assertEquals("Chọn thành viên (1 đã chọn)",
+                        ((Label) createRoot.lookup("#groupSelectionSummary")).getText());
+                createRoot.applyCss();
+                createRoot.layout();
+                capture(createModal, "group-create-light");
+                createModal.hide();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+
+                ((Button) root.lookup("#addConversationMember")).fire();
+                Window addModal = modalWindow(stage);
+                assertTrue(addModal.getScene().getRoot().lookup("#groupFormSubmit").isDisabled());
+                addModal.hide();
+
+                ((Button) root.lookup("#renameConversationGroup")).fire();
+                Window renameModal = modalWindow(stage);
+                var renameRoot = renameModal.getScene().getRoot();
+                assertFalse(renameRoot.lookup("#groupFormSubmit").isDisabled());
+                ((TextField) renameRoot.lookup("#groupNameField")).clear();
+                assertTrue(renameRoot.lookup("#groupFormSubmit").isDisabled());
+                renameModal.hide();
+
+                navigator.themes().toggle();
+                ((Button) root.lookup("#resignConversationAdmin")).fire();
+                Window successorModal = modalWindow(stage);
+                var successorRoot = successorModal.getScene().getRoot();
+                successorRoot.applyCss();
+                successorRoot.layout();
+                assertTrue(successorRoot.lookup("#groupFormSubmit").isDisabled());
+                ((RadioButton) successorRoot.lookup("#group-candidate-usr-03")).fire();
+                assertFalse(successorRoot.lookup("#groupFormSubmit").isDisabled());
+                assertTrue(((Label) successorRoot.lookup("#groupSelectionSummary")).getText().startsWith("Đã chọn:"));
+                successorRoot.applyCss();
+                successorRoot.layout();
+                capture(successorModal, "group-successor-leave-dark");
+                successorModal.hide();
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void aiAssistantSuggestsRepliesAndRewritesDraftInBothThemes() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#aiAssistantButton")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                Window popup = aiPopupWindow();
+                var popupRoot = popup.getScene().getRoot();
+                assertEquals("Gợi ý trả lời", ((Label) popupRoot.lookup("#aiHeading")).getText());
+                assertEquals(3, popupRoot.lookupAll(".chat-ai-option").size());
+                captureWithPopover(stage, popup, "pr-52-ai-replies-dark");
+
+                ((Button) popupRoot.lookup("#aiClose")).fire();
+                assertFalse(popup.isShowing());
+
+                navRef.get().themes().toggle();
+                var root = navRef.get().getRoot();
+                var draft = (TextArea) root.lookup("#draftField");
+                draft.setText("mai mình gửi bản tổng hợp các màn hình. Bạn xem giúp mình phần Hội thoại trước nhé.");
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#aiAssistantButton")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                Window popup = aiPopupWindow();
+                var popupRoot = popup.getScene().getRoot();
+                assertEquals("Viết lại bản nháp", ((Label) popupRoot.lookup("#aiHeading")).getText());
+                var options = popupRoot.lookupAll(".chat-ai-option").stream()
+                        .map(Button.class::cast).toList();
+                assertEquals(3, options.size());
+                captureWithPopover(stage, popup, "pr-52-ai-rewrites-light");
+
+                options.getFirst().fire();
+                assertFalse(popup.isShowing());
+                var draft = (TextArea) navRef.get().getRoot().lookup("#draftField");
+                assertTrue(draft.getText().startsWith("Mai mình"));
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    private static Window aiPopupWindow() {
+        return Window.getWindows().stream()
+                .filter(window -> window.isShowing() && window.getScene().getRoot().lookup("#aiAssistant") != null)
+                .findFirst().orElseThrow();
+    }
+
+    private static <T> T onFx(Callable<T> action) throws Exception {
+        FutureTask<T> task = new FutureTask<>(action);
+        Platform.runLater(task);
+        return task.get(20, TimeUnit.SECONDS);
+    }
+
+    private static Window modalWindow(Window owner) {
+        return Window.getWindows().stream()
+                .filter(window -> window != owner && window.isShowing()
+                        && window.getScene().getRoot().lookup("#groupFormSubmit") != null)
+                .findFirst().orElseThrow();
     }
 
     private static void enterPreviewWorkspace(Parent root) {
@@ -322,15 +568,46 @@ class UserApplicationTest {
         }
         stage.getScene().getRoot().applyCss();
         stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        BufferedImage output = toBufferedImage(stage.getScene().snapshot(null));
+        Path directory = Path.of("target", "screenshots");
+        Files.createDirectories(directory);
+        ImageIO.write(output, "png", directory.resolve(name + ".png").toFile());
+    }
+
+    private static void captureWithPopover(Stage stage, Window popup, String name) throws Exception {
+        if (!Boolean.getBoolean("chatsystem.capture")) {
+            return;
+        }
+        stage.getScene().getRoot().applyCss();
+        stage.getScene().getRoot().layout();
+        popup.getScene().getRoot().applyCss();
+        popup.getScene().getRoot().layout();
+        BufferedImage base = toBufferedImage(stage.getScene().snapshot(null));
+        var transparent = new SnapshotParameters();
+        transparent.setFill(Color.TRANSPARENT);
+        BufferedImage overlay = toBufferedImage(popup.getScene().getRoot().snapshot(transparent, null));
+        int x = (int) Math.round((popup.getX() + popup.getScene().getX())
+                - (stage.getX() + stage.getScene().getX()));
+        int y = (int) Math.round((popup.getY() + popup.getScene().getY())
+                - (stage.getY() + stage.getScene().getY()));
+        var graphics = base.createGraphics();
+        try {
+            graphics.drawImage(overlay, x, y, null);
+        } finally {
+            graphics.dispose();
+        }
+        Path directory = Path.of("target", "screenshots");
+        Files.createDirectories(directory);
+        ImageIO.write(base, "png", directory.resolve(name + ".png").toFile());
+    }
+
+    private static BufferedImage toBufferedImage(WritableImage image) {
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {
                 output.setRGB(x, y, image.getPixelReader().getArgb(x, y));
             }
         }
-        Path directory = Path.of("target", "screenshots");
-        Files.createDirectories(directory);
-        ImageIO.write(output, "png", directory.resolve(name + ".png").toFile());
+        return output;
     }
 }

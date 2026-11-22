@@ -1,0 +1,519 @@
+/* Contacts & Connections (U-SCR-08) styles aligned with WhatsUp graphite design system */
+
+.user-contacts,
+.dialog-pane.contacts-confirmation {
+    -ct-workspace: #fafafa;
+    -ct-surface: #ffffff;
+    -ct-subtle: #f4f4f5;
+    -ct-hover: #ebebed;
+    -ct-selected: #eef4fb;
+    -ct-text: #1f1f1f;
+    -ct-secondary: #525252;
+    -ct-muted: #737373;
+    -ct-rule: rgba(0, 0, 0, 0.08);
+    -ct-control-border: rgba(0, 0, 0, 0.14);
+    -ct-focus: #0f6cbd;
+    -ct-brand: #0f6cbd;
+    -ct-brand-hover: #115ea3;
+    -ct-brand-subtle: #ebf3fc;
+    -ct-brand-text: #115ea3;
+    -ct-on-brand: #ffffff;
+    -ct-online: #16a34a;
+    -ct-danger: #b10e1c;
+    -ct-danger-bg: #fdf3f4;
+    -ct-danger-border: rgba(177, 14, 28, 0.32);
+    -ct-danger-solid: #b10e1c;
+    -ct-danger-solid-hover: #960b17;
+    -ct-scroll-thumb: rgba(0, 0, 0, 0.16);
+    -ct-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
+}
+
+.cs-root:dark .user-contacts,
+.dialog-pane.contacts-confirmation:dark,
+.cs-root:dark .dialog-pane.contacts-confirmation {
+    -ct-workspace: #171719;
+    -ct-surface: #1f1f1f;
+    -ct-subtle: #28282b;
+    -ct-hover: #2e2e32;
+    -ct-selected: #222a35;
+    -ct-text: #f0f0f0;
+    -ct-secondary: #b0b0b6;
+    -ct-muted: #8a8a91;
+    -ct-rule: rgba(255, 255, 255, 0.09);
+    -ct-control-border: rgba(255, 255, 255, 0.14);
+    -ct-focus: #479ef5;
+    -ct-brand: #0f6cbd;
+    -ct-brand-hover: #115ea3;
+    -ct-brand-subtle: #0c3b5e;
+    -ct-brand-text: #77b7f7;
+    -ct-on-brand: #ffffff;
+    -ct-online: #4cc38a;
+    -ct-danger: #f1707b;
+    -ct-danger-bg: #361c24;
+    -ct-danger-border: rgba(241, 112, 123, 0.36);
+    -ct-danger-solid: #c42b38;
+    -ct-danger-solid-hover: #dc3545;
+    -ct-scroll-thumb: rgba(255, 255, 255, 0.16);
+    -ct-scroll-thumb-hover: rgba(255, 255, 255, 0.28);
+}
+
+.user-contacts {
+    -fx-background-color: -ct-workspace;
+}
+
+/* --- Left Directory Sidebar --- */
+
+.user-contacts .contacts-sidebar {
+    -fx-background-color: -ct-surface;
+    -fx-border-color: -ct-rule;
+    -fx-border-width: 0 1 0 0;
+}
+
+.user-contacts .contacts-sidebar-top {
+    -fx-padding: 16 16 12 16;
+    -fx-border-color: -ct-rule;
+    -fx-border-width: 0 0 1 0;
+}
+
+.user-contacts .label.contacts-heading {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+    -fx-min-height: 32;
+}
+
+.user-contacts .contacts-sidebar-nav {
+    -fx-padding: 12 12 16 12;
+}
+
+.user-contacts .contacts-nav {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-min-height: 36;
+    -fx-padding: 6 12;
+}
+
+.user-contacts .contacts-nav-icon-box {
+    -fx-min-width: 18;
+    -fx-pref-width: 18;
+    -fx-max-width: 18;
+    -fx-alignment: center;
+}
+
+.user-contacts .label.contacts-nav-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .label.contacts-nav-count {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -ct-muted;
+    -fx-padding: 2 6;
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+}
+
+.user-contacts .label.contacts-nav-count.is-pending {
+    -fx-background-color: -ct-brand-subtle;
+    -fx-text-fill: -ct-brand-text;
+    -fx-font-weight: 600;
+}
+
+.user-contacts .contacts-nav .ikonli-font-icon,
+.user-contacts .contacts-search-icon {
+    -fx-icon-color: -ct-muted;
+}
+
+.user-contacts .contacts-nav:hover {
+    -fx-background-color: -ct-hover;
+}
+
+.user-contacts .contacts-nav:hover .ikonli-font-icon {
+    -fx-icon-color: -ct-text;
+}
+
+.user-contacts .contacts-nav:selected {
+    -fx-background-color: -ct-selected;
+    -fx-border-color: -ct-rule;
+}
+
+.user-contacts .contacts-nav:selected .label.contacts-nav-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .contacts-nav:selected .ikonli-font-icon {
+    -fx-icon-color: -ct-brand-text;
+}
+
+.user-contacts .contacts-nav:focused {
+    -fx-border-color: -ct-focus;
+}
+
+/* --- Center Directory Workspace --- */
+
+.user-contacts .contacts-content {
+    -fx-padding: 24;
+}
+
+.user-contacts .label.contacts-page-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .label.contacts-count {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-text-fill: -ct-muted;
+}
+
+.user-contacts .contacts-search .text-field {
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-padding: 0 12 0 36;
+    -fx-background-color: -ct-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -ct-control-border;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: -ct-text;
+    -fx-prompt-text-fill: -ct-muted;
+    -fx-font-size: 13px;
+}
+
+.user-contacts .contacts-search .text-field:focused {
+    -fx-border-color: -ct-focus;
+    -fx-border-width: 1.5;
+}
+
+.user-contacts .contacts-scroll,
+.user-contacts .contacts-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.user-contacts .contacts-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+    -fx-padding: 4 2;
+}
+
+.user-contacts .contacts-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.user-contacts .contacts-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -ct-scroll-thumb;
+    -fx-background-radius: 4;
+}
+
+.user-contacts .contacts-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -ct-scroll-thumb-hover;
+}
+
+.user-contacts .contacts-scroll .scroll-bar:vertical .increment-button,
+.user-contacts .contacts-scroll .scroll-bar:vertical .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
+
+/* --- Grouped Directory Card & Rows --- */
+
+.user-contacts .contacts-group {
+    -fx-background-color: -ct-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12;
+    -fx-border-color: -ct-rule;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 1;
+}
+
+.user-contacts .contacts-row {
+    -fx-min-height: 60;
+    -fx-padding: 12 16;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent transparent -ct-rule transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.user-contacts .contacts-row:hover {
+    -fx-background-color: -ct-hover;
+}
+
+.user-contacts .contacts-row.is-first {
+    -fx-background-radius: 11 11 0 0;
+}
+
+.user-contacts .contacts-row.is-last {
+    -fx-border-width: 0;
+    -fx-background-radius: 0 0 11 11;
+}
+
+.user-contacts .contacts-row.is-first.is-last {
+    -fx-background-radius: 11;
+}
+
+.user-contacts .contacts-avatar-wrap {
+    -fx-min-width: 36;
+    -fx-pref-width: 36;
+    -fx-max-width: 36;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+}
+
+.user-contacts .label.contacts-avatar {
+    -fx-min-width: 36;
+    -fx-max-width: 36;
+    -fx-min-height: 36;
+    -fx-max-height: 36;
+    -fx-alignment: center;
+    -fx-background-color: -ct-subtle;
+    -fx-border-color: -ct-rule;
+    -fx-border-width: 1;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .contacts-presence-badge {
+    -fx-min-width: 10;
+    -fx-max-width: 10;
+    -fx-min-height: 10;
+    -fx-max-height: 10;
+    -fx-background-color: -ct-online;
+    -fx-background-radius: 5;
+    -fx-border-color: -ct-surface;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.user-contacts .label.contacts-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .label.contacts-handle {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-text-fill: -ct-muted;
+}
+
+.user-contacts .label.contacts-meta-sep,
+.user-contacts .label.contacts-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: -ct-muted;
+}
+
+.user-contacts .label.contacts-online {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -ct-online;
+}
+
+/* --- Restrained Row Action Hierarchy --- */
+
+.user-contacts .button.contacts-btn {
+    -fx-min-height: 32;
+    -fx-padding: 4 12;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.user-contacts .button.contacts-btn-primary {
+    -fx-background-color: -ct-brand;
+    -fx-border-color: -ct-brand;
+    -fx-text-fill: -ct-on-brand;
+    -fx-font-weight: 600;
+}
+
+.user-contacts .button.contacts-btn-primary:hover {
+    -fx-background-color: -ct-brand-hover;
+    -fx-border-color: -ct-brand-hover;
+}
+
+.user-contacts .button.contacts-btn-secondary {
+    -fx-background-color: -ct-subtle;
+    -fx-border-color: -ct-control-border;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .button.contacts-btn-secondary:hover {
+    -fx-background-color: -ct-hover;
+}
+
+.user-contacts .button.contacts-btn-quiet {
+    -fx-background-color: transparent;
+    -fx-border-color: -ct-rule;
+    -fx-text-fill: -ct-secondary;
+}
+
+.user-contacts .button.contacts-btn-quiet:hover {
+    -fx-background-color: -ct-hover;
+    -fx-border-color: -ct-control-border;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .button.contacts-btn-danger-quiet {
+    -fx-background-color: transparent;
+    -fx-border-color: -ct-rule;
+    -fx-text-fill: -ct-secondary;
+}
+
+.user-contacts .button.contacts-btn-danger-quiet:hover {
+    -fx-background-color: -ct-danger-bg;
+    -fx-border-color: -ct-danger-border;
+    -fx-text-fill: -ct-danger;
+}
+
+.user-contacts .button.contacts-btn:focused {
+    -fx-border-color: -ct-focus;
+}
+
+/* --- Empty State & Footer --- */
+
+.user-contacts .contacts-empty {
+    -fx-background-color: -ct-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -ct-rule;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-min-height: 200;
+    -fx-padding: 32;
+}
+
+.user-contacts .contacts-empty-icon {
+    -fx-min-width: 40;
+    -fx-max-width: 40;
+    -fx-min-height: 40;
+    -fx-max-height: 40;
+    -fx-background-color: -ct-subtle;
+    -fx-background-radius: 10;
+    -fx-border-color: -ct-rule;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.user-contacts .contacts-empty-icon .ikonli-font-icon {
+    -fx-icon-color: -ct-muted;
+}
+
+.user-contacts .label.contacts-empty-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.user-contacts .label.contacts-empty-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: -ct-muted;
+}
+
+.user-contacts .label.contacts-status {
+    -fx-background-color: -ct-brand-subtle;
+    -fx-text-fill: -ct-brand-text;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+}
+
+/* --- Confirmation Modal --- */
+
+.dialog-pane.contacts-confirmation {
+    -fx-background-color: -ct-surface;
+    -fx-border-color: -ct-control-border;
+    -fx-border-width: 1;
+    -fx-padding: 24;
+}
+
+.dialog-pane.contacts-confirmation > .content {
+    -fx-padding: 0;
+}
+
+.dialog-pane.contacts-confirmation > .button-bar > .container {
+    -fx-padding: 20 0 0 0;
+}
+
+.dialog-pane.contacts-confirmation .label.contacts-confirmation-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.dialog-pane.contacts-confirmation .label.contacts-confirmation-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: -ct-secondary;
+}
+
+.dialog-pane.contacts-confirmation .button {
+    -fx-background-color: -ct-subtle;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -ct-control-border;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-min-height: 36;
+    -fx-padding: 6 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -ct-text;
+}
+
+.dialog-pane.contacts-confirmation .button:hover {
+    -fx-background-color: -ct-hover;
+}
+
+.dialog-pane.contacts-confirmation #cancel-contact-action {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -ct-focus;
+    -fx-font-weight: bold;
+}
+
+.dialog-pane.contacts-confirmation #cancel-contact-action:hover,
+.dialog-pane.contacts-confirmation #cancel-contact-action:focused {
+    -fx-background-color: -ct-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.dialog-pane.contacts-confirmation .button.contacts-confirm-danger {
+    -fx-background-color: -ct-danger-solid;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.dialog-pane.contacts-confirmation .button.contacts-confirm-danger:hover {
+    -fx-background-color: -ct-danger-solid-hover;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+}
+
+.dialog-pane.contacts-confirmation .button:focused,
+.dialog-pane.contacts-confirmation .button.contacts-confirm-danger:focused {
+    -fx-border-color: -ct-focus;
+}
