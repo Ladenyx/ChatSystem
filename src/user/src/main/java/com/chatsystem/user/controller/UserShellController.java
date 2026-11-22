@@ -41,7 +41,7 @@ public final class UserShellController {
         backButton.visibleProperty().bind(navigator.canGoBackProperty());
         backButton.managedProperty().bind(backButton.visibleProperty());
         navigator.currentViewProperty().addListener((observable, old, view) -> {
-            workspaceRail.setVisible(view != null);
+            workspaceRail.setVisible(view != null && !UserViews.isAuthView(view));
             chatsButton.setSelected(UserViews.CONVERSATIONS.equals(view));
             contactsButton.setSelected(UserViews.CONTACTS.equals(view));
         });

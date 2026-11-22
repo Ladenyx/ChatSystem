@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.chatsystem.admin.controller.analytics.MonthlyChartController"
+      styleClass="admin-analytics-panel" spacing="8" minWidth="0">
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label fx:id="chartHeading" styleClass="section-title" wrapText="true"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label text="Năm" styleClass="caption"/>
+        <ComboBox fx:id="chartYear" prefWidth="92" accessibleText="Năm thống kê"/>
+    </HBox>
+    <HBox alignment="BASELINE_LEFT" spacing="16" styleClass="admin-analytics-kpis">
+        <HBox alignment="BASELINE_LEFT" spacing="8" minWidth="0">
+            <Label fx:id="primaryValue" styleClass="admin-analytics-number"/>
+            <Label fx:id="primaryLabel" styleClass="caption" wrapText="true"/>
+        </HBox>
+        <HBox alignment="BASELINE_LEFT" spacing="8" styleClass="admin-analytics-kpi-next" minWidth="0">
+            <Label fx:id="monthsValue" styleClass="caption,admin-analytics-inline-number"/>
+            <Label fx:id="monthsLabel" styleClass="caption" wrapText="true"/>
+        </HBox>
+    </HBox>
+    <HBox alignment="CENTER_LEFT" spacing="8">
+        <Label fx:id="chartUnit" styleClass="caption"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="monthHint" styleClass="caption,admin-analytics-month-hint"/>
+    </HBox>
+    <StackPane fx:id="chartHost" minWidth="0"/>
+</VBox>

@@ -1,0 +1,291 @@
+.admin-analytics-view,
+.admin-analytics-view > .viewport {
+    -fx-background-color: -cs-canvas;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.admin-analytics-view {
+    -color-input-bg: -cs-surface-subtle;
+    -color-input-bg-focused: -cs-surface;
+    -color-input-bg-readonly: -cs-surface-subtle;
+    -color-input-fg: -cs-text;
+    -color-input-border: -cs-border;
+    -color-input-border-focused: -cs-focus;
+}
+
+.admin-analytics-content {
+    -fx-padding: 16px 24px;
+}
+
+.admin-analytics-panel {
+    -admin-analytics-rule: ladder(-cs-surface, rgba(255, 255, 255, 0.09) 49%, rgba(0, 0, 0, 0.09) 50%);
+    -fx-background-color: -cs-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -admin-analytics-rule;
+    -fx-border-radius: 12px;
+    -fx-padding: 12px 16px;
+}
+
+.admin-analytics-kpis {
+    -fx-padding: 4px 0;
+}
+
+.admin-analytics-kpi-next {
+    -fx-border-color: -admin-analytics-rule;
+    -fx-border-width: 0 0 0 1px;
+    -fx-padding: 0 0 0 16px;
+}
+
+.admin-analytics-number {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 24px;
+}
+
+.admin-analytics-inline-number {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 16px;
+}
+
+.admin-monthly-chart,
+.admin-monthly-chart .chart-content {
+    -fx-padding: 0;
+}
+
+.admin-monthly-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.admin-monthly-chart .axis {
+    -fx-tick-label-fill: -cs-muted;
+    -fx-tick-label-font-size: 12px;
+}
+
+.admin-monthly-chart .chart-horizontal-grid-lines {
+    -fx-stroke: -admin-analytics-rule;
+}
+
+.admin-monthly-chart .chart-horizontal-zero-line {
+    -fx-stroke: -cs-border;
+}
+
+.admin-monthly-chart .chart-bar {
+    -fx-background-color: -cs-border-strong;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.admin-monthly-chart:history .chart-bar {
+    -fx-background-color: -cs-brand;
+}
+
+.admin-monthly-chart .chart-bar:hover,
+.admin-monthly-chart .chart-bar:selected {
+    -fx-background-color: -cs-focus;
+}
+
+.admin-monthly-chart .chart-series-line {
+    -fx-stroke: -cs-focus;
+    -fx-stroke-width: 2.5px;
+}
+
+.admin-monthly-chart .series1.chart-series-line {
+    -fx-stroke: transparent;
+}
+
+.admin-monthly-chart .chart-line-symbol {
+    -fx-background-color: -cs-focus, -cs-surface;
+    -fx-background-insets: 0, 2px;
+    -fx-background-radius: 4px;
+}
+
+.admin-monthly-chart .chart-line-symbol:future {
+    -fx-background-color: -cs-border-strong, -cs-surface;
+}
+
+.admin-monthly-chart .chart-line-symbol:selected {
+    -fx-background-color: -cs-focus;
+}
+
+.admin-monthly-chart .admin-month-value {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+    -fx-padding: 1px 4px;
+    -fx-alignment: center;
+}
+
+.admin-monthly-chart .button.admin-month-value:hover,
+.admin-monthly-chart .chart-bar:selected .admin-month-value,
+.admin-monthly-chart .chart-line-symbol:selected .admin-month-value {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-text-fill: -cs-brand-text;
+}
+
+.admin-monthly-chart .admin-month-value:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-analytics-month-hint:selected {
+    -fx-text-fill: -cs-brand-text;
+    -fx-font-weight: 600;
+}
+
+.admin-analytics-view .combo-box,
+.admin-analytics-filters .date-picker,
+.admin-analytics-filters .text-field,
+.admin-analytics-filters .button,
+.admin-analytics-operators .toggle-button {
+    -fx-min-height: 32px;
+    -fx-font-size: 13px;
+}
+
+.admin-analytics-operators .toggle-button {
+    -fx-min-width: 36px;
+    -fx-font-family: "Monospaced";
+}
+
+.admin-analytics-operators .toggle-button:selected {
+    -fx-background-color: -cs-border-strong, -cs-surface-subtle;
+    -fx-background-insets: 0, 1px;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-analytics-reset {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-analytics-reset:hover {
+    -fx-background-color: -cs-hover;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-analytics-reset:focused,
+.admin-analytics-operators .toggle-button:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-analytics-filter-error {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-danger;
+}
+
+.admin-analytics-table {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-font-size: 13px;
+    -fx-padding: 0;
+}
+
+.admin-analytics-table:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-analytics-table .column-header-background {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.admin-analytics-table .column-header,
+.admin-analytics-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 32px;
+}
+
+.admin-analytics-table .column-header .label,
+.admin-analytics-table .table-cell {
+    -fx-alignment: center-left;
+    -fx-padding: 0 12px;
+}
+
+.admin-analytics-table .column-header .label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-analytics-table .table-cell {
+    -fx-border-width: 0;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-analytics-table .table-cell.admin-analytics-meta,
+.admin-analytics-table .table-cell.admin-analytics-metric {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+}
+
+.admin-analytics-table .table-cell.admin-analytics-meta {
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-analytics-table .column-header.admin-analytics-metric .label,
+.admin-analytics-table .table-cell.admin-analytics-metric {
+    -fx-alignment: center-right;
+}
+
+.admin-analytics-table .table-row-cell {
+    -fx-background-color: -cs-surface;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 1px;
+}
+
+.admin-analytics-table .table-row-cell:filled {
+    -fx-border-color: transparent transparent -admin-analytics-rule;
+}
+
+.admin-analytics-table .table-row-cell:filled:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-analytics-table .table-row-cell:filled:selected {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 0 0 0 2px;
+}
+
+.admin-analytics-table:focused .table-row-cell:filled:focused {
+    -fx-background-color: -cs-focus, -cs-surface;
+    -fx-background-insets: 0, 1px;
+}
+
+.admin-analytics-table:focused .table-row-cell:filled:selected:focused {
+    -fx-background-color: -cs-focus, -cs-surface-subtle;
+    -fx-background-insets: 0, 1px 1px 1px 2px;
+}
+
+.admin-analytics-ratio-count {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
+    -fx-min-width: 20px;
+    -fx-alignment: center-right;
+}
+
+.admin-friend-ratio {
+    -fx-pref-width: 100px;
+    -fx-pref-height: 8px;
+}
+
+.admin-friend-ratio > .track {
+    -fx-background-color: -cs-hover;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 0;
+}
+
+.admin-friend-ratio > .bar {
+    -fx-background-color: -cs-border-strong;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 0;
+}

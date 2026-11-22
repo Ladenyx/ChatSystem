@@ -1,0 +1,87 @@
+.admin-user-dialog {
+    -fx-background-color: -cs-surface;
+    -fx-padding: 0;
+}
+
+.admin-user-dialog > .admin-user-dialog-content {
+    -fx-padding: 24px 24px 16px;
+}
+
+.admin-user-dialog > .button-bar {
+    -fx-border-color: -cs-border;
+    -fx-border-width: 1px 0 0;
+}
+
+.admin-user-dialog > .button-bar > .container {
+    -fx-padding: 12px 24px;
+}
+
+.admin-user-dialog .button,
+.admin-user-dialog .text-field,
+.admin-user-dialog .combo-box {
+    -fx-min-height: 36px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.admin-user-dialog .date-picker {
+    -fx-background-radius: 8px, 7px;
+}
+
+.admin-user-dialog .date-picker > .text-field {
+    -fx-background-color: transparent;
+}
+
+.admin-user-dialog .admin-dialog-cancel {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-user-dialog .admin-dialog-cancel:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-user-dialog .admin-dialog-primary {
+    -fx-background-color: -cs-text;
+    -fx-text-fill: -cs-surface;
+}
+
+.admin-user-dialog .admin-dialog-primary:hover {
+    -fx-opacity: 0.86;
+}
+
+.admin-user-dialog .button:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-user-dialog-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.admin-field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.admin-dialog-username:readonly {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-dialog-account {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.admin-dialog-account-name,
+.admin-dialog-account-id {
+    -fx-font-family: "Monospaced";
+}
+
+.admin-dialog-account-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: -cs-brand-text;
+}

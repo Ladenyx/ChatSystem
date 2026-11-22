@@ -1,12 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
+      fx:controller="com.chatsystem.admin.controller.dialogs.EditUserController"
+      fx:id="userForm" spacing="16" minWidth="360" prefWidth="536" styleClass="admin-user-dialog-content">
+    <VBox spacing="4">
+        <Label fx:id="formTitle" text="Thêm người dùng" styleClass="admin-user-dialog-title"/>
+        <Label fx:id="formSubtitle" text="Email dùng để nhận mật khẩu tạm" styleClass="secondary-text"
+               wrapText="true"/>
+    </VBox>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <TextField fx:id="username" promptText="Tên đăng nhập" minWidth="0" maxWidth="Infinity"
+                   GridPane.rowIndex="1" styleClass="admin-dialog-username"/>
+        <Label fx:id="usernameLabel" text="Tên đăng nhập *" labelFor="$username" styleClass="admin-field-label"/>
+        <TextField fx:id="fullName" promptText="Họ và tên" minWidth="0" maxWidth="Infinity"
+                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        <Label text="Họ tên *" labelFor="$fullName" styleClass="admin-field-label" GridPane.columnIndex="1"/>
+
+        <TextField fx:id="email" promptText="ten@example.test" minWidth="0" maxWidth="Infinity"
+                   GridPane.columnSpan="2" GridPane.rowIndex="3"/>
+        <Label text="Email *" labelFor="$email" styleClass="admin-field-label" GridPane.rowIndex="2"/>
+
+        <TextField fx:id="address" minWidth="0" maxWidth="Infinity" GridPane.columnSpan="2" GridPane.rowIndex="5"/>
+        <Label text="Địa chỉ" labelFor="$address" styleClass="admin-field-label" GridPane.rowIndex="4"/>
+
+        <DatePicker fx:id="birthDate" promptText="dd/mm/yyyy" minWidth="0" maxWidth="Infinity" GridPane.rowIndex="7"/>
+        <Label text="Ngày sinh" labelFor="$birthDate" styleClass="admin-field-label" GridPane.rowIndex="6"/>
+        <ComboBox fx:id="gender" minWidth="0" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+        <Label text="Giới tính" labelFor="$gender" styleClass="admin-field-label"
+               GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+    </GridPane>
+
+    <Label text="* Bắt buộc · Chỉ trình diễn biểu mẫu" styleClass="caption" wrapText="true"/>
 </VBox>
