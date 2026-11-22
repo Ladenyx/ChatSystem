@@ -96,6 +96,7 @@ public final class SpamReportController implements DialogViewController {
     private ReportContext context;
     private ReportPreparation currentPreparation;
     private Dialog<ButtonType> currentDialog;
+    private Node pendingScrollTarget;
 
     public static void open(ViewNavigator navigator, String conversationId, String conversationTitle) {
         String id = conversationId != null ? conversationId : "";
@@ -152,6 +153,10 @@ public final class SpamReportController implements DialogViewController {
         pickHeading.setText("Báo cáo spam · " + title);
         previewHeading.setText("Xem trước bằng chứng · " + title);
 
+        currentPreparation = null;
+        pendingScrollTarget = null;
+        reasonField.clear();
+        pickFeedback.setVisible(false);
         reasonField.pseudoClassStateChanged(INVALID, false);
         messagesScroll.pseudoClassStateChanged(INVALID, false);
         setupTargetUsers();
@@ -187,6 +192,19 @@ public final class SpamReportController implements DialogViewController {
         previewButton.setOnAction(event -> onPreviewEvidence());
         editPickButton.setOnAction(event -> showStep(pickPane));
         submitReportButton.setOnAction(event -> onSubmitReport());
+
+        dialog.setOnShown(event -> {
+            pane.applyCss();
+            pane.layout();
+            if (pane.getScene() != null && pane.getScene().getWindow() != null) {
+                pane.getScene().getWindow().sizeToScene();
+            }
+            if (pendingScrollTarget != null) {
+                scrollToExcerpt(pendingScrollTarget);
+                pendingScrollTarget = null;
+            }
+        });
+        resizeDialog();
     }
 
     private static ListCell<TargetUserOption> createTargetUserCell() {
@@ -222,7 +240,11 @@ public final class SpamReportController implements DialogViewController {
         List<TargetUserOption> options = service.getTargetUserOptions(context.conversationId());
         targetUserCombo.getItems().addAll(options);
         if (!options.isEmpty()) {
-            targetUserCombo.getSelectionModel().selectFirst();
+            var preferredTargetId = service.resolveTargetUserId(context.conversationId(), preselectedIds);
+            TargetUserOption initial = preferredTargetId
+                    .flatMap(id -> options.stream().filter(opt -> opt.id().equals(id)).findFirst())
+                    .orElse(options.getFirst());
+            targetUserCombo.getSelectionModel().select(initial);
         } else {
             loadMessagesForTargetUser(null);
         }
@@ -242,15 +264,25 @@ public final class SpamReportController implements DialogViewController {
             return;
         }
         List<ReportMessageItem> messages = service.getEligibleMessages(context.conversationId(), targetUserId);
+        boolean hasPreselectedMatch = !preselectedIds.isEmpty()
+                && messages.stream().anyMatch(msg -> preselectedIds.contains(msg.id()));
+        HBox firstSelectedCard = null;
         for (int i = 0; i < messages.size(); i++) {
             ReportMessageItem msg = messages.get(i);
-            boolean initiallySelected = !preselectedIds.isEmpty()
+            boolean initiallySelected = hasPreselectedMatch
                     ? preselectedIds.contains(msg.id())
                     : (i == 0);
             if (initiallySelected) {
                 selectedMessageIds.add(msg.id());
             }
-            messagesList.getChildren().add(createMessageExcerptRow(msg, initiallySelected));
+            HBox card = createMessageExcerptRow(msg, initiallySelected);
+            if (initiallySelected && firstSelectedCard == null) {
+                firstSelectedCard = card;
+            }
+            messagesList.getChildren().add(card);
+        }
+        if (hasPreselectedMatch) {
+            preselectedIds = List.of();
         }
         if (messages.isEmpty()) {
             Label empty = new Label("Không có tin nhắn hợp lệ từ thành viên này");
@@ -258,8 +290,30 @@ public final class SpamReportController implements DialogViewController {
             empty.setWrapText(true);
             messagesList.getChildren().add(empty);
         }
-        messagesScroll.setVvalue(0);
+        if (firstSelectedCard != null && hasPreselectedMatch) {
+            final HBox targetCard = firstSelectedCard;
+            pendingScrollTarget = targetCard;
+            Platform.runLater(() -> scrollToExcerpt(targetCard));
+        } else {
+            messagesScroll.setVvalue(0);
+        }
         updateSelectionCounter();
+    }
+
+    private void scrollToExcerpt(Node card) {
+        messagesScroll.applyCss();
+        messagesScroll.layout();
+        messagesList.applyCss();
+        messagesList.layout();
+        double viewportHeight = messagesScroll.getViewportBounds().getHeight();
+        double contentHeight = messagesList.getBoundsInLocal().getHeight();
+        double scrollable = contentHeight - viewportHeight;
+        if (scrollable > 0) {
+            double targetY = card.getBoundsInParent().getMinY() - viewportHeight * 0.25;
+            messagesScroll.setVvalue(Math.clamp(targetY / scrollable, 0.0, 1.0));
+        } else {
+            messagesScroll.setVvalue(0);
+        }
     }
 
     private void updateSelectionCounter() {
@@ -417,7 +471,7 @@ public final class SpamReportController implements DialogViewController {
         }
         ReportReceipt receipt = service.submitReport(currentPreparation);
         receiptIdLabel.setText(receipt.reportId());
-        receiptStatusLabel.setText(receipt.status());
+        receiptStatusLabel.setText("PENDING".equals(receipt.status()) ? "Chờ xử lý" : receipt.status());
         receiptConversationLabel.setText(currentPreparation.conversationTitle());
         receiptTargetLabel.setText(currentPreparation.targetUserName());
         receiptEvidenceLabel.setText(currentPreparation.totalUniqueCount()

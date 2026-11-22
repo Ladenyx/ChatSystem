@@ -1,5 +1,5 @@
 /* JavaFX color tokens for the User workspace (graphite neutral ramp + restrained cobalt accent). */
-.user-shell, .chat-info, .chat-group-dialog, .chat-ai-pane, .chat-report-dialog {
+.user-shell, .chat-info, .chat-group-dialog, .chat-ai-pane, .chat-report-dialog, .chat-message-menu {
     -chat-canvas: #f5f5f5;
     -chat-workspace-bg: #fafafa;
     -chat-surface: #ffffff;
@@ -25,11 +25,12 @@
     -chat-warning: #8a3707;
     -chat-warning-bg: #fff9f5;
     -chat-danger: #b10e1c;
+    -chat-danger-bg: #fdf3f4;
     -chat-scroll-thumb: rgba(0, 0, 0, 0.16);
     -chat-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
 }
 
-.cs-root:dark .user-shell, .cs-root:dark .chat-info, .chat-group-dialog:dark, .cs-root:dark .chat-ai-pane, .chat-report-dialog:dark, .cs-root:dark .chat-report-dialog {
+.cs-root:dark .user-shell, .cs-root:dark .chat-info, .chat-group-dialog:dark, .cs-root:dark .chat-ai-pane, .chat-report-dialog:dark, .cs-root:dark .chat-report-dialog, .chat-message-menu:dark, .cs-root:dark .chat-message-menu {
     -chat-canvas: #141414;
     -chat-workspace-bg: #171719;
     -chat-surface: #1f1f1f;
@@ -54,6 +55,7 @@
     -chat-warning: #fce100;
     -chat-warning-bg: #332717;
     -chat-danger: #f1707b;
+    -chat-danger-bg: #361c24;
     -chat-scroll-thumb: rgba(255, 255, 255, 0.16);
     -chat-scroll-thumb-hover: rgba(255, 255, 255, 0.28);
 }

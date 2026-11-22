@@ -48,7 +48,7 @@
 }
 
 .label.chat-report-step-num {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-padding: 2 6;
@@ -59,7 +59,7 @@
 
 .label.chat-report-step-label {
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
 }
 
 .chat-report-step.is-active .chat-report-step-num {
@@ -109,9 +109,9 @@
 }
 
 .label.chat-report-count-meta {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 11px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
     -fx-text-fill: -chat-muted;
 }
 
@@ -191,7 +191,7 @@
 
 .label.chat-report-user-name {
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
     -fx-text-fill: -chat-text;
 }
 
@@ -288,7 +288,7 @@
 
 .label.chat-report-badge {
     -fx-font-size: 11px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
     -fx-text-fill: -chat-muted;
     -fx-background-color: transparent;
     -fx-border-color: -chat-rule;
@@ -310,6 +310,10 @@
     -fx-text-fill: -chat-text;
 }
 
+.chat-report-dialog .chat-result-date {
+    -fx-font-family: "Inter";
+}
+
 .chat-report-error-banner {
     -fx-background-color: -chat-surface-subtle;
     -fx-border-color: -chat-danger;
@@ -325,7 +329,7 @@
 
 .label.chat-report-error-text {
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
     -fx-text-fill: -chat-danger;
 }
 
@@ -353,7 +357,7 @@
 
 .label.chat-report-meta-value {
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
+    -fx-font-weight: 400;
     -fx-text-fill: -chat-text;
 }
 
@@ -367,7 +371,7 @@
 }
 
 .label.chat-report-metric-value {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 16px;
     -fx-font-weight: 600;
     -fx-text-fill: -chat-text;
@@ -401,7 +405,7 @@
 }
 
 .label.chat-report-receipt-id {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 15px;
     -fx-font-weight: 600;
     -fx-text-fill: -chat-text;
@@ -426,14 +430,14 @@
 }
 
 .label.chat-report-status-text {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-text-fill: -chat-warning;
 }
 
 .label.chat-report-receipt-mono {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 12px;
     -fx-text-fill: -chat-text;
 }

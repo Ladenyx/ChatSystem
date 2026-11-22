@@ -11,10 +11,13 @@ import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockMonthlyStatistics;
 import com.chatsystem.desktop.mock.model.MockSpamReport;
 import com.chatsystem.desktop.mock.model.MockUser;
+import com.chatsystem.user.control.ChatMessageRow;
+import com.chatsystem.user.service.model.TargetUserOption;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +37,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -563,10 +567,10 @@ class UserApplicationTest {
                 var modalRoot = modal.getScene().getRoot();
                 assertFalse(modalRoot.lookupAll(".chat-report-excerpt-card").isEmpty());
                 assertEquals("1 / 20 đã chọn", ((Label) modalRoot.lookup("#reportSelectionCount")).getText());
+                var reason = (TextField) modalRoot.lookup("#reportReasonField");
+                assertEquals("", reason.getText());
                 capture(modal, "spam-report-pick-light");
 
-                var reason = (TextField) modalRoot.lookup("#reportReasonField");
-                reason.clear();
                 ((Button) modalRoot.lookup("#reportPreviewSubmit")).fire();
                 return null;
             });
@@ -603,6 +607,7 @@ class UserApplicationTest {
                 Window modal = reportModalWindow(stageRef.get());
                 var modalRoot = modal.getScene().getRoot();
                 assertTrue(modalRoot.lookup("#reportAcceptedDone").isVisible());
+                assertEquals("Chờ xử lý", ((Label) modalRoot.lookup(".chat-report-status-text")).getText());
                 capture(modal, "spam-report-accepted-dark");
                 ((Button) modalRoot.lookup("#reportAcceptedDone")).fire();
                 assertFalse(modal.isShowing());
@@ -619,6 +624,156 @@ class UserApplicationTest {
                 return null;
             });
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void messageHoverMenuOpensSpamReportWithPreselectedSenderAndMessage() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        var targetMessageRef = new AtomicReference<MockMessage>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var data = MockData.create();
+                String currentUserId = data.previewUser().id();
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                root.applyCss();
+                root.layout();
+
+                var directMessagesById = data.messagesFor("direct-01").stream()
+                        .collect(java.util.stream.Collectors.toMap(MockMessage::id, m -> m));
+                var directRows = root.lookupAll(".chat-message-row").stream()
+                        .map(ChatMessageRow.class::cast).toList();
+                assertTrue(directRows.stream()
+                        .filter(row -> directMessagesById.get(row.messageId()).state() == MockMessage.State.RECALLED)
+                        .allMatch(row -> row.lookup(".chat-message-more") == null),
+                        "Recalled messages must not offer message actions");
+                assertTrue(directRows.stream()
+                        .filter(row -> directMessagesById.get(row.messageId()).senderId().equals(currentUserId))
+                        .allMatch(row -> row.lookup(".chat-message-more") == null),
+                        "Outgoing own messages must not offer Báo cáo");
+                assertTrue(directRows.stream()
+                        .filter(row -> !directMessagesById.get(row.messageId()).senderId().equals(currentUserId)
+                                && directMessagesById.get(row.messageId()).acceptedByServer()
+                                && directMessagesById.get(row.messageId()).state() != MockMessage.State.RECALLED)
+                        .allMatch(row -> row.lookup(".chat-message-more") != null),
+                        "Eligible incoming messages offer the hover menu");
+
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                root.applyCss();
+                root.layout();
+
+                String firstMemberId = group.participantIds().stream()
+                        .filter(id -> !id.equals(currentUserId)).findFirst().orElseThrow();
+                var groupMessages = data.messagesFor("grp-01");
+                MockMessage targetMessage = null;
+                for (int i = groupMessages.size() - 1; i >= 0; i--) {
+                    MockMessage candidate = groupMessages.get(i);
+                    if (candidate.acceptedByServer()
+                            && candidate.state() != MockMessage.State.RECALLED
+                            && !candidate.senderId().equals(currentUserId)
+                            && !candidate.senderId().equals(firstMemberId)) {
+                        targetMessage = candidate;
+                        break;
+                    }
+                }
+                assertNotNull(targetMessage);
+                targetMessageRef.set(targetMessage);
+                return null;
+            });
+
+            onFx(() -> {
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                ((ScrollPane) root.lookup("#historyScroll")).setVvalue(1);
+                root.applyCss();
+                root.layout();
+
+                String targetId = targetMessageRef.get().id();
+                var targetRow = root.lookupAll(".chat-message-row").stream()
+                        .map(ChatMessageRow.class::cast)
+                        .filter(row -> row.messageId().equals(targetId))
+                        .findFirst().orElseThrow();
+                Button moreBtn = (Button) targetRow.lookup(".chat-message-more");
+                assertNotNull(moreBtn);
+                moreBtn.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window popup = messageMenuPopup();
+                assertTrue(popup.isShowing());
+                Stage stage = stageRef.get();
+                assertTrue(popup.getY() >= stage.getY() && popup.getY() < stage.getY() + stage.getHeight());
+                var menuRoot = popup.getScene().getRoot();
+                Button reportAction = (Button) menuRoot.lookup("#messageActionReport");
+                assertNotNull(reportAction);
+                assertEquals("Báo cáo", reportAction.getText());
+                captureWithPopover(stage, popup, "user-message-menu-light");
+
+                navRef.get().themes().toggle();
+                navRef.get().getRoot().applyCss();
+                navRef.get().getRoot().layout();
+                menuRoot.applyCss();
+                menuRoot.layout();
+                captureWithPopover(stage, popup, "user-message-menu-dark");
+
+                navRef.get().themes().toggle();
+                reportAction.fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                var modalRoot = modal.getScene().getRoot();
+                var combo = (ComboBox<TargetUserOption>) modalRoot.lookup(".chat-report-combo");
+                assertNotNull(combo.getValue());
+                assertEquals(targetMessageRef.get().senderId(), combo.getValue().id());
+                assertEquals("1 / 20 đã chọn", ((Label) modalRoot.lookup("#reportSelectionCount")).getText());
+                assertEquals("", ((TextField) modalRoot.lookup("#reportReasonField")).getText());
+                capture(modal, "spam-report-from-message-light");
+
+                ((Button) modalRoot.lookup("#reportPickCancel")).fire();
+                assertFalse(modal.isShowing());
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    private static Window messageMenuPopup() {
+        return Window.getWindows().stream()
+                .filter(window -> window.isShowing() && window.getScene() != null
+                        && window.getScene().getRoot().lookup("#messageActionMenu") != null)
+                .findFirst().orElseThrow();
     }
 
     private static Window reportModalWindow(Window owner) {

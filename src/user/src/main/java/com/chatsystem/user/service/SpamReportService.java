@@ -5,6 +5,7 @@ import com.chatsystem.user.service.model.ReportPreparation;
 import com.chatsystem.user.service.model.ReportReceipt;
 import com.chatsystem.user.service.model.TargetUserOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -15,6 +16,13 @@ public interface SpamReportService {
      * Retrieves participants in the conversation who can be reported.
      */
     List<TargetUserOption> getTargetUserOptions(String conversationId);
+
+    /**
+     * Resolves the sender user ID for a set of preselected message IDs, when known.
+     */
+    default Optional<String> resolveTargetUserId(String conversationId, List<String> selectedMessageIds) {
+        return Optional.empty();
+    }
 
     /**
      * Retrieves eligible messages sent by the target user in the conversation.

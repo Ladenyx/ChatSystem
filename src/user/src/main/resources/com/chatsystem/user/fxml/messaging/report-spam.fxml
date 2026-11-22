@@ -60,7 +60,6 @@
             <TextField fx:id="reasonField" id="reportReasonField"
                        promptText="Mô tả ngắn hành vi spam hoặc làm phiền"
                        styleClass="chat-report-text-field"
-                       text="Nội dung quảng bá lặp lại, gây làm phiền"
                        accessibleText="Lý do báo cáo"/>
         </VBox>
 
@@ -71,7 +70,8 @@
                 <Label fx:id="selectionCountLabel" id="reportSelectionCount"
                        text="0 / 20 đã chọn" styleClass="chat-report-count-meta"/>
             </HBox>
-            <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-report-scroll">
+            <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER"
+                        prefViewportHeight="196" minHeight="172" styleClass="chat-report-scroll">
                 <VBox fx:id="messagesList" minWidth="0" spacing="8"/>
             </ScrollPane>
         </VBox>
@@ -168,7 +168,8 @@
                        maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 <Label fx:id="evidenceUnionMeta" text="Selected ∪ Context" styleClass="chat-report-count-meta"/>
             </HBox>
-            <ScrollPane fx:id="evidenceScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-report-scroll">
+            <ScrollPane fx:id="evidenceScroll" fitToWidth="true" hbarPolicy="NEVER"
+                        prefViewportHeight="196" minHeight="172" styleClass="chat-report-scroll">
                 <VBox fx:id="evidenceList" minWidth="0" spacing="8"/>
             </ScrollPane>
         </VBox>
@@ -216,7 +217,7 @@
                 </VBox>
                 <HBox alignment="CENTER" spacing="6" styleClass="chat-report-status-pill">
                     <Region styleClass="chat-report-status-dot"/>
-                    <Label fx:id="receiptStatusLabel" text="PENDING" styleClass="chat-report-status-text"/>
+                    <Label fx:id="receiptStatusLabel" text="Chờ xử lý" styleClass="chat-report-status-text"/>
                 </HBox>
             </HBox>
             <Region styleClass="chat-report-divider"/>

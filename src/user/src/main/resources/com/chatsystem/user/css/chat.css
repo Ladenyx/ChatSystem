@@ -694,21 +694,102 @@
 }
 
 .chat-message-more {
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
     -fx-background-color: transparent;
-    -fx-padding: 4;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
     -fx-border-color: transparent;
+    -fx-border-width: 1;
     -fx-opacity: 0;
+    -fx-cursor: hand;
+}
+
+.chat-message-more .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
 }
 
 .chat-message-row:hover .chat-message-more,
+.chat-message-row:menu-open .chat-message-more,
 .chat-message-more:focused {
     -fx-opacity: 1;
 }
 
+.chat-message-row:menu-open .chat-message-more,
 .chat-message-more:hover {
     -fx-background-color: -chat-hover;
+}
+
+.chat-message-more:hover .ikonli-font-icon,
+.chat-message-row:menu-open .chat-message-more .ikonli-font-icon {
+    -fx-icon-color: -chat-text;
+}
+
+.chat-message-menu.cs-root {
+    -fx-background-color: -chat-surface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 6px;
+    -fx-min-width: 152px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 16, 0, 0, 4);
+}
+
+.chat-message-menu.cs-root:dark {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 16, 0, 0, 4);
+}
+
+.chat-message-menu-item {
+    -fx-alignment: center-left;
+    -fx-min-height: 34px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-padding: 0 10px;
+    -fx-graphic-text-gap: 8px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -chat-text;
+    -fx-cursor: hand;
+}
+
+.chat-message-menu-item .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
+}
+
+.chat-message-menu-item:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-message-menu-item:hover .ikonli-font-icon {
+    -fx-icon-color: -chat-text;
+}
+
+.chat-message-menu-item:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-message-menu-danger {
+    -fx-text-fill: -chat-danger;
+}
+
+.chat-message-menu-danger .ikonli-font-icon,
+.chat-message-menu-danger:hover .ikonli-font-icon {
+    -fx-icon-color: -chat-danger;
+}
+
+.chat-message-menu-danger:hover {
+    -fx-background-color: -chat-danger-bg;
 }
 
 .chat-composer {

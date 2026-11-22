@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Mock implementation of SpamReportService backed by ConversationCatalog when available,
@@ -59,6 +60,26 @@ public final class MockSpamReportService implements SpamReportService {
     }
 
     @Override
+    public Optional<String> resolveTargetUserId(String conversationId, List<String> selectedMessageIds) {
+        if (selectedMessageIds == null || selectedMessageIds.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<MockConversation> conversation = findConversation(conversationId);
+        if (conversation.isPresent()) {
+            return catalog.messagesFor(conversation.get().id()).stream()
+                    .filter(MockSpamReportService::isEligibleEvidenceMessage)
+                    .filter(message -> !catalog.currentUserId().equals(message.senderId()))
+                    .filter(message -> selectedMessageIds.contains(message.id()))
+                    .map(MockMessage::senderId)
+                    .findFirst();
+        }
+        if (selectedMessageIds.contains("msg-01") || selectedMessageIds.contains("msg-02")) {
+            return Optional.of(DEFAULT_TARGET_ID);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public List<ReportMessageItem> getEligibleMessages(String conversationId, String targetUserId) {
         Optional<MockConversation> conversation = findConversation(conversationId);
         if (conversation.isPresent()) {
@@ -93,43 +114,84 @@ public final class MockSpamReportService implements SpamReportService {
                     "Bạn đã chọn hơn 20 tin — hãy giảm xuống tối đa 20 để tiếp tục");
         }
 
-        List<ReportMessageItem> eligible = getEligibleMessages(conversationId, targetUserId);
-        List<ReportMessageItem> selected = eligible.stream()
-                .filter(message -> selectedMessageIds.contains(message.id()))
-                .toList();
-
         Optional<MockConversation> conversation = findConversation(conversationId);
-        List<ReportMessageItem> context = conversation.isPresent()
-                ? latestContextMessages(conversation.get().id(), targetUserId)
-                : List.of(
-                        new ReportMessageItem("msg-03", "u-minh", "Minh Anh", "10:14",
-                                "Bạn kiểm tra lại nội dung giúp mình nhé.", false),
-                        new ReportMessageItem("msg-01", targetUserId, targetUserName, "10:15",
-                                "Nhận ưu đãi hôm nay! Nhắn riêng cho mình để mua gói tài liệu.", true));
-
-        Map<String, ReportEvidenceItem> evidenceMap = new LinkedHashMap<>();
+        List<ReportMessageItem> selected;
+        List<ReportEvidenceItem> evidenceList;
+        int contextCount;
         int intersectionCount = 0;
 
-        for (ReportMessageItem sel : selected) {
-            boolean inContext = context.stream().anyMatch(ctx -> ctx.id().equals(sel.id()));
-            if (!inContext) {
-                evidenceMap.put(sel.id(), new ReportEvidenceItem(
-                        sel.id(), sel.senderName(), sel.formattedTime(), "Tin được báo cáo", sel.content()));
+        if (conversation.isPresent()) {
+            List<MockMessage> valid = catalog.messagesFor(conversation.get().id()).stream()
+                    .filter(MockSpamReportService::isEligibleEvidenceMessage)
+                    .toList();
+            int contextFrom = Math.max(0, valid.size() - MAX_CONTEXT_MESSAGES);
+            List<MockMessage> contextMessages = valid.subList(contextFrom, valid.size());
+            Set<String> contextIds = contextMessages.stream()
+                    .map(MockMessage::id)
+                    .collect(Collectors.toSet());
+            Set<String> validSelectedIds = valid.stream()
+                    .filter(message -> message.senderId().equals(targetUserId)
+                            && selectedMessageIds.contains(message.id()))
+                    .map(MockMessage::id)
+                    .collect(Collectors.toSet());
+            if (validSelectedIds.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Cần ít nhất một tin hợp lệ của tài khoản đích và lý do có nội dung");
             }
+            selected = new ArrayList<>();
+            evidenceList = new ArrayList<>();
+            contextCount = contextMessages.size();
+            for (MockMessage message : valid) {
+                boolean isSelected = validSelectedIds.contains(message.id());
+                boolean isContext = contextIds.contains(message.id());
+                if (!isSelected && !isContext) {
+                    continue;
+                }
+                ReportMessageItem item = toMessageItem(message, targetUserId);
+                if (isSelected) {
+                    selected.add(item);
+                }
+                if (isSelected && isContext) {
+                    intersectionCount++;
+                }
+                String classification = (isSelected && isContext) ? "Báo cáo + Ngữ cảnh"
+                        : isSelected ? "Tin được báo cáo"
+                        : "Ngữ cảnh";
+                evidenceList.add(new ReportEvidenceItem(
+                        item.id(), item.senderName(), item.formattedTime(), classification, item.content()));
+            }
+        } else {
+            List<ReportMessageItem> eligible = getEligibleMessages(conversationId, targetUserId);
+            selected = eligible.stream()
+                    .filter(message -> selectedMessageIds.contains(message.id()))
+                    .toList();
+            List<ReportMessageItem> context = List.of(
+                    new ReportMessageItem("msg-03", "u-minh", "Minh Anh", "10:14",
+                            "Bạn kiểm tra lại nội dung giúp mình nhé.", false),
+                    new ReportMessageItem("msg-01", targetUserId, targetUserName, "10:15",
+                            "Nhận ưu đãi hôm nay! Nhắn riêng cho mình để mua gói tài liệu.", true));
+            contextCount = context.size();
+            Map<String, ReportEvidenceItem> evidenceMap = new LinkedHashMap<>();
+            for (ReportMessageItem sel : selected) {
+                boolean inContext = context.stream().anyMatch(ctx -> ctx.id().equals(sel.id()));
+                if (!inContext) {
+                    evidenceMap.put(sel.id(), new ReportEvidenceItem(
+                            sel.id(), sel.senderName(), sel.formattedTime(), "Tin được báo cáo", sel.content()));
+                }
+            }
+            for (ReportMessageItem ctx : context) {
+                if (selectedMessageIds.contains(ctx.id())) {
+                    intersectionCount++;
+                    evidenceMap.put(ctx.id(), new ReportEvidenceItem(
+                            ctx.id(), ctx.senderName(), ctx.formattedTime(), "Báo cáo + Ngữ cảnh", ctx.content()));
+                } else {
+                    evidenceMap.put(ctx.id(), new ReportEvidenceItem(
+                            ctx.id(), ctx.senderName(), ctx.formattedTime(), "Ngữ cảnh", ctx.content()));
+                }
+            }
+            evidenceList = new ArrayList<>(evidenceMap.values());
         }
 
-        for (ReportMessageItem ctx : context) {
-            if (selectedMessageIds.contains(ctx.id())) {
-                intersectionCount++;
-                evidenceMap.put(ctx.id(), new ReportEvidenceItem(
-                        ctx.id(), ctx.senderName(), ctx.formattedTime(), "Báo cáo + Ngữ cảnh", ctx.content()));
-            } else {
-                evidenceMap.put(ctx.id(), new ReportEvidenceItem(
-                        ctx.id(), ctx.senderName(), ctx.formattedTime(), "Ngữ cảnh", ctx.content()));
-            }
-        }
-
-        List<ReportEvidenceItem> evidenceList = new ArrayList<>(evidenceMap.values());
         int totalUnique = evidenceList.size();
         String consentNotice = "Toàn bộ " + totalUnique
                 + " tin và lý do sẽ được gửi dạng bản rõ tới server để Admin hệ thống xem xét, kể cả trong nhóm E2EE.";
@@ -147,7 +209,7 @@ public final class MockSpamReportService implements SpamReportService {
                 selected,
                 evidenceList,
                 selected.size(),
-                context.size(),
+                contextCount,
                 intersectionCount,
                 totalUnique,
                 consentNotice);
@@ -165,16 +227,6 @@ public final class MockSpamReportService implements SpamReportService {
         return catalog.conversations().stream()
                 .filter(chat -> chat.id().equals(conversationId))
                 .findFirst();
-    }
-
-    private List<ReportMessageItem> latestContextMessages(String conversationId, String targetUserId) {
-        List<MockMessage> valid = catalog.messagesFor(conversationId).stream()
-                .filter(MockSpamReportService::isEligibleEvidenceMessage)
-                .toList();
-        int fromIndex = Math.max(0, valid.size() - MAX_CONTEXT_MESSAGES);
-        return valid.subList(fromIndex, valid.size()).stream()
-                .map(message -> toMessageItem(message, targetUserId))
-                .toList();
     }
 
     private ReportMessageItem toMessageItem(MockMessage message, String targetUserId) {
