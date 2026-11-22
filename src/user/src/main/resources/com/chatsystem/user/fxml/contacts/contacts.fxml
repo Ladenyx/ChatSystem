@@ -1,12 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
-</VBox>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="contactsRoot" fx:controller="com.chatsystem.user.controller.contacts.ContactsController"
+            stylesheets="@../../css/contacts.css" styleClass="user-contacts" minWidth="0">
+    <fx:define>
+        <ToggleGroup fx:id="contactsTabs"/>
+    </fx:define>
+    <left>
+        <VBox prefWidth="252" spacing="16" styleClass="contacts-sidebar">
+            <Label text="Bạn bè &amp; Kết nối" wrapText="true" styleClass="contacts-heading"/>
+            <VBox spacing="4">
+                <ToggleButton fx:id="contactsTabAll" text="Tất cả bạn bè" toggleGroup="$contactsTabs"
+                              maxWidth="Infinity" styleClass="contacts-nav">
+                    <graphic><FontIcon iconLiteral="fth-users" iconSize="16"/></graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="contactsTabOnline" text="Đang online" toggleGroup="$contactsTabs"
+                              maxWidth="Infinity" styleClass="contacts-nav">
+                    <graphic><FontIcon iconLiteral="fth-activity" iconSize="16"/></graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="contactsTabRequests" text="Lời mời kết bạn" toggleGroup="$contactsTabs"
+                              maxWidth="Infinity" styleClass="contacts-nav">
+                    <graphic><FontIcon iconLiteral="fth-user-plus" iconSize="16"/></graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="contactsTabSearch" text="Tìm người dùng" toggleGroup="$contactsTabs"
+                              maxWidth="Infinity" styleClass="contacts-nav">
+                    <graphic><FontIcon iconLiteral="fth-search" iconSize="16"/></graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="contactsTabBlocked" text="Đã chặn" toggleGroup="$contactsTabs"
+                              maxWidth="Infinity" styleClass="contacts-nav">
+                    <graphic><FontIcon iconLiteral="fth-slash" iconSize="16"/></graphic>
+                </ToggleButton>
+            </VBox>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="16" styleClass="contacts-content" minWidth="0">
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label fx:id="contactsTitle" styleClass="page-title" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="contactsCount" styleClass="secondary-text"/>
+            </HBox>
+            <StackPane fx:id="contactsSearchRow" alignment="CENTER_LEFT" styleClass="contacts-search">
+                <TextField fx:id="contactsFilter"/>
+                <FontIcon iconLiteral="fth-search" iconSize="16" mouseTransparent="true">
+                    <StackPane.margin><Insets left="12"/></StackPane.margin>
+                </FontIcon>
+            </StackPane>
+            <ScrollPane fx:id="contactsScroll" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                        accessibleText="Danh sách kết nối" styleClass="contacts-scroll">
+                <content><VBox fx:id="contactsList" spacing="8" minWidth="0"/></content>
+            </ScrollPane>
+            <VBox spacing="4">
+                <Label fx:id="contactsStatus" visible="false" managed="false" wrapText="true"
+                       styleClass="contacts-status"/>
+                <Label fx:id="contactsNote" wrapText="true" styleClass="caption"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
