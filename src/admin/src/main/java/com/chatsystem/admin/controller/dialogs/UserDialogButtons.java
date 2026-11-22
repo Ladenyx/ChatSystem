@@ -2,6 +2,7 @@ package com.chatsystem.admin.controller.dialogs;
 
 import atlantafx.base.theme.Styles;
 import java.util.Objects;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -22,13 +23,23 @@ final class UserDialogButtons {
         Button cancelButton = (Button) pane.lookupButton(cancel);
         cancelButton.setId("cancelUserDialog");
         cancelButton.getStyleClass().add("admin-dialog-cancel");
+        ButtonBar.setButtonUniformSize(cancelButton, false);
         Button submitButton = (Button) pane.lookupButton(submit);
         submitButton.setId("submitUserDialog");
-        submitButton.getStyleClass().add(destructive ? Styles.DANGER : "admin-dialog-primary");
         if (destructive) {
+            submitButton.getStyleClass().addAll(Styles.DANGER, "admin-dialog-danger");
             submitButton.setDefaultButton(false);
-            cancelButton.requestFocus();
+            cancelButton.setDefaultButton(true);
+            Platform.runLater(cancelButton::requestFocus);
+            cancelButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    cancelButton.requestFocus();
+                }
+            });
+        } else {
+            submitButton.getStyleClass().add("admin-dialog-primary");
         }
+        ButtonBar.setButtonUniformSize(submitButton, false);
         return submitButton;
     }
 }

@@ -1,6 +1,14 @@
 .admin-user-dialog {
+    -ad-danger-solid: #b10e1c;
+    -ad-danger-solid-hover: #960b17;
     -fx-background-color: -cs-surface;
     -fx-padding: 0;
+}
+
+.admin-user-dialog:dark,
+.cs-root:dark .admin-user-dialog {
+    -ad-danger-solid: #c42b38;
+    -ad-danger-solid-hover: #dc3545;
 }
 
 .admin-user-dialog > .admin-user-dialog-content {
@@ -24,22 +32,18 @@
     -fx-border-radius: 8px;
 }
 
+.admin-user-dialog > .button-bar .button {
+    -fx-padding: 6px 16px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
 .admin-user-dialog .date-picker {
     -fx-background-radius: 8px, 7px;
 }
 
 .admin-user-dialog .date-picker > .text-field {
     -fx-background-color: transparent;
-}
-
-.admin-user-dialog .admin-dialog-cancel {
-    -fx-background-color: -cs-surface-subtle;
-    -fx-border-color: -cs-border;
-    -fx-text-fill: -cs-text;
-}
-
-.admin-user-dialog .admin-dialog-cancel:hover {
-    -fx-background-color: -cs-hover;
 }
 
 .admin-user-dialog .admin-dialog-primary {
@@ -52,6 +56,40 @@
 }
 
 .admin-user-dialog .button:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-user-dialog .button.admin-dialog-cancel {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-text-fill: -cs-focus;
+    -fx-font-weight: bold;
+}
+
+.admin-user-dialog .button.admin-dialog-cancel:hover,
+.admin-user-dialog .button.admin-dialog-cancel:focused {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.admin-user-dialog .button.admin-dialog-danger {
+    -fx-background-color: -ad-danger-solid;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.admin-user-dialog .button.admin-dialog-danger:hover {
+    -fx-background-color: -ad-danger-solid-hover;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+}
+
+.admin-user-dialog .button.admin-dialog-danger:focused {
     -fx-border-color: -cs-focus;
 }
 

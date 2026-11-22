@@ -1,5 +1,5 @@
 /* JavaFX color tokens for the User workspace (graphite neutral ramp + restrained cobalt accent). */
-.user-shell, .chat-info {
+.user-shell, .chat-info, .chat-group-dialog, .chat-ai-pane {
     -chat-canvas: #f5f5f5;
     -chat-workspace-bg: #fafafa;
     -chat-surface: #ffffff;
@@ -21,11 +21,15 @@
     -chat-online: #16a34a;
     -chat-offline: #737373;
     -chat-icon-color: -chat-muted;
+    -chat-incoming: #ffffff;
+    -chat-warning: #8a3707;
+    -chat-warning-bg: #fff9f5;
+    -chat-danger: #b10e1c;
     -chat-scroll-thumb: rgba(0, 0, 0, 0.16);
     -chat-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
 }
 
-.cs-root:dark .user-shell, .cs-root:dark .chat-info {
+.cs-root:dark .user-shell, .cs-root:dark .chat-info, .chat-group-dialog:dark, .cs-root:dark .chat-ai-pane {
     -chat-canvas: #141414;
     -chat-workspace-bg: #171719;
     -chat-surface: #1f1f1f;
@@ -46,6 +50,10 @@
     -chat-on-brand: #ffffff;
     -chat-online: #4cc38a;
     -chat-offline: #8a8a91;
+    -chat-incoming: #232326;
+    -chat-warning: #fce100;
+    -chat-warning-bg: #332717;
+    -chat-danger: #f1707b;
     -chat-scroll-thumb: rgba(255, 255, 255, 0.16);
     -chat-scroll-thumb-hover: rgba(255, 255, 255, 0.28);
 }
