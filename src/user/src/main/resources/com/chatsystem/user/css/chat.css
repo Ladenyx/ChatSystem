@@ -1098,6 +1098,23 @@
     -fx-font-size: 13px;
 }
 
+.chat-group-dialog > .button-bar .button.chat-dialog-cancel {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: -chat-focus;
+    -fx-font-weight: bold;
+}
+
+.chat-group-dialog > .button-bar .button.chat-dialog-cancel:hover,
+.chat-group-dialog > .button-bar .button.chat-dialog-cancel:focused {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: transparent;
+}
+
 .chat-group-candidate {
     -fx-padding: 8 12;
     -fx-min-height: 56;

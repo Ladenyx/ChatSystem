@@ -259,7 +259,7 @@ public final class GroupFormController implements DialogViewController {
         pane.getButtonTypes().setAll(cancel, submit);
 
         var cancelButton = (Button) pane.lookupButton(cancel);
-        cancelButton.getStyleClass().add("chat-outline");
+        cancelButton.getStyleClass().add("chat-dialog-cancel");
         ButtonBar.setButtonUniformSize(cancelButton, false);
 
         submitButton = (Button) pane.lookupButton(submit);
