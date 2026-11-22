@@ -1,12 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.chatsystem.desktop.controller.PlaceholderController"
-      alignment="CENTER" spacing="16" styleClass="empty-state" minWidth="0" prefWidth="480"
-      focusTraversable="true">
-    <Label fx:id="screenId" styleClass="eyebrow"/>
-    <Label fx:id="screenTitle" styleClass="page-title" wrapText="true" textAlignment="CENTER"/>
-    <Label text="Chưa có dữ liệu hiển thị." styleClass="secondary-text" wrapText="true"/>
-    <Label text="Bản xem giao diện · Ngoại tuyến" styleClass="caption" wrapText="true"/>
-</VBox>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<SplitPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.chatsystem.admin.controller.groups.GroupsController"
+           dividerPositions="0.54" styleClass="admin-users-page,admin-groups-page" stylesheets="@../../css/groups.css"
+           accessibleText="Danh sách và chi tiết nhóm chat" focusTraversable="false">
+    <StackPane.margin><Insets top="16" right="24" bottom="16" left="24"/></StackPane.margin>
+
+    <VBox spacing="12" minWidth="360" styleClass="admin-user-directory,admin-groups-directory">
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Danh sách nhóm" styleClass="section-title" wrapText="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Chỉ xem" styleClass="caption,admin-readonly-tag"/>
+        </HBox>
+
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <TextField fx:id="nameFilter" id="groupNameFilter" promptText="Tìm theo tên nhóm"
+                       accessibleText="Tìm theo tên nhóm"
+                       minWidth="0" HBox.hgrow="ALWAYS" styleClass="admin-search-input"/>
+            <ComboBox fx:id="sortOrder" id="groupSortOrder" accessibleText="Sắp xếp nhóm chat"
+                      minWidth="144" prefWidth="160"/>
+        </HBox>
+
+        <TableView fx:id="groupsTable" id="groupsTable" fixedCellSize="48" minWidth="0" minHeight="144"
+                   styleClass="admin-users-table,admin-directory-table" accessibleText="Danh sách nhóm chat"
+                   VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="groupNameColumn" text="Tên nhóm" minWidth="112" prefWidth="220"
+                             sortable="false" reorderable="false"/>
+                <TableColumn fx:id="memberCountColumn" text="Thành viên" minWidth="76" prefWidth="96"
+                             styleClass="admin-group-size-column" sortable="false" reorderable="false"/>
+                <TableColumn fx:id="groupCreatedColumn" text="Ngày tạo" minWidth="132" prefWidth="144"
+                             styleClass="admin-date-column" sortable="false" reorderable="false"/>
+            </columns>
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
+            <placeholder>
+                <Label text="Không tìm thấy nhóm phù hợp" styleClass="secondary-text" wrapText="true"/>
+            </placeholder>
+        </TableView>
+
+        <HBox spacing="8" alignment="CENTER_LEFT" minHeight="28">
+            <Label fx:id="groupCount" id="groupCount" styleClass="caption"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Hyperlink fx:id="clearFilter" id="clearGroupFilter" text="Xóa bộ lọc" onAction="#clearFilter"/>
+        </HBox>
+    </VBox>
+
+    <StackPane minWidth="316" styleClass="admin-inspector-panel">
+        <VBox fx:id="unselectedGroup" id="unselectedGroup" alignment="CENTER" spacing="12" styleClass="admin-inspector-empty">
+            <StackPane styleClass="admin-inspector-icon">
+                <FontIcon iconLiteral="fth-message-square" iconSize="20"/>
+            </StackPane>
+            <Label text="Chọn nhóm chat để xem thông tin và danh sách thành viên" styleClass="secondary-text"
+                   wrapText="true" textAlignment="CENTER"/>
+        </VBox>
+
+        <ScrollPane fx:id="groupInspector" id="groupInspector" fitToWidth="true" hbarPolicy="NEVER"
+                    minWidth="0" visible="false" managed="false" focusTraversable="false"
+                    styleClass="admin-user-inspector">
+            <VBox spacing="16" minWidth="0" styleClass="admin-profile-content">
+                <VBox spacing="12" minWidth="0" styleClass="admin-profile-summary">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label fx:id="groupInitials" id="groupInitials" styleClass="admin-profile-initials,admin-group-avatar"/>
+                        <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="groupTitle" id="groupTitle" styleClass="admin-profile-name"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <FlowPane hgap="8" vgap="2" alignment="CENTER_LEFT" minWidth="0">
+                                <Label fx:id="groupId" id="groupId" styleClass="caption,admin-profile-handle"
+                                       minHeight="-Infinity"/>
+                                <Label text="·" styleClass="caption"/>
+                                <Label fx:id="groupMemberCountBadge" id="groupMemberCountBadge" styleClass="caption"
+                                       minHeight="-Infinity"/>
+                            </FlowPane>
+                            <Label fx:id="groupCreated" id="groupCreated" styleClass="caption,admin-account-meta"
+                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="admin-notice-banner">
+                    <FontIcon iconLiteral="fth-lock" iconSize="16" styleClass="admin-notice-icon"/>
+                    <Label text="Admin chỉ xem thông tin nhóm và thành viên, không xem tin nhắn. Hệ thống không lưu khóa giải mã E2EE của nhóm."
+                           minWidth="0" maxWidth="Infinity" minHeight="-Infinity" wrapText="true" styleClass="caption" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <VBox spacing="8" minWidth="0">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Admin nhóm" styleClass="admin-subsection-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="adminCount" id="adminCount" styleClass="caption"/>
+                    </HBox>
+                    <TableView fx:id="adminTable" id="adminTable" fixedCellSize="40" minWidth="0"
+                               styleClass="admin-users-table,admin-inspector-table" focusTraversable="false">
+                        <columns>
+                            <TableColumn fx:id="adminIdentityColumn" text="Họ tên và tài khoản" minWidth="144" prefWidth="200"
+                                         sortable="false" reorderable="false"/>
+                            <TableColumn fx:id="adminRoleColumn" text="Vai trò" minWidth="108" prefWidth="120"
+                                         sortable="false" reorderable="false"/>
+                        </columns>
+                        <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
+                        <placeholder>
+                            <Label text="Không có quản trị viên" styleClass="secondary-text" wrapText="true"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+
+                <VBox spacing="8" minWidth="0">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Thành viên thường" styleClass="admin-subsection-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="memberCount" id="memberCount" styleClass="caption"/>
+                    </HBox>
+                    <TableView fx:id="membersTable" id="membersTable" fixedCellSize="40" minWidth="0"
+                               styleClass="admin-users-table,admin-inspector-table" focusTraversable="false">
+                        <columns>
+                            <TableColumn fx:id="memberIdentityColumn" text="Họ tên và tài khoản" minWidth="144" prefWidth="200"
+                                         sortable="false" reorderable="false"/>
+                            <TableColumn fx:id="memberRoleColumn" text="Vai trò" minWidth="108" prefWidth="120"
+                                         sortable="false" reorderable="false"/>
+                        </columns>
+                        <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
+                        <placeholder>
+                            <Label text="Không có thành viên thường" styleClass="secondary-text" wrapText="true"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+</SplitPane>

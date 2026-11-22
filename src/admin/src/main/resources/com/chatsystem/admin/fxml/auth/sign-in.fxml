@@ -17,7 +17,6 @@
                 <FontIcon iconLiteral="fth-message-square" iconSize="16" mouseTransparent="true"/>
             </StackPane>
             <Label text="WhatsUp" styleClass="brand"/>
-            <Label text="Admin App" styleClass="caption"/>
         </HBox>
     </top>
     <center>
