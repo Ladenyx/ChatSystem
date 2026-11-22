@@ -148,6 +148,13 @@ public final class SpamController implements ViewController {
         clearFilters.managedProperty().bind(clearFilters.visibleProperty());
         spamDateError.managedProperty().bind(spamDateError.visibleProperty());
         lockAccountNotice.managedProperty().bind(lockAccountNotice.visibleProperty());
+        reviewNoteField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.isBlank()) {
+                reviewNoteField.pseudoClassStateChanged(INVALID, false);
+                reviewNoteError.setVisible(false);
+                reviewNoteError.setManaged(false);
+            }
+        });
 
         reportsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, selected) -> showReportDetails(selected));
@@ -366,6 +373,7 @@ public final class SpamController implements ViewController {
         reviewedBox.setManaged(isReviewed);
 
         reviewNoteField.clear();
+        reviewNoteField.pseudoClassStateChanged(INVALID, false);
         reviewNoteError.setVisible(false);
         reviewNoteError.setManaged(false);
 
@@ -386,8 +394,8 @@ public final class SpamController implements ViewController {
         lockAccountButton.setDisable(!preview.canLockReportedAccount(report));
         lockAccountButton.setText(locked ? "Tài khoản đã bị khóa" : "Khóa tài khoản bị báo cáo");
         lockIcon.setIconCode(locked ? Feather.CHECK : Feather.LOCK);
-        String notice = target.role() == MockUser.Role.ADMIN ? "Không khóa tài khoản Admin hệ thống từ báo cáo."
-                : status == MockUser.Status.DELETED ? "Không khóa tài khoản đã xóa mềm." : "";
+        String notice = target.role() == MockUser.Role.ADMIN ? "Không khóa tài khoản Admin hệ thống từ báo cáo"
+                : status == MockUser.Status.DELETED ? "Không khóa tài khoản đã xóa mềm" : "";
         lockAccountNotice.setText(notice);
         lockAccountNotice.setVisible(!notice.isEmpty());
     }
@@ -399,24 +407,23 @@ public final class SpamController implements ViewController {
             MockMessage msg = item.message();
             MockUser sender = preview.user(msg.senderId());
 
-            Label senderLabel = wrappingLabel(sender.fullName() + " (@" + sender.username() + ")",
+            Label senderLabel = wrappingLabel(sender.fullName() + " · @" + sender.username(),
                     "admin-bubble-sender");
-
             Label timeLabel = new Label(DATE_TIME.format(msg.sentAt()));
             timeLabel.getStyleClass().add("admin-bubble-time");
-            FlowPane metadata = new FlowPane(8, 4, timeLabel);
-            metadata.setAlignment(Pos.CENTER_LEFT);
-            metadata.setMinWidth(0);
-            metadata.setMinHeight(Region.USE_PREF_SIZE);
+            FlowPane header = new FlowPane(8, 4, senderLabel, timeLabel);
+            header.setAlignment(Pos.CENTER_LEFT);
+            header.setMinWidth(0);
+            header.setMinHeight(Region.USE_PREF_SIZE);
 
             if (item.selected()) {
-                metadata.getChildren().add(evidenceTag("Bị báo cáo", "tag-selected"));
+                header.getChildren().add(evidenceTag("Bị báo cáo", "tag-selected"));
             }
             if (item.context()) {
-                metadata.getChildren().add(evidenceTag("Ngữ cảnh", "tag-context"));
+                header.getChildren().add(evidenceTag("Ngữ cảnh", "tag-context"));
             }
 
-            VBox bubbleCard = new VBox(4, senderLabel, metadata, wrappingLabel(msg.text(), "admin-bubble-text"));
+            VBox bubbleCard = new VBox(6, header, wrappingLabel(msg.text(), "admin-bubble-text"));
             bubbleCard.setMinWidth(0);
             bubbleCard.setMinHeight(Region.USE_PREF_SIZE);
             bubbleCard.getStyleClass().addAll("admin-chat-bubble-card",
@@ -469,9 +476,11 @@ public final class SpamController implements ViewController {
         }
         String note = reviewNoteField.getText() == null ? "" : reviewNoteField.getText().strip();
         if (note.isEmpty()) {
+            reviewNoteField.pseudoClassStateChanged(INVALID, true);
             reviewNoteError.setText("Nhập ghi chú trước khi đánh dấu đã xử lý");
             reviewNoteError.setVisible(true);
             reviewNoteError.setManaged(true);
+            reviewNoteField.requestFocus();
             return;
         }
 
@@ -552,7 +561,7 @@ public final class SpamController implements ViewController {
 
         private UserDisplayCell(java.util.function.Function<MockSpamReport, MockUser> userExtractor) {
             this.userExtractor = userExtractor;
-            name.getStyleClass().add("admin-user-name");
+            name.getStyleClass().add("admin-cell-secondary-name");
             handle.getStyleClass().add("caption");
             layout.setMinWidth(0);
         }

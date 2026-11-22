@@ -14,12 +14,44 @@
     -fx-padding: 16px;
 }
 
+.admin-readonly-tag {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -admin-user-rule;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 2px 8px;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-groups-directory .combo-box {
+    -fx-min-height: 36px;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-font-size: 13px;
+}
+
+.admin-groups-directory .combo-box:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-groups-directory .combo-box:focused {
+    -fx-border-color: -cs-focus;
+}
+
 .admin-group-avatar {
     -fx-background-color: -cs-brand-subtle;
     -fx-text-fill: -cs-brand-text;
     -fx-font-weight: 600;
     -fx-font-size: 16px;
     -fx-background-radius: 8px;
+}
+
+.admin-groups-directory .table-cell.admin-group-size-column {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12px;
 }
 
 .admin-groups-directory .table-cell.admin-group-size-column,
@@ -29,10 +61,10 @@
 
 .admin-notice-banner {
     -fx-background-color: -cs-surface-subtle;
-    -fx-border-color: -cs-border;
+    -fx-border-color: -admin-user-rule;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-    -fx-padding: 8px 12px;
+    -fx-padding: 12px;
 }
 
 .admin-notice-icon {
@@ -45,10 +77,6 @@
     -fx-text-fill: -cs-text;
 }
 
-.admin-section-icon {
-    -fx-icon-color: -cs-muted;
-}
-
 .admin-member-name {
     -fx-font-size: 13px;
     -fx-font-weight: 600;
@@ -57,8 +85,9 @@
 
 .admin-role-badge {
     -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
     -fx-padding: 2px 8px;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
 }
 
@@ -69,5 +98,6 @@
 
 .admin-role-badge.badge-member {
     -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -admin-user-rule;
     -fx-text-fill: -cs-muted;
 }

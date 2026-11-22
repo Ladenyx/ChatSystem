@@ -21,7 +21,7 @@ public final class SpamModerationPreview {
         for (MockSpamReport report : data.spamReports()) {
             if (report.status() == MockSpamReport.Status.REVIEWED) {
                 reviews.put(report.id(), new Review(report.createdAt().plusSeconds(3600),
-                        "Đã xem xét bằng chứng trong báo cáo mẫu."));
+                        "Đã xác minh nội dung vi phạm và lưu hồ sơ xử lý"));
             }
         }
     }

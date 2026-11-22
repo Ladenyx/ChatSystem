@@ -8,6 +8,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -22,12 +23,9 @@
 
     <VBox spacing="12" minWidth="360" styleClass="admin-user-directory,admin-groups-directory">
         <HBox spacing="8" alignment="CENTER_LEFT">
-            <VBox spacing="2">
-                <Label text="Danh sách nhóm" styleClass="section-title" wrapText="true"/>
-                <Label text="Tra cứu nhóm và xem vai trò thành viên" styleClass="caption"/>
-            </VBox>
+            <Label text="Danh sách nhóm" styleClass="section-title" wrapText="true"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label text="Chỉ xem" styleClass="caption"/>
+            <Label text="Chỉ xem" styleClass="caption,admin-readonly-tag"/>
         </HBox>
 
         <HBox spacing="8" alignment="CENTER_LEFT">
@@ -81,10 +79,13 @@
                         <VBox spacing="4" minWidth="0" HBox.hgrow="ALWAYS">
                             <Label fx:id="groupTitle" id="groupTitle" styleClass="admin-profile-name"
                                    minWidth="0" minHeight="-Infinity" wrapText="true"/>
-                            <Label fx:id="groupId" id="groupId" styleClass="caption,admin-profile-handle"
-                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
-                            <Label fx:id="groupMemberCountBadge" id="groupMemberCountBadge" styleClass="caption"
-                                   minWidth="0" minHeight="-Infinity" wrapText="true"/>
+                            <FlowPane hgap="8" vgap="2" alignment="CENTER_LEFT" minWidth="0">
+                                <Label fx:id="groupId" id="groupId" styleClass="caption,admin-profile-handle"
+                                       minHeight="-Infinity"/>
+                                <Label text="·" styleClass="caption"/>
+                                <Label fx:id="groupMemberCountBadge" id="groupMemberCountBadge" styleClass="caption"
+                                       minHeight="-Infinity"/>
+                            </FlowPane>
                             <Label fx:id="groupCreated" id="groupCreated" styleClass="caption,admin-account-meta"
                                    minWidth="0" minHeight="-Infinity" wrapText="true"/>
                         </VBox>
@@ -99,7 +100,6 @@
 
                 <VBox spacing="8" minWidth="0">
                     <HBox alignment="CENTER_LEFT" spacing="8">
-                        <FontIcon iconLiteral="fth-shield" iconSize="14" styleClass="admin-section-icon"/>
                         <Label text="Admin nhóm" styleClass="admin-subsection-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="adminCount" id="adminCount" styleClass="caption"/>
@@ -109,7 +109,7 @@
                         <columns>
                             <TableColumn fx:id="adminIdentityColumn" text="Họ tên và tài khoản" minWidth="144" prefWidth="200"
                                          sortable="false" reorderable="false"/>
-                            <TableColumn fx:id="adminRoleColumn" text="Quyền hạn" minWidth="90" prefWidth="110"
+                            <TableColumn fx:id="adminRoleColumn" text="Vai trò" minWidth="108" prefWidth="120"
                                          sortable="false" reorderable="false"/>
                         </columns>
                         <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
@@ -121,7 +121,6 @@
 
                 <VBox spacing="8" minWidth="0">
                     <HBox alignment="CENTER_LEFT" spacing="8">
-                        <FontIcon iconLiteral="fth-users" iconSize="14" styleClass="admin-section-icon"/>
                         <Label text="Thành viên thường" styleClass="admin-subsection-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="memberCount" id="memberCount" styleClass="caption"/>
@@ -131,7 +130,7 @@
                         <columns>
                             <TableColumn fx:id="memberIdentityColumn" text="Họ tên và tài khoản" minWidth="144" prefWidth="200"
                                          sortable="false" reorderable="false"/>
-                            <TableColumn fx:id="memberRoleColumn" text="Vai trò" minWidth="90" prefWidth="110"
+                            <TableColumn fx:id="memberRoleColumn" text="Vai trò" minWidth="108" prefWidth="120"
                                          sortable="false" reorderable="false"/>
                         </columns>
                         <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>

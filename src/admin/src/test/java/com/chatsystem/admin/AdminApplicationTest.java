@@ -818,7 +818,7 @@ class AdminApplicationTest {
                 assertTrue(noteError.isVisible());
 
                 // Non-empty note
-                String note = "Đã xem bằng chứng đính kèm và khóa tài khoản mẫu.";
+                String note = "Đã xem bằng chứng đính kèm và khóa tài khoản";
                 noteInput.setText(note);
                 markReviewedBtn.fire();
                 root.applyCss();
