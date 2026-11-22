@@ -28,7 +28,7 @@ public final class ConfirmActionController implements ViewController {
         var user = UserManagementFixtures.findUser(action.userId()).orElse(null);
         Prompt prompt = promptFor(action.action());
         confirmationTitle.setText(prompt.title());
-        account.setText(user == null ? "Tài khoản chưa có trong dữ liệu mẫu" : "@" + user.username());
+        account.setText(user == null ? "Không tìm thấy thông tin tài khoản" : "@" + user.username());
         accountId.setText("ID " + action.userId());
         consequences.setText(prompt.consequences());
         if (action.action() == Action.RESET_PASSWORD && user != null) {

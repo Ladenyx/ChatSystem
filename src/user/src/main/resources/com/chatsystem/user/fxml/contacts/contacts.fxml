@@ -63,11 +63,8 @@
                         accessibleText="Danh sách kết nối" styleClass="contacts-scroll">
                 <content><VBox fx:id="contactsList" spacing="0" minWidth="0"/></content>
             </ScrollPane>
-            <VBox spacing="8" styleClass="contacts-footer">
-                <Label fx:id="contactsStatus" visible="false" managed="false" wrapText="true"
-                       maxWidth="Infinity" styleClass="contacts-status"/>
-                <Label fx:id="contactsNote" wrapText="true" maxWidth="Infinity" styleClass="contacts-note"/>
-            </VBox>
+            <Label fx:id="contactsStatus" visible="false" managed="false" wrapText="true"
+                   maxWidth="Infinity" styleClass="contacts-status"/>
         </VBox>
     </center>
 </BorderPane>

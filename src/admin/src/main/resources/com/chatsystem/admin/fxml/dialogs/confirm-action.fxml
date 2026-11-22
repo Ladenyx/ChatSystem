@@ -11,5 +11,4 @@
         <Label fx:id="recipient" styleClass="caption" wrapText="true" managed="false" visible="false"/>
     </VBox>
     <Label fx:id="consequences" wrapText="true"/>
-    <Label text="Dữ liệu mẫu · Xem trước thao tác" styleClass="caption" wrapText="true"/>
 </VBox>

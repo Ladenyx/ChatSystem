@@ -51,7 +51,7 @@ public final class EditUserController implements ViewController {
             formTitle.setText("Sửa hồ sơ");
             usernameLabel.setText("Tên đăng nhập · chỉ đọc");
             username.setEditable(false);
-            formSubtitle.setText(user == null ? "Tài khoản chưa có trong dữ liệu mẫu" : "ID " + user.id());
+            formSubtitle.setText(user == null ? "Không tìm thấy thông tin tài khoản" : "ID " + user.id());
         }
         if (user != null) {
             username.setText(user.username());
