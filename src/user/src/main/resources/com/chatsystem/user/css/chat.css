@@ -819,6 +819,180 @@
     -fx-border-color: transparent;
 }
 
+.chat-history-empty {
+    -fx-padding: 32;
+}
+
+.chat-message-row.is-selectable {
+    -fx-padding: 6 10;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.chat-message-row.is-selectable:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-message-row.is-selectable:selected {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.chat-selection-header {
+    -fx-background-color: -chat-surface;
+}
+
+.chat-selection-bar {
+    -fx-min-height: 68;
+}
+
+.chat-selection-btn {
+    -fx-min-height: 36;
+    -fx-padding: 6 14;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-graphic-text-gap: 6;
+}
+
+.button.chat-danger-solid {
+    -fx-background-color: -chat-danger-solid;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 600;
+    -fx-min-height: 36;
+    -fx-padding: 6 16;
+}
+
+.button.chat-danger-solid .ikonli-font-icon {
+    -fx-icon-color: #ffffff;
+}
+
+.button.chat-danger-solid:hover {
+    -fx-background-color: -chat-danger-solid-hover;
+}
+
+.button.chat-danger-solid:disabled {
+    -fx-opacity: 0.45;
+}
+
+.button.chat-danger-solid:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.label.chat-selection-warning {
+    -fx-text-fill: -chat-danger;
+    -fx-font-weight: 600;
+}
+
+.dialog-pane.chat-message-dialog {
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-control-border;
+    -fx-border-width: 1;
+    -fx-padding: 0;
+}
+
+.dialog-pane.chat-message-dialog > .content {
+    -fx-padding: 0;
+}
+
+.dialog-pane.chat-message-dialog > .button-bar > .container {
+    -fx-padding: 12 20 18 20;
+}
+
+.dialog-pane.chat-message-dialog .chat-message-dialog-header {
+    -fx-padding: 14 16 14 20;
+    -fx-border-color: transparent transparent -chat-rule transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dialog-pane.chat-message-dialog .label.chat-message-dialog-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-text;
+}
+
+.dialog-pane.chat-message-dialog .chat-message-dialog-body {
+    -fx-padding: 16 20 8 20;
+}
+
+.dialog-pane.chat-message-dialog .label.chat-message-dialog-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: -chat-secondary;
+    -fx-line-spacing: 2px;
+}
+
+.dialog-pane.chat-message-dialog .chat-recall-option {
+    -fx-padding: 12;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.dialog-pane.chat-message-dialog .chat-recall-option:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.dialog-pane.chat-message-dialog .chat-recall-option:selected {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.dialog-pane.chat-message-dialog .chat-recall-option.is-disabled {
+    -fx-opacity: 0.52;
+    -fx-cursor: default;
+    -fx-background-color: -chat-surface-subtle;
+    -fx-border-color: -chat-rule;
+}
+
+.dialog-pane.chat-message-dialog .label.chat-recall-option-title {
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-text;
+}
+
+.dialog-pane.chat-message-dialog .label.chat-recall-option-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: -chat-secondary;
+    -fx-line-spacing: 1.5px;
+}
+
+.dialog-pane.chat-message-dialog .button {
+    -fx-min-height: 36;
+    -fx-padding: 6 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.dialog-pane.chat-message-dialog .button.chat-dialog-cancel {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-text-fill: -chat-focus;
+}
+
+.dialog-pane.chat-message-dialog .button.chat-dialog-cancel:hover,
+.dialog-pane.chat-message-dialog .button.chat-dialog-cancel:focused {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.dialog-pane.chat-message-dialog .button.chat-primary:focused {
+    -fx-border-color: -chat-focus;
+}
+
 .chat-composer {
     -fx-background-color: -chat-surface;
     -fx-border-color: -chat-rule;

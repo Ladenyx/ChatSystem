@@ -29,39 +29,77 @@
                     <tooltip><Tooltip text="Thông tin đoạn chat"/></tooltip>
                 </Button>
             </HBox>
+            <HBox fx:id="selectionHeader" id="selectionHeader" alignment="CENTER_LEFT" spacing="12"
+                  visible="false" managed="false" styleClass="chat-header,chat-selection-header">
+                <Button fx:id="exitSelectionButton" id="exitSelectionMode" onAction="#exitSelectionMode"
+                        accessibleText="Thoát chế độ chọn" styleClass="chat-icon-btn">
+                    <graphic><FontIcon iconLiteral="fth-x" iconSize="18"/></graphic>
+                    <tooltip><Tooltip text="Thoát chọn nhiều tin (Esc)"/></tooltip>
+                </Button>
+                <Label fx:id="selectionCountLabel" id="selectionCountLabel" styleClass="chat-header-title"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS" text="Đã chọn 0 tin nhắn"/>
+                <Label fx:id="selectionLimitHint" id="selectionLimitHint" styleClass="chat-header-status"
+                       text="Tối đa 50 tin"/>
+            </HBox>
         </StackPane>
     </top>
     <center>
         <VBox minWidth="0">
             <VBox fx:id="historyNotice" styleClass="chat-history-notice"/>
-            <ScrollPane fx:id="historyScroll" id="historyScroll" fitToWidth="true" hbarPolicy="NEVER"
-                        styleClass="chat-history" accessibleText="Lịch sử tin nhắn" VBox.vgrow="ALWAYS">
-                <VBox fx:id="messageRows" id="messageRows" spacing="12" minWidth="0" styleClass="chat-history-content"/>
-            </ScrollPane>
+            <StackPane VBox.vgrow="ALWAYS" minWidth="0">
+                <ScrollPane fx:id="historyScroll" id="historyScroll" fitToWidth="true" fitToHeight="true"
+                            hbarPolicy="NEVER" styleClass="chat-history" accessibleText="Lịch sử tin nhắn">
+                    <VBox fx:id="messageRows" id="messageRows" alignment="BOTTOM_LEFT" spacing="12" minWidth="0"
+                          styleClass="chat-history-content"/>
+                </ScrollPane>
+                <VBox fx:id="emptyHistory" id="emptyHistory" alignment="CENTER" spacing="10"
+                      visible="false" managed="false" styleClass="chat-history-empty">
+                    <StackPane styleClass="chat-empty-icon">
+                        <FontIcon iconLiteral="fth-message-circle" iconSize="20"/>
+                    </StackPane>
+                    <Label text="Chưa có tin nhắn nào" styleClass="chat-empty-title"/>
+                    <Label text="Các tin nhắn mới trong cuộc trò chuyện sẽ hiển thị tại đây."
+                           styleClass="chat-empty-subtitle" wrapText="true" textAlignment="CENTER" maxWidth="300"/>
+                </VBox>
+            </StackPane>
         </VBox>
     </center>
     <bottom>
-        <HBox fx:id="composer" alignment="CENTER_LEFT" spacing="8" fillHeight="false" styleClass="chat-composer">
-            <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
-                      prefRowCount="2" prefHeight="56" minWidth="0" HBox.hgrow="ALWAYS" accessibleText="Soạn tin nhắn"/>
-            <Button fx:id="aiAssistantButton" id="aiAssistantButton" onAction="#openAssistant"
-                    accessibleText="Mở gợi ý soạn tin bằng AI" styleClass="chat-outline,chat-ai-trigger">
-                <graphic>
-                    <Region styleClass="chat-icon" mouseTransparent="true">
-                        <shape>
-                            <SVGPath content="M8 4 Q9 11 16 12 Q9 13 8 20 Q7 13 0 12 Q7 11 8 4 Z
-                                              M18 0 Q18.75 5.25 24 6 Q18.75 6.75 18 12 Q17.25 6.75 12 6 Q17.25 5.25 18 0 Z
-                                              M17 16 Q17.5 19.5 21 20 Q17.5 20.5 17 24 Q16.5 20.5 13 20 Q16.5 19.5 17 16 Z"/>
-                        </shape>
-                    </Region>
-                </graphic>
-                <tooltip><Tooltip text="Gợi ý soạn tin bằng AI"/></tooltip>
-            </Button>
-            <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
-                    styleClass="chat-primary,chat-composer-icon,chat-send">
-                <graphic><FontIcon iconLiteral="fth-send" iconSize="15"/></graphic>
-                <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
-            </Button>
-        </HBox>
+        <StackPane>
+            <HBox fx:id="composer" alignment="CENTER_LEFT" spacing="8" fillHeight="false" styleClass="chat-composer">
+                <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
+                          prefRowCount="2" prefHeight="56" minWidth="0" HBox.hgrow="ALWAYS" accessibleText="Soạn tin nhắn"/>
+                <Button fx:id="aiAssistantButton" id="aiAssistantButton" onAction="#openAssistant"
+                        accessibleText="Mở gợi ý soạn tin bằng AI" styleClass="chat-outline,chat-ai-trigger">
+                    <graphic>
+                        <Region styleClass="chat-icon" mouseTransparent="true">
+                            <shape>
+                                <SVGPath content="M8 4 Q9 11 16 12 Q9 13 8 20 Q7 13 0 12 Q7 11 8 4 Z
+                                                  M18 0 Q18.75 5.25 24 6 Q18.75 6.75 18 12 Q17.25 6.75 12 6 Q17.25 5.25 18 0 Z
+                                                  M17 16 Q17.5 19.5 21 20 Q17.5 20.5 17 24 Q16.5 20.5 13 20 Q16.5 19.5 17 16 Z"/>
+                            </shape>
+                        </Region>
+                    </graphic>
+                    <tooltip><Tooltip text="Gợi ý soạn tin bằng AI"/></tooltip>
+                </Button>
+                <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
+                        styleClass="chat-primary,chat-composer-icon,chat-send">
+                    <graphic><FontIcon iconLiteral="fth-send" iconSize="15"/></graphic>
+                    <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
+                </Button>
+            </HBox>
+            <HBox fx:id="selectionActionBar" id="selectionActionBar" alignment="CENTER_LEFT" spacing="12"
+                  visible="false" managed="false" styleClass="chat-composer,chat-selection-bar">
+                <Label fx:id="selectionBarNote" id="selectionBarNote" styleClass="chat-caption" wrapText="true"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                       text="Chỉ xóa ở phía bạn · Những người khác vẫn xem được"/>
+                <Button fx:id="selectionCancelButton" id="selectionCancelButton" text="Hủy"
+                        onAction="#exitSelectionMode" styleClass="chat-outline,chat-selection-btn"/>
+                <Button fx:id="deleteSelectedButton" id="deleteSelectedButton" text="Xóa phía mình"
+                        onAction="#confirmBulkDelete" disable="true" styleClass="chat-danger-solid,chat-selection-btn">
+                    <graphic><FontIcon iconLiteral="fth-trash-2" iconSize="14"/></graphic>
+                </Button>
+            </HBox>
+        </StackPane>
     </bottom>
 </BorderPane>
