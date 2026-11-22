@@ -23,14 +23,6 @@
                     styleClass="rail-settings-item" maxWidth="Infinity">
                 <graphic><FontIcon iconLiteral="fth-user" iconSize="15"/></graphic>
             </Button>
-            <Button id="displayOptions" text="Tùy chọn hiển thị" onAction="#openDisplayOptions"
-                    styleClass="rail-settings-item" maxWidth="Infinity">
-                <graphic><FontIcon iconLiteral="fth-sliders" iconSize="15"/></graphic>
-            </Button>
-            <Button id="openMockData" text="Xem dữ liệu mẫu" onAction="#openMockData"
-                    styleClass="rail-settings-item" maxWidth="Infinity">
-                <graphic><FontIcon iconLiteral="fth-database" iconSize="15"/></graphic>
-            </Button>
         </VBox>
     </fx:define>
     <left>

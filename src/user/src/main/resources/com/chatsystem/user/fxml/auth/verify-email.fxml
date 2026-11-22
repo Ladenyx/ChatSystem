@@ -17,7 +17,7 @@
                         <VBox fillWidth="true" styleClass="auth-card">
                             <VBox spacing="4">
                                 <Label text="Xác minh email" styleClass="auth-heading" wrapText="true"/>
-                                <Label text="Nhập mã 6 chữ số (bản xem trước không gửi hoặc kiểm tra mã)"
+                                <Label text="Nhập mã xác minh 6 chữ số đã gửi tới email của bạn"
                                        styleClass="auth-muted" wrapText="true"/>
                                 <Label fx:id="maskedEmail" wrapText="true" styleClass="auth-field-label"/>
                             </VBox>

@@ -29,7 +29,6 @@ public final class AdminShellController {
     @FXML private Button backButton;
     @FXML private Button displayButton;
     @FXML private Label pageTitle;
-    @FXML private Label overviewDataNote;
     private final Map<View, ToggleButton> buttons = new LinkedHashMap<>();
     private final ToggleGroup group = new ToggleGroup();
     private ViewNavigator navigator;
@@ -54,8 +53,6 @@ public final class AdminShellController {
         backButton.disableProperty().bind(navigator.canGoBackProperty().not());
         backButton.visibleProperty().bind(navigator.canGoBackProperty());
         backButton.managedProperty().bind(backButton.visibleProperty());
-        overviewDataNote.visibleProperty().bind(currentView.isEqualTo(AdminViews.OVERVIEW));
-        overviewDataNote.managedProperty().bind(overviewDataNote.visibleProperty());
         currentView.addListener((observable, old, view) -> {
             group.selectToggle(buttons.get(view));
             pageTitle.setText(view == null ? "" : view.title());

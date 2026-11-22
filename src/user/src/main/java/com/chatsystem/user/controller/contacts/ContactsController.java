@@ -1,0 +1,528 @@
+package com.chatsystem.user.controller.contacts;
+
+import com.chatsystem.desktop.mock.MockData;
+import com.chatsystem.desktop.mock.model.MockUser;
+import com.chatsystem.desktop.navigation.View;
+import com.chatsystem.desktop.navigation.ViewController;
+import com.chatsystem.desktop.navigation.ViewNavigator;
+import com.chatsystem.user.UserViews;
+import com.chatsystem.user.control.ConversationAvatar;
+import com.chatsystem.user.mock.MockContacts;
+import com.chatsystem.user.mock.MockContacts.Relationship;
+import com.chatsystem.user.navigation.UserViewInputs;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import javafx.beans.binding.Bindings;
+import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+/** Version 1 preview: relationship changes live only in this cached view. */
+public final class ContactsController implements ViewController {
+    private enum Tab {
+        ALL("Tất cả bạn bè", "Lọc bạn bè theo tên", "bạn bè", "Chưa có bạn bè",
+                "fth-users", "Lời mời đã chấp nhận sẽ hiển thị tại đây"),
+        ONLINE("Đang online", "Lọc bạn bè theo tên", "bạn bè online", "Không có bạn bè đang online",
+                "fth-activity", "Chỉ hiển thị bạn bè đang trực tuyến"),
+        REQUESTS("Lời mời kết bạn", "Lọc lời mời theo tên", "lời mời", "Không có lời mời đang chờ",
+                "fth-user-plus", "Các lời mời kết bạn mới sẽ xuất hiện tại đây"),
+        SEARCH("Tìm người dùng", "Tìm theo họ tên hoặc tên đăng nhập", "kết quả", "Nhập tên để tìm người dùng",
+                "fth-search", "Tìm kiếm theo họ tên đầy đủ hoặc @username"),
+        BLOCKED("Đã chặn", "", "tài khoản", "Chưa chặn tài khoản nào",
+                "fth-slash", "Các tài khoản bị chặn sẽ xuất hiện tại đây");
+
+        private final String title;
+        private final String prompt;
+        private final String countUnit;
+        private final String emptyText;
+        private final String emptyIcon;
+        private final String emptyHint;
+
+        Tab(String title, String prompt, String countUnit, String emptyText,
+                String emptyIcon, String emptyHint) {
+            this.title = title;
+            this.prompt = prompt;
+            this.countUnit = countUnit;
+            this.emptyText = emptyText;
+            this.emptyIcon = emptyIcon;
+            this.emptyHint = emptyHint;
+        }
+    }
+
+    private enum ContactAction {
+        UNFRIEND("Hủy kết bạn", "Hủy kết bạn với %s?", "Tin nhắn và nhóm chung vẫn được giữ nguyên.",
+                Relationship.NONE, "Đã hủy kết bạn", true),
+        BLOCK("Chặn", "Chặn %s?",
+                "Tình bạn và lời mời đang chờ sẽ bị hủy. Hai bên không thể gửi tin nhắn riêng hoặc lời mời mới.",
+                Relationship.BLOCKED, "Đã chặn", true),
+        UNBLOCK("Bỏ chặn", "Bỏ chặn %s?", "Tình bạn và lời mời cũ sẽ không tự khôi phục.",
+                Relationship.NONE, "Đã bỏ chặn", false);
+
+        private final String label;
+        private final String question;
+        private final String detail;
+        private final Relationship next;
+        private final String status;
+        private final boolean destructive;
+
+        ContactAction(String label, String question, String detail, Relationship next, String status,
+                boolean destructive) {
+            this.label = label;
+            this.question = question;
+            this.detail = detail;
+            this.next = next;
+            this.status = status;
+            this.destructive = destructive;
+        }
+    }
+
+    private enum ActionTone {
+        PRIMARY("contacts-btn-primary"),
+        SECONDARY("contacts-btn-secondary"),
+        QUIET("contacts-btn-quiet"),
+        DANGER_QUIET("contacts-btn-danger-quiet");
+
+        private final String styleClass;
+
+        ActionTone(String styleClass) {
+            this.styleClass = styleClass;
+        }
+    }
+
+    private static final String CHAT_TOOLTIP = "Nhắn tin trực tiếp";
+    private static final String GROUP_TOOLTIP = "Tạo nhóm trò chuyện mới";
+
+    @FXML private BorderPane contactsRoot;
+    @FXML private ToggleGroup contactsTabs;
+    @FXML private ToggleButton contactsTabAll;
+    @FXML private ToggleButton contactsTabOnline;
+    @FXML private ToggleButton contactsTabRequests;
+    @FXML private ToggleButton contactsTabSearch;
+    @FXML private ToggleButton contactsTabBlocked;
+    @FXML private TextField contactsFilter;
+    @FXML private StackPane contactsSearchRow;
+    @FXML private ScrollPane contactsScroll;
+    @FXML private Label contactsTitle;
+    @FXML private Label contactsCount;
+    @FXML private Label contactsStatus;
+    @FXML private VBox contactsList;
+
+    private final List<MockUser> users = MockData.create().users().stream()
+            .filter(user -> !user.id().equals(MockData.PREVIEW_USER_ID))
+            .filter(user -> user.status() == MockUser.Status.ACTIVE)
+            .toList();
+    private final Map<String, Relationship> relationships = new HashMap<>(MockContacts.initialRelationships());
+    private final Map<Tab, Label> tabCountLabels = new EnumMap<>(Tab.class);
+    private final Map<Tab, ToggleButton> tabButtons = new EnumMap<>(Tab.class);
+    private ViewNavigator navigator;
+    private Dialog<ButtonType> confirmation;
+    private Tab tab;
+
+    @FXML
+    private void initialize() {
+        setupNavTab(contactsTabAll, Tab.ALL, true);
+        setupNavTab(contactsTabOnline, Tab.ONLINE, true);
+        setupNavTab(contactsTabRequests, Tab.REQUESTS, true);
+        setupNavTab(contactsTabSearch, Tab.SEARCH, false);
+        setupNavTab(contactsTabBlocked, Tab.BLOCKED, true);
+
+        contactsSearchRow.managedProperty().bind(contactsSearchRow.visibleProperty());
+        contactsStatus.managedProperty().bind(contactsStatus.visibleProperty());
+        contactsTabs.selectedToggleProperty().addListener((observable, previous, selected) -> {
+            if (selected == null) {
+                contactsTabs.selectToggle(previous);
+            } else if (selected.getUserData() != tab) {
+                selectTab((Tab) selected.getUserData());
+            }
+        });
+        contactsFilter.textProperty().addListener((observable, previous, current) -> {
+            contactsStatus.setVisible(false);
+            render();
+            contactsScroll.setVvalue(0);
+        });
+        contactsTabs.selectToggle(contactsTabAll);
+    }
+
+    private void setupNavTab(ToggleButton toggle, Tab item, boolean showCount) {
+        toggle.setUserData(item);
+        tabButtons.put(item, toggle);
+
+        Node icon = toggle.getGraphic();
+        if (icon != null) {
+            icon.setMouseTransparent(true);
+        }
+        StackPane iconBox = icon != null ? new StackPane(icon) : new StackPane();
+        iconBox.getStyleClass().add("contacts-nav-icon-box");
+
+        Label label = new Label(toggle.getText());
+        label.getStyleClass().add("contacts-nav-label");
+        label.setMinWidth(0);
+        label.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(label, Priority.ALWAYS);
+
+        HBox content = new HBox(10, iconBox, label);
+        content.setAlignment(Pos.CENTER_LEFT);
+        if (showCount) {
+            Label count = new Label("0");
+            count.getStyleClass().add("contacts-nav-count");
+            count.setMinWidth(Region.USE_PREF_SIZE);
+            content.getChildren().add(count);
+            tabCountLabels.put(item, count);
+        }
+
+        content.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(0, toggle.getWidth() - 26), toggle.widthProperty()));
+
+        toggle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        toggle.setGraphic(content);
+        toggle.setAccessibleText(item.title);
+    }
+
+    @Override
+    public void onEnter(ViewNavigator navigator, View view) {
+        this.navigator = navigator;
+    }
+
+    @Override
+    public void onLeave() {
+        navigator = null;
+        if (confirmation != null) {
+            confirmation.close();
+        }
+    }
+
+    private void selectTab(Tab next) {
+        tab = next;
+        contactsTitle.setText(tab.title);
+        contactsSearchRow.setVisible(tab != Tab.BLOCKED);
+        contactsFilter.setPromptText(tab.prompt);
+        contactsFilter.setAccessibleText(tab.prompt);
+        contactsStatus.setVisible(false);
+        if (contactsFilter.getText().isEmpty()) {
+            render();
+        } else {
+            contactsFilter.clear();
+        }
+        contactsScroll.setVvalue(0);
+    }
+
+    private void render() {
+        updateTabCounts();
+
+        String query = contactsFilter.getText().strip().toLowerCase(Locale.ROOT);
+        List<MockUser> visible = users.stream()
+                .filter(user -> matchesTab(user, query))
+                .filter(user -> matchesQuery(user, query))
+                .toList();
+        contactsCount.setText(visible.size() + " " + tab.countUnit);
+        if (visible.isEmpty()) {
+            renderEmptyState(query);
+        } else {
+            VBox group = new VBox();
+            group.getStyleClass().add("contacts-group");
+            group.setMinWidth(0);
+            List<HBox> rows = visible.stream().map(this::row).toList();
+            rows.getFirst().getStyleClass().add("is-first");
+            rows.getLast().getStyleClass().add("is-last");
+            group.getChildren().setAll(rows);
+            contactsList.getChildren().setAll(group);
+        }
+    }
+
+    private void renderEmptyState(String query) {
+        FontIcon icon = new FontIcon(tab.emptyIcon);
+        icon.setIconSize(18);
+        icon.setMouseTransparent(true);
+        StackPane iconWrap = new StackPane(icon);
+        iconWrap.getStyleClass().add("contacts-empty-icon");
+
+        Label empty = new Label(query.isEmpty() ? tab.emptyText : "Không có kết quả phù hợp");
+        empty.setId("contactsEmpty");
+        empty.setWrapText(true);
+        empty.getStyleClass().add("contacts-empty-title");
+
+        Label hint = new Label(query.isEmpty() ? tab.emptyHint : "Thử nhập họ tên hoặc @username khác");
+        hint.setWrapText(true);
+        hint.getStyleClass().add("contacts-empty-hint");
+
+        VBox panel = new VBox(12, iconWrap, new VBox(4, empty, hint));
+        panel.setAlignment(Pos.CENTER);
+        ((VBox) panel.getChildren().get(1)).setAlignment(Pos.CENTER);
+        panel.getStyleClass().add("contacts-empty");
+        contactsList.getChildren().setAll(panel);
+    }
+
+    private void updateTabCounts() {
+        int allCount = 0;
+        int onlineCount = 0;
+        int requestsCount = 0;
+        int blockedCount = 0;
+        for (MockUser user : users) {
+            Relationship rel = relationship(user);
+            if (rel == Relationship.FRIEND) {
+                allCount++;
+                if (user.presence() == MockUser.Presence.ONLINE) {
+                    onlineCount++;
+                }
+            } else if (rel == Relationship.INCOMING) {
+                requestsCount++;
+            } else if (rel == Relationship.BLOCKED) {
+                blockedCount++;
+            }
+        }
+        setTabCount(Tab.ALL, allCount, false);
+        setTabCount(Tab.ONLINE, onlineCount, false);
+        setTabCount(Tab.REQUESTS, requestsCount, requestsCount > 0);
+        setTabCount(Tab.BLOCKED, blockedCount, false);
+    }
+
+    private void setTabCount(Tab target, int count, boolean pending) {
+        Label countLabel = tabCountLabels.get(target);
+        if (countLabel != null) {
+            countLabel.setText(String.valueOf(count));
+            if (pending && !countLabel.getStyleClass().contains("is-pending")) {
+                countLabel.getStyleClass().add("is-pending");
+            } else if (!pending) {
+                countLabel.getStyleClass().remove("is-pending");
+            }
+        }
+        ToggleButton toggle = tabButtons.get(target);
+        if (toggle != null) {
+            toggle.setAccessibleText(target.title + ", " + count);
+        }
+    }
+
+    private boolean matchesTab(MockUser user, String query) {
+        Relationship relationship = relationship(user);
+        return switch (tab) {
+            case ALL -> relationship == Relationship.FRIEND;
+            case ONLINE -> relationship == Relationship.FRIEND && user.presence() == MockUser.Presence.ONLINE;
+            case REQUESTS -> relationship == Relationship.INCOMING;
+            case SEARCH -> !query.isEmpty()
+                    && relationship != Relationship.BLOCKED && relationship != Relationship.BLOCKED_ME;
+            case BLOCKED -> relationship == Relationship.BLOCKED;
+        };
+    }
+
+    private boolean matchesQuery(MockUser user, String query) {
+        if (tab == Tab.BLOCKED || user.fullName().toLowerCase(Locale.ROOT).contains(query)) {
+            return true;
+        }
+        String usernameQuery = query.startsWith("@") ? query.substring(1) : query;
+        return tab == Tab.SEARCH && !usernameQuery.isEmpty() && user.username().contains(usernameQuery);
+    }
+
+    private HBox row(MockUser user) {
+        Label avatar = new Label(ConversationAvatar.initials(user.fullName()));
+        avatar.getStyleClass().add("contacts-avatar");
+
+        StackPane avatarWrap = new StackPane(avatar);
+        avatarWrap.getStyleClass().add("contacts-avatar-wrap");
+        if ((tab == Tab.ALL || tab == Tab.ONLINE) && user.presence() == MockUser.Presence.ONLINE) {
+            Region presenceDot = new Region();
+            presenceDot.getStyleClass().add("contacts-presence-badge");
+            StackPane.setAlignment(presenceDot, Pos.BOTTOM_RIGHT);
+            avatarWrap.getChildren().add(presenceDot);
+        }
+
+        Label name = new Label(user.fullName());
+        name.getStyleClass().add("contacts-name");
+
+        Label username = new Label("@" + user.username());
+        username.getStyleClass().add("contacts-handle");
+
+        Label separator = new Label("·");
+        separator.getStyleClass().add("contacts-meta-sep");
+
+        HBox metadata = new HBox(6, username, separator, relationshipStatus(user));
+        metadata.setAlignment(Pos.CENTER_LEFT);
+
+        VBox identity = new VBox(2, name, metadata);
+        identity.setMinWidth(0);
+        HBox.setHgrow(identity, Priority.ALWAYS);
+
+        HBox row = new HBox(12, avatarWrap, identity, actions(user));
+        row.setId("contact-" + user.id());
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("contacts-row");
+        return row;
+    }
+
+    private Label relationshipStatus(MockUser user) {
+        Label status = new Label(switch (tab) {
+            case ALL, ONLINE -> user.presence() == MockUser.Presence.ONLINE ? "Đang hoạt động" : "Ngoại tuyến";
+            case REQUESTS -> "Chờ phản hồi";
+            case BLOCKED -> "Bạn đã chặn";
+            case SEARCH -> switch (relationship(user)) {
+                case FRIEND -> "Bạn bè";
+                case INCOMING -> "Đã nhận lời mời";
+                case OUTGOING -> "Đã gửi lời mời";
+                default -> "Chưa kết bạn";
+            };
+        });
+        if ((tab == Tab.ALL || tab == Tab.ONLINE) && user.presence() == MockUser.Presence.ONLINE) {
+            status.getStyleClass().add("contacts-online");
+        } else {
+            status.getStyleClass().add("contacts-meta");
+        }
+        return status;
+    }
+
+    private HBox actions(MockUser user) {
+        HBox actions = new HBox(8);
+        actions.setMinWidth(Region.USE_PREF_SIZE);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        List<? extends Node> buttons = switch (tab) {
+            case ALL -> List.of(
+                    chat(user),
+                    confirmationAction(user, "unfriend", ContactAction.UNFRIEND, ActionTone.QUIET),
+                    confirmationAction(user, "block", ContactAction.BLOCK, ActionTone.DANGER_QUIET));
+            case ONLINE -> List.of(
+                    chat(user),
+                    group(user));
+            case REQUESTS -> List.of(
+                    button(user, "accept", "Đồng ý", ActionTone.PRIMARY,
+                            () -> change(user, Relationship.FRIEND, "Đã chấp nhận lời mời từ")),
+                    button(user, "decline", "Từ chối", ActionTone.QUIET,
+                            () -> change(user, Relationship.NONE, "Đã từ chối lời mời từ")));
+            case SEARCH -> switch (relationship(user)) {
+                case FRIEND -> List.of(chat(user), group(user));
+                case INCOMING -> List.of(
+                        chat(user),
+                        button(user, "view-request", "Xem lời mời", ActionTone.SECONDARY, () -> {
+                            contactsTabs.selectToggle(contactsTabRequests);
+                            contactsFilter.setText(user.fullName());
+                            contactsFilter.requestFocus();
+                        }));
+                case OUTGOING -> List.of(chat(user));
+                default -> List.of(
+                        chat(user),
+                        button(user, "invite", "Kết bạn", ActionTone.PRIMARY,
+                                () -> change(user, Relationship.OUTGOING, "Đã gửi lời mời tới")));
+            };
+            case BLOCKED -> List.of(confirmationAction(user, "unblock", ContactAction.UNBLOCK, ActionTone.SECONDARY));
+        };
+        actions.getChildren().setAll(buttons);
+        return actions;
+    }
+
+    private Button chat(MockUser user) {
+        Button button = button(user, "chat", "Nhắn tin", ActionTone.SECONDARY,
+                () -> navigator.navigate(UserViews.CONVERSATIONS, new UserViewInputs.DirectChat(user.id())));
+        button.setTooltip(new Tooltip(CHAT_TOOLTIP));
+        button.setAccessibleHelp(CHAT_TOOLTIP);
+        return button;
+    }
+
+    private Button group(MockUser user) {
+        Button button = button(user, "group", "Tạo nhóm", ActionTone.QUIET,
+                () -> navigator.showModal(UserViews.CREATE_GROUP, new UserViewInputs.CreateGroup(List.of(user.id()))));
+        button.setTooltip(new Tooltip(GROUP_TOOLTIP));
+        button.setAccessibleHelp(GROUP_TOOLTIP);
+        return button;
+    }
+
+    private static Button button(MockUser user, String action, String label, ActionTone tone, Runnable handler) {
+        Button button = new Button(label);
+        button.setId("contact-" + action + "-" + user.id());
+        button.setAccessibleText(label + " · " + user.fullName());
+        button.getStyleClass().addAll("contacts-btn", tone.styleClass);
+        button.setOnAction(event -> handler.run());
+        return button;
+    }
+
+    private Relationship relationship(MockUser user) {
+        return relationships.getOrDefault(user.id(), Relationship.NONE);
+    }
+
+    private void change(MockUser user, Relationship next, String message) {
+        if (next == Relationship.NONE) {
+            relationships.remove(user.id());
+        } else {
+            relationships.put(user.id(), next);
+        }
+        render();
+        contactsStatus.setText(message + " " + user.fullName());
+        contactsStatus.setVisible(true);
+        if (tab == Tab.BLOCKED) {
+            contactsTabBlocked.requestFocus();
+        } else {
+            contactsFilter.requestFocus();
+        }
+    }
+
+    private Button confirmationAction(MockUser user, String id, ContactAction action, ActionTone tone) {
+        return button(user, id, action.label, tone, () -> confirm(user, action));
+    }
+
+    private void confirm(MockUser user, ContactAction action) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(contactsRoot.getScene().getWindow());
+        dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.initStyle(StageStyle.UNDECORATED);
+        String question = action.question.formatted(user.fullName());
+        dialog.setTitle(question);
+        var pane = dialog.getDialogPane();
+        pane.setId("contactsConfirmation");
+        pane.getStyleClass().add("contacts-confirmation");
+        pane.setPrefWidth(400);
+
+        Label title = new Label(question);
+        title.setId("contactsConfirmationTitle");
+        title.getStyleClass().add("contacts-confirmation-title");
+        title.setWrapText(true);
+        Label description = new Label(action.detail);
+        description.getStyleClass().add("contacts-confirmation-detail");
+        description.setWrapText(true);
+        pane.setContent(new VBox(8, title, description));
+
+        ButtonType confirm = new ButtonType(action.label, ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Quay lại", ButtonBar.ButtonData.CANCEL_CLOSE);
+        pane.getButtonTypes().setAll(cancel, confirm);
+        Button confirmButton = (Button) pane.lookupButton(confirm);
+        Button cancelButton = (Button) pane.lookupButton(cancel);
+        ButtonBar.setButtonUniformSize(confirmButton, false);
+        ButtonBar.setButtonUniformSize(cancelButton, false);
+        confirmButton.setId("confirm-contact-action");
+        confirmButton.setDefaultButton(false);
+        if (action.destructive) {
+            confirmButton.getStyleClass().add("contacts-confirm-danger");
+        }
+        cancelButton.setId("cancel-contact-action");
+        cancelButton.setDefaultButton(true);
+        navigator.themes().apply(pane);
+        pane.getStylesheets().addAll(contactsRoot.getStylesheets());
+        dialog.setOnHidden(event -> {
+            confirmation = null;
+            if (dialog.getResult() == confirm && navigator != null) {
+                change(user, action.next, action.status);
+            }
+        });
+        confirmation = dialog;
+        dialog.show();
+        cancelButton.requestFocus();
+    }
+}

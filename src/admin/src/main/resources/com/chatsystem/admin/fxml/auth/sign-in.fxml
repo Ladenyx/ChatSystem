@@ -17,7 +17,6 @@
                 <FontIcon iconLiteral="fth-message-square" iconSize="16" mouseTransparent="true"/>
             </StackPane>
             <Label text="WhatsUp" styleClass="brand"/>
-            <Label text="Admin App" styleClass="caption"/>
         </HBox>
     </top>
     <center>
@@ -40,8 +39,6 @@
                 <VBox spacing="12" alignment="CENTER">
                     <Button fx:id="signInSubmit" text="Đăng nhập" defaultButton="true" onAction="#openOverview"
                             maxWidth="Infinity" styleClass="admin-sign-in-submit"/>
-                    <Label text="Bản xem trước · Dùng thông tin mẫu" styleClass="caption"
-                           wrapText="true" textAlignment="CENTER"/>
                 </VBox>
             </VBox>
         </StackPane>

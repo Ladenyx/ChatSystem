@@ -17,8 +17,6 @@
                           styleClass="auth-card-column">
                         <VBox fillWidth="true" styleClass="auth-card">
                             <Label text="Đăng nhập" styleClass="auth-heading" wrapText="true"/>
-                            <Label id="authOfflinePreview" text="Bản xem trước ngoại tuyến. Không nhập thông tin thật."
-                                   styleClass="auth-muted" wrapText="true"/>
                             <VBox spacing="12">
                                 <VBox spacing="4">
                                     <Label text="Tên đăng nhập" styleClass="auth-field-label"/>

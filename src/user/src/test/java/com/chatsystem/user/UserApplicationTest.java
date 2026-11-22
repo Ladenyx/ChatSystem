@@ -87,6 +87,7 @@ class UserApplicationTest {
             UserApplication app = new UserApplication();
             app.start(stage);
             try {
+                assertEquals("WhatsUp", stage.getTitle());
                 var root = stage.getScene().getRoot();
                 enterPreviewWorkspace(root);
                 root.applyCss();
@@ -154,11 +155,6 @@ class UserApplicationTest {
                         "user-modal");
                 ((ToggleButton) root.lookup("#navContacts")).fire();
                 assertEquals(1, javafx.stage.Window.getWindows().size());
-                fireSetting(root, "displayOptions");
-                Window popup = Window.getWindows().stream()
-                        .filter(window -> window.getScene().getRoot().lookup("#lightTheme") != null)
-                        .findFirst().orElseThrow();
-                capture(popup, "user-popover");
             } finally {
                 stage.close();
             }
@@ -239,7 +235,7 @@ class UserApplicationTest {
                 enterPreviewWorkspace(root);
                 root.applyCss();
                 root.layout();
-                fireSetting(root, "openMockData");
+                navigator.navigate(MockDataPreviewController.VIEW);
                 assertEquals(MockDataPreviewController.VIEW, navigator.currentViewProperty().get());
                 root.applyCss();
                 root.layout();
@@ -295,7 +291,7 @@ class UserApplicationTest {
                 capture(stage, "user-mock-chart-dark");
                 ((Button) root.lookup("#goBack")).fire();
                 assertEquals(UserViews.CONVERSATIONS, navigator.currentViewProperty().get());
-                fireSetting(root, "openMockData");
+                navigator.navigate(MockDataPreviewController.VIEW);
                 assertSame(tabs, root.lookup("#mockTabs"));
                 assertEquals(4, tabs.getSelectionModel().getSelectedIndex());
             } finally {

@@ -1,0 +1,507 @@
+@import "users.css";
+
+.admin-spam-directory .combo-box,
+.admin-spam-directory .date-picker {
+    -fx-min-height: 36px;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-font-size: 13px;
+}
+
+.admin-spam-directory .date-picker > .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-min-height: 34px;
+}
+
+.admin-spam-directory .combo-box:hover,
+.admin-spam-directory .date-picker:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.admin-spam-directory .combo-box:focused,
+.admin-spam-directory .date-picker:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-spam-directory .date-picker:invalid {
+    -fx-border-color: -cs-danger;
+}
+
+.admin-spam-directory .date-picker:invalid .text-field {
+    -fx-border-color: transparent;
+}
+
+.admin-spam-page .admin-users-table .table-cell.admin-date-column {
+    -fx-text-alignment: right;
+    -fx-font-family: "Inter";
+    -fx-font-size: 12px;
+}
+
+.admin-spam-page .admin-account-meta {
+    -fx-font-family: "Inter";
+}
+
+.admin-cell-secondary-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-report-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+}
+
+.admin-spam-page #reportStatusBadge.admin-user-status {
+    -fx-text-fill: -cs-text;
+    -fx-font-weight: 600;
+}
+
+.admin-report-section {
+    -fx-border-color: -admin-user-rule transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 12px 0 0 0;
+}
+
+.admin-party-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.admin-reason-callout {
+    -fx-background-color: #f4f4f5;
+    -fx-border-color: -admin-user-rule;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 10px 12px;
+}
+
+.cs-root:dark .admin-reason-callout {
+    -fx-background-color: #262629;
+}
+
+.admin-field-eyebrow {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-muted;
+}
+
+.admin-reason-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -cs-text;
+    -fx-line-spacing: 2px;
+}
+
+.admin-bubble-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: -cs-text;
+    -fx-line-spacing: 2px;
+}
+
+.admin-subsection-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.admin-evidence-open {
+    -fx-min-height: 30px;
+    -fx-padding: 4px 10px;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -admin-user-rule;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+    -fx-graphic-text-gap: 6px;
+}
+
+.admin-evidence-open .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-evidence-open:hover {
+    -fx-background-color: -cs-hover;
+    -fx-border-color: -admin-user-rule;
+}
+
+.admin-evidence-open:focused {
+    -fx-border-color: -cs-focus;
+    -fx-border-width: 1.5px;
+}
+
+.admin-evidence-open:disabled {
+    -fx-opacity: 0.55;
+}
+
+.admin-reported-card {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: rgba(177, 14, 28, 0.20) rgba(177, 14, 28, 0.20) rgba(177, 14, 28, 0.20) -cs-danger;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-background-radius: 2px 8px 8px 2px;
+    -fx-border-radius: 2px 8px 8px 2px;
+    -fx-padding: 10px 12px;
+    -fx-cursor: hand;
+}
+
+.cs-root:dark .admin-reported-card {
+    -fx-background-color: #361920;
+    -fx-border-color: rgba(241, 112, 123, 0.28) rgba(241, 112, 123, 0.28) rgba(241, 112, 123, 0.28) -cs-danger;
+}
+
+.admin-reported-card:hover {
+    -fx-border-color: -cs-danger;
+}
+
+.admin-reported-card:focused {
+    -fx-border-color: -cs-focus -cs-focus -cs-focus -cs-danger;
+}
+
+.admin-e2ee-note {
+    -fx-padding: 2px 0;
+}
+
+.admin-e2ee-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-bubble-sender {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.admin-bubble-time {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.tag-selected {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-graphic-text-gap: 4px;
+    -fx-text-fill: -cs-danger;
+}
+
+.tag-selected .ikonli-font-icon {
+    -fx-icon-color: -cs-danger;
+}
+
+.admin-reviewed-banner {
+    -fx-background-color: -cs-success-bg;
+    -fx-border-color: -admin-user-rule;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.admin-spam-lock {
+    -fx-min-height: 36px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(177, 14, 28, 0.36);
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 4px 12px;
+    -fx-text-fill: #b10e1c;
+    -fx-graphic-text-gap: 8px;
+}
+
+.cs-root:dark .admin-spam-lock {
+    -fx-background-color: #26181c;
+    -fx-border-color: rgba(241, 112, 123, 0.40);
+    -fx-text-fill: #f1707b;
+}
+
+.admin-spam-lock .ikonli-font-icon,
+.admin-error-text {
+    -fx-icon-color: -cs-danger;
+    -fx-text-fill: -cs-danger;
+}
+
+.admin-spam-lock:hover {
+    -fx-background-color: -cs-danger-bg;
+    -fx-border-color: -cs-danger;
+}
+
+.admin-spam-lock:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-spam-lock:disabled,
+.cs-root:dark .admin-spam-lock:disabled {
+    -fx-text-fill: -cs-muted;
+    -fx-border-color: -admin-user-rule;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-opacity: 0.72;
+}
+
+.admin-spam-lock:disabled .ikonli-font-icon,
+.cs-root:dark .admin-spam-lock:disabled .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}
+
+.admin-moderation-actions .text-field {
+    -fx-min-height: 36px;
+    -fx-font-size: 13px;
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: -cs-text;
+    -fx-prompt-text-fill: -cs-muted;
+}
+
+.admin-moderation-actions .text-field:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.admin-moderation-actions .text-field:invalid {
+    -fx-border-color: -cs-danger;
+}
+
+.admin-reviewed-icon {
+    -fx-icon-color: -cs-success;
+}
+
+.admin-reviewed-header {
+    -fx-text-fill: -cs-text;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+}
+
+.admin-spam-page .status-pending .admin-status-dot {
+    -fx-background-color: #d97706;
+}
+
+.cs-root:dark .admin-spam-page .status-pending .admin-status-dot {
+    -fx-background-color: #f59e0b;
+}
+
+.admin-spam-page .status-reviewed .admin-status-dot {
+    -fx-background-color: -cs-success;
+}
+
+/* --- Evidence Conversation Modal --- */
+
+.evidence-dialog-pane {
+    -ev-rule: rgba(0, 0, 0, 0.09);
+    -ev-canvas: #f4f4f5;
+    -ev-other-bubble: #ffffff;
+    -ev-reporter-bubble: #eef4fb;
+    -ev-reporter-border: rgba(15, 108, 189, 0.16);
+    -ev-reported-bubble: #fef2f2;
+    -ev-reported-border: rgba(177, 14, 28, 0.28);
+    -fx-font-family: "Inter";
+    -fx-background-color: -cs-surface;
+    -fx-padding: 0;
+}
+
+.evidence-dialog-pane:dark,
+.cs-root:dark .evidence-dialog-pane {
+    -ev-rule: rgba(255, 255, 255, 0.09);
+    -ev-canvas: #161618;
+    -ev-other-bubble: #242427;
+    -ev-reporter-bubble: #1a2d40;
+    -ev-reporter-border: rgba(119, 183, 247, 0.22);
+    -ev-reported-bubble: #361920;
+    -ev-reported-border: rgba(241, 112, 123, 0.36);
+}
+
+.evidence-dialog-pane > .content {
+    -fx-padding: 0;
+}
+
+.evidence-dialog-pane > .button-bar {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -ev-rule;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.evidence-dialog-pane > .button-bar > .container {
+    -fx-padding: 12px 20px;
+}
+
+.evidence-dialog-pane .button.evidence-dialog-close {
+    -fx-min-height: 36px;
+    -fx-padding: 6px 16px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-focus;
+}
+
+.evidence-dialog-pane .button.evidence-dialog-close:hover,
+.evidence-dialog-pane .button.evidence-dialog-close:focused {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-border-color: transparent;
+}
+
+.evidence-dialog-header {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -ev-rule;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 16px 20px;
+}
+
+.evidence-dialog-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.evidence-jump-counter {
+    -fx-background-color: -cs-danger-bg;
+    -fx-border-color: -ev-reported-border;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-danger;
+}
+
+.evidence-dialog-pane .button.evidence-jump-btn {
+    -fx-min-height: 28px;
+    -fx-padding: 4px 10px;
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -ev-rule;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+    -fx-graphic-text-gap: 6px;
+}
+
+.evidence-dialog-pane .button.evidence-jump-btn .ikonli-font-icon {
+    -fx-icon-color: -cs-danger;
+}
+
+.evidence-dialog-pane .button.evidence-jump-btn:hover {
+    -fx-background-color: -cs-hover;
+}
+
+.evidence-dialog-pane .button.evidence-jump-btn:focused {
+    -fx-border-color: -cs-focus;
+}
+
+.evidence-chat-scroll,
+.evidence-chat-scroll > .viewport,
+.evidence-chat-canvas {
+    -fx-background-color: -ev-canvas;
+    -fx-background-insets: 0;
+}
+
+.evidence-chat-scroll {
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.evidence-chat-canvas {
+    -fx-padding: 16px 20px;
+}
+
+.evidence-date-line {
+    -fx-background-color: -ev-rule;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+}
+
+.evidence-date-chip {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-muted;
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -ev-rule;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 2px 10px;
+}
+
+.evidence-msg-avatar {
+    -fx-alignment: center;
+    -fx-min-width: 32px;
+    -fx-max-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -ev-rule;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.evidence-msg-author {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -cs-text;
+}
+
+.evidence-msg-handle {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.evidence-msg-time {
+    -fx-font-family: "Inter";
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.evidence-msg-bubble {
+    -fx-padding: 10px 14px;
+    -fx-border-width: 1px;
+}
+
+.evidence-msg-bubble.evidence-msg-other {
+    -fx-background-color: -ev-other-bubble;
+    -fx-border-color: -ev-rule;
+    -fx-background-radius: 4px 12px 12px 12px;
+    -fx-border-radius: 4px 12px 12px 12px;
+}
+
+.evidence-msg-bubble.evidence-msg-reporter {
+    -fx-background-color: -ev-reporter-bubble;
+    -fx-border-color: -ev-reporter-border;
+    -fx-background-radius: 12px 4px 12px 12px;
+    -fx-border-radius: 12px 4px 12px 12px;
+}
+
+.evidence-msg-bubble.bubble-selected {
+    -fx-background-color: -ev-reported-bubble;
+    -fx-border-color: -ev-reported-border -ev-reported-border -ev-reported-border -cs-danger;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-background-radius: 2px 10px 10px 2px;
+    -fx-border-radius: 2px 10px 10px 2px;
+}
+
+.evidence-dialog-notice {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -ev-rule;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 10px 20px;
+}
+
+.evidence-dialog-notice .ikonli-font-icon {
+    -fx-icon-color: -cs-muted;
+}

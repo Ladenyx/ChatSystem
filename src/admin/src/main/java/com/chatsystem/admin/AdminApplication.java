@@ -12,7 +12,7 @@ import javafx.scene.Parent;
 import javafx.stage.Stage;
 
 public final class AdminApplication extends Application {
-    static final String WINDOW_TITLE = "WhatsUp · Admin App";
+    static final String WINDOW_TITLE = "WhatsUp";
 
     public static ViewNavigator createNavigator() throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(AdminApplication.class.getResource(
