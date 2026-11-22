@@ -55,6 +55,7 @@ public final class ConversationsController implements ViewController {
     private final ConversationCatalog catalog = UserViews.CONVERSATIONS_DATA;
     private final Runnable catalogListener = this::onCatalogChanged;
     private MockConversation selected;
+    private javafx.collections.ObservableList<MockConversation> allConversations;
     private FilteredList<MockConversation> visibleConversations;
     private boolean updatingSelection;
 
@@ -91,12 +92,13 @@ public final class ConversationsController implements ViewController {
         this.navigator = navigator;
         catalog.addChangeListener(catalogListener);
         if (visibleConversations == null) {
-            visibleConversations = new FilteredList<>(FXCollections.observableArrayList(catalog.conversations()));
+            allConversations = FXCollections.observableArrayList(catalog.conversations());
+            visibleConversations = new FilteredList<>(allConversations);
             conversationItems.setCellFactory(list -> new ConversationCell(catalog));
             conversationItems.setItems(visibleConversations);
             allFilter.setSelected(true);
         } else {
-            conversationItems.refresh();
+            syncConversations();
         }
         applyFilter();
         showSelection(selected);
@@ -113,10 +115,33 @@ public final class ConversationsController implements ViewController {
         if (navigator == null) {
             return;
         }
-        conversationItems.refresh();
+        syncConversations();
         String query = conversationFilter.getText().strip().toLowerCase(Locale.ROOT);
         if (!query.isBlank()) {
             showSearchResults(query);
+        }
+    }
+
+    private void syncConversations() {
+        if (allConversations == null) {
+            return;
+        }
+        String selectedId = selected == null ? null : selected.id();
+        updatingSelection = true;
+        try {
+            allConversations.setAll(catalog.conversations());
+            selected = selectedId == null ? null : allConversations.stream()
+                    .filter(chat -> chat.id().equals(selectedId))
+                    .findFirst().orElse(null);
+            int selectedIndex = selected == null ? -1 : visibleConversations.indexOf(selected);
+            if (selectedIndex < 0) {
+                conversationItems.getSelectionModel().clearSelection();
+            } else {
+                conversationItems.getSelectionModel().select(selectedIndex);
+            }
+            conversationItems.refresh();
+        } finally {
+            updatingSelection = false;
         }
     }
 

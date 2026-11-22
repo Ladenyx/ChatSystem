@@ -3,6 +3,7 @@ package com.chatsystem.user.mock;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.chatsystem.desktop.mock.MockData;
+import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.user.messaging.ConversationCatalog;
 import java.time.Duration;
@@ -101,5 +102,68 @@ class MockConversationCatalogTest {
         catalog.reset();
         assertEquals(2, notifications.get());
         assertEquals(8, catalog.messagesFor("direct-04").size());
+    }
+
+    @Test
+    void groupAdminRoleAndMemberRemovalEnforceRulesAndNotifyListeners() {
+        var catalog = new MockConversationCatalog();
+        AtomicInteger notifications = new AtomicInteger();
+        catalog.addChangeListener(notifications::incrementAndGet);
+
+        assertTrue(catalog.isCurrentUserGroupAdmin("grp-01"));
+        assertTrue(catalog.isGroupAdmin("grp-01", "usr-02"));
+        assertFalse(catalog.isGroupAdmin("grp-01", "usr-03"));
+        assertFalse(catalog.canManageGroupMember("grp-01", "usr-01"));
+        assertTrue(catalog.canManageGroupMember("grp-01", "usr-02"));
+        assertTrue(catalog.canManageGroupMember("grp-01", "usr-03"));
+
+        // Grant admin (U-22 / UC-USR-GRP-06) + idempotency
+        catalog.setGroupAdminRole("grp-01", "usr-03", true);
+        assertEquals(1, notifications.get());
+        assertTrue(catalog.isGroupAdmin("grp-01", "usr-03"));
+        catalog.setGroupAdminRole("grp-01", "usr-03", true);
+        assertEquals(1, notifications.get());
+
+        // Revoke another admin (BR-01)
+        catalog.setGroupAdminRole("grp-01", "usr-02", false);
+        assertEquals(2, notifications.get());
+        assertFalse(catalog.isGroupAdmin("grp-01", "usr-02"));
+
+        // Cannot self-manage via member role/removal endpoints
+        assertThrows(IllegalArgumentException.class, () -> catalog.setGroupAdminRole("grp-01", "usr-01", false));
+        assertThrows(IllegalArgumentException.class, () -> catalog.removeGroupMember("grp-01", "usr-01"));
+        assertThrows(IllegalArgumentException.class, () -> catalog.setGroupAdminRole("direct-01", "usr-02", true));
+
+        // Remove regular member and another admin (U-23 / UC-USR-GRP-07) + idempotency
+        catalog.removeGroupMember("grp-01", "usr-08");
+        assertEquals(3, notifications.get());
+        catalog.removeGroupMember("grp-01", "usr-08");
+        assertEquals(3, notifications.get());
+        catalog.removeGroupMember("grp-01", "usr-03");
+        assertEquals(4, notifications.get());
+        assertEquals(6, catalog.groupMembers("grp-01").size());
+        var updatedChat = catalog.conversations().stream()
+                .filter(chat -> chat.id().equals("grp-01")).findFirst().orElseThrow();
+        assertEquals(6, updatedChat.participantIds().size());
+        assertFalse(updatedChat.participantIds().contains("usr-08"));
+        assertFalse(updatedChat.participantIds().contains("usr-03"));
+
+        // Transfer admin via U-DLG-05 demotes current user and blocks further admin mutations
+        catalog.transferGroupAdmin("grp-01", "usr-04");
+        assertEquals(5, notifications.get());
+        assertTrue(catalog.isGroupAdmin("grp-01", "usr-04"));
+        assertFalse(catalog.isCurrentUserGroupAdmin("grp-01"));
+        assertFalse(catalog.canManageGroupMember("grp-01", "usr-02"));
+        assertThrows(IllegalStateException.class, () -> catalog.setGroupAdminRole("grp-01", "usr-02", true));
+        assertThrows(IllegalStateException.class, () -> catalog.removeGroupMember("grp-01", "usr-02"));
+        assertThrows(IllegalStateException.class, () -> catalog.transferGroupAdmin("grp-01", "usr-02"));
+
+        // Reset restores initial group snapshot
+        catalog.reset();
+        assertEquals(6, notifications.get());
+        assertEquals(8, catalog.groupMembers("grp-01").size());
+        assertTrue(catalog.isCurrentUserGroupAdmin("grp-01"));
+        assertEquals(MockGroup.Role.ADMIN, catalog.groupMembers("grp-01").get(1).role());
+        assertFalse(catalog.isGroupAdmin("grp-01", "usr-04"));
     }
 }
