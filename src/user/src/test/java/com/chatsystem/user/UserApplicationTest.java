@@ -48,6 +48,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -597,6 +598,10 @@ class UserApplicationTest {
                 Window modal = reportModalWindow(stageRef.get());
                 var modalRoot = modal.getScene().getRoot();
                 assertTrue(modalRoot.lookup("#reportSubmitConfirmed").isVisible());
+                assertTrue(modalRoot.lookupAll(".chat-report-metric").isEmpty());
+                assertEquals("1 tin nhắn", ((Label) modalRoot.lookup("#reportPreviewCount")).getText());
+                var previewList = (VBox) modalRoot.lookup("#evidenceList");
+                assertEquals(1, previewList.getChildren().size());
                 capture(modal, "spam-report-preview-dark");
 
                 ((Button) modalRoot.lookup("#reportSubmitConfirmed")).fire();
@@ -605,9 +610,32 @@ class UserApplicationTest {
 
             onFx(() -> {
                 Window modal = reportModalWindow(stageRef.get());
+                Window confirm = reportConfirmWindow(modal);
+                var confirmRoot = confirm.getScene().getRoot();
+                assertEquals("Xác nhận gửi báo cáo?", ((Label) confirmRoot.lookup("#reportConfirmTitle")).getText());
+                capture(confirm, "spam-report-confirm-dark");
+
+                ((Button) confirmRoot.lookup("#reportConfirmCancel")).fire();
+                assertFalse(confirm.isShowing());
+                assertTrue(modal.getScene().getRoot().lookup("#reportSubmitConfirmed").isVisible());
+
+                ((Button) modal.getScene().getRoot().lookup("#reportSubmitConfirmed")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
+                Window confirm = reportConfirmWindow(modal);
+                ((Button) confirm.getScene().getRoot().lookup("#reportConfirmSubmit")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Window modal = reportModalWindow(stageRef.get());
                 var modalRoot = modal.getScene().getRoot();
                 assertTrue(modalRoot.lookup("#reportAcceptedDone").isVisible());
                 assertEquals("Chờ xử lý", ((Label) modalRoot.lookup(".chat-report-status-text")).getText());
+                assertEquals("1 tin nhắn đã báo cáo", ((Label) modalRoot.lookup("#receiptEvidenceLabel")).getText());
                 capture(modal, "spam-report-accepted-dark");
                 ((Button) modalRoot.lookup("#reportAcceptedDone")).fire();
                 assertFalse(modal.isShowing());
@@ -790,6 +818,14 @@ class UserApplicationTest {
         return Window.getWindows().stream()
                 .filter(window -> window != owner && window.isShowing()
                         && window.getScene().getRoot().lookup("#reportPreviewSubmit") != null)
+                .findFirst().orElseThrow();
+    }
+
+    private static Window reportConfirmWindow(Window owner) {
+        return Window.getWindows().stream()
+                .filter(window -> window != owner && window.isShowing()
+                        && window.getScene() != null
+                        && window.getScene().getRoot().lookup("#reportConfirmDialog") != null)
                 .findFirst().orElseThrow();
     }
 

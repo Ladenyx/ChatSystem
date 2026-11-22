@@ -118,39 +118,18 @@
             </HBox>
         </HBox>
 
-        <VBox spacing="12" styleClass="chat-report-summary-box">
-            <VBox spacing="6">
-                <HBox spacing="12" alignment="BASELINE_LEFT">
-                    <Label text="Tài khoản" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
-                    <Label fx:id="previewTargetValue" styleClass="chat-report-meta-value"
-                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
-                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                </HBox>
-                <HBox spacing="12" alignment="BASELINE_LEFT">
-                    <Label text="Lý do" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
-                    <Label fx:id="previewReasonValue" styleClass="chat-report-meta-value"
-                           wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
-                           maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                </HBox>
-            </VBox>
-            <Region styleClass="chat-report-divider"/>
-            <HBox spacing="8" styleClass="chat-report-metrics">
-                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
-                    <Label fx:id="metricSelectedValue" text="0" styleClass="chat-report-metric-value,is-accent"/>
-                    <Label text="Đã chọn" styleClass="chat-report-metric-label"/>
-                </VBox>
-                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
-                    <Label fx:id="metricContextValue" text="0" styleClass="chat-report-metric-value"/>
-                    <Label text="Ngữ cảnh" styleClass="chat-report-metric-label"/>
-                </VBox>
-                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
-                    <Label fx:id="metricIntersectionValue" text="0" styleClass="chat-report-metric-value"/>
-                    <Label text="Giao nhau" styleClass="chat-report-metric-label"/>
-                </VBox>
-                <VBox spacing="2" styleClass="chat-report-metric" HBox.hgrow="ALWAYS" maxWidth="Infinity">
-                    <Label fx:id="metricTotalValue" text="0" styleClass="chat-report-metric-value"/>
-                    <Label text="Tổng gửi" styleClass="chat-report-metric-label"/>
-                </VBox>
+        <VBox spacing="6" styleClass="chat-report-summary-box">
+            <HBox spacing="12" alignment="BASELINE_LEFT">
+                <Label text="Tài khoản" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
+                <Label fx:id="previewTargetValue" styleClass="chat-report-meta-value"
+                       wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox spacing="12" alignment="BASELINE_LEFT">
+                <Label text="Lý do" minWidth="72" prefWidth="72" styleClass="chat-report-meta-key"/>
+                <Label fx:id="previewReasonValue" styleClass="chat-report-meta-value"
+                       wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="350"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
             </HBox>
         </VBox>
 
@@ -166,11 +145,11 @@
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label text="Bằng chứng gửi kèm" styleClass="chat-report-field-title"
                        maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                <Label fx:id="evidenceUnionMeta" text="Selected ∪ Context" styleClass="chat-report-count-meta"/>
+                <Label fx:id="previewCountMeta" id="reportPreviewCount" text="0 tin nhắn" styleClass="chat-report-count-meta"/>
             </HBox>
             <ScrollPane fx:id="evidenceScroll" fitToWidth="true" hbarPolicy="NEVER"
                         prefViewportHeight="196" minHeight="172" styleClass="chat-report-scroll">
-                <VBox fx:id="evidenceList" minWidth="0" spacing="8"/>
+                <VBox fx:id="evidenceList" id="evidenceList" minWidth="0" spacing="8"/>
             </ScrollPane>
         </VBox>
 
@@ -235,8 +214,8 @@
                            maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
                 <HBox spacing="12" alignment="BASELINE_LEFT">
-                    <Label text="Gói bằng chứng" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
-                    <Label fx:id="receiptEvidenceLabel" styleClass="chat-report-receipt-mono"
+                    <Label text="Tin đã báo cáo" minWidth="128" prefWidth="128" styleClass="chat-report-meta-key"/>
+                    <Label fx:id="receiptEvidenceLabel" id="receiptEvidenceLabel" styleClass="chat-report-receipt-mono"
                            wrapText="true" minWidth="0" minHeight="-Infinity" prefWidth="300"
                            maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>

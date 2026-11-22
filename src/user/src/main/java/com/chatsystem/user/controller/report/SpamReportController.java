@@ -9,7 +9,6 @@ import com.chatsystem.user.UserViews;
 import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.navigation.UserViewInputs;
 import com.chatsystem.user.service.SpamReportService;
-import com.chatsystem.user.service.model.ReportEvidenceItem;
 import com.chatsystem.user.service.model.ReportMessageItem;
 import com.chatsystem.user.service.model.ReportPreparation;
 import com.chatsystem.user.service.model.ReportReceipt;
@@ -23,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -35,6 +35,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 /**
  * Controller for User Spam Reporting dialog (U-DLG-04 / P1 / REPORT-GROUP).
@@ -68,12 +71,8 @@ public final class SpamReportController implements DialogViewController {
     @FXML private Button previewCloseButton;
     @FXML private Label previewTargetValue;
     @FXML private Label previewReasonValue;
-    @FXML private Label metricSelectedValue;
-    @FXML private Label metricContextValue;
-    @FXML private Label metricIntersectionValue;
-    @FXML private Label metricTotalValue;
     @FXML private Label previewConsentNotice;
-    @FXML private Label evidenceUnionMeta;
+    @FXML private Label previewCountMeta;
     @FXML private ScrollPane evidenceScroll;
     @FXML private VBox evidenceList;
     @FXML private Button editPickButton;
@@ -92,10 +91,12 @@ public final class SpamReportController implements DialogViewController {
 
     private final Set<String> selectedMessageIds = new LinkedHashSet<>();
     private List<String> preselectedIds = List.of();
+    private ViewNavigator navigator;
     private SpamReportService service;
     private ReportContext context;
     private ReportPreparation currentPreparation;
     private Dialog<ButtonType> currentDialog;
+    private Dialog<ButtonType> confirmDialog;
     private Node pendingScrollTarget;
 
     public static void open(ViewNavigator navigator, String conversationId, String conversationTitle) {
@@ -130,6 +131,7 @@ public final class SpamReportController implements DialogViewController {
 
     @Override
     public void onEnter(ViewNavigator navigator, View view, ViewInput input) {
+        this.navigator = navigator;
         service = UserApplication.getSpamReportService();
         if (input instanceof UserViewInputs.ReportSpam reportInput) {
             preselectedIds = reportInput.selectedMessageIds();
@@ -191,7 +193,7 @@ public final class SpamReportController implements DialogViewController {
 
         previewButton.setOnAction(event -> onPreviewEvidence());
         editPickButton.setOnAction(event -> showStep(pickPane));
-        submitReportButton.setOnAction(event -> onSubmitReport());
+        submitReportButton.setOnAction(event -> confirmSubmitReport());
 
         dialog.setOnShown(event -> {
             pane.applyCss();
@@ -205,6 +207,15 @@ public final class SpamReportController implements DialogViewController {
             }
         });
         resizeDialog();
+    }
+
+    @Override
+    public void onLeave() {
+        if (confirmDialog != null) {
+            confirmDialog.close();
+            confirmDialog = null;
+        }
+        navigator = null;
     }
 
     private static ListCell<TargetUserOption> createTargetUserCell() {
@@ -335,7 +346,7 @@ public final class SpamReportController implements DialogViewController {
         checkBox.setSelected(initiallyChecked);
         checkBox.setAccessibleText("Chọn tin nhắn của " + item.senderName());
 
-        VBox detailsBox = buildDetailsBox(item.senderName(), item.formattedTime(), null, item.content());
+        VBox detailsBox = buildDetailsBox(item.senderName(), item.formattedTime(), item.content());
 
         HBox card = new HBox(12, checkBox, detailsBox);
         card.getStyleClass().addAll("chat-report-excerpt-card", "is-selectable");
@@ -389,14 +400,12 @@ public final class SpamReportController implements DialogViewController {
             pickFeedback.setVisible(false);
             previewTargetValue.setText(currentPreparation.targetUserName());
             previewReasonValue.setText(currentPreparation.reason());
-            metricSelectedValue.setText(String.valueOf(currentPreparation.selectedCount()));
-            metricContextValue.setText(String.valueOf(currentPreparation.contextCount()));
-            metricIntersectionValue.setText(String.valueOf(currentPreparation.intersectionCount()));
-            metricTotalValue.setText(String.valueOf(currentPreparation.totalUniqueCount()));
-            evidenceUnionMeta.setText("Selected ∪ Context · " + currentPreparation.totalUniqueCount() + " tin");
-            previewConsentNotice.setText(currentPreparation.consentNotice());
+            previewCountMeta.setText(currentPreparation.selectedCount() + " tin nhắn");
+            previewConsentNotice.setText(currentPreparation.selectedCount()
+                    + " tin nhắn đã chọn và lý do báo cáo sẽ được gửi dạng bản rõ để quản trị viên"
+                    + " hệ thống xem xét, kể cả trong nhóm mã hóa đầu cuối (E2EE).");
 
-            renderEvidenceList(currentPreparation.evidence());
+            renderSelectedEvidenceList(currentPreparation.selectedMessages());
             showStep(previewPane);
         } catch (IllegalArgumentException ex) {
             boolean invalidReason = reason == null || reason.isBlank();
@@ -413,46 +422,30 @@ public final class SpamReportController implements DialogViewController {
         }
     }
 
-    private void renderEvidenceList(List<ReportEvidenceItem> evidence) {
+    private void renderSelectedEvidenceList(List<ReportMessageItem> selectedMessages) {
         evidenceList.getChildren().clear();
-        for (ReportEvidenceItem item : evidence) {
-            VBox detailsBox = buildDetailsBox(item.senderName(), item.formattedTime(),
-                    item.classification(), item.content());
+        for (ReportMessageItem item : selectedMessages) {
+            VBox detailsBox = buildDetailsBox(item.senderName(), item.formattedTime(), item.content());
             HBox card = new HBox(detailsBox);
-            card.getStyleClass().addAll("chat-report-excerpt-card", "is-readonly");
-            if (!"Ngữ cảnh".equals(item.classification())) {
-                card.pseudoClassStateChanged(SELECTED, true);
-            }
+            card.getStyleClass().addAll("chat-report-excerpt-card", "is-readonly", "is-reported-preview");
             evidenceList.getChildren().add(card);
         }
         evidenceScroll.setVvalue(0);
     }
 
-    private static VBox buildDetailsBox(String sender, String formattedTime,
-                                        String classification, String content) {
+    private static VBox buildDetailsBox(String sender, String formattedTime, String content) {
         Label senderLabel = new Label(sender);
         senderLabel.getStyleClass().add("chat-result-title");
         senderLabel.setMinWidth(0);
         senderLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(senderLabel, Priority.ALWAYS);
 
-        HBox headerRow = new HBox(8, senderLabel);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
-
-        if (classification != null && !classification.isBlank()) {
-            Label classLabel = new Label(classification);
-            classLabel.getStyleClass().add("chat-report-badge");
-            if (!"Ngữ cảnh".equals(classification)) {
-                classLabel.getStyleClass().add("is-reported");
-            }
-            classLabel.setMinWidth(Region.USE_PREF_SIZE);
-            headerRow.getChildren().add(classLabel);
-        }
-
         Label timeLabel = new Label(formattedTime);
         timeLabel.getStyleClass().addAll("chat-caption", "chat-result-date");
         timeLabel.setMinWidth(Region.USE_PREF_SIZE);
-        headerRow.getChildren().add(timeLabel);
+
+        HBox headerRow = new HBox(8, senderLabel, timeLabel);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
 
         Label contentLabel = new Label(content);
         contentLabel.getStyleClass().add("chat-report-content");
@@ -465,7 +458,82 @@ public final class SpamReportController implements DialogViewController {
         return detailsBox;
     }
 
-    private void onSubmitReport() {
+    private void confirmSubmitReport() {
+        if (currentPreparation == null) {
+            return;
+        }
+        if (confirmDialog != null) {
+            confirmDialog.close();
+            confirmDialog = null;
+        }
+        Dialog<ButtonType> dialog = new Dialog<>();
+        Window owner = currentDialog != null && currentDialog.getDialogPane().getScene() != null
+                ? currentDialog.getDialogPane().getScene().getWindow()
+                : null;
+        if (owner != null) {
+            dialog.initOwner(owner);
+        }
+        dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.initStyle(StageStyle.UNDECORATED);
+        dialog.setTitle("Xác nhận gửi báo cáo?");
+
+        var pane = dialog.getDialogPane();
+        pane.setId("reportConfirmDialog");
+        pane.getStyleClass().add("chat-report-confirm");
+        pane.setPrefWidth(400);
+
+        Label title = new Label("Xác nhận gửi báo cáo?");
+        title.setId("reportConfirmTitle");
+        title.getStyleClass().add("chat-report-confirm-title");
+        title.setWrapText(true);
+
+        Label detail = new Label("Gửi báo cáo spam đối với " + currentPreparation.targetUserName()
+                + " kèm " + currentPreparation.selectedCount()
+                + " tin nhắn đã chọn để quản trị viên xem xét? Nội dung đã chọn và lý do sẽ được gửi"
+                + " dạng bản rõ, kể cả trong nhóm E2EE.");
+        detail.getStyleClass().add("chat-report-confirm-detail");
+        detail.setWrapText(true);
+        pane.setContent(new VBox(8, title, detail));
+
+        ButtonType cancelType = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType confirmType = new ButtonType("Gửi báo cáo", ButtonBar.ButtonData.OK_DONE);
+        pane.getButtonTypes().setAll(cancelType, confirmType);
+
+        Button cancelButton = (Button) pane.lookupButton(cancelType);
+        Button confirmButton = (Button) pane.lookupButton(confirmType);
+        ButtonBar.setButtonUniformSize(cancelButton, false);
+        ButtonBar.setButtonUniformSize(confirmButton, false);
+        cancelButton.setId("reportConfirmCancel");
+        cancelButton.getStyleClass().add("chat-dialog-cancel");
+        cancelButton.setDefaultButton(true);
+        confirmButton.setId("reportConfirmSubmit");
+        confirmButton.getStyleClass().add("chat-primary");
+        confirmButton.setDefaultButton(false);
+
+        if (navigator != null) {
+            navigator.themes().apply(pane);
+        }
+        for (String file : List.of("chat-tokens.css", "chat.css", "report.css")) {
+            String sheet = UserApplication.class.getResource("/com/chatsystem/user/css/" + file).toExternalForm();
+            if (!pane.getStylesheets().contains(sheet)) {
+                pane.getStylesheets().add(sheet);
+            }
+        }
+
+        dialog.setOnHidden(event -> {
+            if (confirmDialog == dialog) {
+                confirmDialog = null;
+            }
+            if (dialog.getResult() == confirmType) {
+                executeSubmitReport();
+            }
+        });
+        confirmDialog = dialog;
+        dialog.show();
+        cancelButton.requestFocus();
+    }
+
+    private void executeSubmitReport() {
         if (currentPreparation == null) {
             return;
         }
@@ -474,9 +542,7 @@ public final class SpamReportController implements DialogViewController {
         receiptStatusLabel.setText("PENDING".equals(receipt.status()) ? "Chờ xử lý" : receipt.status());
         receiptConversationLabel.setText(currentPreparation.conversationTitle());
         receiptTargetLabel.setText(currentPreparation.targetUserName());
-        receiptEvidenceLabel.setText(currentPreparation.totalUniqueCount()
-                + " tin (" + currentPreparation.selectedCount() + " đã chọn · "
-                + currentPreparation.contextCount() + " ngữ cảnh)");
+        receiptEvidenceLabel.setText(currentPreparation.selectedCount() + " tin nhắn đã báo cáo");
         receiptTimestampLabel.setText(receipt.timestamp());
         showStep(acceptedPane);
     }
