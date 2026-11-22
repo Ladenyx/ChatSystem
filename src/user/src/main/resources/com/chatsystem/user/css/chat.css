@@ -648,11 +648,31 @@
     -fx-padding: 20;
 }
 
+.label.chat-message-avatar {
+    -fx-min-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-max-height: 32;
+    -fx-alignment: center;
+    -fx-background-color: -chat-surface;
+    -fx-border-color: -chat-rule;
+    -fx-border-width: 1;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-text;
+}
+
 .label.chat-message-author {
     -fx-font-size: 12px;
     -fx-font-weight: 600;
     -fx-text-fill: -chat-secondary;
     -fx-padding: 0 0 0 4;
+}
+
+.chat-message-row.is-incoming .label.chat-message-author {
+    -fx-padding: 0 0 0 44;
 }
 
 .chat-bubble {
@@ -682,10 +702,14 @@
 }
 
 .label.chat-message-meta {
-    -fx-font-family: "Monospaced";
+    -fx-font-family: "Inter";
     -fx-font-size: 11px;
     -fx-text-fill: -chat-muted;
     -fx-padding: 0 4;
+}
+
+.chat-message-row.is-incoming .label.chat-message-meta {
+    -fx-padding: 0 4 0 44;
 }
 
 .label.chat-message-meta.chat-receipt-read {
@@ -737,18 +761,18 @@
     -fx-border-color: -chat-rule;
     -fx-border-radius: 10px;
     -fx-border-width: 1px;
-    -fx-padding: 6px;
-    -fx-min-width: 152px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 16, 0, 0, 4);
+    -fx-padding: 4px;
+    -fx-min-width: 140px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 3);
 }
 
 .chat-message-menu.cs-root:dark {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 16, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.40), 12, 0, 0, 3);
 }
 
 .chat-message-menu-item {
     -fx-alignment: center-left;
-    -fx-min-height: 34px;
+    -fx-min-height: 32px;
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-background-radius: 6px;
@@ -776,7 +800,8 @@
 }
 
 .chat-message-menu-item:focused {
-    -fx-border-color: -chat-focus;
+    -fx-background-color: -chat-hover;
+    -fx-border-color: transparent;
 }
 
 .chat-message-menu-danger {
@@ -788,8 +813,10 @@
     -fx-icon-color: -chat-danger;
 }
 
-.chat-message-menu-danger:hover {
+.chat-message-menu-danger:hover,
+.chat-message-menu-danger:focused {
     -fx-background-color: -chat-danger-bg;
+    -fx-border-color: transparent;
 }
 
 .chat-composer {

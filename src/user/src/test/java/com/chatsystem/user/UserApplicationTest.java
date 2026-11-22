@@ -666,14 +666,17 @@ class UserApplicationTest {
                         "Recalled messages must not offer message actions");
                 assertTrue(directRows.stream()
                         .filter(row -> directMessagesById.get(row.messageId()).senderId().equals(currentUserId))
-                        .allMatch(row -> row.lookup(".chat-message-more") == null),
-                        "Outgoing own messages must not offer Báo cáo");
+                        .allMatch(row -> row.lookup(".chat-message-more") == null
+                                && row.lookup(".chat-message-avatar") == null),
+                        "Outgoing own messages must not offer Báo cáo or avatar");
                 assertTrue(directRows.stream()
                         .filter(row -> !directMessagesById.get(row.messageId()).senderId().equals(currentUserId)
                                 && directMessagesById.get(row.messageId()).acceptedByServer()
                                 && directMessagesById.get(row.messageId()).state() != MockMessage.State.RECALLED)
-                        .allMatch(row -> row.lookup(".chat-message-more") != null),
-                        "Eligible incoming messages offer the hover menu");
+                        .allMatch(row -> row.lookup(".chat-message-more") != null
+                                && row.lookup(".chat-message-avatar") instanceof Label avatar
+                                && !avatar.getText().isBlank()),
+                        "Eligible incoming messages offer the hover menu and monogram avatar");
 
                 var group = conversations.getItems().stream()
                         .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
@@ -723,10 +726,17 @@ class UserApplicationTest {
                 Window popup = messageMenuPopup();
                 assertTrue(popup.isShowing());
                 Stage stage = stageRef.get();
-                assertTrue(popup.getY() >= stage.getY() && popup.getY() < stage.getY() + stage.getHeight());
                 var menuRoot = popup.getScene().getRoot();
+                var card = menuRoot.lookup("#messageActionMenu");
+                var cardBounds = card.localToScreen(card.getLayoutBounds());
+                var historyScroll = stage.getScene().getRoot().lookup("#historyScroll");
+                var historyBounds = historyScroll.localToScreen(historyScroll.getBoundsInLocal());
+                assertTrue(cardBounds.getMinY() >= historyBounds.getMinY()
+                        && cardBounds.getMaxY() <= historyBounds.getMaxY(),
+                        "Message action menu stays inside history viewport and does not overlap composer");
                 Button reportAction = (Button) menuRoot.lookup("#messageActionReport");
                 assertNotNull(reportAction);
+                assertFalse(reportAction.isFocused());
                 assertEquals("Báo cáo", reportAction.getText());
                 captureWithPopover(stage, popup, "user-message-menu-light");
 

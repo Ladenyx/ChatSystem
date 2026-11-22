@@ -146,6 +146,7 @@ public final class ChatHistoryController {
         VBox menu = new VBox(2);
         menu.setId("messageActionMenu");
         menu.getStyleClass().add("chat-message-menu");
+        menu.setFocusTraversable(true);
         navigator.themes().apply(menu);
         menu.getStylesheets().addAll(TOKENS_CSS, CHAT_CSS);
 
@@ -177,29 +178,43 @@ public final class ChatHistoryController {
 
         menu.applyCss();
         menu.layout();
+        var menuBounds = menu.getBoundsInParent();
+        double shadowOffsetX = -menuBounds.getMinX();
+        double shadowOffsetY = -menuBounds.getMinY();
+        double cardWidth = menu.prefWidth(-1);
+        double cardHeight = menu.prefHeight(-1);
+
         var bounds = anchor.localToScreen(anchor.getBoundsInLocal());
-        double menuHeight = menu.prefHeight(-1);
-        double menuWidth = menu.prefWidth(-1);
+        var historyBounds = historyScroll.localToScreen(historyScroll.getBoundsInLocal());
         var ownerWindow = anchor.getScene().getWindow();
-        double x = bounds.getMinX();
-        if (ownerWindow != null && x + menuWidth > ownerWindow.getX() + ownerWindow.getWidth() - 8) {
-            x = Math.max(ownerWindow.getX() + 8, bounds.getMaxX() - menuWidth);
-        }
-        double y = bounds.getMaxY() + 4;
-        if (ownerWindow != null) {
-            double minY = ownerWindow.getY() + 8;
-            double maxY = Math.max(minY, ownerWindow.getY() + ownerWindow.getHeight() - menuHeight - 8);
-            if (y + menuHeight > ownerWindow.getY() + ownerWindow.getHeight() - 8) {
-                y = bounds.getMinY() - menuHeight - 4;
+
+        double cardX = bounds.getMinX();
+        if (historyBounds != null) {
+            if (cardX + cardWidth > historyBounds.getMaxX() - 8) {
+                cardX = bounds.getMaxX() - cardWidth;
             }
-            y = Math.clamp(y, minY, maxY);
+            double minX = historyBounds.getMinX() + 8;
+            double maxX = Math.max(minX, historyBounds.getMaxX() - cardWidth - 8);
+            cardX = Math.clamp(cardX, minX, maxX);
+        } else if (ownerWindow != null && cardX + cardWidth > ownerWindow.getX() + ownerWindow.getWidth() - 8) {
+            cardX = Math.max(ownerWindow.getX() + 8, bounds.getMaxX() - cardWidth);
         }
+
+        double cardY = bounds.getMaxY() + 4;
+        double areaTop = historyBounds != null ? historyBounds.getMinY() + 8
+                : (ownerWindow != null ? ownerWindow.getY() + 8 : cardY);
+        double areaBottom = historyBounds != null ? historyBounds.getMaxY() - 8
+                : (ownerWindow != null ? ownerWindow.getY() + ownerWindow.getHeight() - 8 : cardY + cardHeight);
+        if (cardY + cardHeight > areaBottom) {
+            cardY = bounds.getMinY() - cardHeight - 4;
+        }
+        cardY = Math.clamp(cardY, areaTop, Math.max(areaTop, areaBottom - cardHeight));
 
         messageActionPopup = popup;
         activeMenuRow = row;
         row.setMenuOpen(true);
-        popup.show(anchor, x, y);
-        reportBtn.requestFocus();
+        popup.show(anchor, cardX - shadowOffsetX, cardY - shadowOffsetY);
+        menu.requestFocus();
     }
 
     private void closeMessageMenu() {
