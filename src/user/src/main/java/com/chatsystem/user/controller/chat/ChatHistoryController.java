@@ -3,54 +3,84 @@ package com.chatsystem.user.controller.chat;
 import atlantafx.base.controls.Popover;
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.navigation.ViewNavigator;
-import javafx.application.Platform;
 import com.chatsystem.user.UserViews;
 import com.chatsystem.user.control.ChatMessageRow;
 import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.messaging.ConversationCatalog;
 import com.chatsystem.user.navigation.UserViewInputs;
+import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.PopupWindow.AnchorLocation;
 
 public final class ChatHistoryController {
+    private static final double ASSISTANT_GAP = 8;
+    private static final PseudoClass ASSISTANT_OPEN = PseudoClass.getPseudoClass("open");
+
     @FXML private Label conversationTitle;
     @FXML private Label conversationStatus;
     @FXML private ConversationAvatar conversationAvatar;
     @FXML private ScrollPane historyScroll;
     @FXML private VBox messageRows;
     @FXML private TextArea draftField;
-
-    @FXML private Button refineDraft;
-    @FXML private Button recommendReply;
+    @FXML private HBox composer;
+    @FXML private Button aiAssistantButton;
 
     private ViewNavigator navigator;
     private MockConversation conversation;
 
     @FXML
-    private void initialize() {
-        refineDraft.disableProperty().bind(draftField.textProperty().map(String::isBlank));
+    private void openAssistant() {
+        String conversationId = conversation.id();
+        String draft = draftField.getText();
+        var mode = draft.isBlank() ? UserViewInputs.AiMode.RECOMMEND : UserViewInputs.AiMode.REFINE;
+        var input = new UserViewInputs.AiAssistant(conversationId, mode, draft, suggestion -> {
+            if (conversation.id().equals(conversationId) && draftField.getText().equals(draft)) {
+                draftField.setText(suggestion);
+                draftField.requestFocus();
+                draftField.positionCaret(suggestion.length());
+            }
+        });
+        var popup = navigator.showPopover(UserViews.AI_ASSISTANT, aiAssistantButton, input, assistant -> {
+            assistant.setArrowLocation(Popover.ArrowLocation.BOTTOM_RIGHT);
+            assistant.setArrowSize(0);
+            assistant.setCornerRadius(12);
+            assistant.setHeaderAlwaysVisible(false);
+            assistant.setCloseButtonEnabled(false);
+            assistant.getStyleClass().add("chat-ai-popup");
+            var pane = (Region) assistant.getContentNode();
+            navigator.getRoot().layout();
+            var insets = composer.getInsets();
+            double availableWidth = composer.getWidth() - insets.getLeft() - insets.getRight();
+            pane.setPrefWidth(Math.min(pane.getPrefWidth(), availableWidth));
+            assistant.getRoot().getStylesheets().addAll(pane.getStylesheets());
+            assistant.showingProperty().addListener((observable, wasShowing, showing) ->
+                    aiAssistantButton.pseudoClassStateChanged(ASSISTANT_OPEN, showing));
+        });
+
+        positionAssistant(popup);
     }
 
-    @FXML
-    private void openRefine() {
-        openAssistant(refineDraft, UserViewInputs.AiMode.REFINE);
-    }
-
-    @FXML
-    private void openRecommend() {
-        openAssistant(recommendReply, UserViewInputs.AiMode.RECOMMEND);
-    }
-
-    private void openAssistant(Button anchor, UserViewInputs.AiMode mode) {
-        var input = new UserViewInputs.AiAssistant(conversation.id(), mode, draftField.getText());
-        navigator.showPopover(UserViews.AI_ASSISTANT, anchor, input, popup -> {
-            popup.setArrowLocation(Popover.ArrowLocation.BOTTOM_LEFT);
-            popup.setHeaderAlwaysVisible(false);
-            popup.setCloseButtonEnabled(false);
+    private void positionAssistant(Popover popup) {
+        popup.getRoot().applyCss();
+        popup.getRoot().layout();
+        var composerBounds = composer.localToScreen(composer.getLayoutBounds());
+        popup.setAnchorLocation(AnchorLocation.WINDOW_BOTTOM_RIGHT);
+        popup.setAnchorY(composerBounds.getMinY() - ASSISTANT_GAP);
+        double right = composerBounds.getMaxX() - composer.getInsets().getRight();
+        popup.setAnchorX(right);
+        // GTK can restore the initial X position while processing the vertical move.
+        Platform.runLater(() -> {
+            if (popup.isShowing()) {
+                popup.setAnchorX(right);
+            }
         });
     }
 

@@ -69,7 +69,7 @@ Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thà
   - `U-SCR-08`: 5 phân mục (sub-tab): *Tất cả bạn bè*, *Đang Online*, *Lời mời kết bạn*, *Tìm người dùng*, *Đã chặn*.
   - `U-DLG-01`: Hồ sơ & Bảo mật Tài khoản (Hồ sơ, Đổi mật khẩu, Quản lý khóa E2EE).
   - `U-DLG-02`: Tạo nhóm chat mới.
-  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend` theo [llm-assistant.md](../../decisions/llm-assistant.md)): chọn tối đa **5 tin nhắn** ngữ cảnh cho `Recommend`, hiển thị **3 phương án** trả về cho mỗi yêu cầu, và có bước xem trước/xác nhận nêu rõ bản rõ gửi tới Server & Meta Model API (kèm lưu ý dữ liệu có thể được dùng huấn luyện mô hình tương lai khi dùng `muse-spark-1.3-contributor`).
+  - `U-DLG-03`: Popover Trợ lý AI (`Refine` & `Recommend` theo [llm-assistant.md](../../decisions/llm-assistant.md)): tự động lấy tối đa **50 tin nhắn** hợp lệ gần nhất từ local client để AI hiểu ngữ cảnh và văn phong cuộc trò chuyện, hiển thị ngay **3 phương án** (`Refine` bản nháp hoặc `Recommend` câu trả lời) để chọn điền vào ô nháp (bản rõ ngữ cảnh cục bộ và bản nháp được gửi qua Server tới Meta Model API).
   - `U-DLG-04`: Báo cáo Spam (chọn tin vi phạm, lý do và xem trước gói bằng chứng).
   - `U-DLG-05`: Chọn Admin kế nhiệm.
 

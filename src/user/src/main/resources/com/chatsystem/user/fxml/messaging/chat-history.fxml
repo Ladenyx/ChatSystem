@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.chatsystem.user.controller.chat.ChatHistoryController"
             visible="false" styleClass="chat-selected" minWidth="0">
@@ -40,29 +41,27 @@
         </VBox>
     </center>
     <bottom>
-        <StackPane>
-            <VBox fx:id="composer" spacing="8" styleClass="chat-composer">
-                <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
-                          prefRowCount="2" prefHeight="56" accessibleText="Soạn tin nhắn"/>
-                <HBox spacing="8" alignment="CENTER_LEFT">
-                    <Button fx:id="refineDraft" id="refineDraft" onAction="#openRefine" accessibleText="Chỉnh sửa bằng AI"
-                            styleClass="chat-outline,chat-composer-icon">
-                        <graphic><ChatIcon icon="refine"/></graphic>
-                        <tooltip><Tooltip text="Chỉnh sửa (Refine)"/></tooltip>
-                    </Button>
-                    <Button fx:id="recommendReply" id="recommendReply" onAction="#openRecommend" accessibleText="Gợi ý trả lời bằng AI"
-                            styleClass="chat-outline,chat-composer-icon">
-                        <graphic><ChatIcon icon="recommend"/></graphic>
-                        <tooltip><Tooltip text="Gợi ý (Recommend)"/></tooltip>
-                    </Button>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
-                            styleClass="chat-primary,chat-composer-icon,chat-send">
-                        <graphic><ChatIcon icon="send"/></graphic>
-                        <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
-                    </Button>
-                </HBox>
-            </VBox>
-        </StackPane>
+        <HBox fx:id="composer" alignment="CENTER_LEFT" spacing="8" fillHeight="false" styleClass="chat-composer">
+            <TextArea fx:id="draftField" id="draftField" promptText="Nhập tin nhắn" wrapText="true"
+                      prefRowCount="2" prefHeight="56" minWidth="0" HBox.hgrow="ALWAYS" accessibleText="Soạn tin nhắn"/>
+            <Button fx:id="aiAssistantButton" onAction="#openAssistant"
+                    accessibleText="Mở gợi ý soạn tin bằng AI" styleClass="chat-outline,chat-ai-trigger">
+                <graphic>
+                    <Region styleClass="chat-icon" mouseTransparent="true">
+                        <shape>
+                            <SVGPath content="M8 4 Q9 11 16 12 Q9 13 8 20 Q7 13 0 12 Q7 11 8 4 Z
+                                              M18 0 Q18.75 5.25 24 6 Q18.75 6.75 18 12 Q17.25 6.75 12 6 Q17.25 5.25 18 0 Z
+                                              M17 16 Q17.5 19.5 21 20 Q17.5 20.5 17 24 Q16.5 20.5 13 20 Q16.5 19.5 17 16 Z"/>
+                        </shape>
+                    </Region>
+                </graphic>
+                <tooltip><Tooltip text="Gợi ý soạn tin bằng AI"/></tooltip>
+            </Button>
+            <Button fx:id="sendButton" id="sendMessage" disable="true" accessibleText="Gửi tin nhắn"
+                    styleClass="chat-primary,chat-composer-icon,chat-send">
+                <graphic><ChatIcon icon="send"/></graphic>
+                <tooltip><Tooltip text="Gửi (Enter)"/></tooltip>
+            </Button>
+        </HBox>
     </bottom>
 </BorderPane>

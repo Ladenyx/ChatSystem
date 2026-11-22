@@ -342,10 +342,9 @@
 
 .chat-composer {
     -fx-background-color: -chat-surface;
-    -fx-background-radius: 8 8 0 0;
-    -fx-border-radius: 8 8 0 0;
-    -fx-border-color: -chat-control-border;
-    -fx-padding: 16;
+    -fx-border-color: -chat-border transparent transparent;
+    -fx-border-width: 1 0 0;
+    -fx-padding: 12 20 16;
 }
 
 .chat-composer .text-area,
@@ -353,13 +352,17 @@
     -fx-background-color: -chat-canvas;
     -fx-text-fill: -chat-text;
     -fx-background-insets: 0;
-    -fx-background-radius: 4;
+    -fx-background-radius: 8;
 }
 
 .chat-composer .text-area {
-    -fx-border-color: -chat-control-border;
-    -fx-border-radius: 4;
+    -fx-border-color: -chat-border;
+    -fx-border-radius: 8;
     -fx-prompt-text-fill: -chat-muted;
+}
+
+.chat-composer .text-area .content {
+    -fx-padding: 8 12;
 }
 
 .chat-composer .text-area:focused {
@@ -402,6 +405,30 @@
 
 .chat-composer-icon:disabled {
     -fx-opacity: 0.65;
+}
+
+.chat-ai-trigger,
+.chat-composer .chat-send {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.chat-ai-trigger:open {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-trigger {
+    -fx-padding: 4 8;
+    -fx-border-color: -chat-border;
+    -chat-icon-color: -chat-brand-text;
+}
+
+.chat-ai-trigger:focused {
+    -fx-border-color: -chat-focus;
+    -fx-effect: none;
 }
 
 .chat-warning {
@@ -596,47 +623,84 @@
     -fx-alignment: center-left;
 }
 
+.chat-ai-popup {
+    -fx-effect: none;
+}
+
+.chat-ai-popup > .content {
+    -fx-padding: 0;
+}
+
 .chat-ai-pane {
-    -fx-pref-width: 560;
-    -fx-max-width: 560;
-    -fx-padding: 16 20;
+    -chat-ai-rule: ladder(-chat-surface, rgba(255, 255, 255, 0.09) 49%, rgba(0, 0, 0, 0.09) 50%);
+    -fx-padding: 16;
     -fx-background-color: -chat-surface;
+    -fx-background-radius: 12;
+}
+
+.chat-ai-title {
+    -fx-text-fill: -chat-text;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.chat-ai-pane .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
+}
+
+.chat-ai-close {
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
     -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
 }
 
-.chat-ai-pane > .scroll-pane {
-    -fx-max-height: 438;
-}
-
-.chat-ai-pane .text-area {
-    -fx-prompt-text-fill: -chat-muted;
-    -fx-border-color: -chat-control-border;
-    -fx-border-radius: 4;
-}
-
-.chat-ai-pane .text-area:focused {
-    -fx-border-color: -chat-focus;
-}
-
-.chat-ai-choice {
-    -fx-alignment: center-left;
-    -fx-min-height: 54;
-    -fx-padding: 10 12;
-    -fx-background-color: -chat-surface;
-    -fx-background-radius: 4;
-    -fx-border-color: -chat-border;
-    -fx-border-radius: 4;
-}
-
-.chat-ai-choice:hover {
+.chat-ai-close:hover {
     -fx-background-color: -chat-hover;
 }
 
-.chat-ai-choice:selected {
-    -fx-background-color: -chat-brand-subtle;
+.chat-ai-close:focused {
     -fx-border-color: -chat-focus;
 }
 
-.chat-ai-choice:choice-focused {
+.chat-ai-option {
+    -fx-alignment: center-left;
+    -fx-min-width: 0;
+    -fx-min-height: 56;
+    -fx-max-height: 56;
+    -fx-padding: 8 40 8 12;
+    -fx-background-color: -chat-canvas;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -chat-ai-rule;
+    -fx-border-radius: 8;
+    -fx-text-fill: -chat-text;
+    -fx-text-alignment: left;
+    -fx-font-size: 14px;
+}
+
+.chat-ai-suggestions:refine .chat-ai-option {
+    -fx-min-height: 76;
+    -fx-max-height: 76;
+}
+
+.chat-ai-option:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-ai-option:pressed {
+    -fx-background-color: -chat-brand-subtle;
+}
+
+.chat-ai-option:focused {
     -fx-border-color: -chat-focus;
+}
+
+.chat-ai-option-row:hover > .chat-ai-insert,
+.chat-ai-option-row:focus-within > .chat-ai-insert {
+    -fx-icon-color: -chat-brand-text;
 }

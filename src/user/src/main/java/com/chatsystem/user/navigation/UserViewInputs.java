@@ -48,15 +48,21 @@ public final class UserViewInputs {
         }
     }
 
-    public record AiAssistant(String conversationId, AiMode mode, String draft) implements ViewInput {
+    public record AiAssistant(String conversationId, AiMode mode, String draft,
+                              Consumer<String> useSuggestion) implements ViewInput {
         public AiAssistant(String conversationId, AiMode mode) {
             this(conversationId, mode, "");
+        }
+
+        public AiAssistant(String conversationId, AiMode mode, String draft) {
+            this(conversationId, mode, draft, suggestion -> {});
         }
 
         public AiAssistant {
             Objects.requireNonNull(conversationId, "conversationId");
             Objects.requireNonNull(mode, "mode");
             Objects.requireNonNull(draft, "draft");
+            Objects.requireNonNull(useSuggestion, "useSuggestion");
         }
     }
 

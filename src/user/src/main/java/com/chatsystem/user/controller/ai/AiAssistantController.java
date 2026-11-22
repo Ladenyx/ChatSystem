@@ -1,27 +1,32 @@
 package com.chatsystem.user.controller.ai;
 
-import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewInput;
 import com.chatsystem.desktop.navigation.ViewNavigator;
-import com.chatsystem.user.UserViews;
 import com.chatsystem.user.navigation.UserViewInputs;
-import javafx.collections.FXCollections;
+import java.util.List;
+import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public final class AiAssistantController implements ViewController {
+    private static final PseudoClass REFINE = PseudoClass.getPseudoClass("refine");
+    private static final List<String> REPLY_EXAMPLES = List.of(
+            "Mình đã hiểu rồi, cảm ơn bạn nhé.",
+            "Mình sẽ xem lại và phản hồi bạn sớm.",
+            "Cảm ơn bạn đã cập nhật. Mình sẽ kiểm tra phần này nhé.");
+
     @FXML private Label heading;
-    @FXML private VBox body;
-    @FXML private VBox disclosure;
-    @FXML private HBox footer;
+    @FXML private VBox suggestions;
 
     private ViewNavigator navigator;
 
@@ -32,51 +37,50 @@ public final class AiAssistantController implements ViewController {
             heading.setText(view.title());
             return;
         }
-        boolean refine = preview.mode() == UserViewInputs.AiMode.REFINE;
-        heading.setText(refine ? "Chỉnh sửa bản nháp" : "Gợi ý trả lời");
 
-        if (refine) {
-            var draft = new TextArea(preview.draft());
-            draft.setWrapText(true);
-            draft.setPrefRowCount(4);
-            draft.setAccessibleText("Bản sao bản nháp");
-            var tone = new ComboBox<>(FXCollections.observableArrayList("Rõ ràng", "Thân thiện", "Trang trọng"));
-            tone.getSelectionModel().selectFirst();
-            tone.setAccessibleText("Giọng văn");
-            body.getChildren().setAll(new Label("Xem trước bản nháp"), draft, new Label("Giọng văn"), tone);
-        } else {
-            showContext(preview.conversationId());
-        }
+        String draft = preview.draft().strip();
+        boolean refine = preview.mode() == UserViewInputs.AiMode.REFINE && !draft.isEmpty();
+        heading.setText(refine ? "Viết lại bản nháp" : "Gợi ý trả lời");
 
-        var dataNotice = new Label("Khi tích hợp AI, nội dung đã chọn có thể được chia sẻ dưới dạng bản rõ.");
-        dataNotice.getStyleClass().add("chat-caption");
-        dataNotice.setWrapText(true);
-        var consent = new CheckBox("Tôi đồng ý chia sẻ nội dung để dùng AI");
-        consent.setWrapText(true);
-        disclosure.getChildren().setAll(dataNotice, consent);
-
-        var generate = new Button(refine ? "Tạo đề xuất" : "Gợi ý trả lời");
-        generate.getStyleClass().add("chat-primary");
-        generate.setDisable(true);
-        var cancel = new Button("Hủy");
-        cancel.setOnAction(event -> close());
-        footer.getChildren().setAll(cancel, generate);
+        var examples = refine ? draftExamples(draft) : REPLY_EXAMPLES;
+        var options = examples.stream()
+                .map(example -> option(example, preview))
+                .toList();
+        suggestions.pseudoClassStateChanged(REFINE, refine);
+        suggestions.getChildren().setAll(options.stream().map(AiAssistantController::optionRow).toList());
+        Platform.runLater(options.getFirst()::requestFocus);
     }
 
-    private void showContext(String conversationId) {
-        body.getChildren().setAll(new Label("Chọn tối đa 5 tin nhắn làm ngữ cảnh"));
-        var catalog = UserViews.CONVERSATIONS_DATA;
-        catalog.messagesFor(conversationId).reversed().stream()
-                .filter(message -> message.state() != MockMessage.State.RECALLED)
-                .limit(5)
-                .forEach(message -> {
-                    var row = new CheckBox(catalog.user(message.senderId()).fullName() + " · " + message.text());
-                    row.setWrapText(true);
-                    body.getChildren().add(row);
-                });
-        if (body.getChildren().size() == 1) {
-            body.getChildren().add(new Label("Chưa có tin nhắn"));
-        }
+    private static List<String> draftExamples(String draft) {
+        int first = draft.codePointAt(0);
+        String sentence = Character.toString(Character.toUpperCase(first))
+                + draft.substring(Character.charCount(first));
+        return List.of(sentence, "Chào bạn,\n" + sentence, sentence + "\nCảm ơn bạn nhé.");
+    }
+
+    private Button option(String example, UserViewInputs.AiAssistant preview) {
+        var option = new Button(example);
+        option.getStyleClass().add("chat-ai-option");
+        option.setAccessibleText("Dùng gợi ý " + example);
+        option.setWrapText(true);
+        option.setMaxWidth(Double.MAX_VALUE);
+        option.setOnAction(event -> {
+            close();
+            preview.useSuggestion().accept(example);
+        });
+        return option;
+    }
+
+    private static StackPane optionRow(Button option) {
+        var insert = new FontIcon(Feather.CORNER_DOWN_LEFT);
+        insert.setIconSize(16);
+        insert.setMouseTransparent(true);
+        insert.getStyleClass().add("chat-ai-insert");
+        StackPane.setAlignment(insert, Pos.CENTER_RIGHT);
+        StackPane.setMargin(insert, new Insets(0, 12, 0, 0));
+        var row = new StackPane(option, insert);
+        row.getStyleClass().add("chat-ai-option-row");
+        return row;
     }
 
     @FXML
