@@ -234,33 +234,39 @@
 }
 
 .chat-list .scroll-bar:vertical,
-.chat-history .scroll-bar:vertical {
+.chat-history .scroll-bar:vertical,
+.chat-composer .text-area .scroll-bar:vertical {
     -fx-background-color: transparent;
     -fx-pref-width: 8;
     -fx-padding: 4 2;
 }
 
 .chat-list .scroll-bar:vertical .track,
-.chat-history .scroll-bar:vertical .track {
+.chat-history .scroll-bar:vertical .track,
+.chat-composer .text-area .scroll-bar:vertical .track {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
 .chat-list .scroll-bar:vertical .thumb,
-.chat-history .scroll-bar:vertical .thumb {
+.chat-history .scroll-bar:vertical .thumb,
+.chat-composer .text-area .scroll-bar:vertical .thumb {
     -fx-background-color: -chat-scroll-thumb;
     -fx-background-radius: 4;
 }
 
 .chat-list .scroll-bar:vertical .thumb:hover,
-.chat-history .scroll-bar:vertical .thumb:hover {
+.chat-history .scroll-bar:vertical .thumb:hover,
+.chat-composer .text-area .scroll-bar:vertical .thumb:hover {
     -fx-background-color: -chat-scroll-thumb-hover;
 }
 
 .chat-list .scroll-bar:vertical .increment-button,
 .chat-list .scroll-bar:vertical .decrement-button,
 .chat-history .scroll-bar:vertical .increment-button,
-.chat-history .scroll-bar:vertical .decrement-button {
+.chat-history .scroll-bar:vertical .decrement-button,
+.chat-composer .text-area .scroll-bar:vertical .increment-button,
+.chat-composer .text-area .scroll-bar:vertical .decrement-button {
     -fx-padding: 0;
     -fx-pref-height: 0;
     -fx-opacity: 0;
@@ -728,6 +734,10 @@
     -fx-font-size: 13px;
 }
 
+.chat-composer .text-area .content {
+    -fx-padding: 8 12;
+}
+
 .chat-composer .text-area:focused {
     -fx-background-color: -chat-surface;
     -fx-border-color: -chat-focus;
@@ -808,6 +818,30 @@
 
 .chat-composer-icon:disabled {
     -fx-opacity: 0.5;
+}
+
+.chat-ai-trigger,
+.chat-composer .chat-send {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.chat-ai-trigger:open {
+    -fx-background-color: -chat-brand-subtle;
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-trigger {
+    -fx-padding: 4 8;
+    -fx-border-color: -chat-rule;
+    -chat-icon-color: -chat-brand-text;
+}
+
+.chat-ai-trigger:focused {
+    -fx-border-color: -chat-focus;
+    -fx-effect: none;
 }
 
 .chat-warning {
@@ -1093,4 +1127,94 @@
 .chat-group-read-only {
     -fx-min-height: 115;
     -fx-alignment: center-left;
+}
+
+.chat-ai-popup {
+    -fx-effect: none;
+}
+
+.chat-ai-popup > .border {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.chat-ai-popup > .content {
+    -fx-padding: 0;
+}
+
+.chat-ai-pane {
+    -fx-padding: 16;
+    -fx-background-color: -chat-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.chat-ai-title {
+    -fx-text-fill: -chat-text;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+}
+
+.chat-ai-pane .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
+}
+
+.chat-ai-close {
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+}
+
+.chat-ai-close:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-ai-close:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-option {
+    -fx-alignment: center-left;
+    -fx-min-width: 0;
+    -fx-min-height: 56;
+    -fx-max-height: 56;
+    -fx-padding: 8 40 8 12;
+    -fx-background-color: -chat-surface-subtle;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -chat-rule;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: -chat-text;
+    -fx-text-alignment: left;
+    -fx-font-size: 13px;
+}
+
+.chat-ai-suggestions:refine .chat-ai-option {
+    -fx-min-height: 76;
+    -fx-max-height: 76;
+}
+
+.chat-ai-option:hover {
+    -fx-background-color: -chat-hover;
+}
+
+.chat-ai-option:pressed {
+    -fx-background-color: -chat-brand-subtle;
+}
+
+.chat-ai-option:focused {
+    -fx-border-color: -chat-focus;
+}
+
+.chat-ai-option-row:hover > .chat-ai-insert,
+.chat-ai-option-row:focus-within > .chat-ai-insert {
+    -fx-icon-color: -chat-brand-text;
 }

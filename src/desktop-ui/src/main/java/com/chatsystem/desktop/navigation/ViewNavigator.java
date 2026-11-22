@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -237,8 +238,13 @@ public final class ViewNavigator implements AutoCloseable {
     }
 
     public Popover showPopover(View view, Node anchor, ViewInput input) {
+        return showPopover(view, anchor, input, popup -> {});
+    }
+
+    public Popover showPopover(View view, Node anchor, ViewInput input, Consumer<Popover> configure) {
         ThemeManager.requireFxThread();
         Objects.requireNonNull(input, "input");
+        Objects.requireNonNull(configure, "configure");
         requireWindow();
         if (anchor == null || anchor.getScene() != root.getScene()
                 || anchor.localToScreen(anchor.getBoundsInLocal()) == null) {
@@ -257,6 +263,7 @@ public final class ViewNavigator implements AutoCloseable {
         popup.setAutoHide(true);
         popup.setHideOnEscape(true);
         popup.setAnimated(!themes.reducedMotionProperty().get());
+        configure.accept(popup);
         themes.apply(popup.getRoot());
         popup.setOnHidden(event -> {
             leave(loaded);
@@ -273,6 +280,13 @@ public final class ViewNavigator implements AutoCloseable {
             popup.getRoot().setVisible(true);
         }
         return popup;
+    }
+
+    public void closePopover() {
+        ThemeManager.requireFxThread();
+        if (popover != null) {
+            popover.hide(Duration.ZERO);
+        }
     }
 
     public StackPane getRoot() {

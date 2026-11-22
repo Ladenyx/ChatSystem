@@ -1,5 +1,5 @@
 /* JavaFX color tokens for the User workspace (graphite neutral ramp + restrained cobalt accent). */
-.user-shell, .chat-info, .chat-group-dialog {
+.user-shell, .chat-info, .chat-group-dialog, .chat-ai-pane {
     -chat-canvas: #f5f5f5;
     -chat-workspace-bg: #fafafa;
     -chat-surface: #ffffff;
@@ -29,7 +29,7 @@
     -chat-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
 }
 
-.cs-root:dark .user-shell, .cs-root:dark .chat-info, .chat-group-dialog:dark {
+.cs-root:dark .user-shell, .cs-root:dark .chat-info, .chat-group-dialog:dark, .cs-root:dark .chat-ai-pane {
     -chat-canvas: #141414;
     -chat-workspace-bg: #171719;
     -chat-surface: #1f1f1f;

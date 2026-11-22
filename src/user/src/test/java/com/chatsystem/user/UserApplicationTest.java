@@ -15,10 +15,12 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.YearMonth;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -33,11 +35,13 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.chart.BarChart;
 import javafx.scene.image.WritableImage;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -445,6 +449,99 @@ class UserApplicationTest {
         task.get(20, TimeUnit.SECONDS);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void aiAssistantSuggestsRepliesAndRewritesDraftInBothThemes() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#aiAssistantButton")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                Window popup = aiPopupWindow();
+                var popupRoot = popup.getScene().getRoot();
+                assertEquals("Gợi ý trả lời", ((Label) popupRoot.lookup("#aiHeading")).getText());
+                assertEquals(3, popupRoot.lookupAll(".chat-ai-option").size());
+                captureWithPopover(stage, popup, "pr-52-ai-replies-dark");
+
+                ((Button) popupRoot.lookup("#aiClose")).fire();
+                assertFalse(popup.isShowing());
+
+                navRef.get().themes().toggle();
+                var root = navRef.get().getRoot();
+                var draft = (TextArea) root.lookup("#draftField");
+                draft.setText("mai mình gửi bản tổng hợp các màn hình. Bạn xem giúp mình phần Hội thoại trước nhé.");
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#aiAssistantButton")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                Window popup = aiPopupWindow();
+                var popupRoot = popup.getScene().getRoot();
+                assertEquals("Viết lại bản nháp", ((Label) popupRoot.lookup("#aiHeading")).getText());
+                var options = popupRoot.lookupAll(".chat-ai-option").stream()
+                        .map(Button.class::cast).toList();
+                assertEquals(3, options.size());
+                captureWithPopover(stage, popup, "pr-52-ai-rewrites-light");
+
+                options.getFirst().fire();
+                assertFalse(popup.isShowing());
+                var draft = (TextArea) navRef.get().getRoot().lookup("#draftField");
+                assertTrue(draft.getText().startsWith("Mai mình"));
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    private static Window aiPopupWindow() {
+        return Window.getWindows().stream()
+                .filter(window -> window.isShowing() && window.getScene().getRoot().lookup("#aiAssistant") != null)
+                .findFirst().orElseThrow();
+    }
+
+    private static <T> T onFx(Callable<T> action) throws Exception {
+        FutureTask<T> task = new FutureTask<>(action);
+        Platform.runLater(task);
+        return task.get(20, TimeUnit.SECONDS);
+    }
+
     private static Window modalWindow(Window owner) {
         return Window.getWindows().stream()
                 .filter(window -> window != owner && window.isShowing()
@@ -475,15 +572,46 @@ class UserApplicationTest {
         }
         stage.getScene().getRoot().applyCss();
         stage.getScene().getRoot().layout();
-        WritableImage image = stage.getScene().snapshot(null);
+        BufferedImage output = toBufferedImage(stage.getScene().snapshot(null));
+        Path directory = Path.of("target", "screenshots");
+        Files.createDirectories(directory);
+        ImageIO.write(output, "png", directory.resolve(name + ".png").toFile());
+    }
+
+    private static void captureWithPopover(Stage stage, Window popup, String name) throws Exception {
+        if (!Boolean.getBoolean("chatsystem.capture")) {
+            return;
+        }
+        stage.getScene().getRoot().applyCss();
+        stage.getScene().getRoot().layout();
+        popup.getScene().getRoot().applyCss();
+        popup.getScene().getRoot().layout();
+        BufferedImage base = toBufferedImage(stage.getScene().snapshot(null));
+        var transparent = new SnapshotParameters();
+        transparent.setFill(Color.TRANSPARENT);
+        BufferedImage overlay = toBufferedImage(popup.getScene().getRoot().snapshot(transparent, null));
+        int x = (int) Math.round((popup.getX() + popup.getScene().getX())
+                - (stage.getX() + stage.getScene().getX()));
+        int y = (int) Math.round((popup.getY() + popup.getScene().getY())
+                - (stage.getY() + stage.getScene().getY()));
+        var graphics = base.createGraphics();
+        try {
+            graphics.drawImage(overlay, x, y, null);
+        } finally {
+            graphics.dispose();
+        }
+        Path directory = Path.of("target", "screenshots");
+        Files.createDirectories(directory);
+        ImageIO.write(base, "png", directory.resolve(name + ".png").toFile());
+    }
+
+    private static BufferedImage toBufferedImage(WritableImage image) {
         BufferedImage output = new BufferedImage((int) image.getWidth(), (int) image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < output.getHeight(); y++) {
             for (int x = 0; x < output.getWidth(); x++) {
                 output.setRGB(x, y, image.getPixelReader().getArgb(x, y));
             }
         }
-        Path directory = Path.of("target", "screenshots");
-        Files.createDirectories(directory);
-        ImageIO.write(output, "png", directory.resolve(name + ".png").toFile());
+        return output;
     }
 }
