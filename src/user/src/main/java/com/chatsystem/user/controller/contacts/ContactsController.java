@@ -10,16 +10,19 @@ import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.mock.MockContacts;
 import com.chatsystem.user.mock.MockContacts.Relationship;
 import com.chatsystem.user.navigation.UserViewInputs;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -35,26 +38,37 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 /** Version 1 preview: relationship changes live only in this cached view. */
 public final class ContactsController implements ViewController {
     private enum Tab {
-        ALL("Tất cả bạn bè", "Lọc bạn bè theo tên", "bạn bè", "Chưa có bạn bè"),
-        ONLINE("Đang online", "Lọc bạn bè theo tên", "bạn bè online", "Không có bạn bè đang online"),
-        REQUESTS("Lời mời kết bạn", "Lọc lời mời theo tên", "lời mời", "Không có lời mời đang chờ"),
-        SEARCH("Tìm người dùng", "Tìm theo họ tên hoặc tên đăng nhập", "kết quả", "Nhập tên để tìm người dùng"),
-        BLOCKED("Đã chặn", "", "tài khoản", "Chưa chặn tài khoản nào");
+        ALL("Tất cả bạn bè", "Lọc bạn bè theo tên", "bạn bè", "Chưa có bạn bè",
+                "fth-users", "Lời mời đã chấp nhận sẽ hiển thị tại đây"),
+        ONLINE("Đang online", "Lọc bạn bè theo tên", "bạn bè online", "Không có bạn bè đang online",
+                "fth-activity", "Chỉ hiển thị bạn bè đang trực tuyến"),
+        REQUESTS("Lời mời kết bạn", "Lọc lời mời theo tên", "lời mời", "Không có lời mời đang chờ",
+                "fth-user-plus", "Các lời mời kết bạn mới sẽ xuất hiện tại đây"),
+        SEARCH("Tìm người dùng", "Tìm theo họ tên hoặc tên đăng nhập", "kết quả", "Nhập tên để tìm người dùng",
+                "fth-search", "Tìm kiếm theo họ tên đầy đủ hoặc @username"),
+        BLOCKED("Đã chặn", "", "tài khoản", "Chưa chặn tài khoản nào",
+                "fth-slash", "Các tài khoản bị chặn sẽ xuất hiện tại đây");
 
         private final String title;
         private final String prompt;
         private final String countUnit;
         private final String emptyText;
+        private final String emptyIcon;
+        private final String emptyHint;
 
-        Tab(String title, String prompt, String countUnit, String emptyText) {
+        Tab(String title, String prompt, String countUnit, String emptyText,
+                String emptyIcon, String emptyHint) {
             this.title = title;
             this.prompt = prompt;
             this.countUnit = countUnit;
             this.emptyText = emptyText;
+            this.emptyIcon = emptyIcon;
+            this.emptyHint = emptyHint;
         }
     }
 
@@ -74,13 +88,27 @@ public final class ContactsController implements ViewController {
         private final String status;
         private final boolean destructive;
 
-        ContactAction(String label, String question, String detail, Relationship next, String status, boolean destructive) {
+        ContactAction(String label, String question, String detail, Relationship next, String status,
+                boolean destructive) {
             this.label = label;
             this.question = question;
             this.detail = detail;
             this.next = next;
             this.status = status;
             this.destructive = destructive;
+        }
+    }
+
+    private enum ActionTone {
+        PRIMARY("contacts-btn-primary"),
+        SECONDARY("contacts-btn-secondary"),
+        QUIET("contacts-btn-quiet"),
+        DANGER_QUIET("contacts-btn-danger-quiet");
+
+        private final String styleClass;
+
+        ActionTone(String styleClass) {
+            this.styleClass = styleClass;
         }
     }
 
@@ -108,17 +136,19 @@ public final class ContactsController implements ViewController {
             .filter(user -> user.status() == MockUser.Status.ACTIVE)
             .toList();
     private final Map<String, Relationship> relationships = new HashMap<>(MockContacts.initialRelationships());
+    private final Map<Tab, Label> tabCountLabels = new EnumMap<>(Tab.class);
+    private final Map<Tab, ToggleButton> tabButtons = new EnumMap<>(Tab.class);
     private ViewNavigator navigator;
     private Dialog<ButtonType> confirmation;
     private Tab tab;
 
     @FXML
     private void initialize() {
-        contactsTabAll.setUserData(Tab.ALL);
-        contactsTabOnline.setUserData(Tab.ONLINE);
-        contactsTabRequests.setUserData(Tab.REQUESTS);
-        contactsTabSearch.setUserData(Tab.SEARCH);
-        contactsTabBlocked.setUserData(Tab.BLOCKED);
+        setupNavTab(contactsTabAll, Tab.ALL, true);
+        setupNavTab(contactsTabOnline, Tab.ONLINE, true);
+        setupNavTab(contactsTabRequests, Tab.REQUESTS, true);
+        setupNavTab(contactsTabSearch, Tab.SEARCH, false);
+        setupNavTab(contactsTabBlocked, Tab.BLOCKED, true);
 
         contactsSearchRow.managedProperty().bind(contactsSearchRow.visibleProperty());
         contactsStatus.managedProperty().bind(contactsStatus.visibleProperty());
@@ -135,6 +165,41 @@ public final class ContactsController implements ViewController {
             contactsScroll.setVvalue(0);
         });
         contactsTabs.selectToggle(contactsTabAll);
+    }
+
+    private void setupNavTab(ToggleButton toggle, Tab item, boolean showCount) {
+        toggle.setUserData(item);
+        tabButtons.put(item, toggle);
+
+        Node icon = toggle.getGraphic();
+        if (icon != null) {
+            icon.setMouseTransparent(true);
+        }
+        StackPane iconBox = icon != null ? new StackPane(icon) : new StackPane();
+        iconBox.getStyleClass().add("contacts-nav-icon-box");
+
+        Label label = new Label(toggle.getText());
+        label.getStyleClass().add("contacts-nav-label");
+        label.setMinWidth(0);
+        label.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(label, Priority.ALWAYS);
+
+        HBox content = new HBox(10, iconBox, label);
+        content.setAlignment(Pos.CENTER_LEFT);
+        if (showCount) {
+            Label count = new Label("0");
+            count.getStyleClass().add("contacts-nav-count");
+            count.setMinWidth(Region.USE_PREF_SIZE);
+            content.getChildren().add(count);
+            tabCountLabels.put(item, count);
+        }
+
+        content.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(0, toggle.getWidth() - 26), toggle.widthProperty()));
+
+        toggle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        toggle.setGraphic(content);
+        toggle.setAccessibleText(item.title);
     }
 
     @Override
@@ -172,6 +237,8 @@ public final class ContactsController implements ViewController {
     }
 
     private void render() {
+        updateTabCounts();
+
         String query = contactsFilter.getText().strip().toLowerCase(Locale.ROOT);
         List<MockUser> visible = users.stream()
                 .filter(user -> matchesTab(user, query))
@@ -179,16 +246,79 @@ public final class ContactsController implements ViewController {
                 .toList();
         contactsCount.setText(visible.size() + " " + tab.countUnit);
         if (visible.isEmpty()) {
-            Label empty = new Label(query.isEmpty() ? tab.emptyText : "Không có kết quả phù hợp");
-            empty.setId("contactsEmpty");
-            empty.setWrapText(true);
-            empty.getStyleClass().add("secondary-text");
-            VBox panel = new VBox(empty);
-            panel.setAlignment(Pos.CENTER);
-            panel.getStyleClass().add("contacts-empty");
-            contactsList.getChildren().setAll(panel);
+            renderEmptyState(query);
         } else {
-            contactsList.getChildren().setAll(visible.stream().map(this::row).toList());
+            VBox group = new VBox();
+            group.getStyleClass().add("contacts-group");
+            group.setMinWidth(0);
+            List<HBox> rows = visible.stream().map(this::row).toList();
+            rows.getFirst().getStyleClass().add("is-first");
+            rows.getLast().getStyleClass().add("is-last");
+            group.getChildren().setAll(rows);
+            contactsList.getChildren().setAll(group);
+        }
+    }
+
+    private void renderEmptyState(String query) {
+        FontIcon icon = new FontIcon(tab.emptyIcon);
+        icon.setIconSize(18);
+        icon.setMouseTransparent(true);
+        StackPane iconWrap = new StackPane(icon);
+        iconWrap.getStyleClass().add("contacts-empty-icon");
+
+        Label empty = new Label(query.isEmpty() ? tab.emptyText : "Không có kết quả phù hợp");
+        empty.setId("contactsEmpty");
+        empty.setWrapText(true);
+        empty.getStyleClass().add("contacts-empty-title");
+
+        Label hint = new Label(query.isEmpty() ? tab.emptyHint : "Thử nhập họ tên hoặc @username khác");
+        hint.setWrapText(true);
+        hint.getStyleClass().add("contacts-empty-hint");
+
+        VBox panel = new VBox(12, iconWrap, new VBox(4, empty, hint));
+        panel.setAlignment(Pos.CENTER);
+        ((VBox) panel.getChildren().get(1)).setAlignment(Pos.CENTER);
+        panel.getStyleClass().add("contacts-empty");
+        contactsList.getChildren().setAll(panel);
+    }
+
+    private void updateTabCounts() {
+        int allCount = 0;
+        int onlineCount = 0;
+        int requestsCount = 0;
+        int blockedCount = 0;
+        for (MockUser user : users) {
+            Relationship rel = relationship(user);
+            if (rel == Relationship.FRIEND) {
+                allCount++;
+                if (user.presence() == MockUser.Presence.ONLINE) {
+                    onlineCount++;
+                }
+            } else if (rel == Relationship.INCOMING) {
+                requestsCount++;
+            } else if (rel == Relationship.BLOCKED) {
+                blockedCount++;
+            }
+        }
+        setTabCount(Tab.ALL, allCount, false);
+        setTabCount(Tab.ONLINE, onlineCount, false);
+        setTabCount(Tab.REQUESTS, requestsCount, requestsCount > 0);
+        setTabCount(Tab.BLOCKED, blockedCount, false);
+    }
+
+    private void setTabCount(Tab target, int count, boolean pending) {
+        Label countLabel = tabCountLabels.get(target);
+        if (countLabel != null) {
+            countLabel.setText(String.valueOf(count));
+            if (pending && !countLabel.getStyleClass().contains("is-pending")) {
+                countLabel.getStyleClass().add("is-pending");
+            } else if (!pending) {
+                countLabel.getStyleClass().remove("is-pending");
+            }
+        }
+        ToggleButton toggle = tabButtons.get(target);
+        if (toggle != null) {
+            toggle.setAccessibleText(target.title + ", " + count);
         }
     }
 
@@ -215,17 +345,33 @@ public final class ContactsController implements ViewController {
     private HBox row(MockUser user) {
         Label avatar = new Label(ConversationAvatar.initials(user.fullName()));
         avatar.getStyleClass().add("contacts-avatar");
+
+        StackPane avatarWrap = new StackPane(avatar);
+        avatarWrap.getStyleClass().add("contacts-avatar-wrap");
+        if ((tab == Tab.ALL || tab == Tab.ONLINE) && user.presence() == MockUser.Presence.ONLINE) {
+            Region presenceDot = new Region();
+            presenceDot.getStyleClass().add("contacts-presence-badge");
+            StackPane.setAlignment(presenceDot, Pos.BOTTOM_RIGHT);
+            avatarWrap.getChildren().add(presenceDot);
+        }
+
         Label name = new Label(user.fullName());
         name.getStyleClass().add("contacts-name");
+
         Label username = new Label("@" + user.username());
-        username.getStyleClass().add("caption");
-        HBox metadata = new HBox(8, username, relationshipStatus(user));
+        username.getStyleClass().add("contacts-handle");
+
+        Label separator = new Label("·");
+        separator.getStyleClass().add("contacts-meta-sep");
+
+        HBox metadata = new HBox(6, username, separator, relationshipStatus(user));
         metadata.setAlignment(Pos.CENTER_LEFT);
-        VBox identity = new VBox(4, name, metadata);
+
+        VBox identity = new VBox(2, name, metadata);
         identity.setMinWidth(0);
         HBox.setHgrow(identity, Priority.ALWAYS);
 
-        HBox row = new HBox(12, avatar, identity, actions(user));
+        HBox row = new HBox(12, avatarWrap, identity, actions(user));
         row.setId("contact-" + user.id());
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("contacts-row");
@@ -234,7 +380,7 @@ public final class ContactsController implements ViewController {
 
     private Label relationshipStatus(MockUser user) {
         Label status = new Label(switch (tab) {
-            case ALL, ONLINE -> user.presence() == MockUser.Presence.ONLINE ? "Online" : "Offline";
+            case ALL, ONLINE -> user.presence() == MockUser.Presence.ONLINE ? "Đang hoạt động" : "Ngoại tuyến";
             case REQUESTS -> "Chờ phản hồi";
             case BLOCKED -> "Bạn đã chặn";
             case SEARCH -> switch (relationship(user)) {
@@ -244,15 +390,10 @@ public final class ContactsController implements ViewController {
                 default -> "Chưa kết bạn";
             };
         });
-        status.getStyleClass().add("caption");
-        if (tab == Tab.ALL || tab == Tab.ONLINE) {
-            Region dot = new Region();
-            dot.getStyleClass().add("contacts-presence");
-            if (user.presence() == MockUser.Presence.ONLINE) {
-                dot.getStyleClass().add("is-online");
-                status.getStyleClass().add("contacts-online");
-            }
-            status.setGraphic(dot);
+        if ((tab == Tab.ALL || tab == Tab.ONLINE) && user.presence() == MockUser.Presence.ONLINE) {
+            status.getStyleClass().add("contacts-online");
+        } else {
+            status.getStyleClass().add("contacts-meta");
         }
         return status;
     }
@@ -262,31 +403,41 @@ public final class ContactsController implements ViewController {
         actions.setMinWidth(Region.USE_PREF_SIZE);
         actions.setAlignment(Pos.CENTER_RIGHT);
         List<? extends Node> buttons = switch (tab) {
-            case ALL -> List.of(chat(user), confirmationAction(user, "unfriend", ContactAction.UNFRIEND),
-                    confirmationAction(user, "block", ContactAction.BLOCK));
-            case ONLINE -> List.of(chat(user), group(user));
+            case ALL -> List.of(
+                    chat(user),
+                    confirmationAction(user, "unfriend", ContactAction.UNFRIEND, ActionTone.QUIET),
+                    confirmationAction(user, "block", ContactAction.BLOCK, ActionTone.DANGER_QUIET));
+            case ONLINE -> List.of(
+                    chat(user),
+                    group(user));
             case REQUESTS -> List.of(
-                    button(user, "accept", "Đồng ý", true, () -> change(user, Relationship.FRIEND, "Đã chấp nhận lời mời từ")),
-                    button(user, "decline", "Từ chối", false, () -> change(user, Relationship.NONE, "Đã từ chối lời mời từ")));
+                    button(user, "accept", "Đồng ý", ActionTone.PRIMARY,
+                            () -> change(user, Relationship.FRIEND, "Đã chấp nhận lời mời từ")),
+                    button(user, "decline", "Từ chối", ActionTone.QUIET,
+                            () -> change(user, Relationship.NONE, "Đã từ chối lời mời từ")));
             case SEARCH -> switch (relationship(user)) {
                 case FRIEND -> List.of(chat(user), group(user));
-                case INCOMING -> List.of(chat(user), button(user, "view-request", "Xem lời mời", false, () -> {
-                    contactsTabs.selectToggle(contactsTabRequests);
-                    contactsFilter.setText(user.fullName());
-                    contactsFilter.requestFocus();
-                }));
+                case INCOMING -> List.of(
+                        chat(user),
+                        button(user, "view-request", "Xem lời mời", ActionTone.SECONDARY, () -> {
+                            contactsTabs.selectToggle(contactsTabRequests);
+                            contactsFilter.setText(user.fullName());
+                            contactsFilter.requestFocus();
+                        }));
                 case OUTGOING -> List.of(chat(user));
-                default -> List.of(chat(user), button(user, "invite", "Kết bạn", true,
-                        () -> change(user, Relationship.OUTGOING, "Đã gửi lời mời tới")));
+                default -> List.of(
+                        chat(user),
+                        button(user, "invite", "Kết bạn", ActionTone.PRIMARY,
+                                () -> change(user, Relationship.OUTGOING, "Đã gửi lời mời tới")));
             };
-            case BLOCKED -> List.of(confirmationAction(user, "unblock", ContactAction.UNBLOCK));
+            case BLOCKED -> List.of(confirmationAction(user, "unblock", ContactAction.UNBLOCK, ActionTone.SECONDARY));
         };
         actions.getChildren().setAll(buttons);
         return actions;
     }
 
     private Button chat(MockUser user) {
-        Button button = button(user, "chat", "Nhắn tin", tab != Tab.SEARCH || relationship(user) != Relationship.NONE,
+        Button button = button(user, "chat", "Nhắn tin", ActionTone.SECONDARY,
                 () -> navigator.navigate(UserViews.CONVERSATIONS, new UserViewInputs.DirectChat(user.id())));
         button.setTooltip(new Tooltip(CHAT_PREVIEW));
         button.setAccessibleHelp(CHAT_PREVIEW);
@@ -294,20 +445,18 @@ public final class ContactsController implements ViewController {
     }
 
     private Button group(MockUser user) {
-        Button button = button(user, "group", "Tạo nhóm", false,
+        Button button = button(user, "group", "Tạo nhóm", ActionTone.QUIET,
                 () -> navigator.showModal(UserViews.CREATE_GROUP, new UserViewInputs.CreateGroup(List.of(user.id()))));
         button.setTooltip(new Tooltip(GROUP_PREVIEW));
         button.setAccessibleHelp(GROUP_PREVIEW);
         return button;
     }
 
-    private static Button button(MockUser user, String action, String label, boolean primary, Runnable handler) {
+    private static Button button(MockUser user, String action, String label, ActionTone tone, Runnable handler) {
         Button button = new Button(label);
         button.setId("contact-" + action + "-" + user.id());
         button.setAccessibleText(label + " · " + user.fullName());
-        if (primary) {
-            button.getStyleClass().add("accent");
-        }
+        button.getStyleClass().addAll("contacts-btn", tone.styleClass);
         button.setOnAction(event -> handler.run());
         return button;
     }
@@ -332,8 +481,8 @@ public final class ContactsController implements ViewController {
         }
     }
 
-    private Button confirmationAction(MockUser user, String id, ContactAction action) {
-        return button(user, id, action.label, false, () -> confirm(user, action));
+    private Button confirmationAction(MockUser user, String id, ContactAction action, ActionTone tone) {
+        return button(user, id, action.label, tone, () -> confirm(user, action));
     }
 
     private void confirm(MockUser user, ContactAction action) {
@@ -346,20 +495,24 @@ public final class ContactsController implements ViewController {
         var pane = dialog.getDialogPane();
         pane.setId("contactsConfirmation");
         pane.getStyleClass().add("contacts-confirmation");
-        pane.setPrefWidth(384);
+        pane.setPrefWidth(400);
+
         Label title = new Label(question);
         title.setId("contactsConfirmationTitle");
-        title.getStyleClass().add("section-title");
+        title.getStyleClass().add("contacts-confirmation-title");
         title.setWrapText(true);
         Label description = new Label(action.detail);
-        description.getStyleClass().add("secondary-text");
+        description.getStyleClass().add("contacts-confirmation-detail");
         description.setWrapText(true);
         pane.setContent(new VBox(8, title, description));
+
         ButtonType confirm = new ButtonType(action.label, ButtonBar.ButtonData.OK_DONE);
         ButtonType cancel = new ButtonType("Quay lại", ButtonBar.ButtonData.CANCEL_CLOSE);
         pane.getButtonTypes().setAll(cancel, confirm);
         Button confirmButton = (Button) pane.lookupButton(confirm);
         Button cancelButton = (Button) pane.lookupButton(cancel);
+        ButtonBar.setButtonUniformSize(confirmButton, false);
+        ButtonBar.setButtonUniformSize(cancelButton, false);
         confirmButton.setId("confirm-contact-action");
         confirmButton.setDefaultButton(false);
         if (action.destructive) {
