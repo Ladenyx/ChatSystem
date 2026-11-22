@@ -81,7 +81,7 @@ public final class UserShellController {
             settingsPopup = new Popup();
             settingsPopup.setAutoHide(true);
             settingsPopup.setHideOnEscape(true);
-            settingsPopup.setAnchorLocation(PopupWindow.AnchorLocation.WINDOW_BOTTOM_LEFT);
+            settingsPopup.setAnchorLocation(PopupWindow.AnchorLocation.WINDOW_TOP_LEFT);
             settingsPopup.getContent().add(settingsContent);
         }
         if (settingsPopup.isShowing()) {
@@ -89,7 +89,12 @@ public final class UserShellController {
             return;
         }
         var anchor = settingsButton.localToScreen(settingsButton.getBoundsInLocal());
-        settingsPopup.show(settingsButton, anchor.getMaxX() + 8, anchor.getMaxY());
+        settingsContent.applyCss();
+        settingsContent.layout();
+        double contentHeight = settingsContent.prefHeight(-1);
+        double targetX = anchor.getMaxX() + 8;
+        double targetY = anchor.getMaxY() - contentHeight;
+        settingsPopup.show(settingsButton, targetX, targetY);
         darkModeSwitch.requestFocus();
     }
 
