@@ -2,6 +2,7 @@ package com.chatsystem.user.messaging;
 
 import com.chatsystem.desktop.mock.MockData;
 import com.chatsystem.desktop.mock.model.MockConversation;
+import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.mock.model.MockUser;
 import java.time.Duration;
@@ -44,6 +45,42 @@ public interface ConversationCatalog {
 
     default void deleteForSelf(Collection<String> messageIds) {
         throw new UnsupportedOperationException("Delete for self is not supported");
+    }
+
+    default List<MockGroup.Member> groupMembers(String conversationId) {
+        return List.of();
+    }
+
+    default boolean isGroupAdmin(String conversationId, String userId) {
+        if (conversationId == null || userId == null) {
+            return false;
+        }
+        return groupMembers(conversationId).stream()
+                .anyMatch(member -> userId.equals(member.userId()) && member.role() == MockGroup.Role.ADMIN);
+    }
+
+    default boolean isCurrentUserGroupAdmin(String conversationId) {
+        return isGroupAdmin(conversationId, currentUserId());
+    }
+
+    default boolean canManageGroupMember(String conversationId, String targetUserId) {
+        if (conversationId == null || targetUserId == null || currentUserId().equals(targetUserId)) {
+            return false;
+        }
+        return isCurrentUserGroupAdmin(conversationId)
+                && groupMembers(conversationId).stream().anyMatch(member -> targetUserId.equals(member.userId()));
+    }
+
+    default void setGroupAdminRole(String conversationId, String targetUserId, boolean admin) {
+        throw new UnsupportedOperationException("Group admin management is not supported");
+    }
+
+    default void removeGroupMember(String conversationId, String targetUserId) {
+        throw new UnsupportedOperationException("Removing group members is not supported");
+    }
+
+    default void transferGroupAdmin(String conversationId, String successorUserId) {
+        throw new UnsupportedOperationException("Transferring group admin is not supported");
     }
 
     default void addChangeListener(Runnable listener) {

@@ -458,6 +458,135 @@ class UserApplicationTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void groupMemberAdminActionsAndRemovalFlowInBothThemes() throws Exception {
+        var stageRef = new AtomicReference<Stage>();
+        var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
+        try {
+            onFx(() -> {
+                Stage stage = new Stage();
+                var navigator = UserApplication.createNavigator();
+                stageRef.set(stage);
+                navRef.set(navigator);
+                stage.setX(0);
+                stage.setY(0);
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+
+                assertEquals("Thành viên (8)", ((Label) root.lookup("#groupMembersHeading")).getText());
+                assertEquals("Admin", ((Label) root.lookup("#member-role-usr-01")).getText());
+                assertEquals("Admin", ((Label) root.lookup("#member-role-usr-02")).getText());
+                assertNull(root.lookup("#member-role-usr-03"));
+                assertNull(root.lookup("#member-menu-usr-01"));
+                assertNotNull(root.lookup("#member-menu-usr-02"));
+                assertNotNull(root.lookup("#member-menu-usr-03"));
+
+                // U-22: Grant Admin to regular member usr-03
+                ((Button) root.lookup("#member-menu-usr-03")).fire();
+                Window grantPopup = popupWindowWith("#memberActionMenu");
+                var grantMenu = grantPopup.getScene().getRoot();
+                assertNotNull(grantMenu.lookup("#memberActionGrantAdmin"));
+                assertNull(grantMenu.lookup("#memberActionRevokeAdmin"));
+                assertNotNull(grantMenu.lookup("#memberActionRemove"));
+                captureWithPopover(stage, grantPopup, "drawer-group-member-menu-light");
+
+                ((Button) grantMenu.lookup("#memberActionGrantAdmin")).fire();
+                Window grantDialog = dialogWindowWith("#memberRoleConfirmDialog");
+                ((Button) grantDialog.getScene().getRoot().lookup("#memberRoleConfirmSubmit")).fire();
+                root.applyCss();
+                root.layout();
+                assertEquals("Admin", ((Label) root.lookup("#member-role-usr-03")).getText());
+
+                // U-22: Revoke Admin from another admin usr-02
+                ((Button) root.lookup("#member-menu-usr-02")).fire();
+                Window revokePopup = popupWindowWith("#memberActionMenu");
+                var revokeMenu = revokePopup.getScene().getRoot();
+                assertNotNull(revokeMenu.lookup("#memberActionRevokeAdmin"));
+                assertNull(revokeMenu.lookup("#memberActionGrantAdmin"));
+                ((Button) revokeMenu.lookup("#memberActionRevokeAdmin")).fire();
+                Window revokeDialog = dialogWindowWith("#memberRoleConfirmDialog");
+                ((Button) revokeDialog.getScene().getRoot().lookup("#memberRoleConfirmSubmit")).fire();
+                root.applyCss();
+                root.layout();
+                assertNull(root.lookup("#member-role-usr-02"));
+
+                // U-23: Remove member usr-08 with confirmation
+                ((Button) root.lookup("#member-menu-usr-08")).fire();
+                Window removePopup = popupWindowWith("#memberActionMenu");
+                ((Button) removePopup.getScene().getRoot().lookup("#memberActionRemove")).fire();
+                Window removeDialog = dialogWindowWith("#memberRemoveConfirmDialog");
+                capture(removeDialog, "drawer-group-remove-confirm-light");
+                ((Button) removeDialog.getScene().getRoot().lookup("#memberRemoveConfirmSubmit")).fire();
+                root.applyCss();
+                root.layout();
+                assertNull(root.lookup("#member-row-usr-08"));
+                assertEquals(7, root.lookupAll(".chat-info-member").size());
+                assertEquals("Thành viên (7)", ((Label) root.lookup("#groupMembersHeading")).getText());
+
+                // Dark theme member menu snapshot
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#member-menu-usr-03")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                var root = navRef.get().getRoot();
+                Window darkMenuPopup = popupWindowWith("#memberActionMenu");
+                captureWithPopover(stage, darkMenuPopup, "drawer-group-member-menu-dark");
+                darkMenuPopup.hide();
+
+                // U-DLG-05 handoff commits role change and hides admin controls for demoted user
+                ((Button) root.lookup("#resignConversationAdmin")).fire();
+                Window successorModal = modalWindow(stage);
+                var successorRoot = successorModal.getScene().getRoot();
+                ((RadioButton) successorRoot.lookup("#group-candidate-usr-04")).fire();
+                ((Button) successorRoot.lookup("#groupFormSubmit")).fire();
+                return null;
+            });
+
+            onFx(() -> {
+                Stage stage = stageRef.get();
+                var root = navRef.get().getRoot();
+                root.applyCss();
+                root.layout();
+                assertNull(root.lookup("#member-role-usr-01"));
+                assertEquals("Admin", ((Label) root.lookup("#member-role-usr-04")).getText());
+                assertNull(root.lookup("#member-menu-usr-04"));
+                assertNull(root.lookup("#renameConversationGroup"));
+                assertNull(root.lookup("#resignConversationAdmin"));
+                assertNotNull(root.lookup("#addConversationMember"));
+                capture(stage, "drawer-group-non-admin-dark");
+                return null;
+            });
+        } finally {
+            onFx(() -> {
+                if (navRef.get() != null) {
+                    navRef.get().close();
+                }
+                if (stageRef.get() != null) {
+                    stageRef.get().close();
+                }
+                return null;
+            });
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void aiAssistantSuggestsRepliesAndRewritesDraftInBothThemes() throws Exception {
         var stageRef = new AtomicReference<Stage>();
         var navRef = new AtomicReference<com.chatsystem.desktop.navigation.ViewNavigator>();
@@ -1205,6 +1334,20 @@ class UserApplicationTest {
         return Window.getWindows().stream()
                 .filter(window -> window != owner && window.isShowing()
                         && window.getScene().getRoot().lookup("#groupFormSubmit") != null)
+                .findFirst().orElseThrow();
+    }
+
+    private static Window popupWindowWith(String selector) {
+        return Window.getWindows().stream()
+                .filter(window -> window.isShowing() && window.getScene() != null
+                        && window.getScene().getRoot().lookup(selector) != null)
+                .findFirst().orElseThrow();
+    }
+
+    private static Window dialogWindowWith(String selector) {
+        return Window.getWindows().stream()
+                .filter(window -> window.isShowing() && window.getScene() != null
+                        && window.getScene().getRoot().lookup(selector) != null)
                 .findFirst().orElseThrow();
     }
 

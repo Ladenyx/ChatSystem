@@ -599,24 +599,49 @@
 
 .chat-info-member {
     -fx-padding: 8;
-    -fx-background-color: -chat-surface-subtle;
+    -fx-background-color: transparent;
     -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.chat-info-member:hover,
+.chat-info-member:menu-open {
+    -fx-background-color: -chat-hover;
 }
 
 .label.chat-info-member-avatar {
-    -fx-min-width: 28;
-    -fx-max-width: 28;
-    -fx-min-height: 28;
-    -fx-max-height: 28;
+    -fx-min-width: 32;
+    -fx-max-width: 32;
+    -fx-min-height: 32;
+    -fx-max-height: 32;
     -fx-alignment: center;
-    -fx-background-color: -chat-surface;
+    -fx-background-color: -chat-surface-subtle;
     -fx-border-color: -chat-rule;
     -fx-border-width: 1;
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
-    -fx-font-size: 11px;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
     -fx-text-fill: -chat-text;
+}
+
+.chat-info-member-online {
+    -fx-min-width: 10;
+    -fx-max-width: 10;
+    -fx-min-height: 10;
+    -fx-max-height: 10;
+    -fx-background-color: -chat-online;
+    -fx-background-radius: 5;
+    -fx-border-color: -chat-surface;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.chat-info-member:hover .chat-info-member-online,
+.chat-info-member:menu-open .chat-info-member-online {
+    -fx-border-color: -chat-hover;
 }
 
 .label.chat-info-member-name {
@@ -625,9 +650,54 @@
     -fx-text-fill: -chat-text;
 }
 
+.label.chat-info-role-badge {
+    -fx-padding: 2 8;
+    -fx-background-color: -chat-brand-subtle;
+    -fx-background-radius: 4;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -chat-brand-text;
+}
+
 .label.chat-info-member-handle {
     -fx-font-size: 11px;
     -fx-text-fill: -chat-muted;
+}
+
+.chat-info-member-more {
+    -fx-min-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-max-height: 28;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.chat-info-member-more .ikonli-font-icon {
+    -fx-icon-color: -chat-muted;
+}
+
+.chat-info-member-more:hover {
+    -fx-background-color: -chat-border;
+}
+
+.chat-info-member:menu-open .chat-info-member-more {
+    -fx-background-color: transparent;
+}
+
+.chat-info-member-more:hover .ikonli-font-icon,
+.chat-info-member:menu-open .chat-info-member-more .ikonli-font-icon {
+    -fx-icon-color: -chat-text;
+}
+
+.chat-info-member-more:focused {
+    -fx-border-color: -chat-focus;
 }
 
 /* --- Chat History & Composer --- */

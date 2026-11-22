@@ -1,5 +1,6 @@
 package com.chatsystem.user.controller.group;
 
+import com.chatsystem.desktop.mock.model.MockGroup;
 import com.chatsystem.desktop.mock.model.MockUser;
 import com.chatsystem.desktop.navigation.DialogViewController;
 import com.chatsystem.desktop.navigation.View;
@@ -14,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -24,6 +26,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -57,6 +60,7 @@ public final class GroupFormController implements DialogViewController {
     private final Map<String, MockUser> usersById = new LinkedHashMap<>();
     private List<MockUser> allCandidates = List.of();
     private Mode mode;
+    private String conversationId = "";
     private Button submitButton;
 
     @FXML
@@ -73,6 +77,7 @@ public final class GroupFormController implements DialogViewController {
         var settings = input instanceof Input context ? context
                 : new Input(view.equals(UserViews.ASSIGN_SUCCESSOR_ADMIN) ? Mode.SUCCESSOR : Mode.CREATE, "");
         mode = settings.mode();
+        conversationId = settings.conversationId() == null ? "" : settings.conversationId();
         heading.setText(switch (mode) {
             case CREATE -> "Tạo nhóm mới";
             case ADD -> "Thêm thành viên";
@@ -116,10 +121,16 @@ public final class GroupFormController implements DialogViewController {
         description.setVisible(!description.getText().isBlank());
         footnote.setVisible(!footnote.getText().isBlank());
 
-        List<String> members = conversation.map(chat -> chat.participantIds()).orElse(List.of());
+        List<String> members = mode == Mode.SUCCESSOR && !catalog.groupMembers(conversationId).isEmpty()
+                ? catalog.groupMembers(conversationId).stream().map(MockGroup.Member::userId).toList()
+                : conversation.map(chat -> chat.participantIds()).orElse(List.of());
         List<String> available = mode == Mode.SUCCESSOR ? members : catalog.conversations().stream()
                 .flatMap(chat -> chat.participantIds().stream()).distinct().filter(id -> !members.contains(id)).toList();
-        allCandidates = available.stream().filter(id -> !catalog.currentUserId().equals(id)).map(catalog::user).toList();
+        allCandidates = available.stream()
+                .filter(id -> !catalog.currentUserId().equals(id))
+                .map(catalog::user)
+                .filter(user -> mode != Mode.SUCCESSOR || user.status() == MockUser.Status.ACTIVE)
+                .toList();
         for (MockUser user : allCandidates) {
             usersById.put(user.id(), user);
         }
@@ -153,12 +164,23 @@ public final class GroupFormController implements DialogViewController {
 
         Label name = new Label(user.fullName());
         name.getStyleClass().add("chat-result-title");
+        name.setTextOverrun(OverrunStyle.ELLIPSIS);
+        name.setMinWidth(0);
+
+        HBox nameRow = new HBox(8, name);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
+        if (mode == Mode.SUCCESSOR && UserViews.CONVERSATIONS_DATA.isGroupAdmin(conversationId, user.id())) {
+            Label roleBadge = new Label("Admin");
+            roleBadge.getStyleClass().add("chat-info-role-badge");
+            roleBadge.setMinWidth(Region.USE_PREF_SIZE);
+            nameRow.getChildren().add(roleBadge);
+        }
 
         String presence = user.presence() == MockUser.Presence.ONLINE ? "Đang hoạt động" : "Ngoại tuyến";
         Label meta = new Label("@" + user.username() + " · " + presence);
         meta.getStyleClass().add("chat-caption");
 
-        VBox text = new VBox(2, name, meta);
+        VBox text = new VBox(2, nameRow, meta);
         text.setMinWidth(0);
         HBox.setHgrow(text, Priority.ALWAYS);
 
@@ -266,6 +288,12 @@ public final class GroupFormController implements DialogViewController {
         submitButton.setId("groupFormSubmit");
         submitButton.getStyleClass().add("chat-primary");
         ButtonBar.setButtonUniformSize(submitButton, false);
+        submitButton.addEventFilter(ActionEvent.ACTION, event -> {
+            if (mode == Mode.SUCCESSOR && isValid()) {
+                String successorId = selectedUserIds.iterator().next();
+                UserViews.CONVERSATIONS_DATA.transferGroupAdmin(conversationId, successorId);
+            }
+        });
         updateFormState();
     }
 }
