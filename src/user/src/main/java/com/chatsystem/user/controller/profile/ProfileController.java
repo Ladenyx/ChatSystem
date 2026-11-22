@@ -4,13 +4,16 @@ import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
+import com.chatsystem.user.control.ConversationAvatar;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -33,6 +36,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 public final class ProfileController implements ViewController {
     private static final String PROFILE_DRAFT = ProfileController.class.getName() + ".draft";
     private static final String CURRENT_EMAIL = ProfileController.class.getName() + ".email";
+    private static final PseudoClass RULE_MET = PseudoClass.getPseudoClass("met");
     private record Draft(String name, String address, String date, String gender) { }
 
     private static final String EMAIL_ATOM = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+";
@@ -41,6 +45,8 @@ public final class ProfileController implements ViewController {
             + DOMAIN_LABEL + "(?:\\." + DOMAIN_LABEL + ")+";
 
     @FXML private TextField username;
+    @FXML private Label accountName;
+    @FXML private Label accountInitials;
     @FXML private TextField fullName;
     @FXML private TextField address;
     @FXML private TextField email;
@@ -50,6 +56,7 @@ public final class ProfileController implements ViewController {
     @FXML private RadioButton genderOther;
     private final ToggleGroup gender = new ToggleGroup();
 
+    @FXML private Button changeEmailButton;
     @FXML private VBox emailChangeForm;
     @FXML private TextField newEmail;
     @FXML private PasswordField emailPassword;
@@ -93,20 +100,35 @@ public final class ProfileController implements ViewController {
 
     @FXML
     private void initialize() {
-        username.setText("demo");
-        fullName.setText("Minh An");
-        email.setText("demo@example.test");
+        var catalog = UserViews.CONVERSATIONS_DATA;
+        var account = catalog.user(catalog.currentUserId());
+        username.setText(account.username());
+        fullName.setText(account.fullName());
+        email.setText(account.email());
+        showIdentity(account.fullName());
         genderMale.setToggleGroup(gender);
         genderFemale.setToggleGroup(gender);
         genderOther.setToggleGroup(gender);
 
-        initKeyDigits(keyDigits, keyFields, "profileKey");
-        initKeyDigits(keyConfirmDigits, keyConfirmation, "profileKeyConfirm");
+        for (Label feedback : List.of(nameError, addressError, dateError, emailError, emailPasswordError,
+                currentPasswordError, newPasswordError, confirmPasswordError, keyError, profileNotice, passwordNotice)) {
+            feedback.visibleProperty().bind(feedback.textProperty().isNotEmpty());
+            feedback.managedProperty().bind(feedback.visibleProperty());
+        }
+
+        initKeyDigits(keyDigits, keyFields, "profileKey", "Mã khôi phục");
+        initKeyDigits(keyConfirmDigits, keyConfirmation, "profileKeyConfirm", "Mã khôi phục nhập lại");
         updateKeySubmit();
 
         bridge(currentPassword, currentPasswordVisible, showCurrentPassword);
         bridge(newPassword, newPasswordVisible, showNewPassword);
         bridge(confirmPassword, confirmPasswordVisible, showConfirmPassword);
+        for (Label rule : List.of(passwordLength, passwordUpper, passwordLower, passwordDigit, passwordSymbol)) {
+            FontIcon icon = new FontIcon("fth-minus");
+            icon.setIconSize(16);
+            icon.setMouseTransparent(true);
+            rule.setGraphic(icon);
+        }
         updatePasswordRules();
 
         newPassword.textProperty().addListener((observable, old, value) -> {
@@ -116,6 +138,11 @@ public final class ProfileController implements ViewController {
         confirmPassword.textProperty().addListener((observable, old, value) -> updateConfirmation());
 
         setupDatePicker();
+    }
+
+    private void showIdentity(String name) {
+        accountName.setText(name);
+        accountInitials.setText(ConversationAvatar.initials(name));
     }
 
     private void setupDatePicker() {
@@ -160,24 +187,25 @@ public final class ProfileController implements ViewController {
     @FXML
     private void saveProfile() {
         if (validateProfile()) {
-            profileNotice.setText("Bản xem trước: Thay đổi hồ sơ mẫu thành công.");
+            showIdentity(fullName.getText().trim());
+            profileNotice.setText("Đã lưu hồ sơ trong bản xem trước");
         }
     }
 
     private boolean validateProfile() {
         String name = fullName.getText().trim();
         String addr = address.getText().trim();
-        nameError.setText(name.isEmpty() ? "Vui lòng nhập họ tên."
-                : name.codePointCount(0, name.length()) > 100 ? "Họ tên không được vượt quá 100 ký tự." : "");
-        addressError.setText(addr.codePointCount(0, addr.length()) > 255 ? "Địa chỉ không được vượt quá 255 ký tự." : "");
+        nameError.setText(name.isEmpty() ? "Nhập họ tên"
+                : name.codePointCount(0, name.length()) > 100 ? "Họ tên tối đa 100 ký tự" : "");
+        addressError.setText(addr.codePointCount(0, addr.length()) > 255 ? "Địa chỉ tối đa 255 ký tự" : "");
         try {
             String raw = birthDate.getEditor().getText().trim();
             LocalDate date = raw.isEmpty() ? null : LocalDate.parse(raw,
                     DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT));
             dateError.setText(date != null && date.isAfter(LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")))
-                    ? "Ngày sinh không được ở tương lai." : "");
+                    ? "Ngày sinh phải là hôm nay hoặc trước đó" : "");
         } catch (Exception ex) {
-            dateError.setText("Ngày sinh không hợp lệ (DD/MM/YYYY).");
+            dateError.setText("Nhập ngày sinh theo dạng dd/mm/yyyy");
         }
         return nameError.getText().isEmpty() && addressError.getText().isEmpty() && dateError.getText().isEmpty();
     }
@@ -192,6 +220,7 @@ public final class ProfileController implements ViewController {
         emailChangeForm.setManaged(true);
         emailChangeForm.setVisible(true);
         profileNotice.setText("");
+        newEmail.requestFocus();
     }
 
     @FXML
@@ -202,6 +231,7 @@ public final class ProfileController implements ViewController {
         emailPasswordError.setText("");
         emailChangeForm.setVisible(false);
         emailChangeForm.setManaged(false);
+        changeEmailButton.requestFocus();
     }
 
     @FXML
@@ -209,22 +239,22 @@ public final class ProfileController implements ViewController {
         String proposed = newEmail.getText().trim();
         String current = emailPassword.getText();
         validateNewEmail();
-        emailPasswordError.setText(current.isEmpty() ? "Vui lòng nhập mật khẩu hiện tại." : "");
+        emailPasswordError.setText(current.isEmpty() ? "Nhập mật khẩu hiện tại" : "");
         if (!emailError.getText().isEmpty() || !emailPasswordError.getText().isEmpty()) {
             return;
         }
         email.setText(proposed);
         navigator.getRoot().getProperties().put(CURRENT_EMAIL, proposed);
         cancelEmailChange();
-        profileNotice.setText("Đã cập nhật email mẫu thành công: " + proposed);
+        profileNotice.setText("Đã cập nhật email trong bản xem trước");
     }
 
     private void validateNewEmail() {
         String proposed = newEmail.getText().trim();
-        emailError.setText(proposed.isEmpty() ? "Vui lòng nhập email."
-                : proposed.codePointCount(0, proposed.length()) > 254 ? "Email không được vượt quá 254 ký tự."
-                : !proposed.matches(EMAIL_PATTERN) ? "Vui lòng nhập email hợp lệ."
-                : proposed.equalsIgnoreCase(email.getText()) ? "Email mới phải khác email hiện tại." : "");
+        emailError.setText(proposed.isEmpty() ? "Nhập email mới"
+                : proposed.codePointCount(0, proposed.length()) > 254 ? "Email tối đa 254 ký tự"
+                : !proposed.matches(EMAIL_PATTERN) ? "Nhập email hợp lệ"
+                : proposed.equalsIgnoreCase(email.getText()) ? "Dùng email khác với email hiện tại" : "");
     }
 
     private String selectedGender() {
@@ -247,7 +277,7 @@ public final class ProfileController implements ViewController {
         if (!validatePassword()) {
             return;
         }
-        passwordNotice.setText("Đổi mật khẩu thành công (bản xem trước ngoại tuyến).");
+        passwordNotice.setText("Đã đổi mật khẩu trong bản xem trước");
         currentPassword.clear();
         newPassword.clear();
         confirmPassword.clear();
@@ -257,16 +287,16 @@ public final class ProfileController implements ViewController {
         String curr = currentPassword.getText();
         String next = newPassword.getText();
         String confirm = confirmPassword.getText();
-        currentPasswordError.setText(curr.isEmpty() ? "Vui lòng nhập mật khẩu hiện tại." : "");
+        currentPasswordError.setText(curr.isEmpty() ? "Nhập mật khẩu hiện tại" : "");
         boolean valid = next.length() >= 8 && next.length() <= 128
                 && next.chars().anyMatch(c -> c >= 'A' && c <= 'Z')
                 && next.chars().anyMatch(c -> c >= 'a' && c <= 'z')
                 && next.chars().anyMatch(c -> c >= '0' && c <= '9')
                 && next.chars().anyMatch(c -> c >= '!' && c <= '~' && !Character.isLetterOrDigit(c));
-        newPasswordError.setText(next.isEmpty() ? "Vui lòng nhập mật khẩu mới."
-                : valid ? "" : "Mật khẩu cần 8–128 ký tự, chữ hoa, chữ thường, số và ký tự đặc biệt.");
-        confirmPasswordError.setText(confirm.isEmpty() ? "Vui lòng nhập lại mật khẩu mới."
-                : !next.equals(confirm) ? "Mật khẩu nhập lại chưa khớp." : "");
+        newPasswordError.setText(next.isEmpty() ? "Nhập mật khẩu mới"
+                : valid ? "" : "Dùng 8–128 ký tự với đủ chữ hoa, chữ thường, số và ký tự đặc biệt");
+        confirmPasswordError.setText(confirm.isEmpty() ? "Nhập lại mật khẩu mới"
+                : !next.equals(confirm) ? "Mật khẩu nhập lại chưa khớp" : "");
         return currentPasswordError.getText().isEmpty() && newPasswordError.getText().isEmpty()
                 && confirmPasswordError.getText().isEmpty();
     }
@@ -296,10 +326,11 @@ public final class ProfileController implements ViewController {
         }
     }
 
-    private void initKeyDigits(HBox row, List<PasswordField> fields, String prefix) {
+    private void initKeyDigits(HBox row, List<PasswordField> fields, String prefix, String fieldName) {
         for (int i = 0; i < 6; i++) {
             PasswordField field = new PasswordField();
             field.setId(prefix + (i + 1));
+            field.setAccessibleText(fieldName + ", chữ số " + (i + 1));
             field.getStyleClass().add("profile-key-digit");
             field.setTextFormatter(new TextFormatter<>(change -> {
                 String text = change.getText();
@@ -341,7 +372,7 @@ public final class ProfileController implements ViewController {
             return;
         }
         if (!keyText(keyFields).equals(keyText(keyConfirmation))) {
-            keyError.setText("Mã xác nhận chưa khớp.");
+            keyError.setText("Mã nhập lại chưa khớp");
             keyConfirmation.getFirst().requestFocus();
             return;
         }
@@ -352,7 +383,7 @@ public final class ProfileController implements ViewController {
         keyStatus.setManaged(true);
         keyStatus.setVisible(true);
         if (deviceStatusLabel != null) {
-            deviceStatusLabel.setText("Đã thiết lập mã E2EE");
+            deviceStatusLabel.setText("Đã thiết lập mã khôi phục");
         }
     }
 
@@ -393,24 +424,29 @@ public final class ProfileController implements ViewController {
     private void updateConfirmation() {
         String confirm = confirmPassword.getText();
         confirmPasswordError.setText(!confirm.isEmpty() && !confirm.equals(newPassword.getText())
-                ? "Mật khẩu nhập lại chưa khớp." : "");
+                ? "Mật khẩu nhập lại chưa khớp" : "");
     }
 
     private void updatePasswordRules() {
         String value = newPassword.getText() == null ? "" : newPassword.getText();
-        passwordLength.setText(mark(value.length() >= 8 && value.length() <= 128, "8–128 ký tự"));
-        passwordUpper.setText(mark(value.chars().anyMatch(c -> c >= 'A' && c <= 'Z'), "Có chữ hoa"));
-        passwordLower.setText(mark(value.chars().anyMatch(c -> c >= 'a' && c <= 'z'), "Có chữ thường"));
-        passwordDigit.setText(mark(value.chars().anyMatch(c -> c >= '0' && c <= '9'), "Có chữ số"));
-        passwordSymbol.setText(mark(value.chars().anyMatch(c -> c >= '!' && c <= '~'
-                && !Character.isLetterOrDigit(c)), "Có ký tự đặc biệt"));
+        showRule(passwordLength, value.length() >= 8 && value.length() <= 128, "8–128 ký tự");
+        showRule(passwordUpper, value.chars().anyMatch(c -> c >= 'A' && c <= 'Z'), "Chữ hoa");
+        showRule(passwordLower, value.chars().anyMatch(c -> c >= 'a' && c <= 'z'), "Chữ thường");
+        showRule(passwordDigit, value.chars().anyMatch(c -> c >= '0' && c <= '9'), "Chữ số");
+        showRule(passwordSymbol, value.chars().anyMatch(c -> c >= '!' && c <= '~'
+                && !Character.isLetterOrDigit(c)), "Ký tự đặc biệt");
     }
 
-    private static String mark(boolean matches, String text) {
-        return (matches ? "✓ " : "○ ") + text;
+    private static void showRule(Label label, boolean matches, String text) {
+        label.setText(text);
+        label.setAccessibleText(text + (matches ? ", đã đạt" : ", chưa đạt"));
+        ((FontIcon) label.getGraphic()).setIconLiteral(matches ? "fth-check" : "fth-minus");
+        label.pseudoClassStateChanged(RULE_MET, matches);
     }
 
     private static void bridge(PasswordField masked, TextField visible, Button button) {
+        FontIcon icon = (FontIcon) button.getGraphic();
+        String fieldName = masked.getAccessibleText().toLowerCase(Locale.ROOT);
         visible.textProperty().bindBidirectional(masked.textProperty());
         button.setOnAction(event -> {
             boolean reveal = !visible.isVisible();
@@ -422,10 +458,8 @@ public final class ProfileController implements ViewController {
             masked.setVisible(!reveal);
             masked.setManaged(!reveal);
             button.setText(reveal ? "Ẩn" : "Hiện");
-            button.setAccessibleText(reveal ? "Ẩn mật khẩu" : "Hiện mật khẩu");
-            FontIcon icon = new FontIcon(reveal ? "fth-eye" : "fth-eye-off");
-            icon.setIconSize(16);
-            button.setGraphic(icon);
+            button.setAccessibleText((reveal ? "Ẩn " : "Hiện ") + fieldName);
+            icon.setIconLiteral(reveal ? "fth-eye" : "fth-eye-off");
             TextField next = reveal ? visible : masked;
             next.requestFocus();
             next.selectRange(anchor, caret);
