@@ -3,6 +3,7 @@ package com.chatsystem.user.navigation;
 import com.chatsystem.desktop.navigation.ViewInput;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class UserViewInputs {
     private UserViewInputs() {
@@ -30,6 +31,13 @@ public final class UserViewInputs {
     public record Conversation(String conversationId) implements ViewInput {
         public Conversation {
             Objects.requireNonNull(conversationId, "conversationId");
+        }
+    }
+
+    public record MessageSearch(String conversationId, Consumer<String> revealMessage) implements ViewInput {
+        public MessageSearch {
+            Objects.requireNonNull(conversationId, "conversationId");
+            Objects.requireNonNull(revealMessage, "revealMessage");
         }
     }
 

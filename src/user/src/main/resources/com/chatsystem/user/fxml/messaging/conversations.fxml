@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
@@ -21,22 +22,22 @@
             <VBox spacing="12" styleClass="chat-sidebar-top">
                 <HBox alignment="CENTER_LEFT" spacing="8" styleClass="chat-sidebar-header">
                     <Label text="Đoạn chat" styleClass="chat-heading" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <Button id="createGroup" text="Nhóm mới" onAction="#createGroup" accessibleText="Tạo nhóm mới"
-                            styleClass="chat-action-btn">
+                    <Button fx:id="createGroupButton" id="createGroup" text="Nhóm mới" onAction="#createGroup"
+                            accessibleText="Tạo nhóm mới" styleClass="chat-action-btn">
                         <graphic><FontIcon iconLiteral="fth-plus" iconSize="14"/></graphic>
                         <tooltip><Tooltip text="Tạo nhóm mới"/></tooltip>
                     </Button>
                 </HBox>
                 <VBox spacing="8">
                     <StackPane alignment="CENTER_LEFT" styleClass="chat-search">
-                        <TextField fx:id="conversationFilter" promptText="Tìm kiếm"
-                                   accessibleText="Lọc hội thoại theo tên"/>
+                        <TextField fx:id="conversationFilter" promptText="Tìm người, nhóm, tin nhắn"
+                                   accessibleText="Tìm hội thoại và tin nhắn"/>
                         <FontIcon iconLiteral="fth-search" iconSize="15" styleClass="chat-search-icon"
                                   mouseTransparent="true">
                             <StackPane.margin><Insets left="12"/></StackPane.margin>
                         </FontIcon>
                     </StackPane>
-                    <HBox spacing="4" styleClass="chat-filter-bar">
+                    <HBox fx:id="filterBar" spacing="4" styleClass="chat-filter-bar">
                         <ToggleButton fx:id="allFilter" text="Tất cả" toggleGroup="$filters"
                                       styleClass="chat-filter-tab" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                         <ToggleButton fx:id="unreadFilter" text="Chưa đọc" toggleGroup="$filters"
@@ -50,6 +51,10 @@
                       styleClass="chat-list" VBox.vgrow="ALWAYS">
                 <placeholder><Label text="Không có đoạn chat phù hợp" wrapText="true" styleClass="chat-caption"/></placeholder>
             </ListView>
+            <ScrollPane fx:id="globalSearch" id="globalSearch" visible="false" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="chat-search-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="globalResults" spacing="8" minWidth="0" styleClass="chat-global-results"/>
+            </ScrollPane>
         </VBox>
     </left>
     <center>

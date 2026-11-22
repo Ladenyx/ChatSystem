@@ -2,6 +2,7 @@ package com.chatsystem.user.controller.chat;
 
 import com.chatsystem.desktop.mock.model.MockConversation;
 import com.chatsystem.desktop.navigation.ViewNavigator;
+import javafx.application.Platform;
 import com.chatsystem.user.UserViews;
 import com.chatsystem.user.control.ChatMessageRow;
 import com.chatsystem.user.control.ConversationAvatar;
@@ -41,12 +42,31 @@ public final class ChatHistoryController {
         }
     }
 
+    public void scrollToMessage(String id) {
+        var active = conversation;
+        Platform.runLater(() -> {
+            if (!active.equals(conversation)) {
+                return;
+            }
+            messageRows.getChildren().stream()
+                    .filter(node -> node instanceof ChatMessageRow row && row.messageId().equals(id))
+                    .findFirst().ifPresent(row -> {
+                        historyScroll.layout();
+                        double scrollable = messageRows.getHeight() - historyScroll.getViewportBounds().getHeight();
+                        if (scrollable > 0) {
+                            historyScroll.setVvalue(Math.clamp(row.getLayoutY() / scrollable, 0, 1));
+                        }
+                    });
+        });
+    }
+
     @FXML
     private void openInfo() {
         if (navigator.isDrawerOpen()) {
             navigator.closeDrawer();
         } else {
-            navigator.showDrawer(UserViews.CONVERSATION_INFO, new UserViewInputs.Conversation(conversation.id()));
+            var input = new UserViewInputs.MessageSearch(conversation.id(), this::scrollToMessage);
+            navigator.showDrawer(UserViews.CONVERSATION_INFO, input, true);
         }
     }
 }

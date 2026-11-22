@@ -24,6 +24,7 @@
     -chat-incoming: #ffffff;
     -chat-warning: #8a3707;
     -chat-warning-bg: #fff9f5;
+    -chat-danger: #b10e1c;
     -chat-scroll-thumb: rgba(0, 0, 0, 0.16);
     -chat-scroll-thumb-hover: rgba(0, 0, 0, 0.28);
 }
@@ -52,6 +53,7 @@
     -chat-incoming: #232326;
     -chat-warning: #fce100;
     -chat-warning-bg: #332717;
+    -chat-danger: #f1707b;
     -chat-scroll-thumb: rgba(255, 255, 255, 0.16);
     -chat-scroll-thumb-hover: rgba(255, 255, 255, 0.28);
 }

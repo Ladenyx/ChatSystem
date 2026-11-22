@@ -1,23 +1,33 @@
 package com.chatsystem.user.controller.messaging;
 
 import com.chatsystem.desktop.mock.model.MockConversation;
+import com.chatsystem.desktop.mock.model.MockMessage;
 import com.chatsystem.desktop.navigation.View;
 import com.chatsystem.desktop.navigation.ViewController;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.user.UserViews;
-import com.chatsystem.user.controller.chat.ChatHistoryController;
+import com.chatsystem.user.control.ConversationAvatar;
 import com.chatsystem.user.control.ConversationCell;
+import com.chatsystem.user.control.SearchResultCard;
+import com.chatsystem.user.controller.chat.ChatHistoryController;
 import com.chatsystem.user.messaging.ConversationCatalog;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public final class ConversationsController implements ViewController {
@@ -33,6 +43,10 @@ public final class ConversationsController implements ViewController {
     @FXML private ToggleButton allFilter;
     @FXML private ToggleButton unreadFilter;
     @FXML private ToggleButton groupFilter;
+    @FXML private Button createGroupButton;
+    @FXML private HBox filterBar;
+    @FXML private ScrollPane globalSearch;
+    @FXML private VBox globalResults;
     @FXML private VBox emptyWorkspace;
     @FXML private BorderPane selectedWorkspace;
     @FXML private ChatHistoryController selectedWorkspaceController;
@@ -50,6 +64,9 @@ public final class ConversationsController implements ViewController {
                 workspace.widthProperty()));
         emptyWorkspace.managedProperty().bind(emptyWorkspace.visibleProperty());
         selectedWorkspace.managedProperty().bind(selectedWorkspace.visibleProperty());
+        for (var node : List.of(createGroupButton, filterBar, conversationItems, globalSearch)) {
+            node.managedProperty().bind(node.visibleProperty());
+        }
 
         conversationItems.getSelectionModel().selectedItemProperty().addListener((observable, previous, current) -> {
             if (!updatingSelection && current != null) {
@@ -110,6 +127,67 @@ public final class ConversationsController implements ViewController {
             }
         } finally {
             updatingSelection = false;
+        }
+        showSearchResults(query);
+    }
+
+    private void showSearchResults(String query) {
+        boolean searching = !query.isBlank();
+        globalSearch.setVisible(searching);
+        createGroupButton.setVisible(!searching);
+        filterBar.setVisible(!searching);
+        conversationItems.setVisible(!searching);
+        globalResults.getChildren().clear();
+        if (!searching) {
+            return;
+        }
+        var conversationCards = new ArrayList<Node>();
+        var messageCards = new ArrayList<Node>();
+        for (var conversation : catalog.conversations()) {
+            if (conversation.title().toLowerCase(Locale.ROOT).contains(query)) {
+                var avatar = new ConversationAvatar();
+                avatar.show(conversation, catalog);
+                conversationCards.add(new SearchResultCard(conversation.title(),
+                        catalog.statusText(conversation), null, avatar, () -> openResult(conversation, null)));
+            }
+            catalog.messagesFor(conversation.id()).stream()
+                    .filter(message -> message.state() != MockMessage.State.RECALLED)
+                    .filter(message -> message.text().toLowerCase(Locale.ROOT).contains(query))
+                    .limit(5)
+                    .forEach(message -> messageCards.add(new SearchResultCard(conversation.title(),
+                            message.text(), message.sentAt(), null, () -> openResult(conversation, message.id()))));
+        }
+        if (!conversationCards.isEmpty()) {
+            globalResults.getChildren().add(resultHeading("Hội thoại", "globalConversationHeading"));
+            globalResults.getChildren().addAll(conversationCards);
+        }
+        if (!messageCards.isEmpty()) {
+            globalResults.getChildren().add(resultHeading("Tin nhắn", "globalMessageHeading"));
+            globalResults.getChildren().addAll(messageCards);
+        }
+        if (globalResults.getChildren().isEmpty()) {
+            var empty = new Label("Không có kết quả");
+            empty.setId("globalSearchEmpty");
+            empty.getStyleClass().add("chat-caption");
+            globalResults.getChildren().add(empty);
+        }
+    }
+
+    private static Label resultHeading(String text, String id) {
+        var label = new Label(text);
+        label.setId(id);
+        label.getStyleClass().add("chat-section-label");
+        return label;
+    }
+
+    private void openResult(MockConversation conversation, String messageId) {
+        selected = conversation;
+        allFilter.setSelected(true);
+        conversationFilter.clear();
+        navigator.closeDrawer();
+        showSelection(conversation);
+        if (messageId != null) {
+            selectedWorkspaceController.scrollToMessage(messageId);
         }
     }
 

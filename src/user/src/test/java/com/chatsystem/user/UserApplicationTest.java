@@ -300,6 +300,69 @@ class UserApplicationTest {
         task.get(30, TimeUnit.SECONDS);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void conversationSearchAndGroupDrawerRenderInBothThemes() throws Exception {
+        FutureTask<Void> task = new FutureTask<>(() -> {
+            Stage stage = new Stage();
+            var navigator = UserApplication.createNavigator();
+            try {
+                stage.setScene(new Scene(navigator.getRoot(), 1280, 720));
+                stage.show();
+                var root = navigator.getRoot();
+                enterPreviewWorkspace(root);
+                root.applyCss();
+                root.layout();
+
+                var filter = (TextField) root.lookup("#conversationFilter");
+                filter.setText("giao diện");
+                root.applyCss();
+                root.layout();
+                assertTrue(root.lookup("#globalSearch").isVisible());
+                assertNotNull(root.lookup("#globalConversationHeading"));
+                assertNotNull(root.lookup("#globalMessageHeading"));
+                capture(stage, "drawer-global-search-light");
+
+                filter.clear();
+                var conversations = (ListView<MockConversation>) root.lookup("#conversationItems");
+                var direct = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("direct-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(direct);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                root.applyCss();
+                root.layout();
+                assertNotNull(root.lookup("#drawer"));
+                ((Button) root.lookup("#searchInConversation")).fire();
+                var localSearch = (TextField) root.lookup("#conversationSearchField");
+                localSearch.setText("mình");
+                root.applyCss();
+                root.layout();
+                ((Button) root.lookup("#nextSearchResult")).fire();
+                ((Button) root.lookup("#nextSearchResult")).fire();
+                root.applyCss();
+                root.layout();
+                capture(stage, "drawer-local-search-light");
+
+                var group = conversations.getItems().stream()
+                        .filter(item -> item.id().equals("grp-01")).findFirst().orElseThrow();
+                conversations.getSelectionModel().select(group);
+                ((Button) root.lookup("#conversationInfo")).fire();
+                navigator.themes().toggle();
+                root.applyCss();
+                root.layout();
+                assertEquals(8, root.lookupAll(".chat-info-member").size());
+                assertNull(root.lookup("#blockConversationPeer"));
+                capture(stage, "drawer-group-dark");
+            } finally {
+                navigator.close();
+                stage.close();
+            }
+            return null;
+        });
+        Platform.runLater(task);
+        task.get(20, TimeUnit.SECONDS);
+    }
+
     private static void enterPreviewWorkspace(Parent root) {
         root.applyCss();
         root.layout();
