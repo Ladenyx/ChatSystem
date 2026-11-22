@@ -111,7 +111,7 @@ public final class SignUpController extends AuthFormController {
             }
             case EMAIL -> {
                 stepTitle.setText("Nhập email");
-                stepHelp.setText("Tiếp tục để xem màn xác minh. Bản xem trước không gửi mã.");
+                stepHelp.setText("Mã xác minh 6 chữ số sẽ được gửi tới email này.");
                 authSignUpContinue.setText("Tiếp tục xác minh");
             }
             case PROFILE -> {

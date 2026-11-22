@@ -141,7 +141,7 @@ public final class MonthlyChartController {
 
     private void showYear(int year) {
         chartUnit.setText(year == snapshotDate.getYear()
-                ? measure.unit + " · Mẫu đến " + DAY_IN_YEAR.format(snapshotDate) : measure.unit);
+                ? measure.unit + " · Cập nhật đến " + DAY_IN_YEAR.format(snapshotDate) : measure.unit);
         var series = seriesForYear.apply(year);
         int peak = 0;
         int total = 0;
@@ -186,7 +186,7 @@ public final class MonthlyChartController {
         String description = "Tháng " + month.getMonthValue() + "/" + month.getYear()
                 + " · " + count + " " + measure.unit.toLowerCase(Locale.ROOT);
         if (future) {
-            description += " · Sau mốc dữ liệu mẫu";
+            description += " · Chưa có dữ liệu";
         }
         Labeled value;
         if (chooseMonth == null) {

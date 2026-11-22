@@ -112,8 +112,8 @@ public final class ContactsController implements ViewController {
         }
     }
 
-    private static final String CHAT_PREVIEW = "Mở bản xem Đoạn chat, chưa chọn cuộc trò chuyện";
-    private static final String GROUP_PREVIEW = "Mở bản xem Tạo nhóm, chưa chọn thành viên";
+    private static final String CHAT_TOOLTIP = "Nhắn tin trực tiếp";
+    private static final String GROUP_TOOLTIP = "Tạo nhóm trò chuyện mới";
 
     @FXML private BorderPane contactsRoot;
     @FXML private ToggleGroup contactsTabs;
@@ -128,7 +128,6 @@ public final class ContactsController implements ViewController {
     @FXML private Label contactsTitle;
     @FXML private Label contactsCount;
     @FXML private Label contactsStatus;
-    @FXML private Label contactsNote;
     @FXML private VBox contactsList;
 
     private final List<MockUser> users = MockData.create().users().stream()
@@ -222,12 +221,6 @@ public final class ContactsController implements ViewController {
         contactsFilter.setPromptText(tab.prompt);
         contactsFilter.setAccessibleText(tab.prompt);
         contactsStatus.setVisible(false);
-        contactsNote.setText(switch (tab) {
-            case ALL -> "Dữ liệu mẫu · Nhắn tin chỉ mở bản xem Đoạn chat, chưa chọn cuộc trò chuyện";
-            case ONLINE, SEARCH -> "Dữ liệu mẫu · Nhắn tin và Tạo nhóm chỉ mở bản xem, chưa chọn người";
-            case REQUESTS -> "Dữ liệu mẫu · Thay đổi chỉ áp dụng trong bản xem này";
-            case BLOCKED -> "Dữ liệu mẫu · Bỏ chặn không khôi phục tình bạn hay lời mời cũ";
-        });
         if (contactsFilter.getText().isEmpty()) {
             render();
         } else {
@@ -439,16 +432,16 @@ public final class ContactsController implements ViewController {
     private Button chat(MockUser user) {
         Button button = button(user, "chat", "Nhắn tin", ActionTone.SECONDARY,
                 () -> navigator.navigate(UserViews.CONVERSATIONS, new UserViewInputs.DirectChat(user.id())));
-        button.setTooltip(new Tooltip(CHAT_PREVIEW));
-        button.setAccessibleHelp(CHAT_PREVIEW);
+        button.setTooltip(new Tooltip(CHAT_TOOLTIP));
+        button.setAccessibleHelp(CHAT_TOOLTIP);
         return button;
     }
 
     private Button group(MockUser user) {
         Button button = button(user, "group", "Tạo nhóm", ActionTone.QUIET,
                 () -> navigator.showModal(UserViews.CREATE_GROUP, new UserViewInputs.CreateGroup(List.of(user.id()))));
-        button.setTooltip(new Tooltip(GROUP_PREVIEW));
-        button.setAccessibleHelp(GROUP_PREVIEW);
+        button.setTooltip(new Tooltip(GROUP_TOOLTIP));
+        button.setAccessibleHelp(GROUP_TOOLTIP);
         return button;
     }
 
@@ -472,7 +465,7 @@ public final class ContactsController implements ViewController {
             relationships.put(user.id(), next);
         }
         render();
-        contactsStatus.setText(message + " " + user.fullName() + " trong bản xem");
+        contactsStatus.setText(message + " " + user.fullName());
         contactsStatus.setVisible(true);
         if (tab == Tab.BLOCKED) {
             contactsTabBlocked.requestFocus();

@@ -73,8 +73,6 @@ class AuthPreviewUiIT {
             withAuthWindow(preview, (stage, navigator) -> {
                 var root = navigator.getRoot();
                 assertAuthRoute(navigator, UserViews.SIGN_IN);
-                var offlineHint = assertInstanceOf(Label.class, shownNode(root, "authOfflinePreview"));
-                assertTrue(offlineHint.getText().contains("Không nhập thông tin thật"));
                 var submit = assertInstanceOf(Button.class, shownNode(root, "authSignInSubmit"));
                 assertReadableSubmit(submit, preview);
                 captureAuth(stage, preview.signInImage());

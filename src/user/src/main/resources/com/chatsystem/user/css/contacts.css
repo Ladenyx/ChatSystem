@@ -441,14 +441,6 @@
     -fx-background-radius: 8;
 }
 
-.user-contacts .label.contacts-note {
-    -fx-font-size: 12px;
-    -fx-text-fill: -ct-muted;
-    -fx-padding: 12 0 0 0;
-    -fx-border-color: -ct-rule transparent transparent transparent;
-    -fx-border-width: 1 0 0 0;
-}
-
 /* --- Confirmation Modal --- */
 
 .dialog-pane.contacts-confirmation {

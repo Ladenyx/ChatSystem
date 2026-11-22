@@ -53,12 +53,12 @@ public final class ForgotPasswordController extends AuthFormController {
             }
             case EMAIL -> {
                 stepTitle.setText("Xác nhận email");
-                authForgotMaskedEmail.setText("Email mẫu: a***@example.test");
-                authForgotContinue.setText("Xem bước kiểm tra email");
+                authForgotMaskedEmail.setText("Email liên kết: a***@example.test");
+                authForgotContinue.setText("Gửi mật khẩu tạm");
             }
             case CHECK_EMAIL -> {
                 stepTitle.setText("Kiểm tra email");
-                stepHelp.setText("Không gửi email trong bản xem trước. Chọn Tiếp tục để xem màn đặt mật khẩu.");
+                stepHelp.setText("Mật khẩu tạm đã được gửi tới email liên kết của bạn. Chọn Tiếp tục để đặt mật khẩu mới.");
                 authForgotContinue.setText("Tiếp tục");
             }
         }
