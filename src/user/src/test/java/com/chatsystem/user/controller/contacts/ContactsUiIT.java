@@ -240,8 +240,8 @@ class ContactsUiIT {
         withContacts(1280, 720, Mode.LIGHT, (stage, root) -> {
             select(root, "Online");
             fire(root, "contact-group-usr-04");
-            var modal = dialog(stage, "screenId");
-            assertEquals(UserViews.CREATE_GROUP.id(), require(modal, "screenId", Label.class).getText());
+            var modal = dialog(stage, "groupFormSubmit");
+            assertNotNull(modal.lookup("#groupNameField"));
             assertNotNull(root.lookup("#contactsRoot"), "Modal must not replace Contacts");
             fire(modal, modal.getButtonTypes().getFirst());
             select(root, "Search");
