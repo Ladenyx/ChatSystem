@@ -2,7 +2,7 @@
 
 Progress tracker for the Java Real-Time Chat System. The project overview and setup instructions are in [README.md](README.md).
 
-**Last updated:** 2026-11-20
+**Last updated:** 2026-11-22
 
 ## Contents
 
@@ -45,7 +45,7 @@ Progress tracker for the Java Real-Time Chat System. The project overview and se
 
 | Milestone | Weight | Scope | Status |
 |-----------|:------:|-------|:------:|
-| **Version 1** | 20% | UI screens of both applications, database creation script, report | 🚧 |
+| **Version 1** | 20% | UI screens of both applications, database creation script, report | ✅ |
 | **Version 2** | 80% | Complete working system, release package, final report, self-assessment | ⬜ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
@@ -58,15 +58,15 @@ Interface and database. The archive contains `src/`, `script/`, `git/` and the r
 
 | Deliverable | Status |
 |-------------|:------:|
-| `src/`: screens of the User Client (UI only) | 🚧 |
-| `src/`: screens of the Admin App (Desktop GUI, UI only) | 🚧 |
+| `src/`: screens of the User Client (UI only) | ✅ |
+| `src/`: screens of the Admin Console (Desktop GUI, UI only) | ✅ |
 | `script/`: database creation script | ✅ |
-| `git/`: commit screenshots of every member | ⬜ |
-| Report: team information | ⬜ |
-| Report: task list of each member | ⬜ |
-| Report: contribution table (total 100) | ⬜ |
-| Report: database design | ⬜ |
-| Report: list of designed screens, with screenshots | ⬜ |
+| `git/`: commit screenshots of every member | ✅ |
+| Report: team information | ✅ |
+| Report: task list of each member | ✅ |
+| Report: contribution table (total 100) | ✅ |
+| Report: database design | ✅ |
+| Report: list of designed screens, with screenshots | ✅ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
 
@@ -114,71 +114,69 @@ X-01: Version 1 database design and creation are complete. Six editable draw.io 
 
 [Acceptance on main](https://github.com/Ladenyx/ChatSystem/actions/runs/44610003728) passed on fresh Docker Compose and native Windows Server 2025 with PostgreSQL 18.7: 381 integrated SQL checks per environment, independent suites (95 Auth/Friends, 156 Messaging/E2EE/Spam, 140 Logs/Analytics), concurrent-write probes and resource cleanup. The [database workflow](.github/workflows/database.yml) repeats acceptance for SQL/Compose changes. Server integration, authorization, E2EE protocol execution and retention jobs belong to Version 2.
 
-X-04: Maven scaffold/Wrapper (task 1.1) and desktop launchers/navigation/theme (task 1.2) are ready. The shared `desktop-ui` library supports both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. Business screens currently contain placeholders; runnable fat-JAR packaging remains pending. No individual UI feature is marked complete yet.
-
-Task 1.3 is ready: shared immutable UI fixtures and a preview page with tables, message/evidence lists, and twelve-month charts in both applications. See [mock data APIs and verification](docs/architecture/ui-mock-data.md) and [screenshots in Git history](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/ui-mock-data/README.md). This supplies data for stages 3–4; individual business screens retain their current status.
+X-04: Maven scaffold/Wrapper (task 1.1), desktop launchers/navigation/theme (task 1.2), and shared immutable UI fixtures (task 1.3; see [mock data APIs and verification](docs/architecture/ui-mock-data.md)) are ready in `desktop-ui` and power both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. All 11 Admin Console screens/dialogs (`A-SCR-01`–`A-SCR-09`, `A-DLG-01`–`A-DLG-02`) and all 14 registered User Client views (`U-SCR-01`–`U-SCR-09`, `U-DLG-01`–`U-DLG-05`) are implemented on `main`, covering all Version 1 UI items (`U-01`–`U-27`, `A-01`–`A-16`). Runnable fat-JAR packaging for Version 2 remains pending.
 
 ### User Client
 
 | ID | Feature | UI | Logic |
 |----|---------|:--:|:-----:|
 | **Authentication & profile** | | | |
-| U-01 | Register an account | ⬜ | ⬜ |
-| U-02 | Log in | ⬜ | ⬜ |
-| U-03 | Update profile information | ⬜ | ⬜ |
-| U-04 | Change password | ⬜ | ⬜ |
-| U-05 | Reset password: random password sent by email | ⬜ | ⬜ |
+| U-01 | Register an account | ✅ | ⬜ |
+| U-02 | Log in | ✅ | ⬜ |
+| U-03 | Update profile information | ✅ | ⬜ |
+| U-04 | Change password | ✅ | ⬜ |
+| U-05 | Reset password: random password sent by email | ✅ | ⬜ |
 | **Relationship management** | | | |
-| U-06 | Friend list with name filter and online/offline status | ⬜ | ⬜ |
-| U-07 | Search users by name or username and send a friend request (blockers hidden) | ⬜ | ⬜ |
-| U-08 | Friend requests: list with name filter, accept or decline | ⬜ | ⬜ |
-| U-09 | Unfriend | ⬜ | ⬜ |
-| U-10 | Block a user (unfriends; no new requests allowed) | ⬜ | ⬜ |
-| U-11 | Online friends list with name filter, chat and create group | ⬜ | ⬜ |
+| U-06 | Friend list with name filter and online/offline status | ✅ | ⬜ |
+| U-07 | Search users by name or username and send a friend request (blockers hidden) | ✅ | ⬜ |
+| U-08 | Friend requests: list with name filter, accept or decline | ✅ | ⬜ |
+| U-09 | Unfriend | ✅ | ⬜ |
+| U-10 | Block a user (unfriends; no new requests allowed) | ✅ | ⬜ |
+| U-11 | Online friends list with name filter, chat and create group | ✅ | ⬜ |
 | **Messaging** | | | |
-| U-12 | Real-time chat with an online friend | ⬜ | ⬜ |
-| U-13 | Offline delivery: messages stored for a friend who is away | ⬜ | ⬜ |
-| U-14 | Chat history | ⬜ | ⬜ |
-| U-15 | Delete the whole chat history | ⬜ | ⬜ |
-| U-16 | Delete one or several messages | ⬜ | ⬜ |
-| U-17 | Search text in one conversation and jump to the match | ⬜ | ⬜ |
-| U-18 | Search text across all conversations and jump to the match | ⬜ | ⬜ |
+| U-12 | Real-time chat with an online friend | ✅ | ⬜ |
+| U-13 | Offline delivery: messages stored for a friend who is away | ✅ | ⬜ |
+| U-14 | Chat history | ✅ | ⬜ |
+| U-15 | Delete the whole chat history | ✅ | ⬜ |
+| U-16 | Delete one or several messages | ✅ | ⬜ |
+| U-17 | Search text in one conversation and jump to the match | ✅ | ⬜ |
+| U-18 | Search text across all conversations and jump to the match | ✅ | ⬜ |
 | **Group chat** | | | |
-| U-19 | Create a group (at least one other username) | ⬜ | ⬜ |
-| U-20 | Rename a group | ⬜ | ⬜ |
-| U-21 | Add members | ⬜ | ⬜ |
-| U-22 | Grant group-admin rights | ⬜ | ⬜ |
-| U-23 | Remove members (group admins only) | ⬜ | ⬜ |
-| U-24 | Group chat | ⬜ | ⬜ |
+| U-19 | Create a group (at least one other username) | ✅ | ⬜ |
+| U-20 | Rename a group | ✅ | ⬜ |
+| U-21 | Add members | ✅ | ⬜ |
+| U-22 | Grant group-admin rights | ✅ | ⬜ |
+| U-23 | Remove members (group admins only) | ✅ | ⬜ |
+| U-24 | Group chat | ✅ | ⬜ |
 | **Security, moderation and AI** | | | |
-| U-25 | Encrypted group chat | ⬜ | ⬜ |
-| U-26 | Report a user for spam | ⬜ | ⬜ |
-| U-27 | LLM assistant: refine a draft and suggest a reply | ⬜ | ⬜ |
+| U-25 | Encrypted group chat | ✅ | ⬜ |
+| U-26 | Report a user for spam | ✅ | ⬜ |
+| U-27 | LLM assistant: refine a draft and suggest a reply | ✅ | ⬜ |
 
-### Admin App (Desktop GUI)
+### Admin Console (Desktop GUI)
 
 | ID | Feature | UI | Logic |
 |----|---------|:--:|:-----:|
 | **User oversight** | | | |
-| A-01 | User list: filter by name, username, status; sort by name, creation date | 🚧 | ⬜ |
-| A-02 | Create, update and delete users | 🚧 | ⬜ |
-| A-03 | Lock and unlock accounts | 🚧 | ⬜ |
-| A-04 | Reset a user's password | 🚧 | ⬜ |
-| A-05 | View a user's login history | 🚧 | ⬜ |
-| A-06 | View a user's friend list | 🚧 | ⬜ |
+| A-01 | User list: filter by name, username, status; sort by name, creation date | ✅ | ⬜ |
+| A-02 | Create, update and delete users | ✅ | ⬜ |
+| A-03 | Lock and unlock accounts | ✅ | ⬜ |
+| A-04 | Reset a user's password | ✅ | ⬜ |
+| A-05 | View a user's login history | ✅ | ⬜ |
+| A-06 | View a user's friend list | ✅ | ⬜ |
 | **Access logs and groups** | | | |
-| A-07 | Login log in chronological order (time, username, full name) | 🚧 | ⬜ |
-| A-08 | Group list: sort by name, creation time; filter by name | ⬜ | ⬜ |
-| A-09 | Members and admins of a group | ⬜ | ⬜ |
+| A-07 | Login log in chronological order (time, username, full name) | ✅ | ⬜ |
+| A-08 | Group list: sort by name, creation time; filter by name | ✅ | ⬜ |
+| A-09 | Members and admins of a group | ✅ | ⬜ |
 | **Spam resolution** | | | |
-| A-10 | Spam reports: sort and filter by time, username | ⬜ | ⬜ |
-| A-11 | Lock a user's account from a spam report | ⬜ | ⬜ |
+| A-10 | Spam reports: sort and filter by time, username | ✅ | ⬜ |
+| A-11 | Lock a user's account from a spam report | ✅ | ⬜ |
 | **Analytics and data visualization** | | | |
-| A-12 | New registrations in a date range: sort by name, creation time; filter by name | 🚧 | ⬜ |
-| A-13 | Chart: new registrations per month for a selected year | 🚧 | ⬜ |
-| A-14 | Friend counts (direct and friends-of-friends): sort, name filter, direct-count filter (`=`, `<`, `>`) | 🚧 | ⬜ |
-| A-15 | Active users in a date range (app opens, people chatted with, groups chatted in): sort, name filter, activity filter (`=`, `<`, `>`) | 🚧 | ⬜ |
-| A-16 | Chart: active users per month for a selected year | 🚧 | ⬜ |
+| A-12 | New registrations in a date range: sort by name, creation time; filter by name | ✅ | ⬜ |
+| A-13 | Chart: new registrations per month for a selected year | ✅ | ⬜ |
+| A-14 | Friend counts (direct and friends-of-friends): sort, name filter, direct-count filter (`=`, `<`, `>`) | ✅ | ⬜ |
+| A-15 | Active users in a date range (app opens, people chatted with, groups chatted in): sort, name filter, activity filter (`=`, `<`, `>`) | ✅ | ⬜ |
+| A-16 | Chart: active users per month for a selected year | ✅ | ⬜ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
 
@@ -202,14 +200,14 @@ Review before each submission. The course rules give a zero for a member without
 
 | Check | Version 1 | Version 2 |
 |-------|:---------:|:---------:|
-| Every member has commits in the repository, with screenshots in `git/` | ⬜ | ⬜ |
-| The archive structure matches the specification exactly | ⬜ | ⬜ |
-| The report contains every required section | ⬜ | ⬜ |
+| Every member has commits in the repository, with screenshots in `git/` | ✅ | ⬜ |
+| The archive structure matches the specification exactly | ✅ | ⬜ |
+| The report contains every required section | ✅ | ⬜ |
 | The self-assessment report is completed on the course template | n/a | ⬜ |
 | The database script runs from scratch on an empty database | ✅ | ⬜ |
 | The JARs start after editing only the configuration file | n/a | ⬜ |
-| Contribution percentages add up to 100 | ⬜ | ⬜ |
+| Contribution percentages add up to 100 | ✅ | ⬜ |
 | The demo video is public and its link is in the report | n/a | ⬜ |
-| No passwords, API keys or tokens are committed | ⬜ | ⬜ |
+| No passwords, API keys or tokens are committed | ✅ | ⬜ |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
