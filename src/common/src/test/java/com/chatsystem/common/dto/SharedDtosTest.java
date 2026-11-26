@@ -5,14 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.chatsystem.common.api.OffsetPage;
 import com.chatsystem.common.domain.AccountStatus;
 import com.chatsystem.common.domain.AiAssistMode;
 import com.chatsystem.common.domain.Gender;
 import com.chatsystem.common.domain.MessageDeliveryState;
 import com.chatsystem.common.domain.SessionScope;
+import com.chatsystem.common.domain.SpamReviewStatus;
 import com.chatsystem.common.domain.UserRole;
+import com.chatsystem.common.dto.admin.AdminCreateUserResponse;
+import com.chatsystem.common.dto.admin.AdminFriendNetworkResponse;
 import com.chatsystem.common.dto.admin.AdminFriendNetworkRowDto;
+import com.chatsystem.common.dto.admin.AdminMonthlySeriesDto;
 import com.chatsystem.common.dto.admin.AdminOverviewDto;
+import com.chatsystem.common.dto.admin.AdminRecentSpamReportDto;
+import com.chatsystem.common.dto.admin.AdminResetPasswordRequest;
 import com.chatsystem.common.dto.admin.AdminUserDetailDto;
 import com.chatsystem.common.dto.admin.MonthlyCountPointDto;
 import com.chatsystem.common.dto.ai.AiAssistRequest;
@@ -26,6 +33,7 @@ import com.chatsystem.common.dto.messaging.DeleteMessagesForSelfRequest;
 import com.chatsystem.common.dto.messaging.MessageDto;
 import com.chatsystem.common.dto.messaging.SendMessageRequest;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -136,11 +144,43 @@ class SharedDtosTest {
         List<MonthlyCountPointDto> twelveMonths = IntStream.rangeClosed(1, 12)
                 .mapToObj(m -> new MonthlyCountPointDto(2026, m, m))
                 .toList();
-        var overview = new AdminOverviewDto(20, 5, 4, 2, 2026, twelveMonths, twelveMonths, List.of());
+        var recentSpam = new AdminRecentSpamReportDto(
+                UUID.randomUUID(), id, "minhan", UUID.randomUUID(), "giabao", NOW, SpamReviewStatus.PENDING);
+        LocalDate asOfDate = LocalDate.of(2026, 11, 15);
+        var overview = new AdminOverviewDto(
+                20, 5, 4, 2, 2026, asOfDate, twelveMonths, twelveMonths, List.of(recentSpam), List.of());
         assertEquals(12, overview.monthlyRegistrations().size());
+        assertEquals(1, overview.recentSpamReports().size());
 
         assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
-                20, 5, 4, 2, 2026, twelveMonths.subList(0, 11), twelveMonths, List.of()));
+                20, 5, 4, 2, 2026, asOfDate, twelveMonths.subList(0, 11), twelveMonths, List.of(), List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new AdminRecentSpamReportDto(
+                UUID.randomUUID(), id, "  ", UUID.randomUUID(), "giabao", NOW, SpamReviewStatus.PENDING));
+
+        var sentOk = new AdminCreateUserResponse(active, true, null);
+        assertTrue(sentOk.activationEmailSent());
+        var smtpFailed = new AdminCreateUserResponse(active, false, "SMTP timeout");
+        assertFalse(smtpFailed.activationEmailSent());
+        assertThrows(IllegalArgumentException.class, () -> new AdminCreateUserResponse(active, true, "unexpected"));
+        assertThrows(IllegalArgumentException.class, () -> new AdminCreateUserResponse(active, false, "   "));
+
+        assertEquals("minhan@example.test", new AdminResetPasswordRequest("minhan@example.test").expectedEmail());
+        assertEquals(null, new AdminResetPasswordRequest(null).expectedEmail());
+        assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest("  "));
+
+        var monthlySeries = new AdminMonthlySeriesDto(2026, asOfDate, List.of(2026, 2025), twelveMonths);
+        assertEquals(12, monthlySeries.points().size());
+        List<MonthlyCountPointDto> wrongYearPoints = IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> new MonthlyCountPointDto(2025, m, m))
+                .toList();
+        assertThrows(IllegalArgumentException.class,
+                () -> new AdminMonthlySeriesDto(2026, asOfDate, List.of(2026), wrongYearPoints));
+
+        var networkRow = new AdminFriendNetworkRowDto(id, "minhan", "Nguyễn Minh An", NOW, 3, 5);
+        var networkResponse = new AdminFriendNetworkResponse(19, 12, OffsetPage.of(List.of(networkRow), 0, 25, 1));
+        assertEquals(19, networkResponse.currentAccounts());
+        assertThrows(IllegalArgumentException.class,
+                () -> new AdminFriendNetworkResponse(5, 6, OffsetPage.of(List.of(), 0, 25, 0)));
         assertThrows(IllegalArgumentException.class, () -> new AdminFriendNetworkRowDto(
                 id, "minhan", "Nguyễn Minh An", NOW, 5, 4));
     }

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatsystem.local/schemas/admin-analytics.schema.json",
+  "title": "Admin Overview, User Creation, and Analytics Payloads",
+  "description": "JSON Schema for A-SCR-02, A-DLG-01 creation result, A-SCR-07, A-SCR-08, and A-SCR-09.",
+  "type": "object",
+  "$defs": {
+    "MonthlyCountPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["year", "month", "count"],
+      "properties": {
+        "year": { "type": "integer" },
+        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "AdminRecentSpamReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "reportedUserId",
+        "reportedUsername",
+        "reporterUserId",
+        "reporterUsername",
+        "receivedAt",
+        "reviewStatus"
+      ],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "reportedUserId": { "type": "string", "format": "uuid" },
+        "reportedUsername": { "type": "string", "minLength": 1 },
+        "reporterUserId": { "type": "string", "format": "uuid" },
+        "reporterUsername": { "type": "string", "minLength": 1 },
+        "receivedAt": { "type": "string", "format": "date-time" },
+        "reviewStatus": { "type": "string", "enum": ["PENDING", "REVIEWED"] }
+      }
+    },
+    "AdminLoginHistoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "userId", "username", "fullName", "loggedInAt", "scope"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "userId": { "type": ["string", "null"], "format": "uuid" },
+        "username": { "type": ["string", "null"] },
+        "fullName": { "type": ["string", "null"] },
+        "loggedInAt": { "type": "string", "format": "date-time" },
+        "scope": { "type": "string", "enum": ["USER_CLIENT", "ADMIN_APP"] }
+      }
+    },
+    "AdminOverviewDto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalUsers",
+        "onlineUsers",
+        "totalGroups",
+        "pendingSpamReports",
+        "year",
+        "asOfDate",
+        "monthlyRegistrations",
+        "monthlyActiveUsers",
+        "recentSpamReports",
+        "recentLogins"
+      ],
+      "properties": {
+        "totalUsers": { "type": "integer", "minimum": 0 },
+        "onlineUsers": { "type": "integer", "minimum": 0 },
+        "totalGroups": { "type": "integer", "minimum": 0 },
+        "pendingSpamReports": { "type": "integer", "minimum": 0 },
+        "year": { "type": "integer" },
+        "asOfDate": { "type": "string", "format": "date" },
+        "monthlyRegistrations": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
+        },
+        "monthlyActiveUsers": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
+        },
+        "recentSpamReports": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AdminRecentSpamReport" }
+        },
+        "recentLogins": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AdminLoginHistoryItem" }
+        }
+      }
+    },
+    "AdminMonthlySeriesDto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["year", "asOfDate", "availableYears", "points"],
+      "properties": {
+        "year": { "type": "integer" },
+        "asOfDate": { "type": "string", "format": "date" },
+        "availableYears": {
+          "type": "array",
+          "items": { "type": "integer" }
+        },
+        "points": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
+        }
+      }
+    },
+    "AdminFriendNetworkResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currentAccounts", "connectedAccounts", "page"],
+      "properties": {
+        "currentAccounts": { "type": "integer", "minimum": 0 },
+        "connectedAccounts": { "type": "integer", "minimum": 0 },
+        "page": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items", "page", "size", "totalItems", "totalPages"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["userId", "username", "fullName", "createdAt", "directFriends", "extendedFriends"],
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "username": { "type": "string" },
+                  "fullName": { "type": "string" },
+                  "createdAt": { "type": "string", "format": "date-time" },
+                  "directFriends": { "type": "integer", "minimum": 0 },
+                  "extendedFriends": { "type": "integer", "minimum": 0 }
+                }
+              }
+            },
+            "page": { "type": "integer", "minimum": 0 },
+            "size": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "totalItems": { "type": "integer", "minimum": 0 },
+            "totalPages": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "AdminCreateUserResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user", "activationEmailSent", "emailDeliveryError"],
+      "properties": {
+        "user": {
+          "$ref": "admin-users.schema.json#/$defs/AdminUserDetail"
+        },
+        "activationEmailSent": { "type": "boolean" },
+        "emailDeliveryError": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

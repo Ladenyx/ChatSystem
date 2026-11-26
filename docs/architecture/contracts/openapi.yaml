@@ -478,16 +478,14 @@ paths:
               $ref: '#/components/schemas/AdminCreateUserRequest'
       responses:
         '201':
-          description: Tài khoản đã được tạo
+          description: "Tài khoản đã được tạo; kiểm tra `activationEmailSent` để biết email kích hoạt đã gửi được hay chưa"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminUserDetailDto'
+                $ref: '#/components/schemas/AdminCreateUserResponse'
         '400':
           $ref: '#/components/responses/ApiErrorResponse'
         '409':
-          $ref: '#/components/responses/ApiErrorResponse'
-        '502':
           $ref: '#/components/responses/ApiErrorResponse'
 
   /admin/users/{userId}:
@@ -500,6 +498,11 @@ paths:
       responses:
         '200':
           description: Hồ sơ đầy đủ của tài khoản
+          headers:
+            ETag:
+              description: "Chuỗi phiên bản phục vụ kiểm tra ghi đè đồng thời qua header `If-Match`"
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -512,6 +515,12 @@ paths:
       operationId: updateAdminUser
       parameters:
         - $ref: '#/components/parameters/UserId'
+        - name: If-Match
+          in: header
+          required: false
+          description: "ETag từ lần đọc `GET /admin/users/{userId}` để chặn ghi đè đồng thời (trả 409 CONFLICT nếu lệch)"
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -521,6 +530,11 @@ paths:
       responses:
         '200':
           description: Hồ sơ sau cập nhật
+          headers:
+            ETag:
+              description: ETag mới sau cập nhật
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -605,6 +619,12 @@ paths:
       operationId: resetAdminUserPassword
       parameters:
         - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminResetPasswordRequest'
       responses:
         '204':
           description: Đã gửi email chứa mật khẩu tạm
@@ -711,11 +731,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                minItems: 12
-                maxItems: 12
-                items:
-                  $ref: '#/components/schemas/MonthlyCountPointDto'
+                $ref: '#/components/schemas/AdminMonthlySeriesDto'
 
   /admin/analytics/activity:
     get:
@@ -773,11 +789,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                minItems: 12
-                maxItems: 12
-                items:
-                  $ref: '#/components/schemas/MonthlyCountPointDto'
+                $ref: '#/components/schemas/AdminMonthlySeriesDto'
 
   /admin/analytics/friend-network:
     get:
@@ -809,11 +821,11 @@ paths:
         - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
-          description: Bảng mạng lưới bạn bè hiện tại
+          description: KPI mạng lưới và trang bảng hiện tại
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminFriendNetworkOffsetPage'
+                $ref: '#/components/schemas/AdminFriendNetworkResponse'
 
   /admin/analytics/friend-network/monthly:
     get:
@@ -828,11 +840,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                minItems: 12
-                maxItems: 12
-                items:
-                  $ref: '#/components/schemas/MonthlyCountPointDto'
+                $ref: '#/components/schemas/AdminMonthlySeriesDto'
 
   /admin/spam-reports/{reportId}/review:
     post:
@@ -1481,9 +1489,32 @@ components:
           format: int64
           minimum: 0
 
+    AdminRecentSpamReportDto:
+      type: object
+      required: [id, reportedUserId, reportedUsername, reporterUserId, reporterUsername, receivedAt, reviewStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        reportedUserId:
+          type: string
+          format: uuid
+        reportedUsername:
+          type: string
+        reporterUserId:
+          type: string
+          format: uuid
+        reporterUsername:
+          type: string
+        receivedAt:
+          type: string
+          format: date-time
+        reviewStatus:
+          $ref: '#/components/schemas/SpamReviewStatus'
+
     AdminOverviewDto:
       type: object
-      required: [totalUsers, onlineUsers, totalGroups, pendingSpamReports, year, monthlyRegistrations, monthlyActiveUsers, recentLogins]
+      required: [totalUsers, onlineUsers, totalGroups, pendingSpamReports, year, asOfDate, monthlyRegistrations, monthlyActiveUsers, recentSpamReports, recentLogins]
       properties:
         totalUsers:
           type: integer
@@ -1499,6 +1530,9 @@ components:
           format: int64
         year:
           type: integer
+        asOfDate:
+          type: string
+          format: date
         monthlyRegistrations:
           type: array
           minItems: 12
@@ -1511,10 +1545,67 @@ components:
           maxItems: 12
           items:
             $ref: '#/components/schemas/MonthlyCountPointDto'
+        recentSpamReports:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminRecentSpamReportDto'
         recentLogins:
           type: array
           items:
             $ref: '#/components/schemas/AdminLoginHistoryItemDto'
+
+    AdminCreateUserResponse:
+      type: object
+      required: [user, activationEmailSent, emailDeliveryError]
+      properties:
+        user:
+          $ref: '#/components/schemas/AdminUserDetailDto'
+        activationEmailSent:
+          type: boolean
+        emailDeliveryError:
+          type: [string, 'null']
+
+    AdminResetPasswordRequest:
+      type: object
+      properties:
+        expectedEmail:
+          type: [string, 'null']
+          format: email
+
+    AdminMonthlySeriesDto:
+      type: object
+      required: [year, asOfDate, availableYears, points]
+      properties:
+        year:
+          type: integer
+        asOfDate:
+          type: string
+          format: date
+        availableYears:
+          type: array
+          items:
+            type: integer
+        points:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items:
+            $ref: '#/components/schemas/MonthlyCountPointDto'
+
+    AdminFriendNetworkResponse:
+      type: object
+      required: [currentAccounts, connectedAccounts, page]
+      properties:
+        currentAccounts:
+          type: integer
+          format: int64
+          minimum: 0
+        connectedAccounts:
+          type: integer
+          format: int64
+          minimum: 0
+        page:
+          $ref: '#/components/schemas/AdminFriendNetworkOffsetPage'
 
     AdminUserListItemDto:
       type: object
