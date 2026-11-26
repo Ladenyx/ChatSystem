@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatsystem.local/schemas/api-error.schema.json",
+  "title": "ApiError",
+  "description": "Uniform error payload returned for all 4xx/5xx REST responses and WebSocket system.error frames.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "code",
+    "message",
+    "status",
+    "timestamp",
+    "path",
+    "requestId",
+    "retryable",
+    "details"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 400,
+      "maximum": 599
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "path": {
+      "type": "string"
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "code", "message"],
+        "properties": {
+          "field": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

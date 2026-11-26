@@ -1,0 +1,94 @@
+{
+  "historyWindowAroundSearchHit": {
+    "request": "GET /api/v1/conversations/20000000-0000-4000-8000-000000000001/messages?aroundMessageId=30000000-0000-4000-8000-000000000042&limit=50",
+    "response": {
+      "items": [
+        {
+          "id": "30000000-0000-4000-8000-000000000041",
+          "conversationId": "20000000-0000-4000-8000-000000000001",
+          "senderUserId": "10000000-0000-4000-8000-000000000001",
+          "createdAt": "2026-11-15T02:55:00Z",
+          "contentPlain": "Bạn xem lại contract REST giúp mình nhé.",
+          "contentCipher": null,
+          "cryptoMetadata": null,
+          "recalledAt": null,
+          "state": "READ"
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000042",
+          "conversationId": "20000000-0000-4000-8000-000000000001",
+          "senderUserId": "10000000-0000-4000-8000-000000000002",
+          "createdAt": "2026-11-15T02:56:10Z",
+          "contentPlain": "Mình đã duyệt phần cursor pagination 50 tin rồi.",
+          "contentCipher": null,
+          "cryptoMetadata": null,
+          "recalledAt": null,
+          "state": "DELIVERED"
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000043",
+          "conversationId": "20000000-0000-4000-8000-000000000001",
+          "senderUserId": "10000000-0000-4000-8000-000000000001",
+          "createdAt": "2026-11-15T02:57:00Z",
+          "contentPlain": null,
+          "contentCipher": null,
+          "cryptoMetadata": null,
+          "recalledAt": "2026-11-15T02:57:30Z",
+          "state": "RECALLED"
+        }
+      ],
+      "nextCursor": "MjAyNi0xMS0xNVQwMjo1NTowMFp8MzAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDQx",
+      "hasMoreOlder": true,
+      "newerCursor": "MjAyNi0xMS0xNVQwMjo1NzowMFp8MzAwMDAwMDAtMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDQz",
+      "hasMoreNewer": true,
+      "anchorMessageId": "30000000-0000-4000-8000-000000000042"
+    }
+  },
+  "wsSendCommand": {
+    "type": "message.send",
+    "requestId": "40000000-0000-4000-8000-000000000001",
+    "timestamp": "2026-11-15T03:00:01Z",
+    "payload": {
+      "messageId": "30000000-0000-4000-8000-000000000044",
+      "conversationId": "20000000-0000-4000-8000-000000000001",
+      "contentPlain": "Chốt contract Đợt 1 xong rồi nhé!",
+      "contentCipher": null,
+      "cryptoMetadata": null
+    }
+  },
+  "wsSendAckEvent": {
+    "type": "message.ack",
+    "eventId": "50000000-0000-4000-8000-000000000001",
+    "seq": 1042,
+    "requestId": "40000000-0000-4000-8000-000000000001",
+    "timestamp": "2026-11-15T03:00:01.085Z",
+    "payload": {
+      "messageId": "30000000-0000-4000-8000-000000000044",
+      "conversationId": "20000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-11-15T03:00:01.080Z",
+      "state": "STORED",
+      "seq": 1042
+    }
+  },
+  "wsSyncResumeCommand": {
+    "type": "sync.resume",
+    "requestId": "40000000-0000-4000-8000-000000000002",
+    "timestamp": "2026-11-15T03:05:00Z",
+    "payload": {
+      "lastAckedSeq": 1041,
+      "limit": 200
+    }
+  },
+  "wsSessionRevokedEvent": {
+    "type": "session.revoked",
+    "eventId": "50000000-0000-4000-8000-000000000009",
+    "seq": null,
+    "requestId": null,
+    "timestamp": "2026-11-15T03:10:00Z",
+    "payload": {
+      "sessionId": "b2c3d4e5-0003-4000-8000-000000000003",
+      "reason": "ADMIN_NEW_LOGIN",
+      "message": "Phiên quản trị đã kết thúc do tài khoản đăng nhập ở nơi khác."
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "description": "Shared DEC-10 canonical byte-count, SHA-256 fingerprint, and tombstone digest vector verified across Java (CanonicalSpamReportEncoder) and Python.",
+  "authenticatedReporterUserId": "10000000-0000-4000-8000-000000000001",
+  "restRequest": {
+    "id": "70000000-0000-4000-8000-000000000001",
+    "reportedUserId": "10000000-0000-4000-8000-000000000002",
+    "conversationId": "20000000-0000-4000-8000-000000000001",
+    "reason": "Gửi link lừa đảo",
+    "evidence": [
+      {
+        "sourceMessageId": "30000000-0000-4000-8000-000000000001",
+        "senderUserId": "10000000-0000-4000-8000-000000000001",
+        "messageCreatedAt": "2026-11-15T03:00:00Z",
+        "contentPlain": "  Xin chào bạn  ",
+        "selected": false,
+        "context": true,
+        "displayOrder": 1
+      },
+      {
+        "sourceMessageId": "30000000-0000-4000-8000-000000000002",
+        "senderUserId": "10000000-0000-4000-8000-000000000002",
+        "messageCreatedAt": "2026-11-15T03:00:02.123456Z",
+        "contentPlain": "Link: https://spam.example/x \"free\"\n\t\\path\u0007",
+        "selected": true,
+        "context": true,
+        "displayOrder": 2
+      }
+    ]
+  },
+  "expectedDec10CanonicalJson": "{\"id\":\"70000000-0000-4000-8000-000000000001\",\"reporter_user_id\":\"10000000-0000-4000-8000-000000000001\",\"reported_user_id\":\"10000000-0000-4000-8000-000000000002\",\"conversation_id\":\"20000000-0000-4000-8000-000000000001\",\"reason\":\"Gửi link lừa đảo\",\"evidence\":[{\"source_message_id\":\"30000000-0000-4000-8000-000000000001\",\"sender_user_id\":\"10000000-0000-4000-8000-000000000001\",\"message_created_at\":\"2026-11-15T03:00:00.000000Z\",\"content_plain\":\"  Xin chào bạn  \",\"is_selected\":false,\"is_context\":true,\"display_order\":1},{\"source_message_id\":\"30000000-0000-4000-8000-000000000002\",\"sender_user_id\":\"10000000-0000-4000-8000-000000000002\",\"message_created_at\":\"2026-11-15T03:00:02.123456Z\",\"content_plain\":\"Link: https://spam.example/x \\\"free\\\"\\n\\t\\\\path\\u0007\",\"is_selected\":true,\"is_context\":true,\"display_order\":2}]}",
+  "expectedUtf8ByteLength": 823,
+  "expectedRequestFingerprintSha256Hex": "a0595ad9b554aa7148f156cf588b0fc137dc19b523901189d1975104686653e2",
+  "expectedTombstoneDigestSha256Hex": "424a190bb9075e03060d8825ca75f7b83f477795cf30c3b155f6c7132b920af3"
+}

@@ -1,0 +1,84 @@
+{
+  "masterList": {
+    "request": "GET /api/v1/admin/users?status=ACTIVE&sortBy=fullName&sortDir=ASC&page=0&size=25",
+    "response": {
+      "items": [
+        {
+          "id": "10000000-0000-4000-8000-000000000001",
+          "username": "minhan",
+          "fullName": "Nguyễn Minh An",
+          "role": "USER",
+          "status": "ACTIVE",
+          "createdAt": "2026-09-12T08:30:00Z"
+        },
+        {
+          "id": "10000000-0000-4000-8000-000000000002",
+          "username": "giabao",
+          "fullName": "Trần Gia Bảo",
+          "role": "USER",
+          "status": "ACTIVE",
+          "createdAt": "2026-10-01T14:15:00Z"
+        }
+      ],
+      "page": 0,
+      "size": 25,
+      "totalItems": 2,
+      "totalPages": 1
+    }
+  },
+  "inspectorProfile": {
+    "request": "GET /api/v1/admin/users/10000000-0000-4000-8000-000000000001",
+    "response": {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "username": "minhan",
+      "fullName": "Nguyễn Minh An",
+      "email": "minhan@example.test",
+      "address": "227 Nguyễn Văn Cừ, Quận 5, TP.HCM",
+      "dateOfBirth": "2004-05-19",
+      "gender": "FEMALE",
+      "role": "USER",
+      "status": "ACTIVE",
+      "statusBeforeDelete": null,
+      "emailVerified": true,
+      "createdAt": "2026-09-12T08:30:00Z",
+      "deletedAt": null,
+      "restoreDeadlineAt": null,
+      "directFriendCount": 4
+    }
+  },
+  "loginHistoryTab": {
+    "request": "GET /api/v1/admin/users/10000000-0000-4000-8000-000000000001/login-history?limit=50",
+    "response": {
+      "items": [
+        {
+          "id": "60000000-0000-4000-8000-000000000001",
+          "userId": "10000000-0000-4000-8000-000000000001",
+          "username": "minhan",
+          "fullName": "Nguyễn Minh An",
+          "loggedInAt": "2026-11-15T03:00:00Z",
+          "scope": "USER_CLIENT"
+        }
+      ],
+      "nextCursor": null,
+      "hasMore": false
+    }
+  },
+  "friendsTab": {
+    "request": "GET /api/v1/admin/users/10000000-0000-4000-8000-000000000001/friends?page=0&size=50",
+    "response": {
+      "items": [
+        {
+          "userId": "10000000-0000-4000-8000-000000000002",
+          "username": "giabao",
+          "fullName": "Trần Gia Bảo",
+          "status": "ACTIVE",
+          "friendsSince": "2026-10-05T10:20:00Z"
+        }
+      ],
+      "page": 0,
+      "size": 50,
+      "totalItems": 1,
+      "totalPages": 1
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatsystem.local/schemas/message-window.schema.json",
+  "title": "MessageWindowResponse",
+  "description": "Cursor-paginated conversation history window for U-SCR-07 (supports before, after, and aroundMessageId search jump).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items",
+    "nextCursor",
+    "hasMoreOlder",
+    "newerCursor",
+    "hasMoreNewer",
+    "anchorMessageId"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/MessageDto"
+      }
+    },
+    "nextCursor": {
+      "type": ["string", "null"]
+    },
+    "hasMoreOlder": {
+      "type": "boolean"
+    },
+    "newerCursor": {
+      "type": ["string", "null"]
+    },
+    "hasMoreNewer": {
+      "type": "boolean"
+    },
+    "anchorMessageId": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    }
+  },
+  "$defs": {
+    "MessageDto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "conversationId",
+        "senderUserId",
+        "createdAt",
+        "contentPlain",
+        "contentCipher",
+        "cryptoMetadata",
+        "recalledAt",
+        "state"
+      ],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "conversationId": { "type": "string", "format": "uuid" },
+        "senderUserId": { "type": ["string", "null"], "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "contentPlain": { "type": ["string", "null"] },
+        "contentCipher": { "type": ["string", "null"] },
+        "cryptoMetadata": { "type": ["object", "null"] },
+        "recalledAt": { "type": ["string", "null"], "format": "date-time" },
+        "state": {
+          "type": "string",
+          "enum": ["PENDING", "FAILED", "STORED", "DELIVERED", "READ", "RECALLED"]
+        }
+      }
+    }
+  }
+}

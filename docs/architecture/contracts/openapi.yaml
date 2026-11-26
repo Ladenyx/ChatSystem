@@ -1,0 +1,1844 @@
+openapi: 3.1.0
+info:
+  title: ChatSystem (WhatsUp) REST API
+  version: 1.0.0-v2-wave1
+  description: |
+    Hợp đồng HTTPS REST API (`/api/v1`) giữa User Client, Admin App và Chat Server.
+    Xem thêm quy ước tổng quát tại `rest-conventions.md` và giao thức thời gian thực tại `websocket-protocol.md`.
+servers:
+  - url: https://{host}/api/v1
+    description: Production / VPS (HTTPS)
+    variables:
+      host:
+        default: chat.example.test
+  - url: http://127.0.0.1:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Đăng nhập, phiên User/Admin, đăng ký tạm, xác minh email, khôi phục mật khẩu (U-01..U-05, A-SCR-01)
+  - name: Messaging
+    description: Hội thoại, lịch sử phân trang cursor, gửi/thu hồi/xóa/tìm tin nhắn 1-1 & nhóm (U-12..U-18, U-24)
+  - name: Sync
+    description: Đồng bộ bù sự kiện sau khi kết nối lại (X-02, U-13)
+  - name: AI
+    description: Trợ lý viết lại nháp và gợi ý trả lời (U-27, DEC-08)
+  - name: Spam
+    description: Gửi báo cáo spam và kiểm duyệt (U-26, A-10, A-11, DEC-10)
+  - name: AdminOverview
+    description: Dashboard Tổng quan Admin App (A-SCR-02)
+  - name: AdminUsers
+    description: Quản lý người dùng tách Master–Detail (A-SCR-03, A-01..A-06)
+  - name: AdminLogs
+    description: Nhật ký đăng nhập hệ thống (A-SCR-06, A-07)
+  - name: AdminAnalytics
+    description: Thống kê đăng ký mới, hoạt động người dùng và mạng lưới bạn bè (A-SCR-07..09, A-12..A-16)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập vào User Client hoặc Admin App
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Kết quả đăng nhập (cấp phiên hoặc yêu cầu chuyển tiếp xác minh/đặt mật khẩu)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '429':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Đăng xuất và thu hồi phiên hiện tại
+      operationId: logout
+      responses:
+        '204':
+          description: Đã thu hồi phiên hiện tại
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Lấy thông tin phiên và tài khoản đang đăng nhập
+      operationId: getCurrentSession
+      responses:
+        '200':
+          description: Thông tin phiên hiện hành
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /auth/force-password-change:
+    post:
+      tags: [Auth]
+      summary: Đặt mật khẩu mới sau khi đăng nhập bằng mật khẩu tạm (U-05, U-SCR-05)
+      operationId: forcePasswordChange
+      description: "Yêu cầu `Authorization: Bearer <transitionToken>` với quyền `FORCE_PASSWORD_CHANGE_REQUIRED`."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForcePasswordChangeRequest'
+      responses:
+        '204':
+          description: Đã lưu mật khẩu mới, vô hiệu hóa mật khẩu tạm và thu hồi toàn bộ phiên cũ
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '410':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations:
+    get:
+      tags: [Messaging]
+      summary: Danh sách hội thoại của người dùng hiện tại (U-SCR-07)
+      operationId: listConversations
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [ALL, UNREAD, GROUP]
+            default: ALL
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/CursorLimit'
+      responses:
+        '200':
+          description: Trang danh sách hội thoại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationCursorPage'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations/{conversationId}/messages:
+    get:
+      tags: [Messaging]
+      summary: Tải lịch sử tin nhắn phân trang cursor hoặc nhảy tới tin đích (U-14, U-17, U-18)
+      operationId: getConversationMessages
+      description: |
+        Tối đa 50 tin/trang. Các tham số `before`, `after`, `aroundMessageId` loại trừ lẫn nhau.
+        Trả về `items` theo thứ tự thời gian tăng dần `(createdAt ASC, id ASC)`.
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/CursorBefore'
+        - name: after
+          in: query
+          description: Con trỏ opaque để tải trang tin mới hơn.
+          schema:
+            type: string
+        - name: aroundMessageId
+          in: query
+          description: UUID tin nhắn đích để tải cửa sổ lịch sử xung quanh khi nhảy từ tìm kiếm.
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 50
+      responses:
+        '200':
+          description: Cửa sổ lịch sử tin nhắn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageWindowResponse'
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '404':
+          $ref: '#/components/responses/ApiErrorResponse'
+    post:
+      tags: [Messaging]
+      summary: Gửi tin nhắn qua REST (dự phòng hoặc retry idempotent cùng messageId)
+      operationId: sendMessage
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '201':
+          description: Tin nhắn mới đã được lưu vào PostgreSQL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageAckDto'
+        '200':
+          description: Retry idempotent khớp bản ghi đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendMessageAckDto'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations/{conversationId}/messages/{messageId}/recall:
+    post:
+      tags: [Messaging]
+      summary: Thu hồi tin nhắn với mọi người trong 48 giờ đầu (U-16, DEC-02)
+      operationId: recallMessage
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tin nhắn đã được thu hồi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecallMessageResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations/{conversationId}/messages/delete-for-self:
+    post:
+      tags: [Messaging]
+      summary: Xóa một hoặc nhiều tin nhắn phía mình (U-16, tối đa 50 tin/lần)
+      operationId: deleteMessagesForSelf
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteMessagesForSelfRequest'
+      responses:
+        '204':
+          description: Đã ẩn các tin nhắn được chọn cho người dùng hiện tại
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations/{conversationId}/history:
+    delete:
+      tags: [Messaging]
+      summary: Xóa toàn bộ lịch sử hội thoại phía mình (U-15)
+      operationId: clearConversationHistoryForSelf
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '204':
+          description: Đã ghi nhận mốc xóa lịch sử phía mình
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /conversations/{conversationId}/messages/search:
+    get:
+      tags: [Messaging]
+      summary: Tìm kiếm tin nhắn trong một hội thoại 1-1 (U-17)
+      operationId: searchMessagesInConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/CursorLimit'
+      responses:
+        '200':
+          description: Kết quả tìm kiếm trong hội thoại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSearchCursorPage'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /messages/search:
+    get:
+      tags: [Messaging]
+      summary: Tìm kiếm tin nhắn trên tất cả hội thoại 1-1 được phép đọc (U-18)
+      operationId: searchMessagesGlobally
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/CursorLimit'
+      responses:
+        '200':
+          description: Kết quả tìm kiếm toàn cục
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSearchCursorPage'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /sync/events:
+    get:
+      tags: [Sync]
+      summary: Kéo sự kiện đồng bộ bù sau khi kết nối lại (X-02)
+      operationId: getSyncEvents
+      parameters:
+        - name: afterSeq
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 200
+      responses:
+        '200':
+          description: Lô sự kiện đồng bộ theo thứ tự seq tăng dần
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncEventsResponse'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /ai/assist:
+    post:
+      tags: [AI]
+      summary: Viết lại bản nháp (REFINE) hoặc gợi ý trả lời (RECOMMEND) (U-27, DEC-08)
+      operationId: assistWriting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiAssistRequest'
+      responses:
+        '200':
+          description: Đúng 3 phương án văn bản gợi ý
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiAssistResponse'
+        '429':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '502':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '504':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /spam-reports:
+    post:
+      tags: [Spam]
+      summary: Gửi báo cáo spam kèm gói bằng chứng đã xác nhận (U-26, DEC-10)
+      operationId: submitSpamReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitSpamReportRequest'
+      responses:
+        '201':
+          description: Báo cáo mới đã được tiếp nhận
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpamReportReceiptDto'
+        '200':
+          description: Retry idempotent khớp fingerprint của báo cáo còn hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpamReportReceiptDto'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '410':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '413':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/overview:
+    get:
+      tags: [AdminOverview]
+      summary: Dữ liệu KPI, xu hướng 12 tháng và danh sách gần đây cho Dashboard Tổng quan (A-SCR-02)
+      operationId: getAdminOverview
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+      responses:
+        '200':
+          description: Ảnh chụp tổng quan hệ thống
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOverviewDto'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users:
+    get:
+      tags: [AdminUsers]
+      summary: Bảng danh sách người dùng lọc/sắp xếp khung trái A-SCR-03 (A-01)
+      operationId: listAdminUsers
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AccountStatus'
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [fullName, createdAt]
+            default: fullName
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/PageIndex'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Trang danh sách tài khoản rút gọn cho bảng trái
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserOffsetPage'
+        '401':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '403':
+          $ref: '#/components/responses/ApiErrorResponse'
+    post:
+      tags: [AdminUsers]
+      summary: Admin tạo tài khoản mới và gửi mật khẩu tạm qua email (A-02, A-DLG-01)
+      operationId: createAdminUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateUserRequest'
+      responses:
+        '201':
+          description: Tài khoản đã được tạo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '502':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}:
+    get:
+      tags: [AdminUsers]
+      summary: Hồ sơ chi tiết khung phải User Inspector A-SCR-03 (A-02)
+      operationId: getAdminUserDetail
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Hồ sơ đầy đủ của tài khoản
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '404':
+          $ref: '#/components/responses/ApiErrorResponse'
+    patch:
+      tags: [AdminUsers]
+      summary: Cập nhật thông tin hồ sơ người dùng (A-02, A-DLG-01)
+      operationId: updateAdminUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateUserRequest'
+      responses:
+        '200':
+          description: Hồ sơ sau cập nhật
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/lock:
+    post:
+      tags: [AdminUsers]
+      summary: Khóa tài khoản và thu hồi toàn bộ phiên đang sống (A-03, A-11)
+      operationId: lockAdminUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Tài khoản đã chuyển sang trạng thái LOCKED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/unlock:
+    post:
+      tags: [AdminUsers]
+      summary: Mở khóa tài khoản (A-03; không tự khôi phục phiên cũ)
+      operationId: unlockAdminUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Tài khoản đã chuyển sang trạng thái ACTIVE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/soft-delete:
+    post:
+      tags: [AdminUsers]
+      summary: Xóa mềm tài khoản 30 ngày và thu hồi toàn bộ phiên (A-02, DEC-07)
+      operationId: softDeleteAdminUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Tài khoản đã chuyển sang trạng thái DELETED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/restore:
+    post:
+      tags: [AdminUsers]
+      summary: Khôi phục tài khoản xóa mềm trước hạn 30 ngày (A-02, DEC-07)
+      operationId: restoreAdminUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Tài khoản đã quay về statusBeforeDelete (ACTIVE hoặc LOCKED)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetailDto'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/reset-password:
+    post:
+      tags: [AdminUsers]
+      summary: Gửi mật khẩu tạm 15 phút qua email cho người dùng (A-04, DEC-06)
+      operationId: resetAdminUserPassword
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '204':
+          description: Đã gửi email chứa mật khẩu tạm
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '429':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '502':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/login-history:
+    get:
+      tags: [AdminUsers]
+      summary: Tab Lịch sử đăng nhập của một tài khoản trên A-SCR-03 (A-05)
+      operationId: getAdminUserLoginHistory
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/CursorLimit'
+      responses:
+        '200':
+          description: Danh sách lượt đăng nhập mới nhất trước
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminLoginHistoryCursorPage'
+        '404':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/users/{userId}/friends:
+    get:
+      tags: [AdminUsers]
+      summary: Tab Danh sách bạn bè trực tiếp của một tài khoản trên A-SCR-03 (A-06)
+      operationId: getAdminUserFriends
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/PageIndex'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Danh sách bạn bè trực tiếp
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserFriendOffsetPage'
+        '404':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+  /admin/login-logs:
+    get:
+      tags: [AdminLogs]
+      summary: Nhật ký đăng nhập toàn hệ thống theo thứ tự thời gian giảm dần (A-SCR-06, A-07)
+      operationId: listAdminLoginLogs
+      parameters:
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/CursorLimit'
+      responses:
+        '200':
+          description: Trang nhật ký đăng nhập toàn hệ thống
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminLoginHistoryCursorPage'
+
+  /admin/analytics/registrations:
+    get:
+      tags: [AdminAnalytics]
+      summary: Danh sách tài khoản đăng ký mới theo khoảng ngày Asia/Ho_Chi_Minh (A-12)
+      operationId: listAdminRegistrations
+      parameters:
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [fullName, createdAt]
+            default: createdAt
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/PageIndex'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Bảng đăng ký mới
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRegistrationOffsetPage'
+
+  /admin/analytics/registrations/monthly:
+    get:
+      tags: [AdminAnalytics]
+      summary: Biểu đồ số đăng ký mới 12 tháng trong năm (A-13)
+      operationId: getMonthlyRegistrations
+      parameters:
+        - $ref: '#/components/parameters/AnalyticsYear'
+      responses:
+        '200':
+          description: Đủ 12 tháng (T1..T12), tháng không có dữ liệu có count = 0
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 12
+                maxItems: 12
+                items:
+                  $ref: '#/components/schemas/MonthlyCountPointDto'
+
+  /admin/analytics/activity:
+    get:
+      tags: [AdminAnalytics]
+      summary: Danh sách hoạt động người dùng theo khoảng ngày và bộ lọc chỉ số (A-15)
+      operationId: listAdminActivity
+      parameters:
+        - $ref: '#/components/parameters/DateFrom'
+        - $ref: '#/components/parameters/DateTo'
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum: [APP_OPENS, PEOPLE_CHATTED, GROUPS_CHATTED]
+        - name: metricOp
+          in: query
+          schema:
+            $ref: '#/components/schemas/ComparisonOperator'
+        - name: metricValue
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [fullName, createdAt]
+            default: createdAt
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/PageIndex'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Bảng hoạt động người dùng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminActivityOffsetPage'
+
+  /admin/analytics/activity/monthly:
+    get:
+      tags: [AdminAnalytics]
+      summary: Biểu đồ người dùng duy nhất mở ứng dụng theo 12 tháng (A-16)
+      operationId: getMonthlyActiveUsers
+      parameters:
+        - $ref: '#/components/parameters/AnalyticsYear'
+      responses:
+        '200':
+          description: Đủ 12 tháng (T1..T12)
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 12
+                maxItems: 12
+                items:
+                  $ref: '#/components/schemas/MonthlyCountPointDto'
+
+  /admin/analytics/friend-network:
+    get:
+      tags: [AdminAnalytics]
+      summary: Bảng quy mô bạn bè trực tiếp và bạn mở rộng (A-14)
+      operationId: listAdminFriendNetwork
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: directFriendsOp
+          in: query
+          schema:
+            $ref: '#/components/schemas/ComparisonOperator'
+        - name: directFriendsValue
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [fullName, createdAt]
+            default: createdAt
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/PageIndex'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Bảng mạng lưới bạn bè hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminFriendNetworkOffsetPage'
+
+  /admin/analytics/friend-network/monthly:
+    get:
+      tags: [AdminAnalytics]
+      summary: Biểu đồ lượt chấp nhận kết bạn 12 tháng trong năm (A-SCR-09)
+      operationId: getMonthlyFriendAcceptances
+      parameters:
+        - $ref: '#/components/parameters/AnalyticsYear'
+      responses:
+        '200':
+          description: Đủ 12 tháng (T1..T12)
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 12
+                maxItems: 12
+                items:
+                  $ref: '#/components/schemas/MonthlyCountPointDto'
+
+  /admin/spam-reports/{reportId}/review:
+    post:
+      tags: [Spam]
+      summary: Đánh dấu báo cáo spam đã xử lý kèm ghi chú bắt buộc (A-10, DEC-10)
+      operationId: reviewSpamReport
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkSpamReportReviewedRequest'
+      responses:
+        '200':
+          description: Báo cáo đã ở trạng thái REVIEWED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpamReportReceiptDto'
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '409':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '410':
+          $ref: '#/components/responses/ApiErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OpaqueSessionToken
+
+  parameters:
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CursorBefore:
+      name: before
+      in: query
+      description: Con trỏ phân trang opaque (Base64URL).
+      schema:
+        type: string
+    CursorLimit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    PageIndex:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    PageSize:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    SortDir:
+      name: sortDir
+      in: query
+      schema:
+        type: string
+        enum: [ASC, DESC]
+        default: DESC
+    DateFrom:
+      name: from
+      in: query
+      required: true
+      description: Ngày bắt đầu (bao gồm), múi giờ Asia/Ho_Chi_Minh.
+      schema:
+        type: string
+        format: date
+    DateTo:
+      name: to
+      in: query
+      required: true
+      description: Ngày kết thúc (bao gồm, tính tới trước 00:00 ngày kế tiếp theo Asia/Ho_Chi_Minh).
+      schema:
+        type: string
+        format: date
+    AnalyticsYear:
+      name: year
+      in: query
+      required: true
+      schema:
+        type: integer
+        minimum: 2000
+        maximum: 2100
+
+  responses:
+    ApiErrorResponse:
+      description: Phản hồi lỗi chuẩn ApiError
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    UserRole:
+      type: string
+      enum: [USER, ADMIN]
+    AccountStatus:
+      type: string
+      enum: [ACTIVE, LOCKED, DELETED]
+    Gender:
+      type: string
+      enum: [MALE, FEMALE, OTHER]
+    SessionScope:
+      type: string
+      enum: [USER_CLIENT, ADMIN_APP]
+    PresenceStatus:
+      type: string
+      enum: [ONLINE, OFFLINE]
+    ConversationType:
+      type: string
+      enum: [DIRECT, GROUP]
+    MessageDeliveryState:
+      type: string
+      enum: [PENDING, FAILED, STORED, DELIVERED, READ, RECALLED]
+    SpamReviewStatus:
+      type: string
+      enum: [PENDING, REVIEWED]
+    ComparisonOperator:
+      type: string
+      enum: [EQ, LT, GT]
+    AuthNextAction:
+      type: string
+      enum: [SESSION_GRANTED, EMAIL_VERIFICATION_REQUIRED, FORCE_PASSWORD_CHANGE_REQUIRED]
+    AiAssistMode:
+      type: string
+      enum: [REFINE, RECOMMEND]
+
+    FieldError:
+      type: object
+      required: [field, code, message]
+      properties:
+        field:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+
+    ApiError:
+      type: object
+      required: [code, message, status, timestamp, path, requestId, retryable, details]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+        requestId:
+          type: string
+        retryable:
+          type: boolean
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+
+    LoginRequest:
+      type: object
+      required: [username, password, scope]
+      properties:
+        username:
+          type: string
+          minLength: 6
+          maxLength: 30
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+        scope:
+          $ref: '#/components/schemas/SessionScope'
+        launchId:
+          type: [string, 'null']
+          format: uuid
+          description: Bắt buộc khi `scope == USER_CLIENT` để ghi nhận `record_app_open`.
+
+    AuthenticatedUserSummary:
+      type: object
+      required: [id, username, fullName, email, role, status, emailVerified]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        emailVerified:
+          type: boolean
+
+    SessionInfo:
+      type: object
+      required: [sessionId, scope, createdAt, user]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        scope:
+          $ref: '#/components/schemas/SessionScope'
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/AuthenticatedUserSummary'
+
+    LoginResponse:
+      type: object
+      required: [nextAction]
+      properties:
+        nextAction:
+          $ref: '#/components/schemas/AuthNextAction'
+        sessionToken:
+          type: [string, 'null']
+        session:
+          oneOf:
+            - $ref: '#/components/schemas/SessionInfo'
+            - type: 'null'
+        transitionToken:
+          type: [string, 'null']
+        transitionExpiresAt:
+          type: [string, 'null']
+          format: date-time
+
+    ForcePasswordChangeRequest:
+      type: object
+      required: [newPassword]
+      properties:
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    ConversationSummaryDto:
+      type: object
+      required: [id, type, title, unreadCount, encrypted, memberCount, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/ConversationType'
+        title:
+          type: string
+        peerUserId:
+          type: [string, 'null']
+          format: uuid
+        peerPresence:
+          oneOf:
+            - $ref: '#/components/schemas/PresenceStatus'
+            - type: 'null'
+        encrypted:
+          type: boolean
+        unreadCount:
+          type: integer
+          minimum: 0
+        memberCount:
+          type: integer
+          minimum: 1
+        lastMessagePreview:
+          type: [string, 'null']
+        lastMessageAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: [string, 'null']
+          format: date-time
+
+    ConversationCursorPage:
+      type: object
+      required: [items, nextCursor, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationSummaryDto'
+        nextCursor:
+          type: [string, 'null']
+        hasMore:
+          type: boolean
+
+    MessageDto:
+      type: object
+      required: [id, conversationId, createdAt, state]
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: [string, 'null']
+          format: uuid
+          description: "`null` sau khi tài khoản gửi bị purge (hiển thị nhãn người đã xóa)."
+        createdAt:
+          type: string
+          format: date-time
+        contentPlain:
+          type: [string, 'null']
+        contentCipher:
+          type: [string, 'null']
+          description: Base64 ciphertext AES-256-GCM cho hội thoại GROUP.
+        cryptoMetadata:
+          type: [object, 'null']
+          additionalProperties: true
+        recalledAt:
+          type: [string, 'null']
+          format: date-time
+        state:
+          $ref: '#/components/schemas/MessageDeliveryState'
+
+    MessageWindowResponse:
+      type: object
+      required: [items, nextCursor, hasMoreOlder, newerCursor, hasMoreNewer, anchorMessageId]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageDto'
+        nextCursor:
+          type: [string, 'null']
+          description: Con trỏ `before` để tải trang tin cũ hơn.
+        hasMoreOlder:
+          type: boolean
+        newerCursor:
+          type: [string, 'null']
+          description: Con trỏ `after` để tải trang tin mới hơn.
+        hasMoreNewer:
+          type: boolean
+        anchorMessageId:
+          type: [string, 'null']
+          format: uuid
+
+    SendMessageRequest:
+      type: object
+      required: [messageId]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: [string, 'null']
+          format: uuid
+          description: Bắt buộc trên khung WSS `message.send`; tùy chọn trên REST (nếu gửi kèm phải khớp path `{conversationId}`).
+        contentPlain:
+          type: [string, 'null']
+        contentCipher:
+          type: [string, 'null']
+        cryptoMetadata:
+          type: [object, 'null']
+          additionalProperties: true
+
+    SendMessageAckDto:
+      type: object
+      required: [messageId, conversationId, createdAt, state, seq]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        state:
+          $ref: '#/components/schemas/MessageDeliveryState'
+        seq:
+          type: integer
+          format: int64
+
+    RecallMessageResponse:
+      type: object
+      required: [messageId, conversationId, recalledAt]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        recalledAt:
+          type: string
+          format: date-time
+
+    DeleteMessagesForSelfRequest:
+      type: object
+      required: [messageIds]
+      properties:
+        messageIds:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: string
+            format: uuid
+
+    MessageSearchHitDto:
+      type: object
+      required: [messageId, conversationId, createdAt, snippet]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: [string, 'null']
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        snippet:
+          type: string
+
+    MessageSearchCursorPage:
+      type: object
+      required: [items, nextCursor, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageSearchHitDto'
+        nextCursor:
+          type: [string, 'null']
+        hasMore:
+          type: boolean
+
+    SyncEventsResponse:
+      type: object
+      required: [events, nextSeq, latestSeq, hasMore, fullResyncRequired]
+      properties:
+        events:
+          type: array
+          items:
+            type: object
+            required: [type, eventId, seq, timestamp, payload]
+            properties:
+              type:
+                type: string
+              eventId:
+                type: string
+                format: uuid
+              seq:
+                type: integer
+                format: int64
+              requestId:
+                type: [string, 'null']
+                format: uuid
+              timestamp:
+                type: string
+                format: date-time
+              payload:
+                type: object
+                additionalProperties: true
+        nextSeq:
+          type: integer
+          format: int64
+        latestSeq:
+          type: integer
+          format: int64
+        hasMore:
+          type: boolean
+        fullResyncRequired:
+          type: boolean
+
+    AiAssistContextMessageDto:
+      type: object
+      required: [senderLabel, sentAt, text]
+      properties:
+        senderLabel:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        text:
+          type: string
+
+    AiAssistRequest:
+      type: object
+      required: [conversationId, mode, contextMessages]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        mode:
+          $ref: '#/components/schemas/AiAssistMode'
+        draft:
+          type: [string, 'null']
+        contextMessages:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/AiAssistContextMessageDto'
+
+    AiAssistResponse:
+      type: object
+      required: [mode, suggestions]
+      properties:
+        mode:
+          $ref: '#/components/schemas/AiAssistMode'
+        suggestions:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: string
+
+    SpamEvidenceItemDto:
+      type: object
+      required: [sourceMessageId, senderUserId, messageCreatedAt, contentPlain, selected, context, displayOrder]
+      properties:
+        sourceMessageId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: string
+          format: uuid
+        messageCreatedAt:
+          type: string
+          format: date-time
+        contentPlain:
+          type: string
+        selected:
+          type: boolean
+        context:
+          type: boolean
+        displayOrder:
+          type: integer
+          minimum: 1
+
+    SubmitSpamReportRequest:
+      type: object
+      required: [id, reportedUserId, conversationId, reason, evidence]
+      properties:
+        id:
+          type: string
+          format: uuid
+        reportedUserId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          minLength: 1
+        evidence:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/SpamEvidenceItemDto'
+
+    SpamReportReceiptDto:
+      type: object
+      required: [reportId, receivedAt, reviewStatus]
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        receivedAt:
+          type: string
+          format: date-time
+        reviewStatus:
+          $ref: '#/components/schemas/SpamReviewStatus'
+        reviewedByUserId:
+          type: [string, 'null']
+          format: uuid
+        reviewedAt:
+          type: [string, 'null']
+          format: date-time
+        reviewNote:
+          type: [string, 'null']
+
+    MarkSpamReportReviewedRequest:
+      type: object
+      required: [reviewNote]
+      properties:
+        reviewNote:
+          type: string
+          minLength: 1
+
+    MonthlyCountPointDto:
+      type: object
+      required: [year, month, count]
+      properties:
+        year:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        count:
+          type: integer
+          format: int64
+          minimum: 0
+
+    AdminOverviewDto:
+      type: object
+      required: [totalUsers, onlineUsers, totalGroups, pendingSpamReports, year, monthlyRegistrations, monthlyActiveUsers, recentLogins]
+      properties:
+        totalUsers:
+          type: integer
+          format: int64
+        onlineUsers:
+          type: integer
+          format: int64
+        totalGroups:
+          type: integer
+          format: int64
+        pendingSpamReports:
+          type: integer
+          format: int64
+        year:
+          type: integer
+        monthlyRegistrations:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items:
+            $ref: '#/components/schemas/MonthlyCountPointDto'
+        monthlyActiveUsers:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items:
+            $ref: '#/components/schemas/MonthlyCountPointDto'
+        recentLogins:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminLoginHistoryItemDto'
+
+    AdminUserListItemDto:
+      type: object
+      required: [id, username, fullName, role, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminUserDetailDto:
+      type: object
+      required: [id, username, fullName, email, role, status, emailVerified, createdAt, directFriendCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: [string, 'null']
+        dateOfBirth:
+          type: [string, 'null']
+          format: date
+        gender:
+          oneOf:
+            - $ref: '#/components/schemas/Gender'
+            - type: 'null'
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        statusBeforeDelete:
+          oneOf:
+            - $ref: '#/components/schemas/AccountStatus'
+            - type: 'null'
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: [string, 'null']
+          format: date-time
+        restoreDeadlineAt:
+          type: [string, 'null']
+          format: date-time
+        directFriendCount:
+          type: integer
+          minimum: 0
+
+    AdminCreateUserRequest:
+      type: object
+      required: [username, fullName, email]
+      properties:
+        username:
+          type: string
+          minLength: 6
+          maxLength: 30
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        address:
+          type: [string, 'null']
+          maxLength: 255
+        dateOfBirth:
+          type: [string, 'null']
+          format: date
+        gender:
+          oneOf:
+            - $ref: '#/components/schemas/Gender'
+            - type: 'null'
+
+    AdminUpdateUserRequest:
+      type: object
+      required: [fullName, email]
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        address:
+          type: [string, 'null']
+          maxLength: 255
+        dateOfBirth:
+          type: [string, 'null']
+          format: date
+        gender:
+          oneOf:
+            - $ref: '#/components/schemas/Gender'
+            - type: 'null'
+
+    AdminLoginHistoryItemDto:
+      type: object
+      required: [id, loggedInAt, scope]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: [string, 'null']
+          format: uuid
+        username:
+          type: [string, 'null']
+        fullName:
+          type: [string, 'null']
+        loggedInAt:
+          type: string
+          format: date-time
+        scope:
+          $ref: '#/components/schemas/SessionScope'
+
+    AdminUserFriendDto:
+      type: object
+      required: [userId, username, fullName, status, friendsSince]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        friendsSince:
+          type: string
+          format: date-time
+
+    AdminRegistrationRowDto:
+      type: object
+      required: [accountKey, registeredAt]
+      properties:
+        accountKey:
+          type: string
+          format: uuid
+        userId:
+          type: [string, 'null']
+          format: uuid
+        username:
+          type: [string, 'null']
+        fullName:
+          type: [string, 'null']
+        email:
+          type: [string, 'null']
+        status:
+          oneOf:
+            - $ref: '#/components/schemas/AccountStatus'
+            - type: 'null'
+        registeredAt:
+          type: string
+          format: date-time
+
+    AdminActivityRowDto:
+      type: object
+      required: [accountKey, appOpens, peopleChattedWith, groupsChattedIn]
+      properties:
+        accountKey:
+          type: string
+          format: uuid
+        userId:
+          type: [string, 'null']
+          format: uuid
+        username:
+          type: [string, 'null']
+        fullName:
+          type: [string, 'null']
+        createdAt:
+          type: [string, 'null']
+          format: date-time
+        appOpens:
+          type: integer
+          minimum: 0
+        peopleChattedWith:
+          type: integer
+          minimum: 0
+        groupsChattedIn:
+          type: integer
+          minimum: 0
+
+    AdminFriendNetworkRowDto:
+      type: object
+      required: [userId, username, fullName, createdAt, directFriends, extendedFriends]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        directFriends:
+          type: integer
+          minimum: 0
+        extendedFriends:
+          type: integer
+          minimum: 0
+
+    AdminUserOffsetPage:
+      type: object
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminUserListItemDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    AdminLoginHistoryCursorPage:
+      type: object
+      required: [items, nextCursor, hasMore]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminLoginHistoryItemDto'
+        nextCursor:
+          type: [string, 'null']
+        hasMore:
+          type: boolean
+
+    AdminUserFriendOffsetPage:
+      type: object
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminUserFriendDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    AdminRegistrationOffsetPage:
+      type: object
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminRegistrationRowDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    AdminActivityOffsetPage:
+      type: object
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminActivityRowDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    AdminFriendNetworkOffsetPage:
+      type: object
+      required: [items, page, size, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminFriendNetworkRowDto'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
