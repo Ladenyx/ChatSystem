@@ -92,7 +92,7 @@ Triển khai song song với Giai đoạn 3 sau khi có phiên đăng nhập và
 
 **Đề xuất Nguyễn Thế Quân làm leader** vì Quân phụ trách khung Maven, `desktop-ui` và Docker Compose ở Version 1. Mỗi người viết feature spec và API contract cho cụm mình phụ trách, triển khai từ giao diện đến Server và kiểm thử với CSDL thật. [Phần việc Version 1](../../../README.md#team-and-contributors)
 
-### Nguyễn Thế Quân (`@Ladenyx`, leader đề xuất)
+### Nguyễn Thế Quân (`@Ladenyx`)
 
 - **Giai đoạn 1-2.** Điều phối tiến độ, chốt quy ước REST/WSS và DTO dùng chung. Dựng Spring Boot, kết nối PostgreSQL, cấu hình ngoài và phần kết nối WebSocket, push sự kiện và presence (`X-02`, `X-03`). Làm skeleton loading trong `desktop-ui`, nối vào một bảng Admin App để thử với dữ liệu thật và chạy thử bản đóng gói trên Windows.
 - **Giai đoạn 3-4.** Tích hợp đăng nhập Admin App, quản lý người dùng và nhật ký (`A-01` đến `A-07`), Dashboard Tổng quan và thống kê (`A-12` đến `A-16`). Dùng API vòng đời tài khoản của Bảo cho các thao tác khóa, xóa và khôi phục.
