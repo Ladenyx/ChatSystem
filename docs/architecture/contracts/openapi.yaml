@@ -1606,6 +1606,7 @@ components:
         expectedEmail:
           type: string
           minLength: 1
+          maxLength: 254
           format: email
 
     AdminMonthlySeriesDto:

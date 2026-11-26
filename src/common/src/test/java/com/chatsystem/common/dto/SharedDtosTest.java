@@ -190,6 +190,10 @@ class SharedDtosTest {
         assertEquals("minhan@example.test", new AdminResetPasswordRequest("minhan@example.test").expectedEmail());
         assertThrows(NullPointerException.class, () -> new AdminResetPasswordRequest(null));
         assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest("  "));
+        assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest("not-an-email"));
+        assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest(" minhan@example.test "));
+        String overMaxEmail = "a".repeat(243) + "@example.com";
+        assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest(overMaxEmail));
 
         var monthlySeries = new AdminMonthlySeriesDto(2026, asOfDate, List.of(2026, 2025), twelveMonths);
         assertEquals(12, monthlySeries.points().size());

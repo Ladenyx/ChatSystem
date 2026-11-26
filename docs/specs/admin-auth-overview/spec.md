@@ -57,7 +57,7 @@
    - `totalGroups`: tổng hội thoại `type = 'GROUP'` trong `conversations`.
    - `pendingSpamReports`: số bản ghi `spam_reports` có `review_status = 'PENDING'` và còn trong hạn **180 ngày** (`received_at + INTERVAL '4320 hours' > CURRENT_TIMESTAMP`).
    - `monthlyRegistrations` & `monthlyActiveUsers`: đủ 12 tháng `T1..T12` của năm `year` (tháng trống = `0`).
-   - `recentSpamReports`: tối đa 3 báo cáo mới nhất theo `(received_at DESC, id DESC)` còn trong hạn 180 ngày.
+   - `recentSpamReports`: tối đa 3 báo cáo đang hoạt động mới nhất theo `(received_at DESC, id DESC)` còn trong hạn 180 ngày (theo [DEC-10](../../decisions/spam-moderation-and-retention.md), khi bất kỳ tài khoản liên quan bị purge, toàn bộ báo cáo bị xóa khỏi `spam_reports` và chuyển sang `spam_report_archives` ẩn danh nên không xuất hiện trên bảng này).
    - `recentLogins`: tối đa 3 lượt đăng nhập mới nhất theo `(login_at DESC, id DESC)`; nếu `user_id IS NULL` (đã purge) thì hiển thị nhãn ẩn danh `"Người dùng đã xóa"`.
 3. Khi nhận sự kiện WSS `admin.kpi.updated` hoặc `admin.spam_report.created` / `admin.spam_report.reviewed`, UI cập nhật chỉ số KPI và danh sách tóm tắt tương ứng (chỉ khi đang ở phiên hợp lệ).
 4. Bấm vào thẻ KPI hoặc liên kết điều hướng sang `A-SCR-03`, `A-SCR-04`, `A-SCR-05`, `A-SCR-06`, `A-SCR-07`, `A-SCR-08`. Bấm `onlineUsersCard` mở `A-SCR-03` ở trạng thái mặc định (không gắn bộ lọc giả).
