@@ -1504,11 +1504,15 @@ components:
           format: uuid
         reportedUsername:
           type: string
+          minLength: 1
+          pattern: '\S'
         reporterUserId:
           type: string
           format: uuid
         reporterUsername:
           type: string
+          minLength: 1
+          pattern: '\S'
         receivedAt:
           type: string
           format: date-time

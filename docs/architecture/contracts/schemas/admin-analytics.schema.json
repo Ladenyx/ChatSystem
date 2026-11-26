@@ -4,6 +4,12 @@
   "title": "Admin Overview, User Creation, and Analytics Payloads",
   "description": "JSON Schema for A-SCR-02, A-DLG-01 creation result, A-SCR-07, A-SCR-08, and A-SCR-09.",
   "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/AdminOverviewDto" },
+    { "$ref": "#/$defs/AdminMonthlySeriesDto" },
+    { "$ref": "#/$defs/AdminFriendNetworkResponse" },
+    { "$ref": "#/$defs/AdminCreateUserResponse" }
+  ],
   "$defs": {
     "MonthlyCountPoint": {
       "type": "object",
@@ -51,9 +57,9 @@
       "properties": {
         "id": { "type": "string", "format": "uuid" },
         "reportedUserId": { "type": "string", "format": "uuid" },
-        "reportedUsername": { "type": "string", "minLength": 1 },
+        "reportedUsername": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "reporterUserId": { "type": "string", "format": "uuid" },
-        "reporterUsername": { "type": "string", "minLength": 1 },
+        "reporterUsername": { "type": "string", "minLength": 1, "pattern": "\\S" },
         "receivedAt": { "type": "string", "format": "date-time" },
         "reviewStatus": { "type": "string", "enum": ["PENDING", "REVIEWED"] }
       }
