@@ -3,7 +3,7 @@
 **Mục tiêu chung:** Hoàn thành mốc **Version 1 (trọng số 20%, dự kiến 22/11/2026)**
 
 Hai trọng tâm cốt lõi của Version 1:
-1. **Mã nguồn giao diện JavaFX chạy được (`src/`)** cho cả hai phân hệ **User Client** và **Admin App (Desktop GUI)** — chưa bắt buộc xử lý nghiệp vụ backend/socket, nhưng cần điều hướng qua lại và có dữ liệu mẫu để hiển thị và chụp màn hình báo cáo (không dùng mockup tĩnh thay thế).
+1. **Mã nguồn giao diện JavaFX chạy được (`src/`)** cho cả hai phân hệ **User Client** và **Admin Console (Desktop GUI)** — chưa bắt buộc xử lý nghiệp vụ backend/socket, nhưng cần điều hướng qua lại và có dữ liệu mẫu để hiển thị và chụp màn hình báo cáo (không dùng mockup tĩnh thay thế).
 2. **Thiết kế Cơ sở dữ liệu hoàn chỉnh (`script/`)** chạy được từ đầu trên database PostgreSQL trống, kèm tài liệu báo cáo và ảnh chụp lịch sử commit Git của từng thành viên (`git/`).
 
 ---
@@ -17,7 +17,7 @@ Mục tiêu là tạo "xương sống" để mọi thành viên có thể kéo c
   - POM cha quản lý phiên bản thư viện/plugin, kiểm tra JDK/Maven; mỗi module có thư mục nguồn, tài nguyên và kiểm thử chuẩn Maven. Xem lệnh build/test và phạm vi khung tại [README.md](../../../README.md).
   - Đã kiểm tra `./mvnw clean verify` cho toàn bộ reactor và `./mvnw -pl src/user -am verify` với Temurin JDK 25 trên Linux; `validate` với JDK 17 bị từ chối đúng yêu cầu. Chưa có test case hoặc lớp khởi chạy ứng dụng ở bước này.
 - [x] **1.2. Xây dựng bộ khung điều hướng (Navigation / Scene Manager) & Theme**
-  - Khởi tạo class khởi chạy cho **User Client** và **Admin App**, nạp theme `Primer Light` / `Primer Dark` của AtlantaFX.
+  - Khởi tạo class khởi chạy cho **User Client** và **Admin Console**, nạp theme `Primer Light` / `Primer Dark` của AtlantaFX.
   - Tạo `ViewNavigator` cho phép chuyển đổi giữa các màn hình FXML và bật các hộp thoại Modal/Drawer/Popover để phục vụ demo luồng màn hình và chụp ảnh báo cáo.
   - Đã có `UserApplication` / `AdminApplication`, rail/sidebar tham chiếu Figma, đổi Primer Light/Dark trực tiếp, cache trang, lịch sử quay lại, reset phiên và quản lý focus/đóng overlay. Thêm thư viện `desktop-ui` để chia sẻ UI mà giữ `common`/`server` độc lập với JavaFX.
   - Đã kiểm tra 10 test GUI trên Linux với Temurin JDK 25 + Xvfb, bao gồm kích thước nội dung 1280 × 720 và 1024 × 640, cùng lệnh launch Maven cho cả hai ứng dụng. Xem [kiến trúc và cách gắn FXML](../../architecture/desktop-ui.md), [ảnh trong lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md) và [lệnh launch](../../../README.md#chạy-user-client-và-admin-app).
@@ -54,18 +54,18 @@ Thực hiện song song với Giai đoạn 1–3 để sớm chốt cấu trúc 
 
 Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thành 3 cụm màn hình để triển khai FXML + Controller UI:
 
-- [ ] **3.1. Cụm 1 — Xác thực & Khởi tạo khóa (`U-SCR-01` → `U-SCR-06`)**
+- [x] **3.1. Cụm 1 — Xác thực & Khởi tạo khóa (`U-SCR-01` → `U-SCR-06`)**
   - `U-SCR-01`: Đăng nhập (`Sign In View`).
   - `U-SCR-02`: Đăng ký (`Sign Up View`).
   - `U-SCR-03`: Xác minh Email (`Email Verification View`, có bộ đếm ngược gửi lại mã).
   - `U-SCR-04`: Quên mật khẩu (`Forgot Password View`).
   - `U-SCR-05`: Đặt mật khẩu bắt buộc (`Force Change Password View`, khi đăng nhập bằng mật khẩu tạm).
   - `U-SCR-06`: Thiết lập / Khôi phục khóa E2EE (`E2EE Key Setup & Recovery View`).
-- [ ] **3.2. Cụm 2 — Khung chính (`MainShell`), Hội thoại (`U-SCR-07`) & Drawer thông tin (`U-SCR-09`)**
+- [x] **3.2. Cụm 2 — Khung chính (`MainShell`), Hội thoại (`U-SCR-07`) & Drawer thông tin (`U-SCR-09`)**
   - Thanh điều hướng dọc (Icon Rail) bên trái cùng.
   - `U-SCR-07`: Cột trái (nút Tạo nhóm mới, ô tìm kiếm tổng hợp `U-18`, bộ lọc *Tất cả/Chưa đọc/Nhóm*, danh sách chat); Khung giữa (header hội thoại, luồng tin nhắn phân trang, trạng thái gửi, menu xóa 1/nhiều dòng & thu hồi 48h, thanh soạn thảo có **2 nút AI riêng biệt: `Chỉnh sửa (Refine)` và `Gợi ý (Recommend)`**).
   - `U-SCR-09`: Panel trượt bên phải (tìm kiếm trong hội thoại `U-17`, quản lý thành viên/Admin nhóm `U-20`–`U-23`, nút xóa lịch sử `U-15`, báo cáo spam, chặn/rời nhóm).
-- [ ] **3.3. Cụm 3 — Bạn bè (`U-SCR-08`) & 5 Hộp thoại (`U-DLG-01` → `U-DLG-05`)**
+- [x] **3.3. Cụm 3 — Bạn bè (`U-SCR-08`) & 5 Hộp thoại (`U-DLG-01` → `U-DLG-05`)**
   - `U-SCR-08`: 5 phân mục (sub-tab): *Tất cả bạn bè*, *Đang Online*, *Lời mời kết bạn*, *Tìm người dùng*, *Đã chặn*.
   - `U-DLG-01`: Hồ sơ & Bảo mật Tài khoản (Hồ sơ, Đổi mật khẩu, Quản lý khóa E2EE).
   - `U-DLG-02`: Tạo nhóm chat mới.
@@ -75,11 +75,11 @@ Bám sát đặc tả tại [screen.md](../../requirements/screen.md), chia thà
 
 ---
 
-## Giai đoạn 4: Xây dựng Giao diện `Admin App` (Desktop GUI) (3–4 ngày)
+## Giai đoạn 4: Xây dựng Giao diện `Admin Console` (Desktop GUI) (3–4 ngày)
 
 Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](../../requirements/screen.md):
 
-- [ ] **4.1. Cụm 1 — Khung Sidebar, Tổng quan & Quản trị Master–Detail (`A-SCR-01` → `A-SCR-06`, `A-DLG-01`..`02`)**
+- [x] **4.1. Cụm 1 — Khung Sidebar, Tổng quan & Quản trị Master–Detail (`A-SCR-01` → `A-SCR-06`, `A-DLG-01`..`02`)**
   - `A-SCR-01`: Đăng nhập Quản trị (`Admin Sign In View`) và khung chính có Sidebar phân nhóm.
   - `A-SCR-02`: Dashboard Tổng quan (4 thẻ KPI + biểu đồ xu hướng nhanh + danh sách tóm tắt).
   - `A-SCR-03`: Quản lý Người dùng dạng `SplitPane` (bảng lọc/sắp xếp bên trái + User Inspector cố định bên phải kèm 2 tab *Lịch sử đăng nhập* `A-05` và *Danh sách bạn bè* `A-06`).
@@ -88,7 +88,7 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
   - `A-SCR-06`: Nhật ký Đăng nhập Hệ thống theo thời gian (`A-07`).
   - `A-DLG-01`: Modal Thêm / Cập nhật Người dùng.
   - `A-DLG-02`: Modal Xác nhận Thao tác Quản trị.
-- [ ] **4.2. Cụm 2 — 3 Trang Dashboard Thống kê & Biểu đồ (`A-SCR-07` → `A-SCR-09`)**
+- [x] **4.2. Cụm 2 — 3 Trang Dashboard Thống kê & Biểu đồ (`A-SCR-07` → `A-SCR-09`)**
   - `A-SCR-07`: Dashboard Đăng ký mới (`BarChart` 12 tháng theo năm chọn `A-13` ở trên + bảng lọc theo khoảng ngày/họ tên `A-12` ở dưới).
   - `A-SCR-08`: Dashboard Hoạt động Người dùng (`LineChart` 12 tháng `A-16` ở trên + bảng chi tiết 3 chỉ số *Lượt mở app / Số người đã chat / Số nhóm đã chat* kèm bộ lọc toán tử `=`, `<`, `>` `A-15` ở dưới).
   - `A-SCR-09`: Phân tích Mạng lưới Bạn bè (`BarChart` 12 tháng đếm lượt chấp nhận kết bạn theo năm + bảng mạng lưới hiện tại `A-14` so sánh *Bạn trực tiếp* với *Tổng bạn mở rộng*, kèm bộ lọc toán tử `=`, `<`, `>`).
@@ -99,17 +99,17 @@ Thực hiện song song với Giai đoạn 3 theo đặc tả tại [screen.md](
 
 Theo bảng **Version 1 deliverables** và **Pre-submission checks** tại [ROADMAP.md](../../../ROADMAP.md#version-1-deliverables):
 
-- [ ] **5.1. Cập nhật trạng thái [ROADMAP.md](../../../ROADMAP.md)**
+- [x] **5.1. Cập nhật trạng thái [ROADMAP.md](../../../ROADMAP.md)**
   - Đánh dấu `✅` vào cột **UI** cho các tính năng `U-01`–`U-27`, `A-01`–`A-16` và `X-01`.
   - Điền GitHub handle của từng thành viên vào cột **Owner**.
-- [ ] **5.2. Thu thập ảnh chụp Commit (`git/`)**
+- [x] **5.2. Thu thập ảnh chụp Commit (`git/`)**
   - Đảm bảo **mọi thành viên trong nhóm đều có commit thực tế trên Git** (theo quy định môn học: thành viên không có commit nhận 0 điểm).
   - Chụp ảnh lịch sử commit của từng thành viên lưu vào thư mục `git/`.
-- [ ] **5.3. Soạn thảo Báo cáo Version 1 (`report/`)**
+- [x] **5.3. Soạn thảo Báo cáo Version 1 (`report/`)**
   - Thông tin nhóm, danh sách công việc của từng thành viên và bảng tỷ lệ đóng góp (tổng cộng đúng **100%**).
   - Thiết kế cơ sở dữ liệu (sơ đồ ERD + giải thích các bảng/ràng buộc chính).
   - Danh sách toàn bộ màn hình đã thiết kế kèm **ảnh chụp màn hình thực tế chạy từ ứng dụng JavaFX**.
-- [ ] **5.4. Kiểm thử chéo trên Windows & kiểm tra cấu trúc gói nộp cuối cùng**
+- [x] **5.4. Kiểm thử chéo trên Windows & kiểm tra cấu trúc gói nộp cuối cùng**
   - Chạy kiểm thử giao diện trực tiếp trên máy **Windows** (`.\mvnw.cmd -pl src/user javafx:run` và `.\mvnw.cmd -pl src/admin javafx:run` ở độ phân giải tối thiểu `1366x768`) để xác nhận không lỗi font tiếng Việt, không lệch/tràn bố cục so với máy Arch Linux và macOS trước khi chụp ảnh đưa vào báo cáo.
   - Đảm bảo file nén chứa đúng `src/`, `script/`, `git/` và file Báo cáo theo đúng quy định của đề bài (kèm POM cha, `mvnw`, `mvnw.cmd`, `.mvn/` để build được từ đầu).
   - Kiểm tra không commit hoặc đóng gói kèm mật khẩu, API key hay thông tin nhạy cảm thật.
