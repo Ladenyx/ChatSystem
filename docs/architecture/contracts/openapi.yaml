@@ -517,10 +517,11 @@ paths:
         - $ref: '#/components/parameters/UserId'
         - name: If-Match
           in: header
-          required: false
-          description: "ETag từ lần đọc `GET /admin/users/{userId}` để chặn ghi đè đồng thời (trả 409 CONFLICT nếu lệch)"
+          required: true
+          description: "ETag bắt buộc từ lần đọc `GET /admin/users/{userId}` để chặn ghi đè đồng thời (trả 409 CONFLICT nếu lệch)"
           schema:
             type: string
+            minLength: 1
       requestBody:
         required: true
         content:
@@ -620,7 +621,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
@@ -628,6 +629,8 @@ paths:
       responses:
         '204':
           description: Đã gửi email chứa mật khẩu tạm
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
         '409':
           $ref: '#/components/responses/ApiErrorResponse'
         '429':
@@ -1512,6 +1515,26 @@ components:
         reviewStatus:
           $ref: '#/components/schemas/SpamReviewStatus'
 
+    OrderedMonthlyPoints:
+      type: array
+      description: "Đúng 12 phần tử tương ứng tháng 1..12 theo thứ tự tăng dần; ràng buộc khớp `year` với trường `year` bao ngoài được kiểm tra bởi DTO/Server."
+      minItems: 12
+      maxItems: 12
+      items: false
+      prefixItems:
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 1 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 2 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 3 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 4 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 5 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 6 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 7 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 8 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 9 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 10 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 11 } } }]
+        - allOf: [{ $ref: '#/components/schemas/MonthlyCountPointDto' }, { properties: { month: { const: 12 } } }]
+
     AdminOverviewDto:
       type: object
       required: [totalUsers, onlineUsers, totalGroups, pendingSpamReports, year, asOfDate, monthlyRegistrations, monthlyActiveUsers, recentSpamReports, recentLogins]
@@ -1534,23 +1557,17 @@ components:
           type: string
           format: date
         monthlyRegistrations:
-          type: array
-          minItems: 12
-          maxItems: 12
-          items:
-            $ref: '#/components/schemas/MonthlyCountPointDto'
+          $ref: '#/components/schemas/OrderedMonthlyPoints'
         monthlyActiveUsers:
-          type: array
-          minItems: 12
-          maxItems: 12
-          items:
-            $ref: '#/components/schemas/MonthlyCountPointDto'
+          $ref: '#/components/schemas/OrderedMonthlyPoints'
         recentSpamReports:
           type: array
+          maxItems: 3
           items:
             $ref: '#/components/schemas/AdminRecentSpamReportDto'
         recentLogins:
           type: array
+          maxItems: 3
           items:
             $ref: '#/components/schemas/AdminLoginHistoryItemDto'
 
@@ -1564,12 +1581,27 @@ components:
           type: boolean
         emailDeliveryError:
           type: [string, 'null']
+      oneOf:
+        - properties:
+            activationEmailSent:
+              const: true
+            emailDeliveryError:
+              type: 'null'
+        - properties:
+            activationEmailSent:
+              const: false
+            emailDeliveryError:
+              type: string
+              minLength: 1
+              pattern: '\S'
 
     AdminResetPasswordRequest:
       type: object
+      required: [expectedEmail]
       properties:
         expectedEmail:
-          type: [string, 'null']
+          type: string
+          minLength: 1
           format: email
 
     AdminMonthlySeriesDto:
@@ -1586,11 +1618,7 @@ components:
           items:
             type: integer
         points:
-          type: array
-          minItems: 12
-          maxItems: 12
-          items:
-            $ref: '#/components/schemas/MonthlyCountPointDto'
+          $ref: '#/components/schemas/OrderedMonthlyPoints'
 
     AdminFriendNetworkResponse:
       type: object

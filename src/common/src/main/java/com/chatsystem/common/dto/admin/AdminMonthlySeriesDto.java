@@ -14,18 +14,7 @@ public record AdminMonthlySeriesDto(
     public AdminMonthlySeriesDto {
         Objects.requireNonNull(asOfDate, "asOfDate");
         Objects.requireNonNull(availableYears, "availableYears");
-        Objects.requireNonNull(points, "points");
         availableYears = List.copyOf(availableYears);
-        points = List.copyOf(points);
-        if (points.size() != 12) {
-            throw new IllegalArgumentException("Monthly series must contain exactly 12 points (T1..T12)");
-        }
-        for (int index = 0; index < 12; index++) {
-            MonthlyCountPointDto point = points.get(index);
-            if (point.year() != year || point.month() != index + 1) {
-                throw new IllegalArgumentException(
-                        "Point at index " + index + " must match year " + year + " and month " + (index + 1));
-            }
-        }
+        points = MonthlyCountPointDto.requireOrderedTwelveMonths(year, points, "points");
     }
 }

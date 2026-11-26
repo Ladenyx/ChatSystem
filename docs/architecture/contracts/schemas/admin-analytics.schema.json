@@ -15,6 +15,27 @@
         "count": { "type": "integer", "minimum": 0 }
       }
     },
+    "OrderedMonthlyPoints": {
+      "type": "array",
+      "description": "Exactly 12 monthly points ordered T1..T12; cross-field year equality against the enclosing `year` is enforced by the DTO/Server.",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": false,
+      "prefixItems": [
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 1 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 2 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 3 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 4 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 5 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 6 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 7 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 8 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 9 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 10 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 11 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/MonthlyCountPoint" }, { "properties": { "month": { "const": 12 } } }] }
+      ]
+    },
     "AdminRecentSpamReport": {
       "type": "object",
       "additionalProperties": false,
@@ -72,24 +93,16 @@
         "pendingSpamReports": { "type": "integer", "minimum": 0 },
         "year": { "type": "integer" },
         "asOfDate": { "type": "string", "format": "date" },
-        "monthlyRegistrations": {
-          "type": "array",
-          "minItems": 12,
-          "maxItems": 12,
-          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
-        },
-        "monthlyActiveUsers": {
-          "type": "array",
-          "minItems": 12,
-          "maxItems": 12,
-          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
-        },
+        "monthlyRegistrations": { "$ref": "#/$defs/OrderedMonthlyPoints" },
+        "monthlyActiveUsers": { "$ref": "#/$defs/OrderedMonthlyPoints" },
         "recentSpamReports": {
           "type": "array",
+          "maxItems": 3,
           "items": { "$ref": "#/$defs/AdminRecentSpamReport" }
         },
         "recentLogins": {
           "type": "array",
+          "maxItems": 3,
           "items": { "$ref": "#/$defs/AdminLoginHistoryItem" }
         }
       }
@@ -105,12 +118,7 @@
           "type": "array",
           "items": { "type": "integer" }
         },
-        "points": {
-          "type": "array",
-          "minItems": 12,
-          "maxItems": 12,
-          "items": { "$ref": "#/$defs/MonthlyCountPoint" }
-        }
+        "points": { "$ref": "#/$defs/OrderedMonthlyPoints" }
       }
     },
     "AdminFriendNetworkResponse": {
@@ -159,7 +167,25 @@
         },
         "activationEmailSent": { "type": "boolean" },
         "emailDeliveryError": { "type": ["string", "null"] }
-      }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "activationEmailSent": { "const": true },
+            "emailDeliveryError": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "activationEmailSent": { "const": false },
+            "emailDeliveryError": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          }
+        }
+      ]
     }
   }
 }

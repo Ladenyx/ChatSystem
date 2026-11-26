@@ -16,6 +16,7 @@ import com.chatsystem.common.domain.UserRole;
 import com.chatsystem.common.dto.admin.AdminCreateUserResponse;
 import com.chatsystem.common.dto.admin.AdminFriendNetworkResponse;
 import com.chatsystem.common.dto.admin.AdminFriendNetworkRowDto;
+import com.chatsystem.common.dto.admin.AdminLoginHistoryItemDto;
 import com.chatsystem.common.dto.admin.AdminMonthlySeriesDto;
 import com.chatsystem.common.dto.admin.AdminOverviewDto;
 import com.chatsystem.common.dto.admin.AdminRecentSpamReportDto;
@@ -34,6 +35,7 @@ import com.chatsystem.common.dto.messaging.MessageDto;
 import com.chatsystem.common.dto.messaging.SendMessageRequest;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -154,6 +156,27 @@ class SharedDtosTest {
 
         assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
                 20, 5, 4, 2, 2026, asOfDate, twelveMonths.subList(0, 11), twelveMonths, List.of(), List.of()));
+        List<MonthlyCountPointDto> swappedMonths = new java.util.ArrayList<>(twelveMonths);
+        Collections.swap(swappedMonths, 0, 1);
+        assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
+                20, 5, 4, 2, 2026, asOfDate, swappedMonths, twelveMonths, List.of(), List.of()));
+        List<MonthlyCountPointDto> wrongYearPoints = IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> new MonthlyCountPointDto(2025, m, m))
+                .toList();
+        assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
+                20, 5, 4, 2, 2026, asOfDate, twelveMonths, wrongYearPoints, List.of(), List.of()));
+        List<AdminRecentSpamReportDto> fourReports = IntStream.range(0, 4)
+                .mapToObj(i -> recentSpam)
+                .toList();
+        assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
+                20, 5, 4, 2, 2026, asOfDate, twelveMonths, twelveMonths, fourReports, List.of()));
+        var loginItem = new AdminLoginHistoryItemDto(
+                UUID.randomUUID(), id, "minhan", "Nguyễn Minh An", NOW, SessionScope.USER_CLIENT);
+        List<AdminLoginHistoryItemDto> fourLogins = IntStream.range(0, 4)
+                .mapToObj(i -> loginItem)
+                .toList();
+        assertThrows(IllegalArgumentException.class, () -> new AdminOverviewDto(
+                20, 5, 4, 2, 2026, asOfDate, twelveMonths, twelveMonths, List.of(), fourLogins));
         assertThrows(IllegalArgumentException.class, () -> new AdminRecentSpamReportDto(
                 UUID.randomUUID(), id, "  ", UUID.randomUUID(), "giabao", NOW, SpamReviewStatus.PENDING));
 
@@ -165,14 +188,11 @@ class SharedDtosTest {
         assertThrows(IllegalArgumentException.class, () -> new AdminCreateUserResponse(active, false, "   "));
 
         assertEquals("minhan@example.test", new AdminResetPasswordRequest("minhan@example.test").expectedEmail());
-        assertEquals(null, new AdminResetPasswordRequest(null).expectedEmail());
+        assertThrows(NullPointerException.class, () -> new AdminResetPasswordRequest(null));
         assertThrows(IllegalArgumentException.class, () -> new AdminResetPasswordRequest("  "));
 
         var monthlySeries = new AdminMonthlySeriesDto(2026, asOfDate, List.of(2026, 2025), twelveMonths);
         assertEquals(12, monthlySeries.points().size());
-        List<MonthlyCountPointDto> wrongYearPoints = IntStream.rangeClosed(1, 12)
-                .mapToObj(m -> new MonthlyCountPointDto(2025, m, m))
-                .toList();
         assertThrows(IllegalArgumentException.class,
                 () -> new AdminMonthlySeriesDto(2026, asOfDate, List.of(2026), wrongYearPoints));
 
