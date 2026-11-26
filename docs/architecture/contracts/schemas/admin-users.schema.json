@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatsystem.local/schemas/admin-users.schema.json",
+  "title": "Admin Users Master-Detail Payloads (A-SCR-03)",
+  "description": "Separated master table page, inspector detail profile, login history tab, and friend list tab for A-SCR-03.",
+  "type": "object",
+  "$defs": {
+    "AdminUserListPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "page", "size", "totalItems", "totalPages"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "username", "fullName", "role", "status", "createdAt"],
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "username": { "type": "string" },
+              "fullName": { "type": "string" },
+              "role": { "type": "string", "enum": ["USER", "ADMIN"] },
+              "status": { "type": "string", "enum": ["ACTIVE", "LOCKED", "DELETED"] },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "page": { "type": "integer", "minimum": 0 },
+        "size": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "totalItems": { "type": "integer", "minimum": 0 },
+        "totalPages": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "AdminUserDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "username",
+        "fullName",
+        "email",
+        "address",
+        "dateOfBirth",
+        "gender",
+        "role",
+        "status",
+        "statusBeforeDelete",
+        "emailVerified",
+        "createdAt",
+        "deletedAt",
+        "restoreDeadlineAt",
+        "directFriendCount"
+      ],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "username": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "address": { "type": ["string", "null"] },
+        "dateOfBirth": { "type": ["string", "null"], "format": "date" },
+        "gender": { "type": ["string", "null"], "enum": ["MALE", "FEMALE", "OTHER", null] },
+        "role": { "type": "string", "enum": ["USER", "ADMIN"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "LOCKED", "DELETED"] },
+        "statusBeforeDelete": { "type": ["string", "null"], "enum": ["ACTIVE", "LOCKED", null] },
+        "emailVerified": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "deletedAt": { "type": ["string", "null"], "format": "date-time" },
+        "restoreDeadlineAt": { "type": ["string", "null"], "format": "date-time" },
+        "directFriendCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

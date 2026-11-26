@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chatsystem.local/schemas/ws-frame.schema.json",
+  "title": "ChatSystem WebSocket Frame",
+  "description": "Raw JSON frame envelope for Client -> Server commands and Server -> Client events over wss://<host>/ws.",
+  "oneOf": [
+    { "$ref": "#/$defs/WsCommand" },
+    { "$ref": "#/$defs/WsEvent" }
+  ],
+  "$defs": {
+    "WsCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "requestId", "timestamp", "payload"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "system.ping",
+            "sync.resume",
+            "message.send",
+            "receipt.delivered",
+            "receipt.read"
+          ]
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    },
+    "WsEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "eventId", "seq", "requestId", "timestamp", "payload"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$"
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "seq": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "requestId": {
+          "type": ["string", "null"],
+          "format": "uuid"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
