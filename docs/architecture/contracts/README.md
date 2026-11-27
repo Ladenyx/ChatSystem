@@ -9,8 +9,9 @@ Bộ tài liệu này chốt quy ước giao tiếp **HTTPS REST**, **Raw JSON o
 | [rest-conventions.md](rest-conventions.md) | Base URL, xác thực Opaque Bearer Token, tách phiên User/Admin, quy ước `camelCase`, `ApiError` + danh mục `ErrorCode`, phân trang Cursor/Offset, lọc/sắp xếp, idempotency, bản đồ endpoint Đợt 1 & Đợt 2 | Cả nhóm |
 | [websocket-protocol.md](websocket-protocol.md) | Bắt tay `wss://<host>/ws`, envelope `WsCommand` / `WsEvent`, heartbeat & presence, thứ tự `seq`, ACK gửi tin bền vững, biên nhận `DELIVERED`/`READ`, đồng bộ bù sau reconnect, danh mục sự kiện theo phạm vi quyền và mã đóng kết nối | Cả nhóm |
 | [openapi.yaml](openapi.yaml) | Đặc tả OpenAPI 3.1.0 cho các endpoint Đợt 1 (Auth, Messaging 1-1 & Sync, Admin Overview/Users/Logs/Analytics) kèm khung chuẩn cho các cụm Đợt 2 (Contacts, Groups/E2EE, Spam, AI) | Client & Server |
-| [schemas/](schemas/) | JSON Schema (Draft 2020-12) kiểm chứng `ApiError`, `WsFrame`, `MessageWindowResponse` (`U-SCR-07`) và `AdminUser` (`A-SCR-03`) | Kiểm thử contract |
+| [schemas/](schemas/) | JSON Schema (Draft 2020-12) kiểm chứng `ApiError`, `WsFrame`, `MessageWindowResponse` (`U-SCR-07`), `AdminUser` (`A-SCR-03`) và `AdminOverview/Analytics` (`A-SCR-02`, `A-SCR-07`–`09`) | Kiểm thử contract |
 | [fixtures/](fixtures/) | Dữ liệu JSON mẫu dùng chung giữa Client và Server cho kiểm thử tích hợp & đối chiếu DEC-10 canonical bytes | Kiểm thử tích hợp |
+| [Kiểm kê & Spec cụm Admin](../../specs/admin/screen-inventory.md) | Kiểm kê màn hình V1, đối chiếu DDL và đặc tả [Auth/Overview/Logs](../../specs/admin-auth-overview/spec.md), [Users](../../specs/admin-users/spec.md), [Analytics](../../specs/admin-analytics/spec.md) | Quân & Bảo |
 
 ## Quyết định kiến trúc đã chốt (Giai đoạn 1)
 

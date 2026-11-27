@@ -1,0 +1,138 @@
+{
+  "overview": {
+    "request": "GET /api/v1/admin/overview?year=2026",
+    "response": {
+      "totalUsers": 20,
+      "onlineUsers": 6,
+      "totalGroups": 4,
+      "pendingSpamReports": 3,
+      "year": 2026,
+      "asOfDate": "2026-11-15",
+      "monthlyRegistrations": [
+        { "year": 2026, "month": 1, "count": 2 },
+        { "year": 2026, "month": 2, "count": 1 },
+        { "year": 2026, "month": 3, "count": 0 },
+        { "year": 2026, "month": 4, "count": 3 },
+        { "year": 2026, "month": 5, "count": 2 },
+        { "year": 2026, "month": 6, "count": 1 },
+        { "year": 2026, "month": 7, "count": 0 },
+        { "year": 2026, "month": 8, "count": 4 },
+        { "year": 2026, "month": 9, "count": 3 },
+        { "year": 2026, "month": 10, "count": 2 },
+        { "year": 2026, "month": 11, "count": 2 },
+        { "year": 2026, "month": 12, "count": 0 }
+      ],
+      "monthlyActiveUsers": [
+        { "year": 2026, "month": 1, "count": 4 },
+        { "year": 2026, "month": 2, "count": 5 },
+        { "year": 2026, "month": 3, "count": 5 },
+        { "year": 2026, "month": 4, "count": 7 },
+        { "year": 2026, "month": 5, "count": 8 },
+        { "year": 2026, "month": 6, "count": 9 },
+        { "year": 2026, "month": 7, "count": 10 },
+        { "year": 2026, "month": 8, "count": 12 },
+        { "year": 2026, "month": 9, "count": 13 },
+        { "year": 2026, "month": 10, "count": 15 },
+        { "year": 2026, "month": 11, "count": 16 },
+        { "year": 2026, "month": 12, "count": 0 }
+      ],
+      "recentSpamReports": [
+        {
+          "id": "70000000-0000-4000-8000-000000000001",
+          "reportedUserId": "10000000-0000-4000-8000-000000000002",
+          "reportedUsername": "giabao",
+          "reporterUserId": "10000000-0000-4000-8000-000000000001",
+          "reporterUsername": "minhan",
+          "receivedAt": "2026-11-15T02:45:00Z",
+          "reviewStatus": "PENDING"
+        }
+      ],
+      "recentLogins": [
+        {
+          "id": "60000000-0000-4000-8000-000000000001",
+          "userId": "10000000-0000-4000-8000-000000000001",
+          "username": "minhan",
+          "fullName": "Nguyễn Minh An",
+          "loggedInAt": "2026-11-15T03:00:00Z",
+          "scope": "USER_CLIENT"
+        }
+      ]
+    }
+  },
+  "createUserSmtpFailure": {
+    "request": {
+      "username": "thanhha",
+      "fullName": "Lê Thanh Hà",
+      "email": "thanhha@example.test",
+      "address": null,
+      "dateOfBirth": "2003-08-21",
+      "gender": "FEMALE"
+    },
+    "response": {
+      "user": {
+        "id": "10000000-0000-4000-8000-000000000021",
+        "username": "thanhha",
+        "fullName": "Lê Thanh Hà",
+        "email": "thanhha@example.test",
+        "address": null,
+        "dateOfBirth": "2003-08-21",
+        "gender": "FEMALE",
+        "role": "USER",
+        "status": "ACTIVE",
+        "statusBeforeDelete": null,
+        "emailVerified": false,
+        "createdAt": "2026-11-15T03:12:00Z",
+        "deletedAt": null,
+        "restoreDeadlineAt": null,
+        "directFriendCount": 0
+      },
+      "activationEmailSent": false,
+      "emailDeliveryError": "Không kết nối được máy chủ Gmail SMTP. Hãy dùng Đặt lại mật khẩu để gửi lại email kích hoạt."
+    }
+  },
+  "monthlySeries2026": {
+    "request": "GET /api/v1/admin/analytics/activity/monthly?year=2026",
+    "response": {
+      "year": 2026,
+      "asOfDate": "2026-11-15",
+      "availableYears": [2026, 2025],
+      "points": [
+        { "year": 2026, "month": 1, "count": 4 },
+        { "year": 2026, "month": 2, "count": 5 },
+        { "year": 2026, "month": 3, "count": 5 },
+        { "year": 2026, "month": 4, "count": 7 },
+        { "year": 2026, "month": 5, "count": 8 },
+        { "year": 2026, "month": 6, "count": 9 },
+        { "year": 2026, "month": 7, "count": 10 },
+        { "year": 2026, "month": 8, "count": 12 },
+        { "year": 2026, "month": 9, "count": 13 },
+        { "year": 2026, "month": 10, "count": 15 },
+        { "year": 2026, "month": 11, "count": 16 },
+        { "year": 2026, "month": 12, "count": 0 }
+      ]
+    }
+  },
+  "friendNetwork": {
+    "request": "GET /api/v1/admin/analytics/friend-network?sortBy=fullName&sortDir=ASC&page=0&size=25",
+    "response": {
+      "currentAccounts": 19,
+      "connectedAccounts": 15,
+      "page": {
+        "items": [
+          {
+            "userId": "10000000-0000-4000-8000-000000000001",
+            "username": "minhan",
+            "fullName": "Nguyễn Minh An",
+            "createdAt": "2026-09-12T08:30:00Z",
+            "directFriends": 4,
+            "extendedFriends": 9
+          }
+        ],
+        "page": 0,
+        "size": 25,
+        "totalItems": 19,
+        "totalPages": 1
+      }
+    }
+  }
+}
