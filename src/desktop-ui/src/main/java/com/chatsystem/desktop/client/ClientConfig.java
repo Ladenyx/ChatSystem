@@ -95,6 +95,7 @@ public record ClientConfig(
             }
         }
         for (Path candidate : new Path[]{
+                Path.of("client.properties"),
                 Path.of("config/client.properties"),
                 Path.of("release/config/client.properties")
         }) {
