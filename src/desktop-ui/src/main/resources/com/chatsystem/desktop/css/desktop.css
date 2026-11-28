@@ -23,6 +23,8 @@
     -cs-warning-bg: #fff9f5;
     -cs-danger: #b10e1c;
     -cs-danger-bg: #fdf3f4;
+    -cs-skeleton-base: #e6e6e6;
+    -cs-skeleton-strong: #d6d6d6;
     -color-accent-emphasis: -cs-brand;
     -color-accent-fg: -cs-brand-text;
     -fx-background-color: -cs-canvas;
@@ -46,6 +48,8 @@
     -cs-warning-bg: #332717;
     -cs-danger: #f1707b;
     -cs-danger-bg: #361c24;
+    -cs-skeleton-base: #2d2d2d;
+    -cs-skeleton-strong: #3a3a3a;
 }
 
 .label { -fx-text-fill: -cs-text; }
@@ -174,3 +178,117 @@
 .mock-preview { -fx-padding: 24px; -fx-spacing: 12px; }
 .mock-preview .tab-content-area { -fx-padding: 16px 0 0 0; }
 .mock-message { -fx-padding: 8px; }
+
+/* Shared skeleton placeholders and 5-state loading surfaces */
+.cs-skeleton-block {
+    -fx-background-color: -cs-skeleton-base;
+    -fx-background-radius: 4px;
+}
+
+.cs-skeleton-block-strong {
+    -fx-background-color: -cs-skeleton-strong;
+    -fx-background-radius: 4px;
+}
+
+.cs-skeleton-circle {
+    -fx-background-color: -cs-skeleton-base;
+    -fx-background-radius: 999px;
+}
+
+.cs-skeleton-pill {
+    -fx-background-color: -cs-skeleton-strong;
+    -fx-background-radius: 999px;
+}
+
+.cs-skeleton-card {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 16px;
+}
+
+.cs-skeleton-row {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 8px 12px;
+}
+
+.cs-skeleton-bubble-in {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 16px;
+}
+
+.cs-skeleton-bubble-out {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 16px;
+}
+
+.cs-state-refresh-bar {
+    -fx-pref-height: 3px;
+    -fx-min-height: 3px;
+    -fx-max-height: 3px;
+    -fx-max-width: infinity;
+}
+
+.cs-state-panel {
+    -fx-background-color: -cs-surface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 8px;
+    -fx-padding: 32px 24px;
+    -fx-spacing: 12px;
+}
+
+.cs-state-banner {
+    -fx-background-color: -cs-surface;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-spacing: 12px;
+}
+
+.cs-state-banner-error {
+    -fx-background-color: -cs-danger-bg;
+    -fx-border-color: -cs-danger;
+}
+
+.cs-state-banner-offline {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border-strong;
+}
+
+.cs-state-banner-warning {
+    -fx-background-color: -cs-warning-bg;
+    -fx-border-color: -cs-warning;
+}
+
+.cs-state-banner-info {
+    -fx-background-color: -cs-brand-subtle;
+    -fx-border-color: -cs-brand;
+}
+
+.cs-older-messages-header {
+    -fx-background-color: -cs-surface-subtle;
+    -fx-border-color: -cs-border;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-spacing: 8px;
+}
+
+.cs-msg-status-sending {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-muted;
+}
+
+.cs-msg-status-failed {
+    -fx-font-size: 12px;
+    -fx-text-fill: -cs-danger;
+}

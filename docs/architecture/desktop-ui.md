@@ -161,6 +161,19 @@ xvfb-run -a -s "-screen 0 1440x1000x24" ./mvnw -Pui-tests verify
 
 Thêm `-Dchatsystem.capture=true` để ghi ảnh render vào `src/user/target/screenshots/` và `src/admin/target/screenshots/`. Profile dùng software renderer và giảm chuyển động để chụp ảnh ổn định, chạy ở nội dung cửa sổ 1280 × 720 và 1024 × 640. Ảnh khung điều hướng đã duyệt được lưu trong [lịch sử Git](https://github.com/Ladenyx/ChatSystem/blob/47e3662b15611c6715c62e79295a83ef4a29d03d/docs/images/navigation-theme/README.md). Mục 1.3 bổ sung [bộ dữ liệu và trang xem mẫu](ui-mock-data.md), kèm kiểm thử riêng. Chưa nghiệm thu Windows/macOS, biểu mẫu nghiệp vụ hoặc fat-JAR.
 
+## Trạng thái tải và Skeleton dùng chung
+
+Module `desktop-ui` cung cấp sẵn hai gói dùng chung cho cả **User Client** và **Admin App** khi nối dữ liệu thật:
+
+- `com.chatsystem.desktop.async`:
+  - `AsyncViewLoader<K, T>` chạy I/O ngoài JavaFX Application Thread, phát 5 trạng thái `ViewLoadState<T>` (`LOADING`, `CONTENT`, `EMPTY`, `RETRYABLE_ERROR`, `DISCONNECTED`), giữ lại dữ liệu cũ còn quyền xem khi làm mới cùng `contextKey` (và xóa ngay nếu mất phiên `401` hoặc mất quyền `403`), đồng thời hủy và bỏ qua phản hồi về muộn khi đổi ngữ cảnh, đổi phiên hoặc rời màn hình.
+  - Ở màn hình Master–Detail (`A-SCR-03`), bảng danh sách bên trái và khung chi tiết bên phải dùng hai `AsyncViewLoader` độc lập để việc chọn hàng không khóa hay xóa bảng.
+  - `SubmitActionGuard` chống bấm gửi lặp trên biểu mẫu và hộp thoại; `UiTaskScope` gom future để hủy tập trung trong `onLeave()`; `ScrollAnchorMath` hỗ trợ giữ vị trí cuộn khi chèn tin nhắn cũ.
+- `com.chatsystem.desktop.skeleton`:
+  - `StateContentPane` bọc vùng nội dung thật và skeleton tương ứng, tự động chuyển đổi 5 trạng thái, gắn `SkeletonPulse` tuân thủ `ThemeManager.reducedMotionProperty()`, và hỗ trợ cả Primer Light/Dark qua token `-cs-skeleton-base` / `-cs-skeleton-strong` trong `desktop.css`. Controller cần gọi `dispose()` hoặc hủy qua `UiTaskScope` trong `onLeave()`.
+  - Các bố cục skeleton sẵn có (`focusTraversable=false`, `mouseTransparent=true`): `AdminKpiStripSkeleton`, `TableSkeleton`, `ChartSkeleton`, `DetailInspectorSkeleton`, `ConversationListSkeleton`, `MessageHistorySkeleton`, `ContactListSkeleton`, `SearchResultsSkeleton`, `AiSuggestionsSkeleton` (3 phương án).
+  - Thành phần phụ trợ: `BusyButtonBinding`, `OlderMessagesHeader`, `MessageSendStatusView`, `E2eeSyncBanner`, `SearchPartialSyncBanner`.
+
 ## Khởi chạy
 
 ```sh
