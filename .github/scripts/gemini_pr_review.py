@@ -48,6 +48,7 @@ DEFAULT_DEEP_MODELS = [
 ]
 DEFAULT_MAX_DIFF_CHARS = 180_000
 DEFAULT_TIMEOUT_SEC = 120
+DEFAULT_DEEP_THINKING_LEVEL = "medium"
 
 HUNK_HEADER_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 
@@ -419,10 +420,32 @@ def call_gemini_once(
     return extract_response_text(parsed)
 
 
-def _format_http_error(exc: urllib.error.HTTPError) -> str:
-    body = exc.read().decode("utf-8", errors="replace")
-    compact = " ".join(body.split())[:220]
-    return f"HTTP {exc.code}: {compact}" if compact else f"HTTP {exc.code}"
+def _format_http_error(exc: urllib.error.HTTPError) -> tuple[str, str]:
+    raw = exc.read().decode("utf-8", errors="replace")
+    compact = " ".join(raw.split())[:220]
+    full_detail = f"HTTP {exc.code}: {compact}" if compact else f"HTTP {exc.code}"
+
+    short_reason = f"HTTP {exc.code}"
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        parsed = None
+    if isinstance(parsed, dict):
+        err_obj = parsed.get("error")
+        if isinstance(err_obj, dict) and err_obj.get("status"):
+            short_reason = f"HTTP {exc.code} {err_obj['status']}"
+
+    return short_reason, full_detail
+
+
+def _format_network_error(exc: BaseException, timeout_sec: int) -> tuple[str, str]:
+    full_detail = f"{type(exc).__name__}: {str(exc)[:200]}"
+    is_timeout = isinstance(exc, (TimeoutError, socket.timeout)) or (
+        isinstance(exc, urllib.error.URLError)
+        and isinstance(exc.reason, (TimeoutError, socket.timeout))
+    )
+    short_reason = f"Timeout ({timeout_sec}s)" if is_timeout else type(exc).__name__
+    return short_reason, full_detail
 
 
 def call_gemini_with_fallback(
@@ -436,6 +459,7 @@ def call_gemini_with_fallback(
 ) -> tuple[str, str, list[tuple[str, str]]]:
     """Try candidate models in order, falling back on 429/404/5xx/network/timeout errors."""
     attempts: list[tuple[str, str]] = []
+    optional_keys = ("responseSchema", "thinkingConfig")
 
     for model in models:
         print(f"[{stage_name}] Calling {model}...")
@@ -450,13 +474,15 @@ def call_gemini_with_fallback(
             )
             return text, model, attempts
         except urllib.error.HTTPError as exc:
-            if exc.code == 400 and "responseSchema" in generation_config:
+            present_optional = [k for k in optional_keys if k in generation_config]
+            if exc.code == 400 and present_optional:
+                stripped = ", ".join(present_optional)
                 print(
-                    f"[{stage_name}] {model} rejected responseSchema (HTTP 400); "
-                    "retrying same model without responseSchema..."
+                    f"[{stage_name}] {model} rejected optional config ({stripped}; HTTP 400); "
+                    "retrying same model without them..."
                 )
                 relaxed_config = {
-                    k: v for k, v in generation_config.items() if k != "responseSchema"
+                    k: v for k, v in generation_config.items() if k not in optional_keys
                 }
                 try:
                     text = call_gemini_once(
@@ -469,32 +495,32 @@ def call_gemini_with_fallback(
                     )
                     return text, model, attempts
                 except urllib.error.HTTPError as retry_exc:
-                    reason = _format_http_error(retry_exc)
+                    short_reason, full_detail = _format_http_error(retry_exc)
                     if retry_exc.code in FALLBACK_STATUS_CODES:
-                        attempts.append((model, reason))
-                        print(f"[{stage_name}] {model} failed ({reason}); falling back...")
+                        attempts.append((model, short_reason))
+                        print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
                         continue
                     raise RuntimeError(
-                        f"[{stage_name}] Non-retryable error from {model}: {reason}"
+                        f"[{stage_name}] Non-retryable error from {model}: {full_detail}"
                     ) from retry_exc
                 except (urllib.error.URLError, TimeoutError, socket.timeout) as retry_exc:
-                    reason = f"{type(retry_exc).__name__}: {str(retry_exc)[:200]}"
-                    attempts.append((model, reason))
-                    print(f"[{stage_name}] {model} failed ({reason}); falling back...")
+                    short_reason, full_detail = _format_network_error(retry_exc, timeout_sec)
+                    attempts.append((model, short_reason))
+                    print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
                     continue
 
-            reason = _format_http_error(exc)
+            short_reason, full_detail = _format_http_error(exc)
             if exc.code in FALLBACK_STATUS_CODES:
-                attempts.append((model, reason))
-                print(f"[{stage_name}] {model} failed ({reason}); falling back...")
+                attempts.append((model, short_reason))
+                print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
                 continue
             raise RuntimeError(
-                f"[{stage_name}] Non-retryable error from {model}: {reason}"
+                f"[{stage_name}] Non-retryable error from {model}: {full_detail}"
             ) from exc
         except (urllib.error.URLError, TimeoutError, socket.timeout) as exc:
-            reason = f"{type(exc).__name__}: {str(exc)[:200]}"
-            attempts.append((model, reason))
-            print(f"[{stage_name}] {model} failed ({reason}); falling back...")
+            short_reason, full_detail = _format_network_error(exc, timeout_sec)
+            attempts.append((model, short_reason))
+            print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
             continue
 
     raise AllModelsFailedError(stage_name, attempts)
@@ -640,6 +666,7 @@ def run_stage2(
     repo_instructions: str,
     stage1_result: dict[str, Any],
     timeout_sec: int,
+    thinking_level: str = DEFAULT_DEEP_THINKING_LEVEL,
 ) -> StageExecution:
     """Execute Stage 2: deep architecture, security, and SOLID/DRY review with fallback."""
     system_prompt = (
@@ -678,6 +705,8 @@ def run_stage2(
         "temperature": 0.2,
         "maxOutputTokens": 8192,
     }
+    if thinking_level and thinking_level != "none":
+        generation_config["thinkingConfig"] = {"thinkingLevel": thinking_level}
 
     text, model_used, attempts = call_gemini_with_fallback(
         models=models,
@@ -827,6 +856,9 @@ def main() -> int:
         os.environ.get("GEMINI_MAX_DIFF_CHARS", str(DEFAULT_MAX_DIFF_CHARS))
     )
     timeout_sec = int(os.environ.get("GEMINI_TIMEOUT_SEC", str(DEFAULT_TIMEOUT_SEC)))
+    deep_thinking_level = os.environ.get(
+        "GEMINI_DEEP_THINKING_LEVEL", DEFAULT_DEEP_THINKING_LEVEL
+    ).strip().lower()
 
     print(f"Fetching PR #{pr_number} from {repo}...")
     pr_meta = fetch_pr_metadata(repo, pr_number, github_token)
@@ -877,6 +909,7 @@ def main() -> int:
                 repo_instructions=repo_instructions,
                 stage1_result=stage1_exec.content,
                 timeout_sec=timeout_sec,
+                thinking_level=deep_thinking_level,
             )
         except AllModelsFailedError as exc:
             stage2_error = "; ".join(f"{m}: {r}" for m, r in exc.attempts)
