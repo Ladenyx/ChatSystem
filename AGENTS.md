@@ -47,7 +47,7 @@ Tests use **JUnit 5** (`junit-jupiter`) via Maven Surefire under `src/*/src/test
 
 Follow Conventional Commits, for example `docs(U-01): clarify signup rules` or `feat(desktop-ui): add skeleton states`. Use standard branch prefixes such as `feature/`, `fix/`, or `docs/` for all work, including agent work; do not use `codex/` branches.
 
-PRs should explain changes, reference feature IDs or issues, record verification, and include screenshots for UI changes. Update roadmap status/ownership when applicable and obtain one teammate review. Each member must contribute their own commits.
+Write PR titles in English following Conventional Commits. PRs should explain changes, reference feature IDs or issues, record verification, and include screenshots for UI changes. Update roadmap status/ownership when applicable and obtain one teammate review. Each member must contribute their own commits.
 
 ## Security & Configuration
 
