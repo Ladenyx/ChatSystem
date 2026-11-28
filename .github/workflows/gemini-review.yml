@@ -46,10 +46,11 @@ jobs:
         uses: google-github-actions/run-gemini-cli@v0
         env:
           GEMINI_CLI_TRUST_WORKSPACE: 'true'
-          GIT_CONFIG_SYSTEM: '/dev/null'
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'
         with:
+          # Pin 0.69.0 để tránh lỗi simple-git allowUnsafeConfigPaths trên 0.70.0–0.71.1 (gemini-cli#30416)
+          gemini_cli_version: '0.69.0'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           # Bỏ trống để dùng model mặc định, hoặc cấu hình biến GEMINI_MODEL trong Repository Variables
           gemini_model: '${{ vars.GEMINI_MODEL }}'
