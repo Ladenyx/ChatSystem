@@ -1,6 +1,7 @@
 package com.chatsystem.admin;
 
 import com.chatsystem.admin.controller.AdminShellController;
+import com.chatsystem.admin.service.AdminServiceRegistry;
 import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
@@ -13,6 +14,15 @@ import javafx.stage.Stage;
 
 public final class AdminApplication extends Application {
     static final String WINDOW_TITLE = "WhatsUp";
+    private static AdminServiceRegistry services = AdminServiceRegistry.mockDefault();
+
+    public static AdminServiceRegistry getServices() {
+        return services;
+    }
+
+    public static void setServices(AdminServiceRegistry serviceRegistry) {
+        services = Objects.requireNonNull(serviceRegistry, "serviceRegistry");
+    }
 
     public static ViewNavigator createNavigator() throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(AdminApplication.class.getResource(
