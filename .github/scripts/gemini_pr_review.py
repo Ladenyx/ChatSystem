@@ -3,13 +3,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
 import re
-import socket
+import signal
 import sys
+import time
+from types import FrameType
 from typing import Any
 import urllib.error
 import urllib.request
@@ -41,13 +45,10 @@ SKIP_EXTENSIONS = {
 SKIP_FILENAMES = {"package-lock.json", "pnpm-lock.yaml", "yarn.lock"}
 
 DEFAULT_TRIAGE_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"]
-DEFAULT_DEEP_MODELS = [
-    "gemini-4-hydrogen",
-    "gemini-3.8-flash",
-    "gemini-3.5-flash-lite",
-]
+DEFAULT_DEEP_MODELS = ["gemini-4-hydrogen", "gemini-3.5-flash-lite"]
 DEFAULT_MAX_DIFF_CHARS = 180_000
-DEFAULT_TIMEOUT_SEC = 120
+MAX_GEMINI_REQUEST_SEC = 60
+GEMINI_REVIEW_BUDGET_SEC = 240
 DEFAULT_DEEP_THINKING_LEVEL = "medium"
 
 HUNK_HEADER_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
@@ -95,13 +96,30 @@ STAGE1_SCHEMA: dict[str, Any] = {
 
 
 class AllModelsFailedError(RuntimeError):
-    """Raised when every candidate model in a fallback chain fails."""
+    """Raised when no model responds before the chain or its time budget ends."""
 
-    def __init__(self, stage_name: str, attempts: list[tuple[str, str]]) -> None:
+    def __init__(
+        self,
+        stage_name: str,
+        attempts: list[tuple[str, str]],
+        *,
+        budget_exhausted: bool = False,
+    ) -> None:
         self.stage_name = stage_name
         self.attempts = attempts
-        details = "; ".join(f"{model}: {reason}" for model, reason in attempts)
-        super().__init__(f"[{stage_name}] All models failed: {details}")
+        details = [f"{model}: {reason}" for model, reason in attempts]
+        if budget_exhausted:
+            details.append("Đã hết thời gian dành cho Gemini")
+        self.details = "; ".join(details)
+        message = "Gemini review budget exhausted" if budget_exhausted else "All models failed"
+        super().__init__(f"[{stage_name}] {message}: {self.details}")
+
+
+class _GeminiHTTPError(RuntimeError):
+    def __init__(self, status_code: int, reason: str, detail: str) -> None:
+        super().__init__(detail)
+        self.status_code = status_code
+        self.reason = reason
 
 
 @dataclass
@@ -389,13 +407,29 @@ def extract_response_text(data: dict[str, Any]) -> str:
     raise RuntimeError(f"Gemini candidate contained no text (finishReason={finish_reason})")
 
 
+@contextmanager
+def _limit_gemini_request_time(timeout_sec: float) -> Iterator[None]:
+    """Enforce a wall-clock limit on the Ubuntu runner, including response reads."""
+
+    def on_timeout(_signum: int, _frame: FrameType | None) -> None:
+        raise TimeoutError("Gemini request exceeded its time limit")
+
+    previous_handler = signal.signal(signal.SIGALRM, on_timeout)
+    try:
+        signal.setitimer(signal.ITIMER_REAL, timeout_sec)
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
 def call_gemini_once(
     model: str,
     api_key: str,
     system_prompt: str,
     user_prompt: str,
     generation_config: dict[str, Any],
-    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    timeout_sec: float = MAX_GEMINI_REQUEST_SEC,
 ) -> str:
     """Call Gemini REST generateContent once using x-goog-api-key header."""
     url = f"{GEMINI_API_BASE}/models/{model}:generateContent"
@@ -414,10 +448,15 @@ def call_gemini_once(
         headers=headers,
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
-        raw = resp.read().decode("utf-8", errors="replace")
-    parsed = json.loads(raw)
-    return extract_response_text(parsed)
+    with _limit_gemini_request_time(timeout_sec):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as exc:
+            with exc:
+                short_reason, full_detail = _format_http_error(exc)
+            raise _GeminiHTTPError(exc.code, short_reason, full_detail) from exc
+        return extract_response_text(json.loads(raw))
 
 
 def _format_http_error(exc: urllib.error.HTTPError) -> tuple[str, str]:
@@ -438,13 +477,12 @@ def _format_http_error(exc: urllib.error.HTTPError) -> tuple[str, str]:
     return short_reason, full_detail
 
 
-def _format_network_error(exc: BaseException, timeout_sec: int) -> tuple[str, str]:
+def _format_network_error(exc: BaseException, timeout_sec: float) -> tuple[str, str]:
     full_detail = f"{type(exc).__name__}: {str(exc)[:200]}"
-    is_timeout = isinstance(exc, (TimeoutError, socket.timeout)) or (
-        isinstance(exc, urllib.error.URLError)
-        and isinstance(exc.reason, (TimeoutError, socket.timeout))
+    is_timeout = isinstance(exc, TimeoutError) or (
+        isinstance(exc, urllib.error.URLError) and isinstance(exc.reason, TimeoutError)
     )
-    short_reason = f"Timeout ({timeout_sec}s)" if is_timeout else type(exc).__name__
+    short_reason = f"Timeout ({timeout_sec:.3g}s)" if is_timeout else type(exc).__name__
     return short_reason, full_detail
 
 
@@ -454,76 +492,57 @@ def call_gemini_with_fallback(
     system_prompt: str,
     user_prompt: str,
     generation_config: dict[str, Any],
-    timeout_sec: int = DEFAULT_TIMEOUT_SEC,
+    timeout_sec: float = MAX_GEMINI_REQUEST_SEC,
     stage_name: str = "Stage",
+    *,
+    deadline: float | None = None,
 ) -> tuple[str, str, list[tuple[str, str]]]:
     """Try candidate models in order, falling back on 429/404/5xx/network/timeout errors."""
+    if deadline is None:
+        deadline = time.monotonic() + GEMINI_REVIEW_BUDGET_SEC
     attempts: list[tuple[str, str]] = []
-    optional_keys = ("responseSchema", "thinkingConfig")
+    optional_keys = [key for key in ("responseSchema", "thinkingConfig") if key in generation_config]
+    relaxed_config = {key: value for key, value in generation_config.items() if key not in optional_keys}
 
     for model in models:
-        print(f"[{stage_name}] Calling {model}...")
-        try:
-            text = call_gemini_once(
-                model=model,
-                api_key=api_key,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                generation_config=generation_config,
-                timeout_sec=timeout_sec,
-            )
-            return text, model, attempts
-        except urllib.error.HTTPError as exc:
-            present_optional = [k for k in optional_keys if k in generation_config]
-            if exc.code == 400 and present_optional:
-                stripped = ", ".join(present_optional)
-                print(
-                    f"[{stage_name}] {model} rejected optional config ({stripped}; HTTP 400); "
-                    "retrying same model without them..."
+        config = generation_config
+        while True:
+            remaining_sec = deadline - time.monotonic()
+            if remaining_sec <= 0:
+                raise AllModelsFailedError(stage_name, attempts, budget_exhausted=True)
+            request_timeout = min(timeout_sec, MAX_GEMINI_REQUEST_SEC, remaining_sec)
+            print(f"[{stage_name}] Calling {model} (timeout {request_timeout:.3g}s)...")
+
+            try:
+                text = call_gemini_once(
+                    model=model,
+                    api_key=api_key,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    generation_config=config,
+                    timeout_sec=request_timeout,
                 )
-                relaxed_config = {
-                    k: v for k, v in generation_config.items() if k not in optional_keys
-                }
-                try:
-                    text = call_gemini_once(
-                        model=model,
-                        api_key=api_key,
-                        system_prompt=system_prompt,
-                        user_prompt=user_prompt,
-                        generation_config=relaxed_config,
-                        timeout_sec=timeout_sec,
+                return text, model, attempts
+            except _GeminiHTTPError as exc:
+                if exc.status_code == 400 and config is generation_config and optional_keys:
+                    print(
+                        f"[{stage_name}] {model} rejected {', '.join(optional_keys)} with HTTP 400."
                     )
-                    return text, model, attempts
-                except urllib.error.HTTPError as retry_exc:
-                    short_reason, full_detail = _format_http_error(retry_exc)
-                    if retry_exc.code in FALLBACK_STATUS_CODES:
-                        attempts.append((model, short_reason))
-                        print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
-                        continue
-                    raise RuntimeError(
-                        f"[{stage_name}] Non-retryable error from {model}: {full_detail}"
-                    ) from retry_exc
-                except (urllib.error.URLError, TimeoutError, socket.timeout) as retry_exc:
-                    short_reason, full_detail = _format_network_error(retry_exc, timeout_sec)
-                    attempts.append((model, short_reason))
-                    print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
+                    config = relaxed_config
                     continue
+                if exc.status_code not in FALLBACK_STATUS_CODES:
+                    raise RuntimeError(
+                        f"[{stage_name}] Non-retryable error from {model}: {exc}"
+                    ) from exc
+                short_reason, full_detail = exc.reason, str(exc)
+            except (urllib.error.URLError, TimeoutError) as exc:
+                short_reason, full_detail = _format_network_error(exc, request_timeout)
 
-            short_reason, full_detail = _format_http_error(exc)
-            if exc.code in FALLBACK_STATUS_CODES:
-                attempts.append((model, short_reason))
-                print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
-                continue
-            raise RuntimeError(
-                f"[{stage_name}] Non-retryable error from {model}: {full_detail}"
-            ) from exc
-        except (urllib.error.URLError, TimeoutError, socket.timeout) as exc:
-            short_reason, full_detail = _format_network_error(exc, timeout_sec)
             attempts.append((model, short_reason))
-            print(f"[{stage_name}] {model} failed ({full_detail}); falling back...")
-            continue
+            print(f"[{stage_name}] {model} failed ({full_detail}).")
+            break
 
-    raise AllModelsFailedError(stage_name, attempts)
+    raise AllModelsFailedError(stage_name, attempts, budget_exhausted=time.monotonic() >= deadline)
 
 
 def parse_stage1_json(raw_text: str) -> dict[str, Any]:
@@ -595,6 +614,8 @@ def run_stage1(
     pr_bundle: str,
     repo_instructions: str,
     timeout_sec: int,
+    *,
+    deadline: float | None = None,
 ) -> StageExecution:
     """Execute Stage 1: single-request triage, summary, and basic checks."""
     system_prompt = (
@@ -636,6 +657,7 @@ def run_stage1(
         generation_config=generation_config,
         timeout_sec=timeout_sec,
         stage_name="Stage 1 (Triage)",
+        deadline=deadline,
     )
     parsed = parse_stage1_json(raw_text)
     return StageExecution(model_used=model_used, attempts=attempts, content=parsed)
@@ -667,6 +689,8 @@ def run_stage2(
     stage1_result: dict[str, Any],
     timeout_sec: int,
     thinking_level: str = DEFAULT_DEEP_THINKING_LEVEL,
+    *,
+    deadline: float | None = None,
 ) -> StageExecution:
     """Execute Stage 2: deep architecture, security, and SOLID/DRY review with fallback."""
     system_prompt = (
@@ -716,6 +740,7 @@ def run_stage2(
         generation_config=generation_config,
         timeout_sec=timeout_sec,
         stage_name="Stage 2 (Deep Review)",
+        deadline=deadline,
     )
     return StageExecution(model_used=model_used, attempts=attempts, content=text)
 
@@ -793,7 +818,7 @@ def render_markdown_comment(
             lines.append(str(stage2_exec.content).strip())
         elif stage2_error:
             lines.append(
-                "> ⚠️ **Tất cả các model dự phòng cho Bước 2 đều gặp lỗi / hết quota (ví dụ HTTP 429).** "
+                "> ⚠️ **Review chuyên sâu chưa hoàn tất.** "
                 "Kết quả Bước 1 ở trên vẫn đã được giữ lại để không làm gián đoạn PR."
             )
     else:
@@ -855,11 +880,19 @@ def main() -> int:
     max_diff_chars = int(
         os.environ.get("GEMINI_MAX_DIFF_CHARS", str(DEFAULT_MAX_DIFF_CHARS))
     )
-    timeout_sec = int(os.environ.get("GEMINI_TIMEOUT_SEC", str(DEFAULT_TIMEOUT_SEC)))
+    try:
+        timeout_sec = int(os.environ.get("GEMINI_TIMEOUT_SEC", str(MAX_GEMINI_REQUEST_SEC)))
+    except ValueError:
+        timeout_sec = 0
+    if timeout_sec <= 0:
+        print("::error::GEMINI_TIMEOUT_SEC must be a positive integer.")
+        return 1
     deep_thinking_level = os.environ.get(
         "GEMINI_DEEP_THINKING_LEVEL", DEFAULT_DEEP_THINKING_LEVEL
     ).strip().lower()
 
+    # Include PR preparation in this deadline to leave time to publish within the five-minute job.
+    deadline = time.monotonic() + GEMINI_REVIEW_BUDGET_SEC
     print(f"Fetching PR #{pr_number} from {repo}...")
     pr_meta = fetch_pr_metadata(repo, pr_number, github_token)
     pr_files = fetch_pr_files(repo, pr_number, github_token)
@@ -881,6 +914,7 @@ def main() -> int:
             pr_bundle=pr_bundle,
             repo_instructions=repo_instructions,
             timeout_sec=timeout_sec,
+            deadline=deadline,
         )
     except AllModelsFailedError as exc:
         print(f"::warning::{exc}")
@@ -910,9 +944,10 @@ def main() -> int:
                 stage1_result=stage1_exec.content,
                 timeout_sec=timeout_sec,
                 thinking_level=deep_thinking_level,
+                deadline=deadline,
             )
         except AllModelsFailedError as exc:
-            stage2_error = "; ".join(f"{m}: {r}" for m, r in exc.attempts)
+            stage2_error = exc.details
             print(f"::warning::{exc}")
         except RuntimeError as exc:
             print(f"::error::{exc}")
@@ -927,8 +962,8 @@ def main() -> int:
         stage2_error=stage2_error,
     )
 
-    comment_url = upsert_pr_comment(repo, pr_number, github_token, markdown)
     _write_step_summary(markdown)
+    comment_url = upsert_pr_comment(repo, pr_number, github_token, markdown)
     print(f"Posted/updated PR review comment: {comment_url}")
     return 0
 
