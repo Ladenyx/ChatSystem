@@ -2,7 +2,7 @@
 
 Progress tracker for the Java Real-Time Chat System. The project overview and setup instructions are in [README.md](README.md).
 
-**Last updated:** 2026-11-22
+**Last updated:** 2026-11-28
 
 ## Contents
 
@@ -46,7 +46,7 @@ Progress tracker for the Java Real-Time Chat System. The project overview and se
 | Milestone | Weight | Scope | Status |
 |-----------|:------:|-------|:------:|
 | **Version 1** | 20% | UI screens of both applications, database creation script, report | ✅ |
-| **Version 2** | 80% | Complete working system, release package, final report, self-assessment | ⬜ |
+| **Version 2** | 80% | Complete working system, release package, final report, self-assessment | 🚧 |
 
 <p align="right">(<a href="#roadmap">back to top</a>)</p>
 
@@ -78,9 +78,9 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 
 | Deliverable | Status |
 |-------------|:------:|
-| `src/`: runnable source of both applications | ⬜ |
-| `release/`: at least two JAR files (admin and user) | ⬜ |
-| `release/`: one configuration file holding the database connection settings | ⬜ |
+| `src/`: runnable source of both applications | 🚧 |
+| `release/`: at least two JAR files (admin and user) | 🚧 |
+| `release/`: one configuration file holding the database connection settings | 🚧 |
 | `script/`: database creation script (final) | ⬜ |
 | `git/`: commit screenshots of every member | ⬜ |
 | Report: team information, task list, contribution table (total 100) | ⬜ |
@@ -105,16 +105,16 @@ The complete system. The archive contains `src/`, `release/`, `script/`, `git/` 
 | ID | Task | Status |
 |----|------|:------:|
 | X-01 | Database design and creation script | ✅ |
-| X-02 | Chat server: connections, message routing, presence | ⬜ |
-| X-03 | Configuration file loading (database, server, email, LLM) | ⬜ |
-| X-04 | Build and packaging of the runnable JARs | 🚧 |
+| X-02 | Chat server: connections, message routing, presence | 🚧 |
+| X-03 | Configuration file loading (database, server, email, LLM) | ✅ |
+| X-04 | Build and packaging of the runnable JARs | ✅ |
 | X-05 | Release test: JARs start on a clean machine after editing only the configuration file | ⬜ |
 
 X-01: Version 1 database design and creation are complete. Six editable draw.io ERDs cover 25 tables, 158 columns and 36 foreign keys; [schema.sql](script/schema.sql) loads the shared users anchor and three domain DDL files through `\ir`. Each workstream has its own DDL/Test pair and isolated runner. See the [SQL workflow](docs/databases/workflow.md) and [Phase 2 scope](docs/management/plans/version-1-plan.md#giai-đoạn-2-thiết-kế-csdl--viết-script-khởi-tạo-x-01--script-2-ngày).
 
 [Acceptance on main](https://github.com/Ladenyx/ChatSystem/actions/runs/44610003728) passed on fresh Docker Compose and native Windows Server 2025 with PostgreSQL 18.7: 381 integrated SQL checks per environment, independent suites (95 Auth/Friends, 156 Messaging/E2EE/Spam, 140 Logs/Analytics), concurrent-write probes and resource cleanup. The [database workflow](.github/workflows/database.yml) repeats acceptance for SQL/Compose changes. Server integration, authorization, E2EE protocol execution and retention jobs belong to Version 2.
 
-X-04: Maven scaffold/Wrapper (task 1.1), desktop launchers/navigation/theme (task 1.2), and shared immutable UI fixtures (task 1.3; see [mock data APIs and verification](docs/architecture/ui-mock-data.md)) are ready in `desktop-ui` and power both applications. See [README.md](README.md#chạy-user-client-và-admin-app) for launch commands and [UI architecture](docs/architecture/desktop-ui.md) for integration and verification. All 11 Admin Console screens/dialogs (`A-SCR-01`–`A-SCR-09`, `A-DLG-01`–`A-DLG-02`) and all 14 registered User Client views (`U-SCR-01`–`U-SCR-09`, `U-DLG-01`–`U-DLG-05`) are implemented on `main`, covering all Version 1 UI items (`U-01`–`U-27`, `A-01`–`A-16`). Runnable fat-JAR packaging for Version 2 remains pending.
+X-02–X-04: Spring Boot server foundation, external configuration loading (`X-03`, `application.properties`, `ClientConfig`), session/token authentication, and WebSocket presence (`X-02` core) are merged on `main` (PR #85; message routing remains open for user messaging slices). Shared desktop async 5-state framework and skeleton/loading UI components live in `desktop-ui` (PR #86–#87), and live PostgreSQL login plus Admin user listing (`A-01`) with [demo-seed.sql](script/seed/demo-seed.sql) are integrated on `main` (PR #88). Cross-platform `-Prelease` fat-JAR packaging (`server.jar`, `user.jar`, `admin.jar` bundling `win`, `linux` and `mac-aarch64` JavaFX 25 natives) and external property fallback are complete (PR #89; see [release/README.md](release/README.md)); final JAR artifacts in `release/` and clean-machine acceptance belong to `X-05`.
 
 ### User Client
 
@@ -158,7 +158,7 @@ X-04: Maven scaffold/Wrapper (task 1.1), desktop launchers/navigation/theme (tas
 | ID | Feature | UI | Logic |
 |----|---------|:--:|:-----:|
 | **User oversight** | | | |
-| A-01 | User list: filter by name, username, status; sort by name, creation date | ✅ | ⬜ |
+| A-01 | User list: filter by name, username, status; sort by name, creation date | ✅ | ✅ |
 | A-02 | Create, update and delete users | ✅ | ⬜ |
 | A-03 | Lock and unlock accounts | ✅ | ⬜ |
 | A-04 | Reset a user's password | ✅ | ⬜ |
