@@ -2,11 +2,22 @@ name: 'Gemini PR Review'
 
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review]
+    types: [opened, reopened, ready_for_review, labeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Số thứ tự PR cần review'
+        required: true
+        type: string
+      force_deep_review:
+        description: 'Ép chạy Bước 2 (review chuyên sâu + fallback)'
+        required: false
+        default: true
+        type: boolean
 
-# Hủy lượt chạy cũ nếu PR có cập nhật mới cùng lúc
+# Hủy lượt chạy cũ nếu cùng PR có trigger mới chồng lên
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event.pull_request.number }}'
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number }}'
   cancel-in-progress: true
 
 permissions:
@@ -16,77 +27,30 @@ permissions:
 
 jobs:
   review:
-    # Không chạy với Draft PR để tránh lãng phí quota API miễn phí
-    if: ${{ !github.event.pull_request.draft }}
+    # Bỏ qua Draft PR; với sự kiện labeled chỉ chạy khi gắn nhãn "deep-review" để tránh tốn quota
+    if: >-
+      !github.event.pull_request.draft &&
+      (github.event_name != 'pull_request' ||
+       github.event.action != 'labeled' ||
+       github.event.label.name == 'deep-review')
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           persist-credentials: false
+          fetch-depth: 1
 
-      - name: Prepare PR context
+      - name: Run 2-Stage Gemini PR Review
         shell: bash
         env:
-          REPOSITORY: '${{ github.repository }}'
-          PULL_REQUEST_NUMBER: '${{ github.event.pull_request.number }}'
-          # Tùy chọn: ghi thêm trọng tâm review (ví dụ: bảo mật, SOLID...)
-          ADDITIONAL_CONTEXT: 'Focus on correctness, security vulnerabilities, edge cases, and SOLID/DRY principles.'
-        run: |
-          mkdir -p .gemini
-          jq -n \
-            --arg repo "${REPOSITORY}" \
-            --arg pr "${PULL_REQUEST_NUMBER}" \
-            --arg context "${ADDITIONAL_CONTEXT}" \
-            '{repository: $repo, pull_request_number: $pr, additional_context: $context}' > .gemini/context.json
-
-      - name: Run Gemini PR Review
-        uses: google-github-actions/run-gemini-cli@v0
-        env:
-          GEMINI_CLI_TRUST_WORKSPACE: 'true'
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           GEMINI_API_KEY: '${{ secrets.GEMINI_API_KEY }}'
-        with:
-          # Pin 0.69.0 để tránh lỗi simple-git allowUnsafeConfigPaths trên 0.70.0–0.71.1 (gemini-cli#30416)
-          gemini_cli_version: '0.69.0'
-          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          # Bỏ trống để dùng model mặc định, hoặc cấu hình biến GEMINI_MODEL trong Repository Variables
-          gemini_model: '${{ vars.GEMINI_MODEL }}'
-          github_pr_number: '${{ github.event.pull_request.number }}'
-          settings: |-
-            {
-              "model": {
-                "maxSessionTurns": 25
-              },
-              "mcpServers": {
-                "github": {
-                  "command": "docker",
-                  "args": [
-                    "run",
-                    "-i",
-                    "--rm",
-                    "-e",
-                    "GITHUB_PERSONAL_ACCESS_TOKEN",
-                    "ghcr.io/github/github-mcp-server:v0.27.0"
-                  ],
-                  "includeTools": [
-                    "add_comment_to_pending_review",
-                    "pull_request_read",
-                    "pull_request_review_write"
-                  ],
-                  "env": {
-                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-                  }
-                }
-              },
-              "tools": {
-                "core": []
-              }
-            }
-          extensions: |
-            [
-              "https://github.com/gemini-cli-extensions/code-review"
-            ]
-          prompt: '/pr-code-review'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_REPOSITORY: '${{ github.repository }}'
+          PR_NUMBER: '${{ github.event.pull_request.number || inputs.pr_number }}'
+          FORCE_DEEP_REVIEW: ${{ (github.event_name == 'workflow_dispatch' && inputs.force_deep_review) || (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'deep-review') }}
+          GEMINI_TRIAGE_MODELS: ${{ vars.GEMINI_TRIAGE_MODELS || 'gemini-3.5-flash-lite,gemini-3.8-flash' }}
+          GEMINI_DEEP_MODELS: ${{ vars.GEMINI_DEEP_MODELS || 'gemini-4-hydrogen,gemini-3.8-flash,gemini-3.5-flash-lite' }}
+        run: python3 .github/scripts/gemini_pr_review.py
