@@ -10,4 +10,13 @@
 
 **Ví dụ:** A có thể mời D dù C trong nhóm chặn D; nếu D chặn A thì A không mời được, nhưng người bạn khác đủ quyền vẫn có thể mời D.
 
-**Còn mở:** xác nhận quy tắc, ma trận quyền và xử lý chặn/thay đổi thành viên đồng thời với gửi tin.
+## Xử lý đồng thời (Concurrency — đã chốt theo Issue #82)
+
+- Do `blocks`, `friend_requests` và `friendships` nằm trên 3 bảng độc lập dưới mức cô lập mặc định `READ COMMITTED` của PostgreSQL, mọi transaction thay đổi quan hệ giữa cặp người dùng `(u1, u2)` (`sendFriendRequest`, `acceptFriendRequest`, `rejectFriendRequest`, `cancelFriendRequest`, `unfriend`, `blockUser`, `unblockUser`) bắt buộc khóa tuần tự theo cặp tài khoản chuẩn hóa ngay đầu transaction trước khi kiểm tra điều kiện và ghi dữ liệu:
+  ```sql
+  SELECT pg_advisory_xact_lock(
+      hashtextextended('rel:' || LEAST($1, $2)::text || ':' || GREATEST($1, $2)::text, 0)
+  );
+  ```
+
+**Còn mở:** xác nhận quy tắc/ma trận quyền còn lại và xử lý chặn/thay đổi thành viên đồng thời với gửi tin. Cơ chế tuần tự hóa quan hệ giữa cặp người dùng đã chốt bằng `pg_advisory_xact_lock` theo cặp chuẩn hóa.

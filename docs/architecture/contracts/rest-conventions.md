@@ -31,7 +31,8 @@ Tham chiếu liên quan: [Tech stack](../../decisions/tech-stack.md) · [DEC-02]
 - **Không áp đặt TTL cứng** (khớp schema Version 1 `10-auth-and-friends.sql`); phiên chỉ hết hiệu lực khi:
   1. Người dùng đăng xuất (`POST /api/v1/auth/logout` — chỉ thu hồi phiên hiện tại).
   2. Đăng nhập mới hợp lệ trên **Admin App** (thu hồi ngay phiên `ADMIN_APP` cũ đang sống cùng `user_id`, kể cả REST và WSS).
-  3. Tài khoản bị khóa quản trị (`LOCKED`), xóa mềm (`DELETED`) hoặc đổi/đặt lại mật khẩu thành công (thu hồi toàn bộ phiên đang sống trên mọi thiết bị).
+  3. Tài khoản bị khóa quản trị (`LOCKED`), xóa mềm (`DELETED`) hoặc đặt lại mật khẩu bắt buộc (`POST /api/v1/auth/force-password-change` — `U-05`, `A-04`): thu hồi **toàn bộ** phiên đang sống (`USER_CLIENT` và `ADMIN_APP`) trên mọi thiết bị và yêu cầu đăng nhập lại.
+  4. Chủ động đổi mật khẩu (`POST /api/v1/profile/password` — `U-04`): **giữ nguyên** phiên `USER_CLIENT` hiện tại đang thực hiện thao tác, thu hồi toàn bộ các phiên `USER_CLIENT` khác trên các thiết bị khác và mọi phiên `ADMIN_APP` (nếu có) của tài khoản đó.
 
 ### 2.2. Tách phạm vi phiên (`SessionScope`)
 
@@ -51,8 +52,8 @@ Theo [DEC-06](../../decisions/password-reset-and-email.md) và [DEC-07](../../de
 | `nextAction` | Ý nghĩa | Token trả về | Quyền sử dụng |
 | --- | --- | --- | --- |
 | `SESSION_GRANTED` | Đăng nhập thành công | `sessionToken` (`USER_CLIENT` hoặc `ADMIN_APP`) | Vào khung chính |
-| `EMAIL_VERIFICATION_REQUIRED` | Tài khoản do Admin tạo chưa xác minh email | `transitionToken` (ngắn hạn, không lưu `user_sessions`) | Chỉ gọi xác minh/gửi lại mã email (`U-SCR-03`), không cấp phiên ứng dụng |
-| `FORCE_PASSWORD_CHANGE_REQUIRED` | Đăng nhập bằng mật khẩu tạm còn hạn 15 phút | `transitionToken` dùng chung mốc `expiresAt` của `password_reset_tokens` | Chỉ gọi `POST /api/v1/auth/force-password-change` (`U-SCR-05`), không gia hạn khi thao tác |
+| `EMAIL_VERIFICATION_REQUIRED` | Tài khoản đã có mật khẩu thường hợp lệ (`password_hash IS NOT NULL`) nhưng `email_verified_at IS NULL` (ví dụ sau khi Admin đổi `email` tại `PATCH /api/v1/admin/users/{userId}`) | `transitionToken` (ngắn hạn, không lưu `user_sessions`) | Chỉ gọi xác minh/gửi lại mã email (`U-SCR-03`), không cấp phiên ứng dụng |
+| `FORCE_PASSWORD_CHANGE_REQUIRED` | Đăng nhập bằng mật khẩu tạm còn hạn 15 phút (`INITIAL_SETUP`, `USER_RESET`, `ADMIN_RESET`) | `transitionToken` dùng chung mốc `expiresAt` của `password_reset_tokens` | Chỉ gọi `POST /api/v1/auth/force-password-change` (`U-SCR-05`), không gia hạn khi thao tác; khi lưu mật khẩu mới thành công, Server cập nhật đồng thời `password_hash` và `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)` (không gửi thêm OTP thứ hai cho `INITIAL_SETUP` / `ADMIN_RESET`) |
 
 ### 2.4. Ghi nhận lượt mở ứng dụng (`launchId`)
 
@@ -88,6 +89,7 @@ Theo [DEC-06](../../decisions/password-reset-and-email.md) và [DEC-07](../../de
 Trả thẳng payload JSON (không bọc lớp `{ "data": ... }`):
 - `200 OK`: Đọc dữ liệu (`GET`), cập nhật (`PATCH`/`PUT`), lệnh có kết quả trả về (`POST` đăng nhập, thao tác quản trị, AI).
 - `201 Created`: Tạo tài nguyên mới (`POST` đăng ký tạm, tạo user, tạo nhóm, gửi tin/báo cáo mới). Nếu retry idempotent gặp bản ghi đã tồn tại hợp lệ, trả `200 OK` (hoặc giữ nguyên body đã lưu).
+- `202 Accepted`: Yêu cầu bất đồng bộ hoặc phản hồi chống dò tài khoản công khai (cụ thể `POST /api/v1/auth/password-resets` luôn trả đồng nhất `202 Accepted` cho cả trường hợp khớp thông tin, không tồn tại tài khoản, lệch email, `LOCKED` hoặc `DELETED`; chỉ trả lỗi riêng với `400`, `429`, `502`/`503`).
 - `204 No Content`: Đăng xuất, hủy đăng ký tạm, xóa không cần body.
 
 ### 4.2. Phản hồi lỗi (`ApiError`)
@@ -239,7 +241,12 @@ Theo mục 1.3 và mục 2.2 của kế hoạch Version 2, bảng danh sách bê
 | Gửi báo cáo spam (`U-26`) | Client tạo UUID (`reportId`) | Đối chiếu `SHA-256` trên DEC-10 canonical bytes; khớp và chưa hết hạn/purge thì trả biên nhận cũ | Khác fingerprint → `409 IDEMPOTENCY_CONFLICT`; đã vào tombstone → `410 RESOURCE_EXPIRED` |
 | Đánh dấu đã xử lý spam (`A-10`) | `reportId` | Cùng admin lặp lại trả trạng thái `REVIEWED` hiện tại; admin khác gửi lên bản đã `REVIEWED` trả `409 ALREADY_REVIEWED` | Không cho ghi đè ghi chú/người xử lý |
 | Ghi nhận mở app (`U-02`) | Client tạo UUID (`launchId`) | `(account_key, launch_id)` duy nhất trong `app_open_events`; gọi lại giữ nguyên `opened_at` gốc | N/A |
-| Đăng ký tài khoản (`U-01`) & Quên mật khẩu (`U-05`) | Server tạo UUID | **Không tự động retry** khi chưa rõ kết quả (DEC-02); mỗi yêu cầu mới chịu kiểm tra giới hạn tốc độ & quy tắc DEC-06 | N/A |
+| Đăng ký tài khoản (`U-01`) & Quên mật khẩu (`U-05`) | Server tạo UUID | **Không tự động retry** khi chưa rõ kết quả (DEC-02). Riêng `POST /api/v1/auth/password-resets` bỏ gợi ý `maskedEmail`, trả đồng nhất `202 Accepted` để chống dò tài khoản và áp dụng giới hạn tốc độ theo cả IP / cặp `(username, email)` lẫn theo tài khoản (60 giây / tối đa 5 lần/giờ theo DEC-06) để `429` không làm lộ tồn tại tài khoản | N/A |
+
+### 6.1. Tuần tự hóa cập nhật quan hệ cặp người dùng (`U-07`, `U-08`, `U-10`)
+
+- Các bảng `blocks`, `friend_requests` và `friendships` nằm độc lập dưới mức cô lập mặc định `READ COMMITTED` của PostgreSQL. Mọi transaction thay đổi quan hệ giữa hai người dùng `(u1, u2)` (`sendFriendRequest`, `acceptFriendRequest`, `rejectFriendRequest`, `cancelFriendRequest`, `unfriend`, `blockUser`, `unblockUser`) bắt buộc khóa tuần tự theo cặp chuẩn hóa ngay đầu transaction trước khi kiểm tra điều kiện và ghi dữ liệu:
+  `pg_advisory_xact_lock(hashtextextended('rel:' || LEAST(u1, u2)::text || ':' || GREATEST(u1, u2)::text, 0))`
 
 ---
 

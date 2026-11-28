@@ -90,12 +90,53 @@ paths:
         '401':
           $ref: '#/components/responses/ApiErrorResponse'
 
+  /auth/password-resets:
+    post:
+      tags: [Auth]
+      summary: Yêu cầu phát hành mật khẩu tạm khi quên mật khẩu (U-05, U-SCR-04)
+      operationId: requestPasswordReset
+      security: []
+      description: |
+        Bỏ gợi ý `maskedEmail`; người dùng tự nhập cả `username` và `email` liên kết.
+        Chống dò tài khoản: trả về đồng nhất `202 Accepted` cho cả trường hợp khớp thông tin,
+        không tồn tại tài khoản, lệch email, hoặc tài khoản đang `LOCKED` / `DELETED`.
+        Chỉ trả lỗi riêng khi sai định dạng đầu vào (`400`), vượt giới hạn tần suất (`429` — áp dụng
+        theo cả IP / cặp `(username, email)` lẫn theo tài khoản 60s / tối đa 5 lần/giờ để không lộ tồn tại tài khoản)
+        hoặc lỗi hạ tầng gửi email/CSDL (`502` / `503`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '202':
+          description: Phản hồi đồng nhất chống dò tài khoản (không tiết lộ tài khoản tồn tại hay không)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetAcceptedResponse'
+        '400':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '429':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '502':
+          $ref: '#/components/responses/ApiErrorResponse'
+        '503':
+          $ref: '#/components/responses/ApiErrorResponse'
+
   /auth/force-password-change:
     post:
       tags: [Auth]
-      summary: Đặt mật khẩu mới sau khi đăng nhập bằng mật khẩu tạm (U-05, U-SCR-05)
+      summary: Đặt mật khẩu mới sau khi đăng nhập bằng mật khẩu tạm (U-05, U-SCR-05, A-02, A-04)
       operationId: forcePasswordChange
-      description: "Yêu cầu `Authorization: Bearer <transitionToken>` với quyền `FORCE_PASSWORD_CHANGE_REQUIRED`."
+      description: |
+        Yêu cầu `Authorization: Bearer <transitionToken>` với quyền `FORCE_PASSWORD_CHANGE_REQUIRED`
+        (áp dụng cho `INITIAL_SETUP`, `USER_RESET` và `ADMIN_RESET`).
+        Khi lưu mật khẩu mới thành công trong hạn 15 phút, Server cập nhật đồng thời `password_hash`
+        và `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)` trong cùng transaction
+        (không bắt nhận thêm OTP thứ hai cho `INITIAL_SETUP` / `ADMIN_RESET`), vô hiệu hóa mật khẩu tạm
+        và thu hồi toàn bộ phiên đang sống (`USER_CLIENT` và `ADMIN_APP`) trên mọi thiết bị.
       requestBody:
         required: true
         content:
@@ -104,7 +145,9 @@ paths:
               $ref: '#/components/schemas/ForcePasswordChangeRequest'
       responses:
         '204':
-          description: Đã lưu mật khẩu mới, vô hiệu hóa mật khẩu tạm và thu hồi toàn bộ phiên cũ
+          description: |
+            Đã lưu mật khẩu mới, cập nhật `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)`,
+            vô hiệu hóa mật khẩu tạm và thu hồi toàn bộ phiên (`USER_CLIENT` và `ADMIN_APP`).
         '400':
           $ref: '#/components/responses/ApiErrorResponse'
         '401':
@@ -513,6 +556,10 @@ paths:
       tags: [AdminUsers]
       summary: Cập nhật thông tin hồ sơ người dùng (A-02, A-DLG-01)
       operationId: updateAdminUser
+      description: |
+        Kiểm tra ghi đè đồng thời qua `If-Match`. Nếu `email` thay đổi (không phân biệt hoa thường),
+        Server đặt `email_verified_at = NULL` và thu hồi toàn bộ `password_reset_tokens` còn hiệu lực
+        của tài khoản đó trong cùng transaction.
       parameters:
         - $ref: '#/components/parameters/UserId'
         - name: If-Match
@@ -999,6 +1046,10 @@ components:
     AuthNextAction:
       type: string
       enum: [SESSION_GRANTED, EMAIL_VERIFICATION_REQUIRED, FORCE_PASSWORD_CHANGE_REQUIRED]
+      description: |
+        - `SESSION_GRANTED`: đủ điều kiện cấp phiên ứng dụng.
+        - `EMAIL_VERIFICATION_REQUIRED`: tài khoản đã có mật khẩu thường hợp lệ (`password_hash IS NOT NULL`) nhưng `email_verified_at IS NULL` (ví dụ sau khi Admin đổi email tại `PATCH /admin/users/{userId}`), chuyển sang `U-SCR-03`.
+        - `FORCE_PASSWORD_CHANGE_REQUIRED`: đăng nhập bằng mật khẩu tạm còn hạn 15 phút (`INITIAL_SETUP`, `USER_RESET`, `ADMIN_RESET`), chuyển sang `U-SCR-05`; khi lưu mật khẩu mới thành công sẽ đồng thời cập nhật `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)`.
     AiAssistMode:
       type: string
       enum: [REFINE, RECOMMEND]
@@ -1121,6 +1172,36 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+
+    PasswordResetRequest:
+      type: object
+      additionalProperties: false
+      required: [username, email]
+      properties:
+        username:
+          type: string
+          minLength: 6
+          maxLength: 30
+          pattern: '^[A-Za-z0-9_-]{6,30}$'
+        email:
+          type: string
+          minLength: 1
+          maxLength: 254
+          format: email
+          pattern: '^[^@\s]+@[^@.\s]+(\.[^@.\s]+)*$'
+
+    PasswordResetAcceptedResponse:
+      type: object
+      additionalProperties: false
+      required: [status, message]
+      properties:
+        status:
+          type: string
+          enum: [ACCEPTED]
+        message:
+          type: string
+          minLength: 1
+          example: 'Nếu thông tin khớp, bạn sẽ nhận được email hướng dẫn.'
 
     ConversationSummaryDto:
       type: object

@@ -55,14 +55,14 @@
 1. Admin bấm **Thêm người dùng**, điền `username` (6–30 ASCII `[A-Za-z0-9_-]`), `fullName` (1–100 sau trim), `email` (<= 254 đúng định dạng), và các trường tùy chọn (`address`, `dateOfBirth` không ở tương lai theo `Asia/Ho_Chi_Minh`, `gender`).
 2. Client khóa nút gửi + đóng dialog khi đang gửi `POST /api/v1/admin/users`.
 3. Server kiểm tra quyền, định dạng, tính duy nhất không phân biệt hoa thường của `username`/`email` (bao gồm tài khoản đang `DELETED` chưa purge và xử lý nguyên tử khi tạo đồng thời — lỗi trả `409 USERNAME_ALREADY_EXISTS` / `EMAIL_ALREADY_EXISTS` hoặc `400 VALIDATION_ERROR` kèm `FieldError`).
-4. Server lưu `users` (`role = USER`, `status = ACTIVE`, `email_verified_at = NULL`, trigger tự ghi `account_registration_events`) + phát hành mật khẩu tạm ngẫu nhiên 15 phút (`INITIAL_SETUP` trong `password_reset_tokens`) trong cùng transaction, sau đó gửi email kích hoạt qua Gmail SMTP.
+4. Server lưu `users` (`role = USER`, `status = ACTIVE`, `email_verified_at = NULL`, trigger tự ghi `account_registration_events`) + phát hành mật khẩu tạm ngẫu nhiên 15 phút (`INITIAL_SETUP` trong `password_reset_tokens`) trong cùng transaction, sau đó gửi email kích hoạt qua Gmail SMTP. Khi người dùng đăng nhập hợp lệ bằng mật khẩu tạm còn hạn này, Server trả `FORCE_PASSWORD_CHANGE_REQUIRED` (`U-SCR-05`); ngay khi lưu mật khẩu mới thành công trong hạn 15 phút, Server cập nhật đồng thời `password_hash` và `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)` mà không bắt nhận thêm email OTP thứ hai.
 5. **Xử lý khi DB đã lưu nhưng SMTP lỗi (`UC-ADM-USER-MGMT-03` EF-3):** Server vẫn trả `201 Created` với `AdminCreateUserResponse (user, activationEmailSent = false, emailDeliveryError = "...")` để Admin App cập nhật bảng người dùng (không bấm gửi lại tạo trùng) và hướng dẫn Admin dùng chức năng **Đặt lại mật khẩu (`A-04`)** để gửi lại email kích hoạt.
 
 ### 3.4. Cập nhật hồ sơ (`A-02` / `A-DLG-01`)
 1. Client mở `A-DLG-01` ở chế độ sửa (`username` chỉ đọc), điền dữ liệu từ `AdminUserDetailDto` hiện hành và giữ `ETag` của lần đọc đó.
 2. Khi lưu, Client gửi `PATCH /api/v1/admin/users/{userId}` kèm header `If-Match: "<etag>"` và `AdminUpdateUserRequest`.
 3. Server kiểm tra `If-Match`: nếu hồ sơ đã bị chỉnh sửa bởi chủ tài khoản hoặc một Admin khác, hoặc đã chuyển sang `DELETED`/purge → trả `409 CONFLICT` (`"Hồ sơ đã được cập nhật bởi thao tác khác"`), Client tải lại hồ sơ mới nhất để Admin xem lại (`UC-ADM-USER-MGMT-04` EF-2).
-4. Nếu `email` thay đổi (không phân biệt hoa thường): kiểm tra trùng (`409 EMAIL_ALREADY_EXISTS`), lưu email mới và đặt `email_verified_at = NULL` để chủ tài khoản xác minh lại theo DEC-06/DEC-07 (không yêu cầu Admin nhập mật khẩu hiện tại của user).
+4. Nếu `email` thay đổi (không phân biệt hoa thường): kiểm tra trùng (`409 EMAIL_ALREADY_EXISTS`), lưu email mới, đặt `email_verified_at = NULL` và **thu hồi toàn bộ `password_reset_tokens` còn hiệu lực** của tài khoản đó trong cùng transaction (ngăn mật khẩu tạm gửi tới email cũ xác minh email mới; không yêu cầu Admin nhập mật khẩu hiện tại của user). Nếu tài khoản đã có mật khẩu thường hợp lệ (`password_hash IS NOT NULL`), lần đăng nhập tiếp theo sẽ trả `EMAIL_VERIFICATION_REQUIRED` (`U-SCR-03`).
 
 ### 3.5. Khóa / Mở khóa (`A-03` / `A-DLG-02`)
 - Mọi thao tác bắt buộc xác nhận qua `A-DLG-02`.
@@ -83,7 +83,7 @@
 1. `A-DLG-02` hiển thị rõ `recipient` (`Email nhận · <email>`).
 2. Khi xác nhận, Client gửi `POST /api/v1/admin/users/{userId}/reset-password` với `AdminResetPasswordRequest(expectedEmail)`.
 3. Server kiểm tra `role == USER`, `status != DELETED`, đối chiếu `email` hiện tại khớp `expectedEmail` (nếu user/Admin khác vừa đổi email đồng thời → trả `409 CONFLICT` theo `UC-ADM-USER-MGMT-09` EF-2), kiểm tra rate limit (**giãn cách 60 giây, tối đa 5 yêu cầu/giờ/tài khoản** → `429 RATE_LIMITED`).
-4. Server phát hành mật khẩu tạm ngẫu nhiên dùng một lần (hiệu lực **15 phút**, `purpose = ADMIN_RESET`) và gửi email qua SMTP.
+4. Server phát hành mật khẩu tạm ngẫu nhiên dùng một lần (hiệu lực **15 phút**, `purpose = ADMIN_RESET`) và gửi email qua SMTP. Khi người dùng đăng nhập bằng mật khẩu tạm `ADMIN_RESET` và lưu mật khẩu mới qua `U-SCR-05`, Server cập nhật đồng thời `password_hash`, `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)` (hỗ trợ trường hợp dùng `A-04` gửi lại email kích hoạt tại mục 3.3 bước 5) và thu hồi toàn bộ phiên đang sống (`USER_CLIENT` và `ADMIN_APP`).
 5. Nếu gửi SMTP lỗi → trả `502 EMAIL_DELIVERY_FAILED`, vô hiệu hóa bản ghi tạm vừa tạo và **giữ nguyên** mật khẩu hiện tại cùng các phiên đang sống của user. Đặt lại mật khẩu không mở khóa `LOCKED` và không thay đổi mã khôi phục E2EE.
 
 ---
@@ -106,6 +106,7 @@
 | Tạo user thành công nhưng SMTP lỗi (`UC-ADM-USER-MGMT-03` EF-3) | Trả `201 Created` với `AdminCreateUserResponse (activationEmailSent = false, emailDeliveryError)` để không tạo trùng và hướng dẫn dùng `A-04`. |
 | Đổi email đồng thời trước khi xác nhận reset password (`UC-ADM-USER-MGMT-09` EF-2) | Gửi `AdminResetPasswordRequest(expectedEmail)`; nếu email DB đã đổi, Server từ chối bằng `409 CONFLICT` để Admin tải lại hồ sơ trước khi gửi. |
 | Bảo vệ tài khoản `ADMIN` trên `A-SCR-03` | Admin hệ thống không khóa/xóa/reset password lẫn nhau qua `A-SCR-03`; các nút thao tác khóa/xóa/reset bị vô hiệu hóa với tài khoản `ADMIN` và Server chặn bằng `403`. |
+| Luồng kích hoạt `INITIAL_SETUP` / `ADMIN_RESET` & đổi email đồng thời với mật khẩu tạm (Issue #82) | Đăng nhập bằng mật khẩu tạm `INITIAL_SETUP` hoặc `ADMIN_RESET` đi qua `FORCE_PASSWORD_CHANGE_REQUIRED` (`U-SCR-05`) và đặt `email_verified_at = COALESCE(email_verified_at, CURRENT_TIMESTAMP)` khi lưu mật khẩu mới; đổi `email` qua `PATCH /admin/users/{userId}` đặt `email_verified_at = NULL` đồng thời thu hồi mọi `password_reset_tokens` còn hiệu lực. `U-SCR-03` chỉ dùng khi tài khoản đã có mật khẩu thường nhưng `email_verified_at IS NULL`. |
 
 ---
 
