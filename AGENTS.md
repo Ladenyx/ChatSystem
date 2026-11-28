@@ -2,15 +2,17 @@
 
 ## Project Structure & Module Organization
 
-This Java chat project is in design; application code and build configuration do not exist yet.
+This Java chat system is a multi-module Maven project (`pom.xml`, `./mvnw` / `mvnw.cmd`) targeting **JDK 25** (enforced by `maven-enforcer-plugin` `[25,26)` and Maven `[3.9,4.0)`).
 
-- `README.md`: project overview, proposed architecture, and submission layout.
-- `ROADMAP.md`: feature IDs, UI/logic status, owners, and deliverables.
-- `docs/requirements/`: requirements and use cases; `use-cases/UC01-signup.md` documents registration.
+- `src/common/`: shared DTOs, API contracts, and WebSocket protocol models (`chatsystem-common`).
+- `src/server/`: Spring Boot backend REST/WebSocket server (`chatsystem-server`).
+- `src/desktop-ui/`: shared JavaFX 25 / AtlantaFX theme, navigation, async state, skeletons, and HTTP/WS client helpers (`chatsystem-desktop-ui`).
+- `src/user/`: User desktop client (`chatsystem-user`).
+- `src/admin/`: Admin desktop GUI (`chatsystem-admin`).
+- `script/`: database schema and seed scripts (`compose.yaml` and `.env.example` configure local services).
+- `README.md`, `ROADMAP.md`, `docs/`: project overview, feature IDs/ownership, requirements, and architecture notes (including `docs/architecture/desktop-ui.md` and `docs/images/`).
+- `release/`, `report/`, `git/`: submission packages, course report, and commit screenshots.
 - `.github/DISCUSSION_TEMPLATE/`: design-decision and Q&A forms.
-- `Final Project.pdf`: course specification.
-
-The planned layout uses `src/admin/`, `src/user/`, `src/server/`, and `src/common/`. Database scripts belong in `script/`; release artifacts in `release/`; reports in `report/`; commit screenshots in `git/`; documentation assets in `docs/images/`. These directories are not implemented yet. No test directory exists.
 
 ### Course Milestones & Scope Decisions (`Final Project.pdf`)
 
@@ -22,14 +24,14 @@ The planned layout uses `src/admin/`, `src/user/`, `src/server/`, and `src/commo
 
 ## Build, Test, and Development Commands
 
-Run from the repository root:
+Run from the repository root (with JDK 25 in `JAVA_HOME`):
 
+- `./mvnw clean verify`: compile and run headless unit tests across all modules.
+- `./mvnw -Pui-tests verify`: run full verification including JavaFX UI tests (requires a display server or `xvfb-run`).
+- `./mvnw -pl src/<module> -am test`: run tests for a specific module and its local dependencies.
 - `git status --short`: inspect local changes before editing.
 - `git diff --check`: detect whitespace errors in tracked changes.
-- `git diff -- README.md ROADMAP.md docs/`: review tracked documentation; inspect new files separately.
 - `rg 'U-01|UC-01' ROADMAP.md docs/`: locate related requirements.
-
-No application or build/test command exists. Do not present `mvn` or `gradle` examples as working commands. Document build, test, and launch instructions when tooling is selected. The README targets JDK 17+.
 
 ## Coding Style & Naming Conventions
 
@@ -39,11 +41,11 @@ Keep Markdown headings descriptive and tables consistent. Preserve roadmap IDs s
 
 ## Testing Guidelines
 
-No test framework or coverage threshold is configured. For documentation, verify requirement links, feature IDs, and acceptance criteria. When Java testing is introduced, document the framework and command; name test classes `<ClassName>Test`. Cover validation failures, authorization, offline delivery, and concurrent registration where relevant. Report checks actually performed.
+Tests use **JUnit 5** (`junit-jupiter`) via Maven Surefire under `src/*/src/test/java/`. No coverage threshold is enforced. Name test classes `<ClassName>Test`. JavaFX UI tests are gated by `-Dchatsystem.uiTests=true` (enabled by `-Pui-tests`). Cover validation failures, authorization, offline delivery, async state transitions, and concurrent flows where relevant. For documentation, verify requirement links, feature IDs, and acceptance criteria. Report checks actually performed, including skipped UI tests when `-Pui-tests` is not run.
 
 ## Commit & Pull Request Guidelines
 
-History mainly uses `docs:` with one `doc:` entry. Follow the README's Conventional Commits guidance, for example `docs(U-01): clarify signup rules`. Use standard branch prefixes such as `feature/`, `fix/`, or `docs/` for all work, including agent work; do not use `codex/` branches.
+Follow Conventional Commits, for example `docs(U-01): clarify signup rules` or `feat(desktop-ui): add skeleton states`. Use standard branch prefixes such as `feature/`, `fix/`, or `docs/` for all work, including agent work; do not use `codex/` branches.
 
 PRs should explain changes, reference feature IDs or issues, record verification, and include screenshots for UI changes. Update roadmap status/ownership when applicable and obtain one teammate review. Each member must contribute their own commits.
 
