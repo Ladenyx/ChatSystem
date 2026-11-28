@@ -52,5 +52,5 @@ jobs:
           PR_NUMBER: '${{ github.event.pull_request.number || inputs.pr_number }}'
           FORCE_DEEP_REVIEW: ${{ (github.event_name == 'workflow_dispatch' && inputs.force_deep_review) || (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'deep-review') }}
           GEMINI_TRIAGE_MODELS: ${{ vars.GEMINI_TRIAGE_MODELS || 'gemini-3.5-flash-lite,gemini-3.8-flash' }}
-          GEMINI_DEEP_MODELS: ${{ vars.GEMINI_DEEP_MODELS || 'gemini-4-hydrogen,gemini-3.8-flash,gemini-3.5-flash-lite' }}
-        run: python3 .github/scripts/gemini_pr_review.py
+          GEMINI_DEEP_MODELS: ${{ vars.GEMINI_DEEP_MODELS || 'gemini-4-hydrogen,gemini-3.5-flash-lite' }}
+        run: python3 -u .github/scripts/gemini_pr_review.py
