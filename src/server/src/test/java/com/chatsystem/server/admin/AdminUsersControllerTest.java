@@ -161,6 +161,17 @@ class AdminUsersControllerTest {
         assertThat(forbidden.statusCode()).isEqualTo(403);
         assertThat(objectMapper.readValue(forbidden.body(), ApiError.class).code())
                 .isEqualTo(ErrorCode.SESSION_SCOPE_MISMATCH);
+
+        HttpResponse<String> emptyLogin = http.send(
+                HttpRequest.newBuilder(uri("/api/v1/auth/login"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertThat(emptyLogin.statusCode()).isEqualTo(400);
+        assertThat(objectMapper.readValue(emptyLogin.body(), ApiError.class).code())
+                .isEqualTo(ErrorCode.VALIDATION_ERROR);
     }
 
     private URI uri(String path) {

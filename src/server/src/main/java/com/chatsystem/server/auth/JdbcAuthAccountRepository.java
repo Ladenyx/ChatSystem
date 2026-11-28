@@ -33,6 +33,7 @@ public class JdbcAuthAccountRepository implements AuthAccountRepository {
                 SELECT id, username, full_name, email, role, status, password_hash, email_verified_at
                 FROM users
                 WHERE lower(username) = lower(?)
+                FOR UPDATE
                 """,
                 ACCOUNT_MAPPER,
                 username

@@ -43,7 +43,12 @@ public class AuthLoginService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        Objects.requireNonNull(request, "request");
+        if (request == null
+                || request.username() == null || request.username().isBlank()
+                || request.password() == null || request.password().isEmpty()
+                || request.scope() == null) {
+            throw new ApiException(ErrorCode.VALIDATION_ERROR, "Thiếu thông tin đăng nhập bắt buộc.");
+        }
         AuthAccountRecord account = accountRepository.findByUsernameIgnoreCase(request.username().trim())
                 .orElseThrow(() -> new ApiException(
                         ErrorCode.UNAUTHORIZED,

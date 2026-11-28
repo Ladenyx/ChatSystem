@@ -78,6 +78,11 @@
         <HBox spacing="8" alignment="CENTER_LEFT" minHeight="28">
             <Label fx:id="userCount" styleClass="caption"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <HBox fx:id="paginationBar" spacing="6" alignment="CENTER_LEFT" visible="false" managed="false">
+                <Button fx:id="prevPage" text="Trước" onAction="#previousPage"/>
+                <Label fx:id="pageIndicator" styleClass="caption"/>
+                <Button fx:id="nextPage" text="Sau" onAction="#nextPage"/>
+            </HBox>
             <Hyperlink fx:id="clearFilters" text="Xóa bộ lọc" onAction="#clearFilters"/>
         </HBox>
     </VBox>

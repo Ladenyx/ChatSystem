@@ -15,7 +15,7 @@ java -jar src/server/target/server.jar --spring.config.additional-location=optio
 Sau khi chạy `script/schema.sql` trên PostgreSQL 18, nạp thêm dữ liệu mẫu (`sysadmin` / `Admin@123`, `user01`..`user03` / `User@123`):
 
 ```sh
-psql -h 127.0.0.1 -p 55432 -U chatsystem -d chatsystem -f script/seed.sql
+psql -h 127.0.0.1 -p 55432 -U chatsystem -d chatsystem -f script/seed/demo-seed.sql
 ```
 
 Khi chạy `./mvnw -pl src/admin javafx:run`, Admin App mặc định kết nối Server thật (truyền `-Dchatsystem.mock=true` nếu chỉ muốn xem preview ngoại tuyến).

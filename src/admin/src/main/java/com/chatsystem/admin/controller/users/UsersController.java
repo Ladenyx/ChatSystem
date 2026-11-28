@@ -49,6 +49,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -73,6 +74,10 @@ public final class UsersController implements ViewController {
     @FXML private ToggleButton deletedUsers;
     @FXML private Hyperlink clearFilters;
     @FXML private Label userCount;
+    @FXML private HBox paginationBar;
+    @FXML private Button prevPage;
+    @FXML private Label pageIndicator;
+    @FXML private Button nextPage;
     @FXML private StackPane userTableHost;
     @FXML private TableView<AdminUserListItemDto> userTable;
     @FXML private TableColumn<AdminUserListItemDto, AdminUserListItemDto> userIdentity;
@@ -109,8 +114,9 @@ public final class UsersController implements ViewController {
     private StateContentPane tableStatePane;
     private AsyncViewLoader<AdminUserFilter, OffsetPage<AdminUserListItemDto>> directoryLoader;
     private ViewNavigator navigator;
-    private boolean suppressSortReload;
+    private boolean suppressReload;
     private int currentPage;
+    private int totalPages;
 
     @FXML
     private void initialize() {
@@ -130,7 +136,7 @@ public final class UsersController implements ViewController {
         statusFilters.selectedToggleProperty().addListener((observable, previous, current) -> {
             if (current == null) {
                 statusFilters.selectToggle(previous);
-            } else {
+            } else if (!suppressReload) {
                 currentPage = 0;
                 reloadDirectory();
             }
@@ -196,16 +202,16 @@ public final class UsersController implements ViewController {
                 setText(empty || createdAt == null ? null : DATE.format(createdAt));
             }
         });
-        suppressSortReload = true;
+        suppressReload = true;
         userTable.setSortPolicy(table -> {
-            if (!suppressSortReload) {
+            if (!suppressReload) {
                 currentPage = 0;
                 reloadDirectory();
             }
             return true;
         });
         userTable.getSortOrder().add(userIdentity);
-        suppressSortReload = false;
+        suppressReload = false;
         userTable.getFocusModel().focus(-1);
 
         bindText(loginAt, login -> DATE_TIME.format(login.loggedInAt()));
@@ -215,6 +221,9 @@ public final class UsersController implements ViewController {
     }
 
     private void scheduleFilterReload() {
+        if (suppressReload) {
+            return;
+        }
         currentPage = 0;
         if (!directoryService().isLiveBackend()) {
             reloadDirectory();
@@ -245,6 +254,8 @@ public final class UsersController implements ViewController {
                 userTable.getItems().clear();
                 userTable.getSelectionModel().clearSelection();
                 userCount.setText("0 tài khoản");
+                totalPages = 0;
+                setShown(paginationBar, false);
             }
             return;
         }
@@ -252,6 +263,14 @@ public final class UsersController implements ViewController {
         UUID selectedId = selected == null ? null : selected.id();
         userTable.getItems().setAll(page.items());
         userCount.setText(page.totalItems() + " tài khoản");
+        totalPages = page.totalPages();
+        boolean showPagination = totalPages > 1;
+        setShown(paginationBar, showPagination);
+        if (showPagination) {
+            pageIndicator.setText("Trang " + (page.page() + 1) + "/" + totalPages);
+            prevPage.setDisable(page.page() <= 0);
+            nextPage.setDisable(page.page() + 1 >= totalPages);
+        }
         if (selectedId != null) {
             page.items().stream()
                     .filter(item -> item.id().equals(selectedId))
@@ -290,12 +309,33 @@ public final class UsersController implements ViewController {
 
     @FXML
     private void clearFilters() {
-        nameFilter.clear();
-        usernameFilter.clear();
-        statusFilters.selectToggle(allUsers);
+        suppressReload = true;
+        try {
+            nameFilter.clear();
+            usernameFilter.clear();
+            statusFilters.selectToggle(allUsers);
+        } finally {
+            suppressReload = false;
+        }
         currentPage = 0;
         reloadDirectory();
         nameFilter.requestFocus();
+    }
+
+    @FXML
+    private void previousPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            reloadDirectory();
+        }
+    }
+
+    @FXML
+    private void nextPage() {
+        if (currentPage + 1 < totalPages) {
+            currentPage++;
+            reloadDirectory();
+        }
     }
 
     private void showProfile(AdminUserListItemDto item) {
