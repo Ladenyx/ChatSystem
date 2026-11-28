@@ -3,11 +3,11 @@ package com.chatsystem.desktop.navigation;
 import static org.junit.jupiter.api.Assertions.*;
 
 import atlantafx.base.controls.Popover;
+import com.chatsystem.desktop.FxTestRuntime;
 import com.chatsystem.desktop.controller.DisplayOptionsController;
 import com.chatsystem.desktop.navigation.RouteInputTestController.Input;
 import com.chatsystem.desktop.theme.ThemeManager;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
@@ -26,7 +26,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -39,17 +38,7 @@ class ViewNavigatorTest {
 
     @BeforeAll
     static void startJavaFx() throws Exception {
-        CountDownLatch ready = new CountDownLatch(1);
-        Platform.startup(() -> {
-            Platform.setImplicitExit(false);
-            ready.countDown();
-        });
-        assertTrue(ready.await(10, TimeUnit.SECONDS), "JavaFX did not start");
-    }
-
-    @AfterAll
-    static void stopJavaFx() {
-        Platform.exit();
+        FxTestRuntime.ensureStarted();
     }
 
     @Test

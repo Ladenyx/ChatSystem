@@ -20,7 +20,7 @@ import javafx.scene.layout.VBox;
  * initial skeleton, content (with optional top refresh indicator), empty state,
  * non-destructive inline error/offline banner, and full retryable error panel.
  */
-public final class StateContentPane extends StackPane {
+public final class StateContentPane extends StackPane implements AutoCloseable {
     private static final String DEFAULT_EMPTY_TITLE = "Chưa có dữ liệu";
     private static final String DEFAULT_EMPTY_SUBTITLE = "Dữ liệu phù hợp sẽ hiển thị tại đây.";
 
@@ -129,6 +129,11 @@ public final class StateContentPane extends StackPane {
 
     public void dispose() {
         pulseHandle.close();
+    }
+
+    @Override
+    public void close() {
+        dispose();
     }
 
     private Button retryButton() {

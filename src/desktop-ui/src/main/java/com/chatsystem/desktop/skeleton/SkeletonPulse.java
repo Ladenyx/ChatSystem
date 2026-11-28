@@ -6,6 +6,7 @@ import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.util.Duration;
@@ -23,6 +24,7 @@ public final class SkeletonPulse implements AutoCloseable {
     private final ChangeListener<Scene> sceneListener = (obs, oldScene, newScene) -> refreshAnimation();
     private final ChangeListener<Boolean> visibleListener = (obs, wasVisible, isVisible) -> refreshAnimation();
     private final ChangeListener<Boolean> motionListener = (obs, wasReduced, isReduced) -> refreshAnimation();
+    private final WeakChangeListener<Boolean> weakMotionListener = new WeakChangeListener<>(motionListener);
 
     private SkeletonPulse(Node target, ObservableBooleanValue reducedMotion) {
         this.target = Objects.requireNonNull(target, "target");
@@ -31,7 +33,7 @@ public final class SkeletonPulse implements AutoCloseable {
         target.sceneProperty().addListener(sceneListener);
         target.visibleProperty().addListener(visibleListener);
         if (reducedMotion != null) {
-            reducedMotion.addListener(motionListener);
+            reducedMotion.addListener(weakMotionListener);
         }
         refreshAnimation();
     }
@@ -84,7 +86,7 @@ public final class SkeletonPulse implements AutoCloseable {
         target.sceneProperty().removeListener(sceneListener);
         target.visibleProperty().removeListener(visibleListener);
         if (reducedMotion != null) {
-            reducedMotion.removeListener(motionListener);
+            reducedMotion.removeListener(weakMotionListener);
         }
         stopAndResetOpacity();
     }
