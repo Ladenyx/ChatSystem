@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import atlantafx.base.controls.Popover;
 import com.chatsystem.admin.navigation.AdminViewInputs;
+import com.chatsystem.admin.service.MockAdminUserDirectoryService;
+import com.chatsystem.common.dto.admin.AdminUserListItemDto;
 import com.chatsystem.desktop.DesktopWindow;
 import com.chatsystem.desktop.controller.MockDataPreviewController;
 import com.chatsystem.desktop.mock.MockData;
@@ -439,8 +441,12 @@ class AdminApplicationTest {
                 root.applyCss();
                 root.layout();
                 var data = MockData.create();
-                var directory = (TableView<?>) root.lookup("#userTable");
-                directory.getSelectionModel().select(directory.getItems().indexOf(data.previewUser()));
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<AdminUserListItemDto>) root.lookup("#userTable");
+                var previewRow = directory.getItems().stream()
+                        .filter(row -> row.id().equals(MockAdminUserDirectoryService.idForMockUser(data.previewUser().id())))
+                        .findFirst().orElseThrow();
+                directory.getSelectionModel().select(previewRow);
                 root.applyCss();
                 root.layout();
                 ((Hyperlink) root.lookup("#systemLoginLogs")).fire();
@@ -473,7 +479,7 @@ class AdminApplicationTest {
 
                 navigator.goBack();
                 assertEquals(AdminViews.USERS, navigator.currentViewProperty().get());
-                assertEquals(data.previewUser(), directory.getSelectionModel().getSelectedItem());
+                assertEquals(previewRow, directory.getSelectionModel().getSelectedItem());
             } finally {
                 navigator.close();
                 stage.close();
@@ -500,10 +506,13 @@ class AdminApplicationTest {
                 var data = MockData.create();
                 var selected = data.previewUser();
                 @SuppressWarnings("unchecked")
-                var directory = (TableView<MockUser>) root.lookup("#userTable");
+                var directory = (TableView<AdminUserListItemDto>) root.lookup("#userTable");
+                var selectedRow = directory.getItems().stream()
+                        .filter(row -> row.id().equals(MockAdminUserDirectoryService.idForMockUser(selected.id())))
+                        .findFirst().orElseThrow();
                 var inspector = (ScrollPane) root.lookup("#userInspector");
                 assertFalse(inspector.isVisible());
-                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                directory.getSelectionModel().select(selectedRow);
                 assertTrue(inspector.isVisible());
                 assertEquals(selected.fullName(), ((Label) root.lookup("#profileName")).getText());
                 root.applyCss();
@@ -515,14 +524,14 @@ class AdminApplicationTest {
 
                 ((TextField) root.lookup("#nameFilter")).setText("  NGUYỄN  ");
                 ((TextField) root.lookup("#usernameFilter")).setText("MINHAN");
-                assertEquals(List.of(selected), directory.getItems());
-                assertEquals(selected, directory.getSelectionModel().getSelectedItem());
+                assertEquals(List.of(selectedRow), directory.getItems());
+                assertEquals(selectedRow, directory.getSelectionModel().getSelectedItem());
                 ((ToggleButton) root.lookup("#lockedUsers")).fire();
                 assertTrue(directory.getItems().isEmpty());
                 assertFalse(inspector.isVisible());
                 ((Hyperlink) root.lookup("#clearFilters")).fire();
                 assertEquals(data.users().size(), directory.getItems().size());
-                directory.getSelectionModel().select(selected);
+                directory.getSelectionModel().select(selectedRow);
                 directory.scrollTo(Math.max(0, directory.getSelectionModel().getSelectedIndex() - 3));
                 ((TabPane) root.lookup("#userDetails")).getSelectionModel().select(1);
                 navigator.themes().toggle();
@@ -536,7 +545,7 @@ class AdminApplicationTest {
                 created.setSortType(TableColumn.SortType.DESCENDING);
                 directory.getSortOrder().setAll(List.of(created));
                 assertEquals(data.users().stream().map(MockUser::createdAt).sorted(Comparator.reverseOrder()).toList(),
-                        directory.getItems().stream().map(MockUser::createdAt).toList());
+                        directory.getItems().stream().map(AdminUserListItemDto::createdAt).toList());
             } finally {
                 navigator.close();
                 stage.close();
@@ -561,8 +570,12 @@ class AdminApplicationTest {
                 root.layout();
                 var data = MockData.create();
                 var selected = data.previewUser();
-                var directory = (TableView<?>) root.lookup("#userTable");
-                directory.getSelectionModel().select(directory.getItems().indexOf(selected));
+                @SuppressWarnings("unchecked")
+                var directory = (TableView<AdminUserListItemDto>) root.lookup("#userTable");
+                var selectedRow = directory.getItems().stream()
+                        .filter(row -> row.id().equals(MockAdminUserDirectoryService.idForMockUser(selected.id())))
+                        .findFirst().orElseThrow();
+                directory.getSelectionModel().select(selectedRow);
                 directory.scrollTo(directory.getSelectionModel().getSelectedIndex());
                 root.applyCss();
                 root.layout();

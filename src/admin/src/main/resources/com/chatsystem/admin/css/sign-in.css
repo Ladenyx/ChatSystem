@@ -81,3 +81,7 @@
     -fx-text-fill: -cs-muted;
     -fx-opacity: 1;
 }
+
+.admin-sign-in-error {
+    -fx-text-fill: -cs-danger;
+}
