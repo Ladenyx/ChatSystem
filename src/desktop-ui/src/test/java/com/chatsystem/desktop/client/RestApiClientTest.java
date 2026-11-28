@@ -9,9 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.chatsystem.common.api.ApiError;
 import com.chatsystem.common.api.ApiHeaders;
 import com.chatsystem.common.api.ErrorCode;
+import com.chatsystem.common.api.OffsetPage;
 import com.chatsystem.common.domain.AccountStatus;
 import com.chatsystem.common.domain.SessionScope;
 import com.chatsystem.common.domain.UserRole;
+import com.chatsystem.common.dto.admin.AdminUserListItemDto;
 import com.chatsystem.common.dto.auth.AuthenticatedUserSummary;
 import com.chatsystem.common.dto.auth.SessionInfo;
 import com.sun.net.httpserver.HttpServer;
@@ -21,11 +23,13 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
 class RestApiClientTest {
@@ -114,5 +118,35 @@ class RestApiClientTest {
         ApiClientException apiEx = (ApiClientException) failure.getCause();
         assertEquals(401, apiEx.httpStatus());
         assertEquals(ErrorCode.SESSION_REVOKED, apiEx.apiError().orElseThrow().code());
+    }
+
+    @Test
+    void deserializesParameterizedTypesViaTypeReference() {
+        OffsetPage<AdminUserListItemDto> expectedPage = OffsetPage.of(
+                List.of(new AdminUserListItemDto(
+                        UUID.randomUUID(),
+                        "minhan",
+                        "Nguyễn Minh An",
+                        UserRole.USER,
+                        AccountStatus.ACTIVE,
+                        Instant.parse("2026-11-28T03:00:00Z")
+                )),
+                0,
+                25,
+                1
+        );
+        server.createContext("/api/v1/admin/users", exchange -> {
+            byte[] bytes = jsonMapper.writeValueAsBytes(expectedPage);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+
+        OffsetPage<AdminUserListItemDto> actual = client.getAsync(
+                "/api/v1/admin/users?page=0&size=25",
+                new TypeReference<OffsetPage<AdminUserListItemDto>>() {}
+        ).join();
+        assertEquals(expectedPage, actual);
     }
 }

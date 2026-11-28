@@ -37,6 +37,8 @@
                     </VBox>
                 </VBox>
                 <VBox spacing="12" alignment="CENTER">
+                    <Label fx:id="signInError" styleClass="caption,admin-sign-in-error" wrapText="true"
+                           maxWidth="Infinity" visible="false" managed="false"/>
                     <Button fx:id="signInSubmit" text="Đăng nhập" defaultButton="true" onAction="#openOverview"
                             maxWidth="Infinity" styleClass="admin-sign-in-submit"/>
                 </VBox>

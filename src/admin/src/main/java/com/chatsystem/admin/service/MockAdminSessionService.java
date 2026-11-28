@@ -4,6 +4,7 @@ import com.chatsystem.common.domain.AccountStatus;
 import com.chatsystem.common.domain.SessionScope;
 import com.chatsystem.common.domain.UserRole;
 import com.chatsystem.common.dto.auth.AuthenticatedUserSummary;
+import com.chatsystem.common.dto.auth.LoginResponse;
 import com.chatsystem.common.dto.auth.SessionInfo;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,6 +26,11 @@ public final class MockAdminSessionService implements AdminSessionService {
                     true
             )
     );
+
+    @Override
+    public CompletableFuture<LoginResponse> login(String username, String password) {
+        return CompletableFuture.completedFuture(LoginResponse.sessionGranted("mock-admin-token", DEFAULT_SESSION));
+    }
 
     @Override
     public CompletableFuture<SessionInfo> fetchCurrentSession() {

@@ -8,6 +8,8 @@ import com.chatsystem.common.domain.AccountStatus;
 import com.chatsystem.common.domain.SessionScope;
 import com.chatsystem.common.domain.UserRole;
 import com.chatsystem.common.dto.auth.AuthenticatedUserSummary;
+import com.chatsystem.common.dto.auth.LoginRequest;
+import com.chatsystem.common.dto.auth.LoginResponse;
 import com.chatsystem.common.dto.auth.SessionInfo;
 import com.chatsystem.desktop.client.ClientConfig;
 import com.sun.net.httpserver.HttpServer;
@@ -43,6 +45,15 @@ class AdminSessionServiceTest {
                 )
         );
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/api/v1/auth/login", exchange -> {
+            LoginRequest req = jsonMapper.readValue(exchange.getRequestBody(), LoginRequest.class);
+            assertEquals(SessionScope.ADMIN_APP, req.scope());
+            byte[] bytes = jsonMapper.writeValueAsBytes(LoginResponse.sessionGranted("live-admin-token", expected));
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
         server.createContext("/api/v1/auth/me", exchange -> {
             byte[] bytes = jsonMapper.writeValueAsBytes(expected);
             exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -64,7 +75,8 @@ class AdminSessionServiceTest {
                     null
             );
             AdminServiceRegistry liveRegistry = AdminServiceRegistry.live(config);
-            liveRegistry.sessionStore().updateSession("live-admin-token", expected);
+            LoginResponse login = liveRegistry.adminSessionService().login("sysadmin", "Admin@123").join();
+            assertEquals("live-admin-token", login.sessionToken());
             assertTrue(liveRegistry.adminSessionService().isLiveBackend());
             assertTrue(liveRegistry.sessionStore().isAuthenticated());
 

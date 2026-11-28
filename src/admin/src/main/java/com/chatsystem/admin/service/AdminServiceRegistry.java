@@ -11,24 +11,33 @@ public final class AdminServiceRegistry {
     private final ClientSessionStore sessionStore;
     private final RestApiClient restApiClient;
     private final AdminSessionService adminSessionService;
+    private final AdminUserDirectoryService adminUserDirectoryService;
 
     private AdminServiceRegistry(
             ClientConfig config,
             ClientSessionStore sessionStore,
             RestApiClient restApiClient,
-            AdminSessionService adminSessionService
+            AdminSessionService adminSessionService,
+            AdminUserDirectoryService adminUserDirectoryService
     ) {
         this.config = Objects.requireNonNull(config, "config");
         this.sessionStore = Objects.requireNonNull(sessionStore, "sessionStore");
         this.restApiClient = Objects.requireNonNull(restApiClient, "restApiClient");
         this.adminSessionService = Objects.requireNonNull(adminSessionService, "adminSessionService");
+        this.adminUserDirectoryService = Objects.requireNonNull(adminUserDirectoryService, "adminUserDirectoryService");
     }
 
     public static AdminServiceRegistry mockDefault() {
         ClientConfig config = ClientConfig.defaults();
         ClientSessionStore sessionStore = new ClientSessionStore();
         RestApiClient restApiClient = new RestApiClient(config, sessionStore);
-        return new AdminServiceRegistry(config, sessionStore, restApiClient, new MockAdminSessionService());
+        return new AdminServiceRegistry(
+                config,
+                sessionStore,
+                restApiClient,
+                new MockAdminSessionService(),
+                new MockAdminUserDirectoryService()
+        );
     }
 
     public static AdminServiceRegistry live(ClientConfig config) {
@@ -39,7 +48,8 @@ public final class AdminServiceRegistry {
                 config,
                 sessionStore,
                 restApiClient,
-                new HttpAdminSessionService(restApiClient, sessionStore)
+                new HttpAdminSessionService(restApiClient, sessionStore),
+                new HttpAdminUserDirectoryService(restApiClient)
         );
     }
 
@@ -57,5 +67,9 @@ public final class AdminServiceRegistry {
 
     public AdminSessionService adminSessionService() {
         return adminSessionService;
+    }
+
+    public AdminUserDirectoryService adminUserDirectoryService() {
+        return adminUserDirectoryService;
     }
 }

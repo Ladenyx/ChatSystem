@@ -15,9 +15,11 @@ import java.security.KeyStore;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
 /** Shared asynchronous HTTPS/HTTP REST client built on JDK {@link HttpClient} and Jackson 3. */
@@ -55,6 +57,11 @@ public final class RestApiClient {
         return sendAsync("GET", pathAndQuery, null, responseType);
     }
 
+    public <T> CompletableFuture<T> getAsync(String pathAndQuery, TypeReference<T> responseType) {
+        Objects.requireNonNull(responseType, "responseType");
+        return sendAsync("GET", pathAndQuery, null, true, body -> jsonMapper.readValue(body, responseType));
+    }
+
     public <T> CompletableFuture<T> postAsync(String pathAndQuery, Object body, Class<T> responseType) {
         return sendAsync("POST", pathAndQuery, body, responseType);
     }
@@ -78,6 +85,18 @@ public final class RestApiClient {
             Class<T> responseType
     ) {
         Objects.requireNonNull(responseType, "responseType");
+        boolean expectBody = responseType != Void.class;
+        return sendAsync(method, pathAndQuery, body, expectBody, text -> jsonMapper.readValue(text, responseType));
+    }
+
+    private <T> CompletableFuture<T> sendAsync(
+            String method,
+            String pathAndQuery,
+            Object body,
+            boolean expectBody,
+            Function<String, T> reader
+    ) {
+        Objects.requireNonNull(reader, "reader");
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(config.resolve(pathAndQuery))
                 .timeout(config.requestTimeout())
@@ -107,19 +126,19 @@ public final class RestApiClient {
                         Throwable cause = throwable.getCause() != null ? throwable.getCause() : throwable;
                         throw new ApiClientException(0, "Không thể kết nối tới máy chủ.", true, cause);
                     }
-                    return parseResponse(response, responseType);
+                    return parseResponse(response, expectBody, reader);
                 });
     }
 
-    private <T> T parseResponse(HttpResponse<String> response, Class<T> responseType) {
+    private <T> T parseResponse(HttpResponse<String> response, boolean expectBody, Function<String, T> reader) {
         int status = response.statusCode();
         String responseBody = response.body();
         if (status >= 200 && status < 300) {
-            if (responseType == Void.class || responseBody == null || responseBody.isBlank()) {
+            if (!expectBody || responseBody == null || responseBody.isBlank()) {
                 return null;
             }
             try {
-                return jsonMapper.readValue(responseBody, responseType);
+                return reader.apply(responseBody);
             } catch (JacksonException ex) {
                 throw new ApiClientException(status, "Phản hồi JSON từ máy chủ không hợp lệ.", false, ex);
             }

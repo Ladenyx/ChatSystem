@@ -3,6 +3,7 @@ package com.chatsystem.admin;
 import com.chatsystem.admin.controller.AdminShellController;
 import com.chatsystem.admin.service.AdminServiceRegistry;
 import com.chatsystem.desktop.DesktopWindow;
+import com.chatsystem.desktop.client.ClientConfig;
 import com.chatsystem.desktop.navigation.ViewNavigator;
 import com.chatsystem.desktop.theme.ThemeManager;
 import java.io.IOException;
@@ -41,6 +42,9 @@ public final class AdminApplication extends Application {
     }
 
     public static void main(String[] args) {
+        if (!Boolean.getBoolean("chatsystem.mock")) {
+            setServices(AdminServiceRegistry.live(ClientConfig.fromSystemPropertiesOrDefaults()));
+        }
         launch(args);
     }
 }

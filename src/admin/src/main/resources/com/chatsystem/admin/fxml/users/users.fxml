@@ -57,22 +57,23 @@
             <ToggleButton fx:id="deletedUsers" text="Xóa mềm 30 ngày" toggleGroup="$statusFilters"/>
         </FlowPane>
 
-        <TableView fx:id="userTable" fixedCellSize="48" minWidth="0" minHeight="144"
-                   styleClass="admin-users-table,admin-directory-table" accessibleText="Danh sách người dùng"
-                   VBox.vgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="userIdentity" text="Họ tên" minWidth="120" prefWidth="210"
-                             reorderable="false"/>
-                <TableColumn fx:id="userStatus" text="Trạng thái" minWidth="92" prefWidth="112"
-                             sortable="false" reorderable="false"/>
-                <TableColumn fx:id="userCreated" text="Ngày tạo" minWidth="96" prefWidth="104"
-                             styleClass="admin-date-column" reorderable="false"/>
-            </columns>
-            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
-            <placeholder>
-                <Label text="Không tìm thấy tài khoản" styleClass="secondary-text" wrapText="true"/>
-            </placeholder>
-        </TableView>
+        <StackPane fx:id="userTableHost" minWidth="0" minHeight="144" VBox.vgrow="ALWAYS">
+            <TableView fx:id="userTable" fixedCellSize="48" minWidth="0" minHeight="144"
+                       styleClass="admin-users-table,admin-directory-table" accessibleText="Danh sách người dùng">
+                <columns>
+                    <TableColumn fx:id="userIdentity" text="Họ tên" minWidth="120" prefWidth="210"
+                                 reorderable="false"/>
+                    <TableColumn fx:id="userStatus" text="Trạng thái" minWidth="92" prefWidth="112"
+                                 sortable="false" reorderable="false"/>
+                    <TableColumn fx:id="userCreated" text="Ngày tạo" minWidth="96" prefWidth="104"
+                                 styleClass="admin-date-column" reorderable="false"/>
+                </columns>
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_NEXT_COLUMN"/></columnResizePolicy>
+                <placeholder>
+                    <Label text="Không tìm thấy tài khoản" styleClass="secondary-text" wrapText="true"/>
+                </placeholder>
+            </TableView>
+        </StackPane>
 
         <HBox spacing="8" alignment="CENTER_LEFT" minHeight="28">
             <Label fx:id="userCount" styleClass="caption"/>
